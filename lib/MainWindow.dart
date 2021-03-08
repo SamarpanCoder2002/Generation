@@ -191,21 +191,13 @@ class _MainScreenState extends State<MainScreen>
 
   Widget chatTile(BuildContext context) {
     return Card(
-        elevation: 5.0,
-        shadowColor: Colors.black87,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40.0),
-        ),
+
         child: Container(
-          padding: EdgeInsets.only(left: 1.0),
+          padding: EdgeInsets.only(left: 1.0, right: 1.0),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               primary: Colors.white,
               onPrimary: Colors.lightBlueAccent,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(30.0),
-                      bottomRight: Radius.circular(30.0))),
             ),
             onPressed: () {
               print("Pressed");
@@ -215,12 +207,12 @@ class _MainScreenState extends State<MainScreen>
                 Container(
                   //color: Colors.green,
                   padding: EdgeInsets.only(
-                    top: 3.0,
-                    bottom: 3.0,
+                    top: 5.0,
+                    bottom: 5.0,
                   ),
                   child: GestureDetector(
                     child: CircleAvatar(
-                      radius: 35.0,
+                      radius: 30.0,
                       backgroundImage: ExactAssetImage("images/sam.jpg"),
                     ),
                     onTap: () {
@@ -273,7 +265,7 @@ class _MainScreenState extends State<MainScreen>
                         Container(
                             child: Text(
                           "12:00",
-                          style: TextStyle(fontSize: 15.0, color: Colors.blue),
+                          style: TextStyle(fontSize: 12.0, color: Colors.blue),
                         )),
                         SizedBox(
                           height: 10.0,
