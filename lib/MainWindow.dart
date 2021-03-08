@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:slide_drawer/slide_drawer.dart';
@@ -71,7 +72,10 @@ class _MainScreenState extends State<MainScreen>
                   child: Text(
                     "Chats",
                     style: TextStyle(
-                      fontSize: 25.0,
+                      fontSize: 20.0,
+                      fontFamily: 'Lora',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
@@ -79,12 +83,18 @@ class _MainScreenState extends State<MainScreen>
                   child: Text(
                     "Logs",
                     style: TextStyle(
-                      fontSize: 25.0,
+                      fontSize: 20.0,
+                      fontFamily: 'Lora',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
                 Tab(
-                  icon: Icon(Icons.camera_alt_outlined),
+                  icon: Icon(
+                    Icons.camera_alt_outlined,
+                    size: 25.0,
+                  ),
                 ),
               ],
             ),
@@ -129,19 +139,19 @@ class _MainScreenState extends State<MainScreen>
   }
 
   Widget statusList(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(right: 40.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: Colors.green,
-          width: 1.0,
-        ),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.white24,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(80),
+        )
       ),
-      width: MediaQuery.of(context).size.width / 4,
-      height: 10.0,
-      //color: Colors.red,
+      onPressed: () {
+        print("Status Image Clicked");
+      },
       child: CircleAvatar(
+        radius: 50.0,
         backgroundImage: ExactAssetImage('images/sam.jpg'),
       ),
     );
@@ -152,7 +162,7 @@ class _MainScreenState extends State<MainScreen>
         child: Container(
       margin: EdgeInsets.only(top: 35.0, bottom: 10.0),
       padding: EdgeInsets.only(top: 18.0, bottom: 5.0),
-      height: MediaQuery.of(context).size.height * (5.5 / 8),
+      height: MediaQuery.of(context).size.height * (5.15 / 8),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -170,18 +180,117 @@ class _MainScreenState extends State<MainScreen>
           width: 1.0,
         ),
       ),
-      // child: ListView.builder(
-      //   itemCount: 20,
-      //   itemBuilder: (context, position) {
-      //     return Card(
-      //       child: Text(
-      //         "Label is",
-      //         style: TextStyle(fontSize: 20.0),
-      //       ),
-      //       color: Colors.red,
-      //     );
-      //   },
-      // ),
+      child: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (context, position) {
+          return chatTile(context);
+        },
+      ),
     ));
+  }
+
+  Widget chatTile(BuildContext context) {
+    return Card(
+        elevation: 5.0,
+        shadowColor: Colors.black87,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40.0),
+        ),
+        child: Container(
+          padding: EdgeInsets.only(left: 1.0),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.white,
+              onPrimary: Colors.lightBlueAccent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0))),
+            ),
+            onPressed: () {
+              print("Pressed");
+            },
+            child: Row(
+              children: [
+                Container(
+                  //color: Colors.green,
+                  padding: EdgeInsets.only(
+                    top: 3.0,
+                    bottom: 3.0,
+                  ),
+                  child: GestureDetector(
+                    child: CircleAvatar(
+                      radius: 35.0,
+                      backgroundImage: ExactAssetImage("images/sam.jpg"),
+                    ),
+                    onTap: () {
+                      print("Pic Pressed");
+                    },
+                  ),
+                ),
+                Container(
+                  //color: Colors.redAccent,
+                  alignment: Alignment.center,
+                  width: MediaQuery.of(context).size.width / 2 + 20,
+                  padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Samarpan Dasgupta",
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 12.0,
+                      ),
+                      Container(
+                        //color: Colors.blueGrey,
+                        //padding: EdgeInsets.only(left: 10.0),
+                        child: Text(
+                          "New Message Alert",
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            color: Colors.black45,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    //color: Colors.deepPurpleAccent,
+                    padding: EdgeInsets.only(
+                      right: 20.0,
+                      top: 2.0,
+                      bottom: 2.0,
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                            child: Text(
+                          "12:00",
+                          style: TextStyle(fontSize: 15.0, color: Colors.blue),
+                        )),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                        Container(
+                          child: Icon(
+                            Icons.surround_sound,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 }
