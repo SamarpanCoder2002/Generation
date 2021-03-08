@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   slide_drawer: ^1.0.1
+  fab_circular_menu: ^1.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
