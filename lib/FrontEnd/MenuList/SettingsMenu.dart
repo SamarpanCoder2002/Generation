@@ -35,13 +35,6 @@ class _SettingsWindowState extends State<SettingsWindow> {
         height: MediaQuery.of(context).size.height,
         padding: EdgeInsets.only(bottom: 20.0),
         //color: Colors.lightBlueAccent,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.lightBlueAccent, Colors.lightBlueAccent],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
         child: ListView(
           children: <Widget>[
             Container(
@@ -82,8 +75,8 @@ class _SettingsWindowState extends State<SettingsWindow> {
                   Colors.red,
                   null,
                   null,
-                  Colors.yellow,
-                  Colors.amber),
+                  Colors.white,
+                  Colors.black54),
             ),
             SizedBox(
               height: 40.0,
@@ -101,7 +94,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
               child: Text(
                 "Visibility",
                 style: TextStyle(
-                    fontSize: 30.0,
+                    fontSize: 25.0,
                     fontStyle: FontStyle.italic,
                     letterSpacing: 1.0),
               ),
@@ -122,7 +115,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
               child: Text(
                 "Security",
                 style: TextStyle(
-                    fontSize: 30.0,
+                    fontSize: 25.0,
                     fontStyle: FontStyle.italic,
                     letterSpacing: 1.0),
               ),
@@ -162,7 +155,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
               leftText,
               style: TextStyle(
                   color: Colors.black54,
-                  fontSize: 28.0,
+                  fontSize: 20.0,
                   fontFamily: 'Lora',
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.w500,
@@ -238,7 +231,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
               leftText,
               style: TextStyle(
                   color: Colors.black54,
-                  fontSize: 28.0,
+                  fontSize: 20.0,
                   fontFamily: 'Lora',
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.w500,
@@ -294,13 +287,13 @@ class _SettingsWindowState extends State<SettingsWindow> {
       children: [
         Expanded(
           child: Container(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.center,
             //color: Colors.red,
             child: Text(
               "Change Number",
               style: TextStyle(
                   color: Colors.black54,
-                  fontSize: 23.0,
+                  fontSize: 20.0,
                   fontFamily: 'Lora',
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.w500,
@@ -336,7 +329,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
             child: Text(
               _description,
               style: TextStyle(
-                fontSize: 25.0,
+                fontSize: 20.0,
                 fontFamily: 'Lora',
                 fontWeight: FontWeight.w500,
                 fontStyle: FontStyle.italic,
@@ -364,7 +357,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
                   } else {
                     _lastSeenIcons = Icon(
                       Icons.done_rounded,
-                      color: Colors.lightGreenAccent,
+                      color: Colors.green,
                       size: 40.0,
                     );
                     _rightIcon = true;
@@ -386,7 +379,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
               alignment: Alignment.center,
           child: Text(
             "Status",
-            style: TextStyle(fontSize: 25.0,
+            style: TextStyle(fontSize: 20.0,
               fontFamily: 'Lora',
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.italic,
@@ -429,7 +422,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
               alignment: Alignment.center,
               child: Text(
                 "Lock",
-                style: TextStyle(fontSize: 25.0,
+                style: TextStyle(fontSize: 20.0,
                   fontFamily: 'Lora',
                   fontWeight: FontWeight.w500,
                   fontStyle: FontStyle.italic,
