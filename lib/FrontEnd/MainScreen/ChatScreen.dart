@@ -1,3 +1,4 @@
+import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shrinkchat/Backend/InformationContainer.dart';
@@ -29,11 +30,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget chatScreen(BuildContext context) {
-    return ListView(
-      children: [
-        statusBarContainer(context),
-        chatList(context),
-      ],
+    return Scaffold(
+      //floatingActionButton: floatingButton(),
+      body: ListView(
+        children: [
+          statusBarContainer(context),
+          chatList(context),
+        ],
+      ),
     );
   }
 

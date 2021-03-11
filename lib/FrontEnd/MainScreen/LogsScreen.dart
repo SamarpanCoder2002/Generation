@@ -13,10 +13,12 @@ class _ScreenLogsState extends State<ScreenLogs> {
   }
 
   Widget screenLogsList(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      margin: EdgeInsets.only(top: 10.0, bottom: 13.0),
-      child: chatList(context),
+    return Scaffold(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        margin: EdgeInsets.only(top: 10.0, bottom: 13.0),
+        child: chatList(context),
+      ),
     );
   }
 

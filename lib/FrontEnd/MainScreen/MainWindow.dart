@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shrinkchat/DefaultValueStore/ColorSet.dart';
 import 'package:shrinkchat/FrontEnd/MainScreen/ChatScreen.dart';
+import 'package:shrinkchat/FrontEnd/MainScreen/ImageScreen.dart';
 import 'package:shrinkchat/FrontEnd/MainScreen/LogsScreen.dart';
 import 'package:slide_drawer/slide_drawer.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
@@ -14,6 +17,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentTab = 0;
+  File _image;
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               ChatScreen(),
               ScreenLogs(),
-              Container(),
+              ImageTake(),
             ],
           ),
         ));
