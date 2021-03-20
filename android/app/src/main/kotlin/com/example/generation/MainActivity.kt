@@ -1,4 +1,4 @@
-package com.smartherd.shrinkchat
+package com.example.generation
 
 import io.flutter.embedding.android.FlutterActivity
 

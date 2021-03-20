@@ -1,4 +1,4 @@
-# shrinkchat
+# generation
 
 A new Flutter application.
 

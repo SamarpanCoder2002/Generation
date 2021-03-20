@@ -224,7 +224,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget query(){
+  Widget query() {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
           primary: Colors.white,

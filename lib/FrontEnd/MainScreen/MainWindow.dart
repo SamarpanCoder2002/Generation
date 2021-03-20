@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shrinkchat/DefaultValueStore/ColorSet.dart';
-import 'package:shrinkchat/FrontEnd/MainScreen/ChatScreen.dart';
-import 'package:shrinkchat/FrontEnd/MainScreen/ImageScreen.dart';
-import 'package:shrinkchat/FrontEnd/MainScreen/LogsScreen.dart';
+import 'package:generation/DefaultValueStore/ColorSet.dart';
+import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
+import 'package:generation/FrontEnd/MainScreen/ImageScreen.dart';
+import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:slide_drawer/slide_drawer.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
-import 'package:shrinkchat/FrontEnd/MainScreen/LogsScreen.dart';
+import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
                   bottomRight: Radius.circular(40.0)),
             ),
             title: Text(
-              "ShrinkChat",
+              "Generation",
               style: TextStyle(
                   fontSize: 25.0, fontFamily: 'Lora', letterSpacing: 1.0),
             ),
