@@ -8,6 +8,7 @@ import 'package:slide_drawer/slide_drawer.dart';
 
 void main() {
   runApp(MaterialApp(
+    title: "Generation",
     debugShowCheckedModeBanner: false,
     home: Settings(),
   ));
