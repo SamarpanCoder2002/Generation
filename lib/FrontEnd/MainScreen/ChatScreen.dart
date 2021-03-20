@@ -19,7 +19,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
         backwardsCompatibility: true,
         leading: Row(
           children: <Widget>[
@@ -47,7 +46,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             onSurface: Theme.of(context).primaryColor,
           ),
           child: Text(
-            "সমর্পন দাশগুপ্ত ",
+            "রাত জাগা তারা",
             style: TextStyle(color: Colors.white, fontSize: 20.0),
           ),
           onPressed: () {
@@ -58,7 +57,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           IconButton(
             icon: Icon(
               Icons.call,
-              color: Colors.lightGreenAccent,
+              color: Colors.white,
             ),
             highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
             onPressed: () {},
@@ -66,19 +65,91 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           IconButton(
             icon: Icon(
               Icons.videocam_rounded,
-              color: Colors.lightGreenAccent,
+              color: Colors.white,
             ),
             highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
             onPressed: () {},
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (context, position) {
-          return Container();
-        },
-      ),
+      body: mainBody(context),
+    );
+  }
+
+  Widget mainBody(BuildContext context) {
+    return ListView(
+      children: <Widget>[
+        Container(
+          //color: Colors.black12,
+          height: MediaQuery.of(context).size.height * 0.820,
+        ),
+        SizedBox(
+          height: 5.0,
+        ),
+        Row(
+          children: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.emoji_emotions_rounded,
+                color: Colors.orangeAccent,
+                size: 30.0,
+              ),
+              onPressed: () {
+                print("Emoji Pressed");
+              },
+            ),
+            Container(
+                //color: Colors.blue,
+                width: MediaQuery.of(context).size.width * 0.65,
+                //height: 50.0,
+                constraints: BoxConstraints.loose(
+                    Size(MediaQuery.of(context).size.width * 0.65, 100.0)),
+                child: Scrollbar(
+                  showTrackOnHover: true,
+                  thickness: 10.0,
+                  radius: Radius.circular(30.0),
+                  child: TextField(
+                    maxLines: null, // For Line Break
+                    decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        borderSide:
+                            BorderSide(color: Colors.lightGreen, width: 3.0),
+                      ),
+                      hintText: 'Your Messages Here',
+                    ),
+                  ),
+                )),
+            Expanded(
+              child: IconButton(
+                icon: Icon(
+                  Icons.more_vert,
+                  size: 30.0,
+                  color: Colors.brown,
+                ),
+                onPressed: () {
+                  print("Options Pressed");
+                },
+              ),
+            ),
+            Expanded(
+              child: IconButton(
+                icon: Icon(
+                  Icons.send_rounded,
+                  size: 30.0,
+                  color: Colors.green,
+                ),
+                onPressed: () {
+                  print("Send Pressed");
+                },
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 3.0,
+        ),
+      ],
     );
   }
 }
