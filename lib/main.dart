@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:shrinkchat/FrontEnd/MainScreen/MainWindow.dart';
-import 'package:shrinkchat/FrontEnd/MenuList/ProfileScreen.dart';
-import 'package:shrinkchat/FrontEnd/MenuList/SettingsMenu.dart';
+import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/FrontEnd/MenuList/ProfileScreen.dart';
+import 'package:generation/FrontEnd/MenuList/SettingsMenu.dart';
 import 'package:slide_drawer/slide_drawer.dart';
 
 void main() {

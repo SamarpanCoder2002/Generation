@@ -105,11 +105,15 @@ class _SettingsWindowState extends State<SettingsWindow> {
             Container(
               child: lastSeenVisibility("Last Seen"),
             ),
-            SizedBox(height: 30.0,),
+            SizedBox(
+              height: 30.0,
+            ),
             Container(
               child: statusVisibility(),
             ),
-            SizedBox(height: 30.0,),
+            SizedBox(
+              height: 30.0,
+            ),
             Container(
               alignment: Alignment.center,
               child: Text(
@@ -120,7 +124,9 @@ class _SettingsWindowState extends State<SettingsWindow> {
                     letterSpacing: 1.0),
               ),
             ),
-            SizedBox(height: 30.0,),
+            SizedBox(
+              height: 30.0,
+            ),
             Container(
               child: lock(),
             ),
@@ -376,14 +382,16 @@ class _SettingsWindowState extends State<SettingsWindow> {
       children: <Widget>[
         Expanded(
             child: Container(
-              alignment: Alignment.center,
+          alignment: Alignment.center,
           child: Text(
             "Status",
-            style: TextStyle(fontSize: 20.0,
+            style: TextStyle(
+              fontSize: 20.0,
               fontFamily: 'Lora',
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.italic,
-              color: Colors.black54,),
+              color: Colors.black54,
+            ),
           ),
         )),
         Expanded(
@@ -419,16 +427,18 @@ class _SettingsWindowState extends State<SettingsWindow> {
       children: <Widget>[
         Expanded(
             child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                "Lock",
-                style: TextStyle(fontSize: 20.0,
-                  fontFamily: 'Lora',
-                  fontWeight: FontWeight.w500,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.black54,),
-              ),
-            )),
+          alignment: Alignment.center,
+          child: Text(
+            "Lock",
+            style: TextStyle(
+              fontSize: 20.0,
+              fontFamily: 'Lora',
+              fontWeight: FontWeight.w500,
+              fontStyle: FontStyle.italic,
+              color: Colors.black54,
+            ),
+          ),
+        )),
         Expanded(
           child: FlutterSwitch(
             showOnOff: true,
