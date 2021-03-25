@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/BackEnd/InformationContainer.dart';
 import 'package:generation/DefaultValueStore/ColorSet.dart';
+import 'package:generation/FrontEnd/LoadingScreens/DifferentLoader.dart';
+import 'package:page_transition/page_transition.dart';
+
+import 'ChatScreen.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -60,15 +66,16 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget statusList(BuildContext context) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        elevation: 0.0,
-        shape: CircleBorder(),
-        side: BorderSide(width: 1.0,color: Colors.blue)
-      ),
+          elevation: 0.0,
+          shape: CircleBorder(),
+          side: BorderSide(width: 1.0, color: Colors.blue)),
       onPressed: () {
         print("Status Clicked");
       },
       child: CircleAvatar(
-        backgroundImage: ExactAssetImage("images/sam.jpg",),
+        backgroundImage: ExactAssetImage(
+          "images/sam.jpg",
+        ),
         radius: 50.0,
       ),
     );
@@ -121,6 +128,19 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             onPressed: () {
               print("Chat List Pressed");
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Loaders(1)));
+
+              Timer(Duration(milliseconds: 1500), () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        duration: Duration(milliseconds: 350),
+                        curve: Curves.slowMiddle,
+                        child: ChatScreenSetUp()));
+              });
             },
             child: Row(
               children: [

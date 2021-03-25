@@ -23,10 +23,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  slide_drawer: ^1.0.1
-  fab_circular_menu: ^1.0.0
-  flutter_switch: ^0.2.0
-  image_picker: ^0.7.2+1
+
+  path_provider: ^1.6.14
+  camera: ^0.5.8+5
+  path: ^1.7.0
+  circle_list:
+  esys_flutter_share: ^1.0.2
+  gallery_saver: ^2.0.3 # Convert compiledSDKVersion to 29
+  flutter_switch:
+  slide_drawer:
+  fab_circular_menu:
+  page_transition:
+  flutter_spinkit:
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -75,6 +83,5 @@ flutter:
         - asset: fonts/Lora-Italic.ttf
           style: italic
         - asset: fonts/Lora-Regular.ttf
-  #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
