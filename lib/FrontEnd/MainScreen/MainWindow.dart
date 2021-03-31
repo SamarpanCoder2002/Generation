@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:generation/DefaultValueStore/ColorSet.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
