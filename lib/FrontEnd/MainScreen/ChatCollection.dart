@@ -1,7 +1,17 @@
+<<<<<<< HEAD
+=======
+import 'dart:async';
+
+import 'package:fab_circular_menu/fab_circular_menu.dart';
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/BackEnd/InformationContainer.dart';
 import 'package:generation/DefaultValueStore/ColorSet.dart';
+<<<<<<< HEAD
+=======
+import 'package:generation/FrontEnd/LoadingScreens/DifferentLoader.dart';
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
 import 'package:page_transition/page_transition.dart';
 
 import 'ChatScreen.dart';
@@ -125,12 +135,27 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () {
               print("Chat List Pressed");
               Navigator.push(
+<<<<<<< HEAD
                   context,
                   PageTransition(
                       type: PageTransitionType.rightToLeft,
                       duration: Duration(milliseconds: 300),
                       curve: Curves.slowMiddle,
                       child: ChatScreenSetUp()));
+=======
+                  context, MaterialPageRoute(builder: (context) => Loaders(1)));
+
+              Timer(Duration(milliseconds: 1500), () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        duration: Duration(milliseconds: 350),
+                        curve: Curves.slowMiddle,
+                        child: ChatScreenSetUp()));
+              });
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
             },
             child: Row(
               children: [

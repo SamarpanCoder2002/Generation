@@ -24,15 +24,28 @@ dependencies:
   flutter:
     sdk: flutter
 
+<<<<<<< HEAD
   circle_list:
   esys_flutter_share: ^1.0.2
   path_provider: ^1.6.14
   camera: ^0.5.8+5
   gallery_saver:
+=======
+  path_provider: ^1.6.14
+  camera: ^0.5.8+5
+  path: ^1.7.0
+  circle_list:
+  esys_flutter_share: ^1.0.2
+  gallery_saver: ^2.0.3 # Convert compiledSDKVersion to 29
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
   flutter_switch:
   slide_drawer:
   fab_circular_menu:
   page_transition:
+<<<<<<< HEAD
+=======
+  flutter_spinkit:
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
 
 
   # The following adds the Cupertino Icons font to your application.

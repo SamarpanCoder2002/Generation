@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+<<<<<<< HEAD
+=======
+class ChatScreenUI {
+  String _currentMessage;
+  int _messageOwnerIndex;
+
+  ChatScreenUI(this._currentMessage, this._messageOwnerIndex);
+}
+
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
 class ChatScreenSetUp extends StatefulWidget {
   @override
   _ChatScreenSetUpState createState() => _ChatScreenSetUpState();
@@ -8,6 +18,7 @@ class ChatScreenSetUp extends StatefulWidget {
 
 class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
+<<<<<<< HEAD
   ScrollController scrollController;
   List chatContainer = [];
   TextEditingController inputText = TextEditingController();
@@ -31,6 +42,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     inputText.dispose();
   }
 
+=======
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,6 +106,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget mainBody(BuildContext context) {
+<<<<<<< HEAD
     return Container(
       //color: Colors.lightGreenAccent,
       width: MediaQuery.of(context).size.width,
@@ -248,6 +262,79 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             chatContainer[index][1],
             style: TextStyle(color: Colors.black),
           ),
+=======
+    return ListView(
+      children: <Widget>[
+        Container(
+          //color: Colors.black12,
+          height: MediaQuery.of(context).size.height * 0.820,
+        ),
+        SizedBox(
+          height: 5.0,
+        ),
+        Row(
+          children: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.emoji_emotions_rounded,
+                color: Colors.orangeAccent,
+                size: 30.0,
+              ),
+              onPressed: () {
+                print("Emoji Pressed");
+              },
+            ),
+            Container(
+                //color: Colors.blue,
+                width: MediaQuery.of(context).size.width * 0.65,
+                //height: 50.0,
+                constraints: BoxConstraints.loose(
+                    Size(MediaQuery.of(context).size.width * 0.65, 100.0)),
+                child: Scrollbar(
+                  showTrackOnHover: true,
+                  thickness: 10.0,
+                  radius: Radius.circular(30.0),
+                  child: TextField(
+                    maxLines: null, // For Line Break
+                    decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        borderSide:
+                            BorderSide(color: Colors.lightGreen, width: 3.0),
+                      ),
+                      hintText: 'Your Messages Here',
+                    ),
+                  ),
+                )),
+            Expanded(
+              child: IconButton(
+                icon: Icon(
+                  Icons.more_vert,
+                  size: 30.0,
+                  color: Colors.brown,
+                ),
+                onPressed: () {
+                  print("Options Pressed");
+                },
+              ),
+            ),
+            Expanded(
+              child: IconButton(
+                icon: Icon(
+                  Icons.send_rounded,
+                  size: 30.0,
+                  color: Colors.green,
+                ),
+                onPressed: () {
+                  print("Send Pressed");
+                },
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 3.0,
+>>>>>>> 04c4d76e310a213c6d1d328b45d558e5ae649f8c
         ),
       ],
     );
