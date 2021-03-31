@@ -1,8 +1,10 @@
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/BackEnd/InformationContainer.dart';
 import 'package:generation/DefaultValueStore/ColorSet.dart';
+import 'package:page_transition/page_transition.dart';
+
+import 'ChatScreen.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -43,15 +45,13 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       margin: EdgeInsets.only(
         top: 23.0,
-        left: 5.0,
-        right: 5.0,
       ),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * (1 / 8),
       //color: Colors.greenAccent,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 5,
+        itemCount: 10,
         itemBuilder: (context, position) {
           return statusList(context);
         },
@@ -60,20 +60,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget statusList(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-          primary: Colors.white24,
-          onPrimary: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(80),
-          )),
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+          elevation: 0.0,
+          shape: CircleBorder(),
+          side: BorderSide(width: 1.0, color: Colors.blue)),
       onPressed: () {
-        print("Status Image Clicked");
+        print("Status Clicked");
       },
       child: CircleAvatar(
+        backgroundImage: ExactAssetImage(
+          "images/sam.jpg",
+        ),
         radius: 50.0,
-        backgroundImage: ExactAssetImage('images/sam.jpg'),
       ),
     );
   }
@@ -124,7 +123,14 @@ class _ChatScreenState extends State<ChatScreen> {
               onPrimary: Colors.lightBlueAccent,
             ),
             onPressed: () {
-              print("Pressed");
+              print("Chat List Pressed");
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.rightToLeft,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.slowMiddle,
+                      child: ChatScreenSetUp()));
             },
             child: Row(
               children: [

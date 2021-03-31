@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:generation/DefaultValueStore/ColorSet.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
-import 'package:generation/FrontEnd/MainScreen/ImageScreen.dart';
+import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:slide_drawer/slide_drawer.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
@@ -99,7 +98,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 Tab(
                   icon: Icon(
-                    Icons.camera_alt_outlined,
+                    Icons.store,
                     size: 25.0,
                   ),
                 ),
@@ -111,7 +110,7 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               ChatScreen(),
               ScreenLogs(),
-              ImageTake(),
+              ApplicationList(),
             ],
           ),
         ));

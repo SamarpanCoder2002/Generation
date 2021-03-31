@@ -1,7 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.generation">
+
+<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>-->
+<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>-->
+<!--    <uses-permission android:name="android.permission.CAMERA"/>-->
+<!--    <uses-permission android:name="android.permission.FLASHLIGHT"/>-->
+<!--    <uses-feature android:name="android.hardware.camera.autofocus" />-->
+
    <application
-        android:label="generation"
+        android:label="Generation"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
