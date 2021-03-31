@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/BackEnd/InformationContainer.dart';
-import 'package:generation/DefaultValueStore/ColorSet.dart';
+
 import 'package:page_transition/page_transition.dart';
 
 import 'ChatScreen.dart';
@@ -14,7 +14,6 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   Information _information = Information();
   List _store;
-  ColorModeChange _colorModeChange = ColorModeChange();
 
   @override
   void initState() {
@@ -119,7 +118,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               elevation: 0.0,
-              primary: _colorModeChange.everyChatColor,
+              primary: Colors.white,
               onPrimary: Colors.lightBlueAccent,
             ),
             onPressed: () {

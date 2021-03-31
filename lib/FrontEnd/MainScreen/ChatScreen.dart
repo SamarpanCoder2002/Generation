@@ -112,6 +112,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 controller: scrollController,
                 itemCount: chatContainer.length,
                 itemBuilder: (context, position) {
+                  if (position % 2 == 0) return receiverList(context, position);
                   return senderList(context, position);
                 },
               ),
@@ -129,8 +130,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     color: Colors.orangeAccent,
                     size: 30.0,
                   ),
-                  onPressed: () {
-                  },
+                  onPressed: () {},
                 ),
                 Container(
                     //color: Colors.blue,
@@ -244,6 +244,48 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         Container(
           alignment: Alignment.centerRight,
           margin: EdgeInsets.only(right: 5.0, bottom: 5.0),
+          child: Text(
+            chatContainer[index][1],
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget receiverList(BuildContext context, int index) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Container(
+          margin: EdgeInsets.only(
+              right: MediaQuery.of(context).size.width / 3, left: 5.0),
+          alignment: Alignment.centerLeft,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Color.fromRGBO(250, 100, 100, 0.5),
+              elevation: 0.0,
+              padding: EdgeInsets.all(10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20.0),
+                  bottomLeft: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0),
+                ),
+              ),
+            ),
+            child: Text(
+              chatContainer[index][0],
+              style: TextStyle(
+                color: Colors.black54,
+              ),
+            ),
+            onPressed: () {},
+          ),
+        ),
+        Container(
+          alignment: Alignment.centerLeft,
+          margin: EdgeInsets.only(left: 5.0, bottom: 5.0),
           child: Text(
             chatContainer[index][1],
             style: TextStyle(color: Colors.black),
