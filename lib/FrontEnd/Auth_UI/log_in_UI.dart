@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/Backend/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 
@@ -10,6 +12,27 @@ class LogInAuthentication extends StatefulWidget {
 
 class _LogInAuthenticationState extends State<LogInAuthentication> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  bool _pwdShowPermission;
+
+  TextEditingController _email, _pwd;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _pwdShowPermission = true;
+    _email = TextEditingController();
+    _pwd = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _email.dispose();
+    _pwd.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +64,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width - 60,
                       child: TextFormField(
+                        controller: this._email,
                         decoration: InputDecoration(labelText: "Email"),
                         validator: (inputValue) {
                           RegExp _emailRegex = RegExp(
@@ -58,13 +82,59 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width - 60,
                       child: TextFormField(
-                          decoration: InputDecoration(labelText: "Password"),
+                          controller: this._pwd,
+                          obscureText: _pwdShowPermission,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            suffixIcon: IconButton(
+                              icon: _pwdShowPermission
+                                  ? Icon(
+                                      Entypo.eye,
+                                      color: Colors.redAccent,
+                                    )
+                                  : Icon(
+                                      Entypo.eye_with_line,
+                                      color: Colors.green,
+                                    ),
+                              onPressed: () {
+                                if (_pwdShowPermission) {
+                                  setState(() {
+                                    _pwdShowPermission = false;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _pwdShowPermission = true;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
                           validator: (inputValue) {
                             if ((inputValue.length >= 8)) {
                               return null;
                             }
                             return "Password should be more than or equal to 8 characters";
                           }),
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Container(
+                      alignment: Alignment.centerRight,
+                      margin: EdgeInsets.only(right: 15.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0.0,
+                          primary: Colors.white12,
+                        ),
+                        child: Text(
+                          "Forget Password ?",
+                          style: TextStyle(
+                            color: Colors.brown,
+                          ),
+                        ),
+                        onPressed: () {},
+                      ),
                     ),
                     SizedBox(
                       height: 30.0,
@@ -120,14 +190,13 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                           ),
                           onPressed: () {
                             if (_formKey.currentState.validate()) {
-                              print("Proceed with Sign-Up");
-                              Navigator.pop(context);
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MainScreen()));
+                              print("Proceed with Log-In");
+                              EmailAndPasswordAuth emailAndPwdAuth =
+                                  EmailAndPasswordAuth(context,
+                                      this._email.text, this._pwd.text);
+                              emailAndPwdAuth.logIn();
                             } else {
-                              print("Can't Proceed with Sign-up");
+                              print("Can't Proceed with Log-In");
                             }
                           },
                         ),

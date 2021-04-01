@@ -1,11 +1,16 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:generation/Backend/email_pwd_auth.dart';
+import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
-import 'package:slide_drawer/slide_drawer.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
+import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
+import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -13,14 +18,47 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   int _currentTab = 0;
-  File _image;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
         length: 3,
         child: Scaffold(
+          key: _scaffoldKey,
+          drawer: Drawer(
+            child: ListView(
+              children: <Widget>[
+                IconButton(
+                    icon: Icon(Icons.account_box_outlined),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Profile()));
+                    }),
+                IconButton(
+                    icon: Icon(Icons.settings),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SettingsWindow()));
+                    }),
+                IconButton(
+                    icon: Icon(Icons.feedback),
+                    onPressed: () {
+                      print("Exit Clicked");
+                    }),
+                IconButton(
+                    icon: Icon(Icons.exit_to_app),
+                    onPressed: () {
+                      print("Exit Clicked");
+                      SystemNavigator.pop();
+                    }),
+              ],
+            ),
+          ),
           appBar: AppBar(
             brightness: Brightness.dark,
             elevation: 20.0,
@@ -34,12 +72,6 @@ class _MainScreenState extends State<MainScreen> {
               "Generation",
               style: TextStyle(
                   fontSize: 25.0, fontFamily: 'Lora', letterSpacing: 1.0),
-            ),
-            leading: IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {
-                SlideDrawer.of(context).toggle();
-              },
             ),
             actions: [
               Container(

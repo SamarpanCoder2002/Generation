@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/Backend/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 
 class SignUpAuthentication extends StatefulWidget {
@@ -9,6 +11,31 @@ class SignUpAuthentication extends StatefulWidget {
 
 class _SignUpAuthenticationState extends State<SignUpAuthentication> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _pwdShowPermission, _confirmPwdShowPermission;
+
+  TextEditingController _email;
+  TextEditingController _pwd;
+  TextEditingController _confirmPwd;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _pwdShowPermission = true;
+    _confirmPwdShowPermission = true;
+
+    _email = TextEditingController();
+    _pwd = TextEditingController();
+    _confirmPwd = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _email.dispose();
+    _pwd.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +67,10 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width - 60,
                       child: TextFormField(
-                        decoration: InputDecoration(labelText: "Email"),
+                        controller: this._email,
+                        decoration: InputDecoration(
+                          labelText: "Email",
+                        ),
                         validator: (inputValue) {
                           RegExp _emailRegex = RegExp(
                               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
@@ -57,12 +87,79 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width - 60,
                       child: TextFormField(
-                          decoration: InputDecoration(labelText: "Password"),
+                          controller: this._pwd,
+                          obscureText: _pwdShowPermission,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            suffixIcon: IconButton(
+                              icon: _pwdShowPermission
+                                  ? Icon(
+                                      Entypo.eye,
+                                      color: Colors.redAccent,
+                                    )
+                                  : Icon(
+                                      Entypo.eye_with_line,
+                                      color: Colors.green,
+                                    ),
+                              onPressed: () {
+                                if (_pwdShowPermission) {
+                                  setState(() {
+                                    _pwdShowPermission = false;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _pwdShowPermission = true;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
                           validator: (inputValue) {
                             if ((inputValue.length >= 8)) {
                               return null;
                             }
                             return "Password should be more than or equal to 8 characters";
+                          }),
+                    ),
+                    SizedBox(
+                      height: 25.0,
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 60,
+                      child: TextFormField(
+                          controller: this._confirmPwd,
+                          obscureText: _confirmPwdShowPermission,
+                          decoration: InputDecoration(
+                            labelText: "Confirm Password",
+                            suffixIcon: IconButton(
+                              icon: _confirmPwdShowPermission
+                                  ? Icon(
+                                      Entypo.eye,
+                                      color: Colors.redAccent,
+                                    )
+                                  : Icon(
+                                      Entypo.eye_with_line,
+                                      color: Colors.green,
+                                    ),
+                              onPressed: () {
+                                if (_confirmPwdShowPermission) {
+                                  setState(() {
+                                    _confirmPwdShowPermission = false;
+                                  });
+                                } else {
+                                  setState(() {
+                                    _confirmPwdShowPermission = true;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          validator: (inputValue) {
+                            if ((inputValue.length < 8)) {
+                              return "Password should be more than or equal to 8 characters";
+                            } else if (this._confirmPwd.text != this._pwd.text)
+                              return "Password and Confirm Password not Same";
+                            return null;
                           }),
                     ),
                     SizedBox(
@@ -91,12 +188,12 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                           ),
                           onPressed: () {
                             print("Log-in Switcher");
+
                             Navigator.pop(context);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        LogInAuthentication()));
+                                    builder: (_) => LogInAuthentication()));
                           },
                         ),
                         ElevatedButton(
@@ -120,6 +217,10 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                           onPressed: () {
                             if (_formKey.currentState.validate()) {
                               print("Proceed with Sign-Up");
+                              EmailAndPasswordAuth emailAndPwdAuth =
+                                  EmailAndPasswordAuth(context,
+                                      this._email.text, this._pwd.text);
+                              emailAndPwdAuth.signUp();
                             } else {
                               print("Can't Proceed with Sign-up");
                             }

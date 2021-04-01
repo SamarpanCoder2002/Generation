@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -27,17 +29,7 @@ class _ProfileState extends State<Profile> {
               context, "Total Status", "100", Icon(Icons.done_rounded)),
           otherInformation(
               context, "Total Logs", "50", Icon(Icons.done_rounded)),
-          signInButton(
-              context, "images/gg.png", "Sign in With Google", 40.0, 21.0),
-          SizedBox(
-            height: 10.0,
-          ),
-          signInButton(
-              context, "images/fbook.png", "Sign in With Facebook", 40.0, 18.0),
-          SizedBox(
-            height: 5.0,
-          ),
-          query(),
+          logOutButton(),
         ],
       ),
     );
@@ -175,67 +167,32 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget signInButton(BuildContext context, String iconData, String message,
-      double imageSize, double fontSize) {
-    return Container(
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(
-        left: MediaQuery.of(context).size.width / 7,
-        right: MediaQuery.of(context).size.width / 7,
-      ),
-      padding: EdgeInsets.only(left: 5.0, right: 5.0, top: 10.0, bottom: 10.0),
-      child: Center(
-        child: RaisedButton(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40.0),
-              side: BorderSide(
-                width: 1.0,
-              )),
-          color: Colors.white,
-          elevation: 7.0,
-          padding: EdgeInsets.only(
-            top: 8.0,
-            bottom: 8.0,
-            left: 15.0,
-          ),
-          child: Row(
-            children: [
-              Image.asset(
-                iconData,
-                width: imageSize,
-              ),
-              SizedBox(
-                width: 20.0,
-              ),
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(fontSize: fontSize, color: Colors.black38),
-                ),
-              )
-            ],
-          ),
-          onPressed: () {
-            print("Authenticate With Google");
-          },
-        ),
-      ),
-      // child:
-    );
-  }
-
-  Widget query() {
-    return ElevatedButton(
+  Widget logOutButton() {
+    return Center(
+      child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          primary: Colors.white,
-          elevation: 0,
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40.0),
+          ),
+          primary: Colors.redAccent,
+        ),
+        child: Text(
+          "Log-Out",
+          style: TextStyle(
+            fontSize: 25.0,
+          ),
         ),
         onPressed: () {
-          print("Information Alert");
+          print("Log-Out Event");
+          FirebaseAuth.instance.signOut();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => LogInAuthentication()),
+            (Route<dynamic> route) => false,
+          );
         },
-        child: Text(
-          "Why Use It? Read Here",
-          style: TextStyle(color: Colors.blue, fontSize: 20.0),
-        ));
+      ),
+    );
   }
 }
