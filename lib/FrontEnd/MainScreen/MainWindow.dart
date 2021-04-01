@@ -6,7 +6,6 @@ import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:slide_drawer/slide_drawer.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
-import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 
 class MainScreen extends StatefulWidget {
   @override

@@ -155,14 +155,17 @@ class _CameraScreenState extends State<PhotoCapture> {
 
     return ClipRect(
         child: OverflowBox(
-      child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
+            child: SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      child: Align(
+          alignment: Alignment.center,
           child: AspectRatio(
-            aspectRatio: controller.value.aspectRatio,
+            aspectRatio: MediaQuery.of(context).size.width /
+                MediaQuery.of(context).size.height,
             child: CameraPreview(controller),
           )),
-    ));
+    )));
   }
 
   void _onSwitchCamera() {
