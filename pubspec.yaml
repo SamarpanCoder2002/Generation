@@ -25,7 +25,6 @@ dependencies:
     sdk: flutter
 
   circle_list:
-  esys_flutter_share: ^1.0.2
   path_provider: ^1.6.14
   camera: ^0.5.8+5
   gallery_saver:

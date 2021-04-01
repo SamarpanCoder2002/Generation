@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:generation/BackEnd/InformationContainer.dart';
 
 import 'package:page_transition/page_transition.dart';
 
@@ -12,14 +11,11 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  Information _information = Information();
-  List _store;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _store = _information.informationReturn();
     //_colorModeChange.darkMode();
   }
 
@@ -100,7 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       child: ListView.builder(
-        itemCount: _store[0].length,
+        itemCount: 10,
         itemBuilder: (context, position) {
           return chatTile(context, position);
         },
@@ -141,7 +137,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: GestureDetector(
                     child: CircleAvatar(
                       radius: 30.0,
-                      backgroundImage: ExactAssetImage(_store[0][0]),
+                      backgroundImage: ExactAssetImage('images/sam.jpg'),
                     ),
                     onTap: () {
                       print("Pic Pressed");
@@ -156,7 +152,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: Column(
                     children: [
                       Text(
-                        _store[1][0],
+                        "Samarpan Dasgupta",
                         style: TextStyle(
                           fontSize: 18.0,
                           color: Colors.black,
@@ -169,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         //color: Colors.blueGrey,
                         //padding: EdgeInsets.only(left: 10.0),
                         child: Text(
-                          _store[2][0],
+                          "Latest Message",
                           style: TextStyle(
                             fontSize: 15.0,
                             color: Colors.black45,
@@ -192,7 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       children: [
                         Container(
                             child: Text(
-                          _store[3][0],
+                          "12:00",
                           style: TextStyle(fontSize: 12.0, color: Colors.blue),
                         )),
                         SizedBox(
@@ -200,8 +196,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         Container(
                           child: Icon(
-                            _store[4][0],
-                            color: _store[5][0],
+                            Icons.surround_sound_rounded,
+                            color: Colors.green,
                           ),
                         ),
                       ],

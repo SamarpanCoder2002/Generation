@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
+import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:slide_drawer/slide_drawer.dart';
 
 void main() {
@@ -53,7 +54,8 @@ class _SettingsState extends State<Settings> {
           SystemNavigator.pop();
         }),
       ],
-      child: MainScreen(),
+      child: SignUpAuthentication(),
+      // MainScreen(),
     );
   }
 }
