@@ -200,9 +200,10 @@ class _SettingsWindowState extends State<SettingsWindow> {
               inactiveColor: offBgColor,
               inactiveTextColor: offTextColor,
               inactiveText: offText,
-              onToggle: (index) {
+              onToggle: (darkModePermission) {
+                //print(darkModePermission);
                 setState(() {
-                  _colorModeStatus = index;
+                  _colorModeStatus = darkModePermission;
                 });
               },
             ),
