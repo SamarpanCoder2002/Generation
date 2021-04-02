@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -12,6 +13,8 @@ class LogInAuthentication extends StatefulWidget {
 
 class _LogInAuthenticationState extends State<LogInAuthentication> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final RegExp _emailRegex = RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
 
   bool _pwdShowPermission;
 
@@ -67,8 +70,6 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                         controller: this._email,
                         decoration: InputDecoration(labelText: "Email"),
                         validator: (inputValue) {
-                          RegExp _emailRegex = RegExp(
-                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
                           if (_emailRegex.hasMatch(inputValue)) {
                             return null;
                           }
@@ -133,7 +134,16 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                             color: Colors.brown,
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          if (_emailRegex.hasMatch(this._email.text)) {
+                            FirebaseAuth.instance.sendPasswordResetEmail(
+                                email: this._email.text);
+                            showAlertBox("Email Reset Link Send",
+                                "Check Your Email.....\nPassword Must be At Least 8 Characters");
+                          } else
+                            showAlertBox("Not a Email Format",
+                                "Please Give a valid Email");
+                        },
                       ),
                     ),
                     SizedBox(
@@ -210,5 +220,24 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
         ),
       ),
     );
+  }
+
+  void showAlertBox(String _title, String _content) {
+    showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+              backgroundColor: Colors.black54,
+              title: Text(
+                _title,
+                style: TextStyle(color: Colors.white),
+              ),
+              content: Text(
+                _content,
+                style: TextStyle(
+                  color: Colors.white,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ));
   }
 }
