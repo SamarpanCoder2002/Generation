@@ -7,8 +7,11 @@
 <!--    <uses-permission android:name="android.permission.FLASHLIGHT"/>-->
 <!--    <uses-feature android:name="android.hardware.camera.autofocus" />-->
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+
    <application
         android:label="Generation"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

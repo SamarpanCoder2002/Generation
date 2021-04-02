@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:circle_list/circle_list.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:generation/FrontEnd/Store/camera_operation.dart';
+
 import 'package:generation/FrontEnd/Store/images_preview_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ApplicationList extends StatefulWidget {
   @override
@@ -13,6 +13,8 @@ class ApplicationList extends StatefulWidget {
 }
 
 class _ApplicationListState extends State<ApplicationList> {
+  final picker = ImagePicker();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,11 +47,19 @@ class _ApplicationListState extends State<ApplicationList> {
                     onPrimary: Colors.white70,
                     shape: CircleBorder(),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
+                    final PickedFile pickedFile =
+                        await picker.getImage(source: ImageSource.camera);
+
+                    print(pickedFile.path);
+
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => PhotoCapture()));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PreviewImageScreen(
+                            imagePath: File(pickedFile.path).path),
+                      ),
+                    );
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -86,20 +96,35 @@ class _ApplicationListState extends State<ApplicationList> {
                     onPrimary: Colors.white70,
                     shape: CircleBorder(),
                   ),
-                  onPressed: () async {},
+                  onPressed: () async {
+                    print("Take Image");
+
+                    final PickedFile pickedFile =
+                        await picker.getImage(source: ImageSource.gallery);
+
+                    print(pickedFile.path);
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PreviewImageScreen(
+                            imagePath: File(pickedFile.path).path),
+                      ),
+                    );
+                  },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Icon(
-                        Icons.video_call_sharp,
+                        Icons.image,
                         size: 40,
                         color: Colors.green,
                       ),
                       Text(
-                        'Video',
+                        'Images',
                         style: TextStyle(
                             color: Colors.orangeAccent,
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold),
                       )
                     ],
@@ -123,48 +148,24 @@ class _ApplicationListState extends State<ApplicationList> {
                     shape: CircleBorder(),
                   ),
                   onPressed: () async {
-                    print("Take Image");
-                    // PermissionStatus cameraStatus = await Permission.camera.request();
-                    // PermissionStatus storageStatus = await Permission.storage.request();
-                    // if(cameraStatus.isGranted && storageStatus.isGranted) {
-                    //
-                    // }
-                    // ImagePicker()
-                    //     .getImage(source: ImageSource.gallery)
-                    //     .then((recordedImage) {
-                    //   if (recordedImage != null && recordedImage.path != null) {
-                    //     GallerySaver.saveImage(
-                    //       File(recordedImage.path).path,
-                    //     ).then((bool success) {
-                    //       print("Capture Status is: $success");
-                    //       Navigator.push(
-                    //           context,
-                    //           MaterialPageRoute(
-                    //               builder: (context) => PreviewImageScreen(
-                    //                   imagePath:
-                    //                       recordedImage.path)));
-                    //     });
-                    //   }
-                    // });
+                    final PickedFile pickedFile =
+                        await picker.getVideo(source: ImageSource.camera);
 
-                    // else
-                    //   print("Permission Denied");
-                    // // File file = await ImagePicker.pickImage(
-                    //     source: ImageSource.gallery);
+                    print(pickedFile.path);
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Icon(
-                        Icons.image,
+                        Icons.video_call_sharp,
                         size: 40,
                         color: Colors.green,
                       ),
                       Text(
-                        'Gallery',
+                        'Video',
                         style: TextStyle(
                             color: Colors.orangeAccent,
-                            fontSize: 12,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold),
                       )
                     ],

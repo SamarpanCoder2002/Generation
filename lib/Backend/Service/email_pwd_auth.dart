@@ -1,12 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:intl/intl.dart';
 
 class EmailAndPasswordAuth {
   String _email, _pwd;
   BuildContext _context;
+  final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
+  TextEditingController _userName = TextEditingController();
 
   EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
     //Close the keyboard
@@ -45,11 +49,22 @@ class EmailAndPasswordAuth {
           .signInWithEmailAndPassword(email: this._email, password: this._pwd);
 
       if (userCredential.user.emailVerified) {
-        Navigator.pop(this._context);
-        Navigator.push(
-            this._context, MaterialPageRoute(builder: (_) => MainScreen()));
+        DocumentSnapshot responseData = await FirebaseFirestore.instance
+            .doc("generation_users/${userCredential.user.email}")
+            .get();
 
-        showAlertBox("Log-In Successful", "Enjoy this app");
+        print(responseData.exists);
+
+        if (!responseData.exists) {
+          print("Email Not Present");
+          await userNameChecking();
+        } else {
+          Navigator.pop(this._context);
+          Navigator.push(
+              this._context, MaterialPageRoute(builder: (_) => MainScreen()));
+
+          showAlertBox("Log-In Successful", "Enjoy this app");
+        }
       } else {
         print("Email not Verified");
         FirebaseAuth.instance.signOut();
@@ -80,5 +95,93 @@ class EmailAndPasswordAuth {
             ));
   }
 
+  Future<void> userNameChecking() async {
+    showDialog(
+        context: this._context,
+        builder: (_) => AlertDialog(
+              title: Text("Set User Name"),
+              content: Form(
+                key: this._userNameKey,
+                child: SizedBox(
+                  height: MediaQuery.of(this._context).size.height / 5,
+                  child: Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextFormField(
+                          controller: _userName,
+                          validator: (inputUserName) {
+                            if (inputUserName.length < 6)
+                              return "User Name At Least 6 Characters";
+                            else if (inputUserName.contains('@')) {
+                              return "@ Can't Consider in User Name";
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: "User Name",
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              )),
+                          child: Text(
+                            "Save",
+                            style:
+                                TextStyle(fontSize: 18.0, color: Colors.white),
+                          ),
+                          onPressed: () async {
+                            if (_userNameKey.currentState.validate()) {
+                              print("ok");
 
+                              QuerySnapshot querySnapShot =
+                                  await FirebaseFirestore.instance
+                                      .collection('generation_users')
+                                      .where('user_name',
+                                          isEqualTo: this._userName.text)
+                                      .get();
+                              print(querySnapShot.docs.isEmpty);
+
+                              if (querySnapShot.docs.isEmpty) {
+                                FirebaseFirestore.instance
+                                    .collection("generation_users")
+                                    .doc(this._email)
+                                    .set({
+                                  'user_name': this._userName.text,
+                                  "creation_date": DateFormat('dd-MM-yyyy')
+                                      .format(DateTime.now()),
+                                  "creation_time":
+                                      "${DateTime.now().hour}:${DateTime.now().minute}",
+                                });
+
+                                Navigator.pushAndRemoveUntil(
+                                    this._context,
+                                    MaterialPageRoute(
+                                        builder: (_) => MainScreen()),
+                                    (route) => false);
+
+                                showAlertBox(
+                                    "Log-In Successful", "Enjoy this app");
+                              } else {
+                                Navigator.pop(this._context);
+                                showAlertBox("User Name Already Exist",
+                                    "Try Another User Name");
+                              }
+                            } else {
+                              print("Not Validate");
+                            }
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ));
+  }
 }

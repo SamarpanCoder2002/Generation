@@ -24,18 +24,20 @@ dependencies:
   flutter:
     sdk: flutter
 
+  intl: ^0.17.0
+
   flutter_icons: ^1.1.0
 
   circle_list:
-  path_provider: ^2.0.1
-  camera: ^0.5.8+5
-  gallery_saver:
+  image_picker:
   flutter_switch:
   fab_circular_menu:
   page_transition:
 
   firebase_core: ^1.0.2
   firebase_auth: ^1.0.1
+  google_sign_in: ^5.0.1
+  cloud_firestore: ^1.0.3
 
 
   # The following adds the Cupertino Icons font to your application.

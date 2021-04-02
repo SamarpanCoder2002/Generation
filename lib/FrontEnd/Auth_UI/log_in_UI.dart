@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/Backend/Service/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
-import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 
 class LogInAuthentication extends StatefulWidget {
   @override
@@ -198,13 +197,13 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                             "Log-In",
                             style: TextStyle(fontSize: 25.0),
                           ),
-                          onPressed: () {
+                          onPressed: () async{
                             if (_formKey.currentState.validate()) {
                               print("Proceed with Log-In");
                               EmailAndPasswordAuth emailAndPwdAuth =
                                   EmailAndPasswordAuth(context,
                                       this._email.text, this._pwd.text);
-                              emailAndPwdAuth.logIn();
+                              await emailAndPwdAuth.logIn();
                             } else {
                               print("Can't Proceed with Log-In");
                             }
