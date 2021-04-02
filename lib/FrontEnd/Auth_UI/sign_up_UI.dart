@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/Backend/email_pwd_auth.dart';
+import 'package:generation/Backend/Service/email_pwd_auth.dart';
+import 'package:generation/Backend/Service/google_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
+import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 
 class SignUpAuthentication extends StatefulWidget {
   @override
@@ -214,13 +216,13 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                             "Sign-Up",
                             style: TextStyle(fontSize: 25.0),
                           ),
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState.validate()) {
                               print("Proceed with Sign-Up");
                               EmailAndPasswordAuth emailAndPwdAuth =
                                   EmailAndPasswordAuth(context,
                                       this._email.text, this._pwd.text);
-                              emailAndPwdAuth.signUp();
+                              await emailAndPwdAuth.signUp();
                             } else {
                               print("Can't Proceed with Sign-up");
                             }
@@ -250,9 +252,19 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                           width: 45.0,
                         ),
                         onTap: () async {
-                          // print("Google Sign in Tapped");
-                          // var _gAuth = GoogleAuthenticate(context);
-                          // await _gAuth.loginViaGoogle();
+                          bool response = await GoogleAuth().logIn();
+                          if (response) {
+                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => MainScreen()));
+
+                            showAlertBox("Log-In Successful", "Enjoy this app");
+                          } else {
+                            showAlertBox("Log In Error",
+                                "Log-in not Completed or\nEmail Already Present With Other Credentials");
+                          }
                         },
                       ),
                     ),
@@ -264,5 +276,23 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
         ),
       ),
     );
+  }
+
+  void showAlertBox(String _title, String _content) {
+    showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+              backgroundColor: Colors.black54,
+              title: Text(
+                _title,
+                style: TextStyle(color: Colors.white),
+              ),
+              content: Text(
+                _content,
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ));
   }
 }

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:generation/Backend/email_pwd_auth.dart';
+import 'package:generation/Backend/Service/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';

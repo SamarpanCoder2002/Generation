@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/Backend/email_pwd_auth.dart';
+import 'package:generation/Backend/Service/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 

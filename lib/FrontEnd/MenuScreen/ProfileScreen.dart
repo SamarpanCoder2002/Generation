@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation/Backend/Service/google_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 
 class Profile extends StatefulWidget {
@@ -183,9 +184,12 @@ class _ProfileState extends State<Profile> {
             fontSize: 25.0,
           ),
         ),
-        onPressed: () {
+        onPressed: () async{
           print("Log-Out Event");
-          FirebaseAuth.instance.signOut();
+          bool response = await GoogleAuth().logOut();
+          if(!response) {
+            FirebaseAuth.instance.signOut();
+          }
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => LogInAuthentication()),
