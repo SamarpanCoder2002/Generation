@@ -156,7 +156,8 @@ class EmailAndPasswordAuth {
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":
-                                      "${DateTime.now().hour}:${DateTime.now().minute}",
+                                      "${DateFormat('hh:mm a').format(DateTime.now())}",
+                                  "connections": {},
                                 });
 
                                 Navigator.pushAndRemoveUntil(

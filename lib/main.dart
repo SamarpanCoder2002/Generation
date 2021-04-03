@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/intl.dart';
 
 import 'Backend/Service/google_auth.dart';
 
@@ -21,18 +22,23 @@ void main() async {
 Future<Widget> differentContext() async {
   if (FirebaseAuth.instance.currentUser == null) return SignUpAuthentication();
 
-  DocumentSnapshot responseData = await FirebaseFirestore.instance
-      .doc("generation_users/${FirebaseAuth.instance.currentUser.email}")
-      .get();
+  try {
+    DocumentSnapshot responseData = await FirebaseFirestore.instance
+        .doc("generation_users/${FirebaseAuth.instance.currentUser.email}")
+        .get();
 
-  print(responseData.exists);
+    print(responseData.exists);
 
-  if (!responseData.exists) {
-    print("Log-Out Event");
-    bool response = await GoogleAuth().logOut();
+    if (!responseData.exists) {
+      print("Log-Out Event");
+      bool response = await GoogleAuth().logOut();
 
-    if (!response) FirebaseAuth.instance.signOut();
+      if (!response) FirebaseAuth.instance.signOut();
+      return SignUpAuthentication();
+    }
+    return MainScreen();
+  } catch (e) {
+    print("Starting Error is: $e");
     return SignUpAuthentication();
   }
-  return MainScreen();
 }

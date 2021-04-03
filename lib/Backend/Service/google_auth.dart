@@ -49,6 +49,7 @@ class GoogleAuth {
         }
       } else {
         print("Already Logged In");
+        await logOut();
       }
     } catch (e) {
       print("Google LogIn Error: ${e.toString()}");
@@ -147,7 +148,8 @@ class GoogleAuth {
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":
-                                      "${DateTime.now().hour}:${DateTime.now().minute}",
+                                      "${DateFormat('hh:mm a').format(DateTime.now())}",
+                                  "connections": {},
                                 });
 
                                 print("Log-In Successful: User Name: $_email");

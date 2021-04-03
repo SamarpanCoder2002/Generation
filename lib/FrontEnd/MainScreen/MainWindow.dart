@@ -1,11 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
+import 'package:generation/FrontEnd/MainScreen/search.dart';
 import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
 
@@ -16,8 +19,28 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  TextEditingController searchValue;
+  Widget streamController;
+
+  List userCollection;
 
   int _currentTab = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    searchValue = TextEditingController();
+    streamController = null;
+    userCollection = [];
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    searchValue.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -172,8 +195,10 @@ class _MainScreenState extends State<MainScreen> {
                 size: 50.0,
                 color: Color.fromRGBO(16, 24, 255, 1),
               ),
-              onPressed: () {
-                print('Home');
+              onPressed: () async {
+                print('Search based on Text');
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => Search()));
               }),
           IconButton(
               icon: Icon(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 import 'package:page_transition/page_transition.dart';
 
@@ -196,7 +197,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         Container(
                           child: Icon(
-                            Icons.surround_sound_rounded,
+                            Icons.notification_important_outlined,
                             color: Colors.green,
                           ),
                         ),
