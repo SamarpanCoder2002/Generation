@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/Backend/Service/google_auth.dart';
-import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
+import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -200,7 +200,7 @@ class _ProfileState extends State<Profile> {
           }
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (_) => LogInAuthentication()),
+            MaterialPageRoute(builder: (_) => SignUpAuthentication()),
             (Route<dynamic> route) => false,
           );
         },

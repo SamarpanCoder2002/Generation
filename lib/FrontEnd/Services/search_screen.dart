@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -26,8 +27,8 @@ class _SearchState extends State<Search> {
           .collection("generation_users")
           .where(
             searchArgument,
-            isGreaterThanOrEqualTo: searchUser.text
-                .toUpperCase(), // We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
+            isGreaterThanOrEqualTo: searchUser.text.toUpperCase(),
+            // We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
           )
           .get()
           .catchError((e) {
@@ -50,6 +51,10 @@ class _SearchState extends State<Search> {
             itemCount: searchResultSnapshot.docs.length,
             itemBuilder: (context, index) {
               print(searchResultSnapshot.docs[index]);
+              if (searchResultSnapshot.docs[index].id ==
+                  FirebaseAuth.instance.currentUser.email) {
+                return SizedBox();
+              }
               return userTile(
                 searchResultSnapshot.docs[index][searchArgument],
                 searchResultSnapshot.docs[index]

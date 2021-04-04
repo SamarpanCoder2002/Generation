@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 class GoogleAuth {
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
   TextEditingController _userName = TextEditingController();
+  TextEditingController _nickName = TextEditingController();
+  TextEditingController _about = TextEditingController();
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -44,7 +46,7 @@ class GoogleAuth {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => MainScreen()));
 
-            showAlertBox(context, "Log-In Successful", "Enjoy this app");
+            showAlertBox(context, "Log-In Successful", "Enjoy this app", Colors.green);
           }
         }
       } else {
@@ -54,7 +56,7 @@ class GoogleAuth {
     } catch (e) {
       print("Google LogIn Error: ${e.toString()}");
       showAlertBox(context, "Log In Error",
-          "Log-in not Completed or\nEmail Already Present With Other Credentials");
+          "Log-in not Completed or\nEmail Already Present With Other Credentials", Colors.redAccent);
     }
   }
 
@@ -69,19 +71,19 @@ class GoogleAuth {
     }
   }
 
-  void showAlertBox(BuildContext context, String _title, String _content) {
+  void showAlertBox(BuildContext context, String _title, String _content, [Color _titleColor = Colors.white]) {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-              backgroundColor: Colors.black54,
+          backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
               title: Text(
                 _title,
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: _titleColor),
               ),
               content: Text(
                 _content,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.lightBlue,
                 ),
               ),
             ));
@@ -91,28 +93,78 @@ class GoogleAuth {
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
-              title: Text("Set User Name"),
+              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              title: Center(
+                child: Text(
+                  "Set Additional Details",
+                  style: TextStyle(color: Colors.lightBlue),
+                ),
+              ),
               content: Form(
                 key: this._userNameKey,
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height / 5,
-                  child: Column(
+                  width: double.maxFinite,
+                  child: ListView(
+                    shrinkWrap: true,
                     children: <Widget>[
-                      Expanded(
-                        child: TextFormField(
+                      TextFormField(
                           controller: _userName,
+                          style: TextStyle(color: Colors.white),
                           validator: (inputUserName) {
                             if (inputUserName.length < 6)
                               return "User Name At Least 6 Characters";
-                            else if (inputUserName.contains('@')) {
-                              return "@ Can't Consider in User Name";
-                            }
                             return null;
                           },
                           decoration: InputDecoration(
                             labelText: "User Name",
+                            labelStyle: TextStyle(color: Colors.white70),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue),
+                            ),
                           ),
                         ),
+
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      TextFormField(
+                          controller: _nickName,
+                          style: TextStyle(color: Colors.white),
+                          validator: (inputUserName) {
+                            if (inputUserName.length < 6)
+                              return "Nick Name At Least 6 Characters";
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Nick Name / Public Friendly Name",
+                            labelStyle: TextStyle(color: Colors.white70, fontSize: 14.0),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue),
+                            ),
+                          ),
+                        ),
+
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      TextFormField(
+                          controller: _about,
+                          style: TextStyle(color: Colors.white),
+                          validator: (inputUserName) {
+                            if (inputUserName.length < 6)
+                              return "About Should be At Least 6 Characters";
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: "About Yourself",
+                            labelStyle: TextStyle(color: Colors.white70),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue),
+                            ),
+                          ),
+                        ),
+                      SizedBox(
+                        height: 10.0,
                       ),
                       Align(
                         alignment: Alignment.centerRight,
@@ -145,6 +197,8 @@ class GoogleAuth {
                                     .doc(_email)
                                     .set({
                                   'user_name': this._userName.text,
+                                  'nick_name': this._nickName.text,
+                                  'about': this._about.text,
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":
@@ -161,11 +215,11 @@ class GoogleAuth {
                                     (route) => false);
 
                                 showAlertBox(context, "Log-In Successful",
-                                    "Enjoy this app");
+                                    "Enjoy this app", Colors.green);
                               } else {
                                 Navigator.pop(context);
                                 showAlertBox(context, "User Name Already Exist",
-                                    "Try Another User Name");
+                                    "Try Another User Name", Colors.yellow);
                               }
                             } else {
                               print("Not Validate");

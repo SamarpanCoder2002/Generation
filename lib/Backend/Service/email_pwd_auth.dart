@@ -9,8 +9,12 @@ import 'package:intl/intl.dart';
 class EmailAndPasswordAuth {
   String _email, _pwd;
   BuildContext _context;
+
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
+
   TextEditingController _userName = TextEditingController();
+  TextEditingController _nickName = TextEditingController();
+  TextEditingController _about = TextEditingController();
 
   EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
     //Close the keyboard
@@ -31,15 +35,15 @@ class EmailAndPasswordAuth {
           MaterialPageRoute(builder: (_) => LogInAuthentication()));
 
       showAlertBox("Sign-Up Successful",
-          "A Verification Link Sent to Your Registered Mail....\nPlease Verify Your Mail and Log-In");
+          "A Verification Link Sent to Your Registered Mail....\n\nPlease Verify Your Mail then Log-In", Colors.green);
     } catch (e) {
       print("Sign-up Error is: $e");
       if (e.toString() ==
           "[firebase_auth/email-already-in-use] The email address is already in use by another account.")
-        showAlertBox("Email Already Registered", "Try With Another Email");
+        showAlertBox("Email Already Registered", "Try With Another Email", Colors.yellow,);
       else
         showAlertBox("Sign-Up Error",
-            "Undefine Error Occur... \nMake sure your phone Connected to the Internet");
+            "Undefine Error Occur... \n\nMake sure your phone Connected to the Internet", Colors.redAccent,);
     }
   }
 
@@ -63,33 +67,43 @@ class EmailAndPasswordAuth {
           Navigator.push(
               this._context, MaterialPageRoute(builder: (_) => MainScreen()));
 
-          showAlertBox("Log-In Successful", "Enjoy this app");
+          showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
         }
       } else {
         print("Email not Verified");
         FirebaseAuth.instance.signOut();
-        showAlertBox("Log-In Error",
-            "Email Not Verified...\nA Verification Link Sent to Your Registered Mail.\nPlease Verify Your Email then Log in");
+        showAlertBox(
+          "Log-In Error",
+          "Email Not Verified...\n\nA Verification Link Sent to Your Registered Mail.\n\nPlease Verify Your Email then Log in",
+          Colors.redAccent,
+        );
       }
     } catch (e) {
       print("Log-in Error: $e");
-      showAlertBox("Log-in Error", "Email or Password not Matched");
+      showAlertBox(
+          "Log-in Error", "Email or Password not Match", Colors.redAccent);
     }
   }
 
-  void showAlertBox(String _title, String _content) {
+  void showAlertBox(
+    String _title,
+    String _content, [
+    Color _titleColor = Colors.white,
+  ]) {
     showDialog<String>(
         context: this._context,
         builder: (context) => AlertDialog(
-              backgroundColor: Colors.black54,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
               title: Text(
                 _title,
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: _titleColor,
+                ),
               ),
               content: Text(
                 _content,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.lightBlue,
                 ),
               ),
             ));
@@ -119,8 +133,55 @@ class EmailAndPasswordAuth {
                           },
                           decoration: InputDecoration(
                             labelText: "User Name",
+                            labelStyle: TextStyle(
+                                color: Colors.white70, fontSize: 14.0),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue),
+                            ),
                           ),
                         ),
+                      ),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      TextFormField(
+                        controller: _nickName,
+                        style: TextStyle(color: Colors.white),
+                        validator: (inputUserName) {
+                          if (inputUserName.length < 6)
+                            return "Nick Name At Least 6 Characters";
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "Nick Name / Public Friendly Name",
+                          labelStyle:
+                              TextStyle(color: Colors.white70, fontSize: 14.0),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      TextFormField(
+                        controller: _about,
+                        style: TextStyle(color: Colors.white),
+                        validator: (inputUserName) {
+                          if (inputUserName.length < 6)
+                            return "About Should be At Least 6 Characters";
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "About Yourself",
+                          labelStyle: TextStyle(color: Colors.white70),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.0,
                       ),
                       Align(
                         alignment: Alignment.centerRight,
@@ -153,6 +214,8 @@ class EmailAndPasswordAuth {
                                     .doc(this._email)
                                     .set({
                                   'user_name': this._userName.text,
+                                  'nick_name': this._nickName.text,
+                                  'about': this._about.text,
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":

@@ -66,6 +66,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                       width: MediaQuery.of(context).size.width - 60,
                       child: TextFormField(
                         controller: this._email,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: "Email",
                           labelStyle: TextStyle(
@@ -90,6 +91,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                       child: TextFormField(
                           controller: this._pwd,
                           obscureText: _pwdShowPermission,
+                          style: TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             labelText: "Password",
                             labelStyle: TextStyle(
@@ -150,10 +152,10 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                             FirebaseAuth.instance.sendPasswordResetEmail(
                                 email: this._email.text);
                             showAlertBox("Email Reset Link Send",
-                                "Check Your Email.....\nPassword Must be At Least 8 Characters");
+                                "Check Your Email.....\nPassword Must be At Least 8 Characters", Colors.green);
                           } else
                             showAlertBox("Not a Email Format",
-                                "Please Give a valid Email");
+                                "Please Give a valid Email", Colors.redAccent,);
                         },
                       ),
                     ),
@@ -248,19 +250,19 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
     );
   }
 
-  void showAlertBox(String _title, String _content) {
+  void showAlertBox(String _title, String _content, [Color _titleColor = Colors.white]) {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-              backgroundColor: Colors.black54,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
               title: Text(
                 _title,
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: _titleColor),
               ),
               content: Text(
                 _content,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.lightBlue,
                   letterSpacing: 1.0,
                 ),
               ),
