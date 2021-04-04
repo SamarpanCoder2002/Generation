@@ -50,7 +50,7 @@ class _SearchState extends State<Search> {
             child: Center(
               child: Text(
                 "No Matching Found",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.redAccent),
               ),
             ),
           );
@@ -74,19 +74,6 @@ class _SearchState extends State<Search> {
               )
             ],
           ),
-          Spacer(),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(24)),
-              child: Text(
-                "Message",
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-          )
         ],
       ),
     );
@@ -95,8 +82,9 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: Container(
-        color: Colors.black87,
+        //color: Colors.black87,
         width: double.maxFinite,
         height: MediaQuery.of(context).size.height,
         child: Column(
@@ -110,7 +98,7 @@ class _SearchState extends State<Search> {
               ),
               margin: EdgeInsets.only(bottom: 20.0),
               decoration: BoxDecoration(
-                color: Color(0x54FFFFFF),
+                color: Color.fromRGBO(25, 39, 52, 1),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30.0),
                   bottomRight: Radius.circular(30.0),
@@ -120,6 +108,7 @@ class _SearchState extends State<Search> {
                 children: [
                   Expanded(
                     child: TextField(
+                      autofocus: true,
                       controller: searchUser,
                       cursorColor: Colors.white,
                       style: TextStyle(
@@ -130,7 +119,7 @@ class _SearchState extends State<Search> {
                         border: InputBorder.none,
                         labelText: "Enter Username",
                         labelStyle: TextStyle(
-                          color: Colors.white,
+                          color: Colors.green,
                           fontSize: 16,
                           fontFamily: 'Lora',
                           letterSpacing: 1.0,
@@ -146,9 +135,6 @@ class _SearchState extends State<Search> {
             ),
             isLoading
                 ? Container(
-                    decoration: BoxDecoration(
-                      color: const Color.fromRGBO(0, 0, 0, 0.0),
-                    ),
                     child: Center(
                       child: CircularProgressIndicator(
                         backgroundColor: Colors.black,

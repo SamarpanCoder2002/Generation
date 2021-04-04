@@ -18,6 +18,7 @@ class _ApplicationListState extends State<ApplicationList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: Container(
         height: MediaQuery.of(context).size.height,
         child: Center(
@@ -26,7 +27,7 @@ class _ApplicationListState extends State<ApplicationList> {
             outerRadius: MediaQuery.of(context).size.width / 2.2,
             innerRadius: MediaQuery.of(context).size.width / 5,
             showInitialAnimation: true,
-            innerCircleColor: Colors.white,
+            innerCircleColor: Color.fromRGBO(34, 48, 60, 1),
             outerCircleColor: Color.fromRGBO(0, 0, 0, 0.1),
             origin: Offset(0, 0),
             rotateMode: RotateMode.allRotate,

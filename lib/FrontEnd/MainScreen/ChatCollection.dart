@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import 'package:page_transition/page_transition.dart';
 
@@ -27,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatScreen(BuildContext context) {
     return Scaffold(
-      //floatingActionButton: floatingButton(),
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: ListView(
         children: [
           statusBarContainer(context),
@@ -80,7 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: EdgeInsets.only(top: 18.0, bottom: 10.0),
       height: MediaQuery.of(context).size.height * (5.15 / 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Color.fromRGBO(31, 51, 71, 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
@@ -108,14 +107,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget chatTile(BuildContext context, int index) {
     return Card(
         elevation: 0.0,
-        //color: Colors.red,
+        color: Color.fromRGBO(31, 51, 71, 1),
         child: Container(
           //color: Colors.blue,
           padding: EdgeInsets.only(left: 1.0, right: 1.0),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               elevation: 0.0,
-              primary: Colors.white,
+              primary: Color.fromRGBO(31, 51, 71, 1),
               onPrimary: Colors.lightBlueAccent,
             ),
             onPressed: () {
@@ -156,7 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         "Samarpan Dasgupta",
                         style: TextStyle(
                           fontSize: 18.0,
-                          color: Colors.black,
+                          color: Colors.white,
                         ),
                       ),
                       SizedBox(
@@ -169,7 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           "Latest Message",
                           style: TextStyle(
                             fontSize: 15.0,
-                            color: Colors.black45,
+                            color: Color.fromRGBO(150, 150, 150, 1),
                           ),
                         ),
                       )
@@ -190,7 +189,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         Container(
                             child: Text(
                           "12:00",
-                          style: TextStyle(fontSize: 12.0, color: Colors.blue),
+                          style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
                         )),
                         SizedBox(
                           height: 10.0,

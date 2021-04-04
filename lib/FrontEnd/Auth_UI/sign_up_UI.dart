@@ -41,6 +41,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: Container(
         height: MediaQuery.of(context).size.height,
         child: Center(
@@ -51,7 +52,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                 child: Column(
                   children: <Widget>[
                     SizedBox(
-                      height: MediaQuery.of(context).size.height / 6,
+                      height: MediaQuery.of(context).size.height / 10,
                     ),
                     Center(
                       child: Text(
@@ -69,8 +70,16 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                       width: MediaQuery.of(context).size.width - 60,
                       child: TextFormField(
                         controller: this._email,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                         decoration: InputDecoration(
                           labelText: "Email",
+                          labelStyle: TextStyle(
+                            color: Colors.white70,
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue)),
                         ),
                         validator: (inputValue) {
                           RegExp _emailRegex = RegExp(
@@ -90,8 +99,17 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                       child: TextFormField(
                           controller: this._pwd,
                           obscureText: _pwdShowPermission,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                           decoration: InputDecoration(
                             labelText: "Password",
+                            labelStyle: TextStyle(
+                              color: Colors.white70,
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.lightBlue)),
                             suffixIcon: IconButton(
                               icon: _pwdShowPermission
                                   ? Icon(
@@ -130,8 +148,17 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                       child: TextFormField(
                           controller: this._confirmPwd,
                           obscureText: _confirmPwdShowPermission,
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
                           decoration: InputDecoration(
                             labelText: "Confirm Password",
+                            labelStyle: TextStyle(
+                              color: Colors.white70,
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.lightBlue)),
                             suffixIcon: IconButton(
                               icon: _confirmPwdShowPermission
                                   ? Icon(
@@ -164,81 +191,56 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                           }),
                     ),
                     SizedBox(
-                      height: 30.0,
+                      height: 50.0,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              elevation: 5.0,
-                              primary: Colors.amber,
-                              padding: EdgeInsets.only(
-                                left: 20.0,
-                                right: 20.0,
-                                top: 7.0,
-                                bottom: 7.0,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0)),
-                              )),
-                          child: Text(
-                            "Log-in",
-                            style: TextStyle(fontSize: 25.0),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: Size(
+                              MediaQuery.of(context).size.width - 60, 30.0),
+                          elevation: 5.0,
+                          primary: Color.fromRGBO(57, 60, 80, 1),
+                          padding: EdgeInsets.only(
+                            left: 20.0,
+                            right: 20.0,
+                            top: 7.0,
+                            bottom: 7.0,
                           ),
-                          onPressed: () {
-                            print("Log-in Switcher");
-
-                            Navigator.pop(context);
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => LogInAuthentication()));
-                          },
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              elevation: 5.0,
-                              primary: Colors.green,
-                              padding: EdgeInsets.only(
-                                left: 20.0,
-                                right: 20.0,
-                                top: 7.0,
-                                bottom: 7.0,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20.0)),
-                              )),
-                          child: Text(
-                            "Sign-Up",
-                            style: TextStyle(fontSize: 25.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20.0)),
+                          )),
+                      child: Ink(
+                        child: Text(
+                          "Sign-Up",
+                          style: TextStyle(
+                            fontSize: 25.0,
+                            letterSpacing: 1.0,
+                            fontWeight: FontWeight.w400,
                           ),
-                          onPressed: () async {
-                            if (_formKey.currentState.validate()) {
-                              print("Proceed with Sign-Up");
-                              EmailAndPasswordAuth emailAndPwdAuth =
-                                  EmailAndPasswordAuth(context,
-                                      this._email.text, this._pwd.text);
-                              await emailAndPwdAuth.signUp();
-                            } else {
-                              print("Can't Proceed with Sign-up");
-                            }
-                          },
                         ),
-                      ],
+                      ),
+                      onPressed: () async {
+                        if (_formKey.currentState.validate()) {
+                          print("Proceed with Sign-Up");
+                          EmailAndPasswordAuth emailAndPwdAuth =
+                              EmailAndPasswordAuth(
+                                  context, this._email.text, this._pwd.text);
+                          await emailAndPwdAuth.signUp();
+                        } else {
+                          print("Can't Proceed with Sign-up");
+                        }
+                      },
                     ),
                     SizedBox(
                       height: 30.0,
                     ),
                     Center(
                       child: Text(
-                        "OR Log-In With",
+                        "OR Connect With",
                         style: TextStyle(
                           fontSize: 18.0,
                           letterSpacing: 1.0,
-                          color: Colors.brown,
+                          color: Color.fromRGBO(87, 255, 51, 1),
                         ),
                       ),
                     ),
@@ -252,6 +254,47 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                         ),
                         onTap: () async {
                           await GoogleAuth().logIn(context);
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    SizedBox(
+                      width: 200.0,
+                      child: ElevatedButton(
+                        child: Row(
+                          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              "First Time User? ",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13.0,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            Text(
+                              "Log-In",
+                              style: TextStyle(
+                                color: Colors.lightBlueAccent,
+                                fontSize: 13.0,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0.0,
+                          primary: Color.fromRGBO(34, 48, 60, 1),
+                        ),
+                        onPressed: () {
+                          print("Log-in Switcher");
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => LogInAuthentication()));
                         },
                       ),
                     ),

@@ -17,7 +17,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     // TODO: implement initState
     super.initState();
     // ScrollController Initialization
-    scrollController = ScrollController(initialScrollOffset: 0.0);
+    scrollController = ScrollController(
+      initialScrollOffset: 0.0,
+    );
 
     // For AutoScroll to the end position
     if (scrollController.hasClients)
@@ -34,8 +36,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       appBar: AppBar(
-        backwardsCompatibility: true,
+        brightness: Brightness.dark,
+        backgroundColor: Color.fromRGBO(25, 39, 52, 1),
+        elevation: 10.0,
+        shadowColor: Colors.white70,
         leading: Row(
           children: <Widget>[
             SizedBox(
@@ -59,6 +65,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         title: ElevatedButton(
           style: ElevatedButton.styleFrom(
             elevation: 0.0,
+            primary: Color.fromRGBO(25, 39, 52, 1),
             onSurface: Theme.of(context).primaryColor,
           ),
           child: Text(
@@ -73,7 +80,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           IconButton(
             icon: Icon(
               Icons.call,
-              color: Colors.white,
+              color: Colors.green,
             ),
             highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
             onPressed: () {},
@@ -81,7 +88,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           IconButton(
             icon: Icon(
               Icons.videocam_rounded,
-              color: Colors.white,
+              color: Colors.redAccent,
             ),
             highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
             onPressed: () {},
@@ -97,12 +104,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       //color: Colors.lightGreenAccent,
       width: MediaQuery.of(context).size.width,
       //height: MediaQuery.of(context).size.height,
+      margin: EdgeInsets.only(
+        top: 20.0,
+      ),
       child: ListView(
         shrinkWrap: true,
         children: <Widget>[
           Container(
             //color: Colors.black,
-            height: MediaQuery.of(context).size.height - 135,
+            height: MediaQuery.of(context).size.height - 155,
             padding: EdgeInsets.only(bottom: 10.0, top: 5.0),
             child: Scrollbar(
               showTrackOnHover: false,
@@ -143,20 +153,27 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       thickness: 10.0,
                       radius: Radius.circular(30.0),
                       child: TextField(
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                         onTap: () {
                           scrollController.jumpTo(
                               scrollController.position.maxScrollExtent);
                         },
                         controller: inputText,
-                        maxLines: null, // For Line Break
+                        maxLines: null,
+                        // For Line Break
                         decoration: InputDecoration(
                           focusedBorder: OutlineInputBorder(
                             borderRadius:
-                                BorderRadius.all(Radius.circular(30.0)),
+                                BorderRadius.all(Radius.circular(20.0)),
                             borderSide: BorderSide(
                                 color: Colors.lightGreen, width: 2.0),
                           ),
                           hintText: 'Type Here',
+                          hintStyle: TextStyle(color: Colors.white),
+                          enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlue)),
                         ),
                       ),
                     )),
@@ -221,7 +238,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           alignment: Alignment.centerRight,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: Color.fromRGBO(100, 100, 250, 0.5),
+              primary: Colors.lightBlue,
               elevation: 0.0,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
@@ -235,7 +252,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             child: Text(
               chatContainer[index][0],
               style: TextStyle(
-                color: Colors.black54,
+                color: Colors.white,
               ),
             ),
             onPressed: () {},
@@ -246,7 +263,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           margin: EdgeInsets.only(right: 5.0, bottom: 5.0),
           child: Text(
             chatContainer[index][1],
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.lightBlue),
           ),
         ),
       ],
@@ -260,10 +277,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         Container(
           margin: EdgeInsets.only(
               right: MediaQuery.of(context).size.width / 3, left: 5.0),
+          padding: EdgeInsets.only(top: 5.0),
           alignment: Alignment.centerLeft,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: Color.fromRGBO(250, 100, 100, 0.5),
+              primary: Color.fromRGBO(60, 80, 100, 1),
               elevation: 0.0,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
@@ -277,7 +295,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             child: Text(
               chatContainer[index][0],
               style: TextStyle(
-                color: Colors.black54,
+                color: Colors.white,
               ),
             ),
             onPressed: () {},
@@ -288,7 +306,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           margin: EdgeInsets.only(left: 5.0, bottom: 5.0),
           child: Text(
             chatContainer[index][1],
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(color: Colors.lightBlue),
           ),
         ),
       ],

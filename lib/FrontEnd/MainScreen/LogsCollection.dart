@@ -14,8 +14,9 @@ class _ScreenLogsState extends State<ScreenLogs> {
 
   Widget screenLogsList(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: Container(
-        color: Colors.white,
+        color: Color.fromRGBO(34, 48, 60, 1),
         height: MediaQuery.of(context).size.height,
         margin: EdgeInsets.only(top: 10.0, bottom: 13.0),
         child: chatList(context),
@@ -35,10 +36,11 @@ class _ScreenLogsState extends State<ScreenLogs> {
   Widget chatTile(BuildContext context) {
     return Card(
         elevation: 0.0,
+        color: Color.fromRGBO(34, 48, 60, 1),
         child: Container(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: Colors.white,
+              primary: Color.fromRGBO(34, 48, 60, 1),
               onPrimary: Colors.lightBlueAccent,
               elevation: 0.0,
             ),
@@ -65,7 +67,7 @@ class _ScreenLogsState extends State<ScreenLogs> {
                     "Samarpan Dasgupta",
                     style: TextStyle(
                       fontSize: 18.0,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   ),
                 ),

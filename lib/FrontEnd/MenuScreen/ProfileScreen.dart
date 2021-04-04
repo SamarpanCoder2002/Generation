@@ -13,6 +13,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: ListView(
         children: [
           SizedBox(
@@ -46,7 +47,7 @@ class _ProfileState extends State<Profile> {
             alignment: Alignment.centerLeft,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  primary: Colors.white24,
+                  primary: Color.fromRGBO(34, 48, 60, 1),
                   onPrimary: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -75,13 +76,16 @@ class _ProfileState extends State<Profile> {
                       style: TextStyle(
                           fontSize: 20.0,
                           fontFamily: 'Lora',
-                          fontStyle: FontStyle.italic),
+                          fontStyle: FontStyle.italic,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   SizedBox(
                     height: 20.0,
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       SizedBox(
                         width: 10.0,
@@ -91,10 +95,11 @@ class _ProfileState extends State<Profile> {
                           //color: Colors.yellow,
                           child: Center(
                             child: Text(
-                              "Last Seen 12:00",
+                              "Last Active 12:00",
                               style: TextStyle(
                                 fontFamily: 'Lora',
                                 fontSize: 16.0,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -112,6 +117,7 @@ class _ProfileState extends State<Profile> {
                               style: TextStyle(
                                 fontFamily: 'Lora',
                                 fontSize: 16.0,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -145,6 +151,7 @@ class _ProfileState extends State<Profile> {
                   fontSize: 20.0,
                   fontFamily: 'Lora',
                   fontStyle: FontStyle.italic,
+                  color: Colors.white70,
                 ),
               ),
             ),
@@ -160,6 +167,7 @@ class _ProfileState extends State<Profile> {
                 fontSize: 20.0,
                 fontFamily: 'Lora',
                 fontStyle: FontStyle.italic,
+                color: Colors.white70,
               ),
             ),
           ),
@@ -184,10 +192,10 @@ class _ProfileState extends State<Profile> {
             fontSize: 25.0,
           ),
         ),
-        onPressed: () async{
+        onPressed: () async {
           print("Log-Out Event");
           bool response = await GoogleAuth().logOut();
-          if(!response) {
+          if (!response) {
             FirebaseAuth.instance.signOut();
           }
           Navigator.pushAndRemoveUntil(
