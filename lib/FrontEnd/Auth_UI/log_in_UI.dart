@@ -278,7 +278,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
+          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
                 style: TextStyle(color: _titleColor),

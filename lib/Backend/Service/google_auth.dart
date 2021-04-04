@@ -80,7 +80,8 @@ class GoogleAuth {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
                 style: TextStyle(color: _titleColor),
@@ -98,7 +99,8 @@ class GoogleAuth {
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Center(
                 child: Text(
                   "Set Additional Details",
@@ -203,6 +205,7 @@ class GoogleAuth {
                                   'user_name': this._userName.text,
                                   'nick_name': this._nickName.text,
                                   'about': this._about.text,
+                                  'status': {},
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":

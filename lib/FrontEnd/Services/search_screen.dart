@@ -10,6 +10,7 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   Icon _iconSample = Icon(Icons.filter_list_rounded);
+
   String searchArgument;
 
   TextEditingController searchUser = TextEditingController();
@@ -55,11 +56,7 @@ class _SearchState extends State<Search> {
                   FirebaseAuth.instance.currentUser.email) {
                 return SizedBox();
               }
-              return userTile(
-                searchResultSnapshot.docs[index][searchArgument],
-                searchResultSnapshot.docs[index]
-                    [searchArgument == "about" ? "nick_name" : "about"],
-              );
+              return userTile(index);
             })
         : Container(
             child: Center(
@@ -71,7 +68,7 @@ class _SearchState extends State<Search> {
           );
   }
 
-  Widget userTile(String userName, String userAbout) {
+  Widget userTile(int index) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       width: double.maxFinite,
@@ -83,7 +80,7 @@ class _SearchState extends State<Search> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userName,
+                  searchResultSnapshot.docs[index][searchArgument],
                   style: TextStyle(
                       color: Colors.orange,
                       fontSize: searchArgument != "about" ? 20 : 15),
@@ -92,19 +89,76 @@ class _SearchState extends State<Search> {
                   height: 5.0,
                 ),
                 Text(
-                  userAbout,
+                  searchResultSnapshot.docs[index]
+                      [searchArgument == "about" ? "nick_name" : "about"],
                   style: TextStyle(color: Colors.lightBlue, fontSize: 14),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: Icon(
-              Icons.person_add_alt_1_outlined,
-              size: 30.0,
-              color: Colors.green,
-            ),
-            onPressed: () {},
+            icon: searchResultSnapshot.docs[index]['status']
+                    .containsKey('${FirebaseAuth.instance.currentUser.email}')
+                ? Icon(
+                    Icons.done_outline_rounded,
+                    size: 30.0,
+                    color: Colors.lightBlue,
+                  )
+                : Icon(
+                    Icons.person_add_alt,
+                    size: 30.0,
+                    color: Colors.green,
+                  ),
+            onPressed: () async {
+              setState(() {
+                isLoading = true;
+              });
+
+              DocumentSnapshot documentSnapShotCurrUser =
+                  await FirebaseFirestore.instance
+                      .collection('generation_users')
+                      .doc(FirebaseAuth.instance.currentUser.email)
+                      .get();
+
+              Map<String, dynamic> statusCollectionCurrUser =
+                  documentSnapShotCurrUser.get('status');
+
+              if (!statusCollectionCurrUser
+                  .containsKey(searchResultSnapshot.docs[index].id)) {
+                Map<String, dynamic> statusCollectionRequestUser =
+                    searchResultSnapshot.docs[index]['status'];
+
+                statusCollectionCurrUser.addAll({
+                  '${searchResultSnapshot.docs[index].id}':
+                      "Connection Request Send",
+                });
+                statusCollectionRequestUser.addAll({
+                  '${FirebaseAuth.instance.currentUser.email}':
+                      "Request Pending",
+                });
+
+                setState(() {
+                  FirebaseFirestore.instance
+                      .doc(
+                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                      .update({
+                    'status': statusCollectionCurrUser,
+                  });
+
+                  FirebaseFirestore.instance
+                      .doc(
+                          'generation_users/${searchResultSnapshot.docs[index].id}')
+                      .update({
+                    'status': statusCollectionRequestUser,
+                  });
+
+                  initiateSearch();
+
+                  isLoading = false;
+                });
+                print("Updated");
+              }
+            },
           ),
         ],
       ),
@@ -196,7 +250,8 @@ class _SearchState extends State<Search> {
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               shape: CircleBorder(),
               title: Center(
                 child: Text(

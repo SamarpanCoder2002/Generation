@@ -102,7 +102,8 @@ class EmailAndPasswordAuth {
     showDialog<String>(
         context: this._context,
         builder: (context) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
+          elevation: 5.0,
+          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
                 style: TextStyle(
@@ -122,7 +123,8 @@ class EmailAndPasswordAuth {
     showDialog(
         context: this._context,
         builder: (_) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+          elevation: 5.0,
+          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Center(
                 child: Text(
                   "Set Additional Details",
@@ -227,6 +229,9 @@ class EmailAndPasswordAuth {
                                   'user_name': this._userName.text,
                                   'nick_name': this._nickName.text,
                                   'about': this._about.text,
+                                  'status': {
+
+                                  },
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":

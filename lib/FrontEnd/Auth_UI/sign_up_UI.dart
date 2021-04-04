@@ -335,7 +335,8 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-              backgroundColor: Colors.black54,
+          elevation: 5.0,
+          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
                 style: TextStyle(color: Colors.white),
