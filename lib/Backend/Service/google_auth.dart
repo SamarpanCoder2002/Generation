@@ -46,7 +46,8 @@ class GoogleAuth {
             Navigator.push(
                 context, MaterialPageRoute(builder: (_) => MainScreen()));
 
-            showAlertBox(context, "Log-In Successful", "Enjoy this app", Colors.green);
+            showAlertBox(
+                context, "Log-In Successful", "Enjoy this app", Colors.green);
           }
         }
       } else {
@@ -55,8 +56,11 @@ class GoogleAuth {
       }
     } catch (e) {
       print("Google LogIn Error: ${e.toString()}");
-      showAlertBox(context, "Log In Error",
-          "Log-in not Completed or\nEmail Already Present With Other Credentials", Colors.redAccent);
+      showAlertBox(
+          context,
+          "Log In Error",
+          "Log-in not Completed or\nEmail Already Present With Other Credentials",
+          Colors.redAccent);
     }
   }
 
@@ -71,11 +75,12 @@ class GoogleAuth {
     }
   }
 
-  void showAlertBox(BuildContext context, String _title, String _content, [Color _titleColor = Colors.white]) {
+  void showAlertBox(BuildContext context, String _title, String _content,
+      [Color _titleColor = Colors.white]) {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
               title: Text(
                 _title,
                 style: TextStyle(color: _titleColor),
@@ -108,61 +113,60 @@ class GoogleAuth {
                     shrinkWrap: true,
                     children: <Widget>[
                       TextFormField(
-                          controller: _userName,
-                          style: TextStyle(color: Colors.white),
-                          validator: (inputUserName) {
-                            if (inputUserName.length < 6)
-                              return "User Name At Least 6 Characters";
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            labelText: "User Name",
-                            labelStyle: TextStyle(color: Colors.white70),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
+                        controller: _userName,
+                        style: TextStyle(color: Colors.white),
+                        validator: (inputUserName) {
+                          if (inputUserName.length < 6)
+                            return "User Name At Least 6 Characters";
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "User Name",
+                          labelStyle: TextStyle(color: Colors.white70),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue),
                           ),
                         ),
-
+                      ),
                       SizedBox(
                         height: 15.0,
                       ),
                       TextFormField(
-                          controller: _nickName,
-                          style: TextStyle(color: Colors.white),
-                          validator: (inputUserName) {
-                            if (inputUserName.length < 6)
-                              return "Nick Name At Least 6 Characters";
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Nick Name / Public Friendly Name",
-                            labelStyle: TextStyle(color: Colors.white70, fontSize: 14.0),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
+                        controller: _nickName,
+                        style: TextStyle(color: Colors.white),
+                        validator: (inputUserName) {
+                          if (inputUserName.length < 6)
+                            return "Nick Name At Least 6 Characters";
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "Nick Name / Public Friendly Name",
+                          labelStyle:
+                              TextStyle(color: Colors.white70, fontSize: 14.0),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue),
                           ),
                         ),
-
+                      ),
                       SizedBox(
                         height: 15.0,
                       ),
                       TextFormField(
-                          controller: _about,
-                          style: TextStyle(color: Colors.white),
-                          validator: (inputUserName) {
-                            if (inputUserName.length < 6)
-                              return "About Should be At Least 6 Characters";
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            labelText: "About Yourself",
-                            labelStyle: TextStyle(color: Colors.white70),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
+                        controller: _about,
+                        style: TextStyle(color: Colors.white),
+                        validator: (inputUserName) {
+                          if (inputUserName.length < 6)
+                            return "About Should be At Least 6 Characters";
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "About Yourself",
+                          labelStyle: TextStyle(color: Colors.white70),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue),
                           ),
                         ),
+                      ),
                       SizedBox(
                         height: 10.0,
                       ),

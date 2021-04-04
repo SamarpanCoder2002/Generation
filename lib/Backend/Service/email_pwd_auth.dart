@@ -34,16 +34,25 @@ class EmailAndPasswordAuth {
       Navigator.push(this._context,
           MaterialPageRoute(builder: (_) => LogInAuthentication()));
 
-      showAlertBox("Sign-Up Successful",
-          "A Verification Link Sent to Your Registered Mail....\n\nPlease Verify Your Mail then Log-In", Colors.green);
+      showAlertBox(
+          "Sign-Up Successful",
+          "A Verification Link Sent to Your Registered Mail....\n\nPlease Verify Your Mail then Log-In",
+          Colors.green);
     } catch (e) {
       print("Sign-up Error is: $e");
       if (e.toString() ==
           "[firebase_auth/email-already-in-use] The email address is already in use by another account.")
-        showAlertBox("Email Already Registered", "Try With Another Email", Colors.yellow,);
+        showAlertBox(
+          "Email Already Registered",
+          "Try With Another Email",
+          Colors.yellow,
+        );
       else
-        showAlertBox("Sign-Up Error",
-            "Undefine Error Occur... \n\nMake sure your phone Connected to the Internet", Colors.redAccent,);
+        showAlertBox(
+          "Sign-Up Error",
+          "Undefine Error Occur... \n\nMake sure your phone Connected to the Internet",
+          Colors.redAccent,
+        );
     }
   }
 
@@ -113,31 +122,33 @@ class EmailAndPasswordAuth {
     showDialog(
         context: this._context,
         builder: (_) => AlertDialog(
-              title: Text("Set User Name"),
+              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              title: Center(
+                child: Text(
+                  "Set Additional Details",
+                  style: TextStyle(color: Colors.lightBlue),
+                ),
+              ),
               content: Form(
                 key: this._userNameKey,
                 child: SizedBox(
-                  height: MediaQuery.of(this._context).size.height / 5,
-                  child: Column(
+                  width: double.maxFinite,
+                  child: ListView(
+                    shrinkWrap: true,
                     children: <Widget>[
-                      Expanded(
-                        child: TextFormField(
-                          controller: _userName,
-                          validator: (inputUserName) {
-                            if (inputUserName.length < 6)
-                              return "User Name At Least 6 Characters";
-                            else if (inputUserName.contains('@')) {
-                              return "@ Can't Consider in User Name";
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            labelText: "User Name",
-                            labelStyle: TextStyle(
-                                color: Colors.white70, fontSize: 14.0),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
+                      TextFormField(
+                        controller: _userName,
+                        style: TextStyle(color: Colors.white),
+                        validator: (inputUserName) {
+                          if (inputUserName.length < 6)
+                            return "User Name At Least 6 Characters";
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: "User Name",
+                          labelStyle: TextStyle(color: Colors.white70),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.lightBlue),
                           ),
                         ),
                       ),
@@ -211,7 +222,7 @@ class EmailAndPasswordAuth {
                               if (querySnapShot.docs.isEmpty) {
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
-                                    .doc(this._email)
+                                    .doc(_email)
                                     .set({
                                   'user_name': this._userName.text,
                                   'nick_name': this._nickName.text,
@@ -223,18 +234,20 @@ class EmailAndPasswordAuth {
                                   "connections": {},
                                 });
 
+                                print("Log-In Successful: User Name: $_email");
+
                                 Navigator.pushAndRemoveUntil(
                                     this._context,
                                     MaterialPageRoute(
                                         builder: (_) => MainScreen()),
                                     (route) => false);
 
-                                showAlertBox(
-                                    "Log-In Successful", "Enjoy this app");
+                                showAlertBox("Log-In Successful",
+                                    "Enjoy this app", Colors.green);
                               } else {
                                 Navigator.pop(this._context);
                                 showAlertBox("User Name Already Exist",
-                                    "Try Another User Name");
+                                    "Try Another User Name", Colors.yellow);
                               }
                             } else {
                               print("Not Validate");

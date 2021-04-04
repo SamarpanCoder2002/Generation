@@ -11,14 +11,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    //_colorModeChange.darkMode();
-  }
-
   @override
   Widget build(BuildContext context) {
     return chatScreen(context);
@@ -189,7 +181,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         Container(
                             child: Text(
                           "12:00",
-                          style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+                          style: TextStyle(
+                              fontSize: 13.0, color: Colors.lightBlue),
                         )),
                         SizedBox(
                           height: 10.0,
