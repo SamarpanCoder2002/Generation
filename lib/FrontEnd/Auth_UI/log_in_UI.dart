@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/Backend/Service/email_pwd_auth.dart';
+import 'package:generation/Backend/firebase_services/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -278,7 +278,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
                 style: TextStyle(color: _titleColor),

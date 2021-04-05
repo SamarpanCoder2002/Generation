@@ -97,18 +97,7 @@ class _SearchState extends State<Search> {
             ),
           ),
           IconButton(
-            icon: searchResultSnapshot.docs[index]['status']
-                    .containsKey('${FirebaseAuth.instance.currentUser.email}')
-                ? Icon(
-                    Icons.done_outline_rounded,
-                    size: 30.0,
-                    color: Colors.lightBlue,
-                  )
-                : Icon(
-                    Icons.person_add_alt,
-                    size: 30.0,
-                    color: Colors.green,
-                  ),
+            icon: requestIconController(index),
             onPressed: () async {
               setState(() {
                 isLoading = true;
@@ -123,28 +112,20 @@ class _SearchState extends State<Search> {
               Map<String, dynamic> statusCollectionCurrUser =
                   documentSnapShotCurrUser.get('status');
 
+              Map<String, dynamic> statusCollectionRequestUser =
+                  searchResultSnapshot.docs[index]['status'];
+
               if (!statusCollectionCurrUser
                   .containsKey(searchResultSnapshot.docs[index].id)) {
-                Map<String, dynamic> statusCollectionRequestUser =
-                    searchResultSnapshot.docs[index]['status'];
-
                 statusCollectionCurrUser.addAll({
-                  '${searchResultSnapshot.docs[index].id}':
-                      "Connection Request Send",
+                  '${searchResultSnapshot.docs[index].id}': "Request Pending",
                 });
                 statusCollectionRequestUser.addAll({
                   '${FirebaseAuth.instance.currentUser.email}':
-                      "Request Pending",
+                      "Invitation Came",
                 });
 
                 setState(() {
-                  FirebaseFirestore.instance
-                      .doc(
-                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
-                      .update({
-                    'status': statusCollectionCurrUser,
-                  });
-
                   FirebaseFirestore.instance
                       .doc(
                           'generation_users/${searchResultSnapshot.docs[index].id}')
@@ -152,12 +133,70 @@ class _SearchState extends State<Search> {
                     'status': statusCollectionRequestUser,
                   });
 
-                  initiateSearch();
+                  FirebaseFirestore.instance
+                      .doc(
+                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                      .update({
+                    'status': statusCollectionCurrUser,
+                  });
 
-                  isLoading = false;
+                  initiateSearch();
                 });
+
                 print("Updated");
+              } else {
+                if (searchResultSnapshot.docs[index]['status']
+                        [FirebaseAuth.instance.currentUser.email] ==
+                    "Request Pending") {
+                  Map<String, dynamic> connectionsMapRequestUser =
+                      searchResultSnapshot.docs[index]['connections'];
+
+                  Map<String, dynamic> connectionsMapCurrUser =
+                      documentSnapShotCurrUser.get('connections');
+
+                  statusCollectionCurrUser.addAll({
+                    '${searchResultSnapshot.docs[index].id}':
+                        "Request Accepted",
+                  });
+
+                  statusCollectionRequestUser.addAll({
+                    '${FirebaseAuth.instance.currentUser.email}':
+                        "Invitation Accepted",
+                  });
+
+                  connectionsMapRequestUser.addAll({
+                    '${FirebaseAuth.instance.currentUser.email}': [],
+                  });
+
+                  connectionsMapCurrUser.addAll({
+                    '${searchResultSnapshot.docs[index].id}': [],
+                  });
+
+                  setState(() {
+                    FirebaseFirestore.instance
+                        .doc(
+                            'generation_users/${searchResultSnapshot.docs[index].id}')
+                        .update({
+                      'status': statusCollectionRequestUser,
+                      'connections': connectionsMapRequestUser,
+                    });
+
+                    FirebaseFirestore.instance
+                        .doc(
+                            'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                        .update({
+                      'status': statusCollectionCurrUser,
+                      'connections': connectionsMapCurrUser,
+                    });
+
+                    initiateSearch();
+                  });
+                }
               }
+
+              setState(() {
+                isLoading = false;
+              });
             },
           ),
         ],
@@ -308,5 +347,44 @@ class _SearchState extends State<Search> {
                 ),
               ),
             ));
+  }
+
+  Widget requestIconController(int index) {
+    if (!searchResultSnapshot.docs[index]['status']
+        .containsKey('${FirebaseAuth.instance.currentUser.email}')) {
+      return Icon(
+        Icons.person_add_alt,
+        size: 30.0,
+        color: Colors.lightBlue,
+      );
+    }
+
+    if (searchResultSnapshot.docs[index]['status']
+        .containsValue('Invitation Came')) {
+      return Icon(
+        Icons.pending_actions_rounded,
+        size: 30.0,
+        color: Colors.amber,
+      );
+    } else if (searchResultSnapshot.docs[index]['status']
+        .containsValue('Invitation Accepted')) {
+      return Icon(
+        Icons.done_all_outlined,
+        size: 30.0,
+        color: Colors.green,
+      );
+    } else if (searchResultSnapshot.docs[index]['status']
+        .containsValue('Request Pending')) {
+      return Icon(
+        Icons.done_outline_rounded,
+        size: 30.0,
+        color: Colors.amber,
+      );
+    }
+    return Icon(
+      Icons.done_all_outlined,
+      size: 30.0,
+      color: Colors.green,
+    );
   }
 }

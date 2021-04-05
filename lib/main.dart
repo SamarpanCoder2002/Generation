@@ -5,7 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'Backend/Service/google_auth.dart';
+
+import 'package:generation/Backend/firebase_services/google_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

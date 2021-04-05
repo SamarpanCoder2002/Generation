@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:fab_circular_menu/fab_circular_menu.dart';
 
 import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
 import 'package:generation/FrontEnd/Services/search_screen.dart';
