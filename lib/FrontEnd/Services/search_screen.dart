@@ -125,12 +125,14 @@ class _SearchState extends State<Search> {
 
                 // Make New Table with Name as User Name of Invited User
                 print("Add Request User Data to SQLite");
-                LocalStorageHelper()
+                bool response = await LocalStorageHelper()
                     .createTable(searchResultSnapshot.docs[index]['user_name']);
-                LocalStorageHelper().insertAdditionalData(
-                    searchResultSnapshot.docs[index]['user_name'],
-                    searchResultSnapshot.docs[index]['nick_name'],
-                    searchResultSnapshot.docs[index]['about']);
+                if (response) {
+                  LocalStorageHelper().insertAdditionalData(
+                      searchResultSnapshot.docs[index]['user_name'],
+                      searchResultSnapshot.docs[index]['nick_name'],
+                      searchResultSnapshot.docs[index]['about']);
+                }
 
                 connectionRequestCollectionRequestUser.addAll({
                   '${FirebaseAuth.instance.currentUser.email}':
@@ -177,12 +179,14 @@ class _SearchState extends State<Search> {
                   print("Add Invited User Data to SQLite");
 
                   // Make New Table with Name as User Name of Requested User
-                  LocalStorageHelper().createTable(
+                  bool response = await LocalStorageHelper().createTable(
                       searchResultSnapshot.docs[index]['user_name']);
-                  LocalStorageHelper().insertAdditionalData(
-                      searchResultSnapshot.docs[index]['user_name'],
-                      searchResultSnapshot.docs[index]['nick_name'],
-                      searchResultSnapshot.docs[index]['about']);
+                  if (response) {
+                    LocalStorageHelper().insertAdditionalData(
+                        searchResultSnapshot.docs[index]['user_name'],
+                        searchResultSnapshot.docs[index]['nick_name'],
+                        searchResultSnapshot.docs[index]['about']);
+                  }
 
                   connectionsMapRequestUser.addAll({
                     '${FirebaseAuth.instance.currentUser.email}': [],
@@ -210,6 +214,15 @@ class _SearchState extends State<Search> {
                       'connections': connectionsMapCurrUser,
                     });
                   });
+                } else {
+                  bool response = await LocalStorageHelper().createTable(
+                      searchResultSnapshot.docs[index]['user_name']);
+                  if (response) {
+                    LocalStorageHelper().insertAdditionalData(
+                        searchResultSnapshot.docs[index]['user_name'],
+                        searchResultSnapshot.docs[index]['nick_name'],
+                        searchResultSnapshot.docs[index]['about']);
+                  }
                 }
               }
 

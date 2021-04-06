@@ -44,13 +44,15 @@ class LocalStorageHelper {
   }
 
   // For make a table
-  void createTable(String tableName) async {
+  Future<bool> createTable(String tableName) async {
     Database db = await this.database;
     try {
       await db.execute(
           "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colNickName TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT)");
+      return true;
     } catch (e) {
-      print("Error in Local Storage: ${e.toString()}");
+      print("Error in Local Storage Create Table: ${e.toString()}");
+      return false;
     }
   }
 
@@ -138,5 +140,16 @@ class LocalStorageHelper {
       print("No Data Present");
 
     yield allData.toList();
+  }
+
+  //Checking Table is present in sqLite or not
+  Future<bool> checkDBPresence(String _tableName) async {
+    try {
+      Database db = await this.database;
+      await db.rawQuery('SELECT * FROM $_tableName');
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

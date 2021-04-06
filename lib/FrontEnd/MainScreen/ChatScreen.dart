@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
-import 'package:generation/Backend/firebase_services/conversation_management.dart';
 
 class ChatScreenSetUp extends StatefulWidget {
   @override
@@ -202,9 +200,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       print("Send Pressed");
 
                       if (inputText.text.isNotEmpty) {
-                        await Conversation().sendMessageToOther(
-                            inputText.text, 'dasgupta2samarpan@gmail.com');
-
                         setState(() {
                           chatContainer.add(
                             [
