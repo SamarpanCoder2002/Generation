@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:generation/Backend/firebase_services/google_auth.dart';
+import 'package:generation/Backend/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Management {
@@ -37,87 +38,5 @@ class Management {
         },
       ),
     );
-  }
-
-  Future<void> connectionRequestManager(
-      int index, QuerySnapshot searchResultSnapshot) async {
-    DocumentSnapshot documentSnapShotCurrUser = await FirebaseFirestore.instance
-        .collection('generation_users')
-        .doc(FirebaseAuth.instance.currentUser.email)
-        .get();
-
-    Map<String, dynamic> connectionRequestCollectionCurrUser =
-        documentSnapShotCurrUser.get('connection_request');
-
-    Map<String, dynamic> connectionRequestCollectionRequestUser =
-        searchResultSnapshot.docs[index]['connection_request'];
-
-    if (!connectionRequestCollectionCurrUser
-        .containsKey(searchResultSnapshot.docs[index].id)) {
-      connectionRequestCollectionCurrUser.addAll({
-        '${searchResultSnapshot.docs[index].id}': "Request Pending",
-      });
-
-      print("Add Request User Data to SQLite");
-
-      connectionRequestCollectionRequestUser.addAll({
-        '${FirebaseAuth.instance.currentUser.email}': "Invitation Came",
-      });
-
-      FirebaseFirestore.instance
-          .doc('generation_users/${searchResultSnapshot.docs[index].id}')
-          .update({
-        'connection_request': connectionRequestCollectionRequestUser,
-      });
-
-      FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-          .update({
-        'connection_request': connectionRequestCollectionCurrUser,
-      });
-
-      print("Updated");
-    } else {
-      if (searchResultSnapshot.docs[index]['connection_request']
-              [FirebaseAuth.instance.currentUser.email] ==
-          "Request Pending") {
-        Map<String, dynamic> connectionsMapRequestUser =
-            searchResultSnapshot.docs[index]['connections'];
-
-        Map<String, dynamic> connectionsMapCurrUser =
-            documentSnapShotCurrUser.get('connections');
-
-        connectionRequestCollectionCurrUser.addAll({
-          '${searchResultSnapshot.docs[index].id}': "Request Accepted",
-        });
-
-        connectionRequestCollectionRequestUser.addAll({
-          '${FirebaseAuth.instance.currentUser.email}': "Invitation Accepted",
-        });
-        print("Add Invited User Data to SQLite");
-
-        connectionsMapRequestUser.addAll({
-          '${FirebaseAuth.instance.currentUser.email}': [],
-        });
-
-        connectionsMapCurrUser.addAll({
-          '${searchResultSnapshot.docs[index].id}': [],
-        });
-
-        FirebaseFirestore.instance
-            .doc('generation_users/${searchResultSnapshot.docs[index].id}')
-            .update({
-          'connection_request': connectionRequestCollectionRequestUser,
-          'connections': connectionsMapRequestUser,
-        });
-
-        FirebaseFirestore.instance
-            .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-            .update({
-          'connection_request': connectionRequestCollectionCurrUser,
-          'connections': connectionsMapCurrUser,
-        });
-      }
-    }
   }
 }

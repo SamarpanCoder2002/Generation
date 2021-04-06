@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -6,6 +5,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'ChatScreen.dart';
+import 'package:generation/Backend/sqlite_services/local_storage_controller.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -14,12 +14,17 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = false;
+  List<Object> allConnections;
+  Stream<List<String>> _latestStream = LocalStorageHelper().extractTables();
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    isLoading = false;
+  void didUpdateWidget(ChatScreen oldWidget) {
+    // TODO: implement didUpdateWidget
+    print("Update Widget Run");
+    setState(() {
+      _latestStream = LocalStorageHelper().extractTables();
+    });
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -84,37 +89,59 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatList(BuildContext context) {
     return SafeArea(
-        child: Container(
-      margin: EdgeInsets.only(top: 35.0),
-      padding: EdgeInsets.only(top: 18.0, bottom: 10.0),
-      height: MediaQuery.of(context).size.height * (5.15 / 8),
-      decoration: BoxDecoration(
-        color: Color.fromRGBO(31, 51, 71, 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10.0,
-            spreadRadius: 0.0,
-            offset: Offset(0.0, -5.0), // shadow direction: bottom right
-          )
-        ],
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
-        border: Border.all(
-          color: Colors.black26,
-          width: 1.0,
-        ),
-      ),
-      child: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (context, position) {
-          return chatTile(context, position);
-        },
-      ),
-    ));
+            child: Container(
+            margin: EdgeInsets.only(top: 35.0),
+            padding: EdgeInsets.only(top: 18.0, bottom: 10.0),
+            height: MediaQuery.of(context).size.height * (5.15 / 8),
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(31, 51, 71, 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10.0,
+                  spreadRadius: 0.0,
+                  offset: Offset(0.0, -5.0), // shadow direction: bottom right
+                )
+              ],
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40.0),
+                  topRight: Radius.circular(40.0)),
+              border: Border.all(
+                color: Colors.black26,
+                width: 1.0,
+              ),
+            ),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _latestStream = LocalStorageHelper().extractTables();
+                });
+              },
+              child: StreamBuilder<List<String>>(
+                stream: _latestStream,
+                builder: (context, snapshot) {
+                  print('Check: ${snapshot.connectionState}');
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    print(snapshot.data);
+                    return ListView.builder(
+                      itemCount:
+                          snapshot.data == null ? 0 : snapshot.data.length,
+                      itemBuilder: (context, position) {
+                        print(snapshot.connectionState);
+                        return chatTile(
+                            context, position, snapshot.data[position]);
+                      },
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
+            ),
+          ));
   }
 
-  Widget chatTile(BuildContext context, int index) {
+  Widget chatTile(BuildContext context, int index, String _userName) {
     return Card(
         elevation: 0.0,
         color: Color.fromRGBO(31, 51, 71, 1),
@@ -162,7 +189,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: Column(
                     children: [
                       Text(
-                        "Samarpan Dasgupta",
+                        _userName,
                         style: TextStyle(
                           fontSize: 18.0,
                           color: Colors.white,

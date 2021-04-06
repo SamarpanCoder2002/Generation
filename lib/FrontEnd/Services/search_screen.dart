@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/Backend/firebase_services/firestore_management.dart';
+import 'package:generation/Backend/sqlite_services/local_storage_controller.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -105,8 +105,113 @@ class _SearchState extends State<Search> {
                 isLoading = true;
               });
 
-              await Management()
-                  .connectionRequestManager(index, searchResultSnapshot);
+              DocumentSnapshot documentSnapShotCurrUser =
+                  await FirebaseFirestore.instance
+                      .collection('generation_users')
+                      .doc(FirebaseAuth.instance.currentUser.email)
+                      .get();
+
+              Map<String, dynamic> connectionRequestCollectionCurrUser =
+                  documentSnapShotCurrUser.get('connection_request');
+
+              Map<String, dynamic> connectionRequestCollectionRequestUser =
+                  searchResultSnapshot.docs[index]['connection_request'];
+
+              if (!connectionRequestCollectionCurrUser
+                  .containsKey(searchResultSnapshot.docs[index].id)) {
+                connectionRequestCollectionCurrUser.addAll({
+                  '${searchResultSnapshot.docs[index].id}': "Request Pending",
+                });
+
+                // Make New Table with Name as User Name of Invited User
+                print("Add Request User Data to SQLite");
+                LocalStorageHelper()
+                    .createTable(searchResultSnapshot.docs[index]['user_name']);
+                LocalStorageHelper().insertAdditionalData(
+                    searchResultSnapshot.docs[index]['user_name'],
+                    searchResultSnapshot.docs[index]['nick_name'],
+                    searchResultSnapshot.docs[index]['about']);
+
+                connectionRequestCollectionRequestUser.addAll({
+                  '${FirebaseAuth.instance.currentUser.email}':
+                      "Invitation Came",
+                });
+
+                setState(() {
+                  FirebaseFirestore.instance
+                      .doc(
+                          'generation_users/${searchResultSnapshot.docs[index].id}')
+                      .update({
+                    'connection_request':
+                        connectionRequestCollectionRequestUser,
+                  });
+
+                  FirebaseFirestore.instance
+                      .doc(
+                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                      .update({
+                    'connection_request': connectionRequestCollectionCurrUser,
+                  });
+                });
+
+                print("Updated");
+              } else {
+                if (searchResultSnapshot.docs[index]['connection_request']
+                        [FirebaseAuth.instance.currentUser.email] ==
+                    "Request Pending") {
+                  Map<String, dynamic> connectionsMapRequestUser =
+                      searchResultSnapshot.docs[index]['connections'];
+
+                  Map<String, dynamic> connectionsMapCurrUser =
+                      documentSnapShotCurrUser.get('connections');
+
+                  connectionRequestCollectionCurrUser.addAll({
+                    '${searchResultSnapshot.docs[index].id}':
+                        "Request Accepted",
+                  });
+
+                  connectionRequestCollectionRequestUser.addAll({
+                    '${FirebaseAuth.instance.currentUser.email}':
+                        "Invitation Accepted",
+                  });
+                  print("Add Invited User Data to SQLite");
+
+                  // Make New Table with Name as User Name of Requested User
+                  LocalStorageHelper().createTable(
+                      searchResultSnapshot.docs[index]['user_name']);
+                  LocalStorageHelper().insertAdditionalData(
+                      searchResultSnapshot.docs[index]['user_name'],
+                      searchResultSnapshot.docs[index]['nick_name'],
+                      searchResultSnapshot.docs[index]['about']);
+
+                  connectionsMapRequestUser.addAll({
+                    '${FirebaseAuth.instance.currentUser.email}': [],
+                  });
+
+                  connectionsMapCurrUser.addAll({
+                    '${searchResultSnapshot.docs[index].id}': [],
+                  });
+
+                  setState(() {
+                    FirebaseFirestore.instance
+                        .doc(
+                            'generation_users/${searchResultSnapshot.docs[index].id}')
+                        .update({
+                      'connection_request':
+                          connectionRequestCollectionRequestUser,
+                      'connections': connectionsMapRequestUser,
+                    });
+
+                    FirebaseFirestore.instance
+                        .doc(
+                            'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                        .update({
+                      'connection_request': connectionRequestCollectionCurrUser,
+                      'connections': connectionsMapCurrUser,
+                    });
+                  });
+                }
+              }
 
               setState(() {
                 initiateSearch();

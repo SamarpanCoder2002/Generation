@@ -149,7 +149,18 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
           ),
-          floatingActionButton: floatingButton(),
+          floatingActionButton: FloatingActionButton(
+              backgroundColor: Color.fromRGBO(20, 200, 50, 1),
+              child: Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+                size: 30.0,
+              ),
+              onPressed: () async {
+                print('Search based on Text');
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => Search()));
+              }),
           body: TabBarView(
             children: [
               ChatScreen(),
@@ -158,54 +169,5 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ));
-  }
-
-  Widget floatingButton() {
-    if (_currentTab == 0 || _currentTab == 1) {
-      return FabCircularMenu(
-        fabColor: Color.fromRGBO(20, 200, 50, 1),
-        fabOpenIcon: Icon(
-          Icons.search_rounded,
-          color: Colors.white,
-          size: 30.0,
-        ),
-        fabOpenColor: Color.fromRGBO(200, 20, 50, 1),
-        fabIconBorder: CircleBorder(
-          side: BorderSide(width: 0.2, color: Colors.black45),
-        ),
-        fabCloseIcon: Icon(
-          Icons.close_outlined,
-          color: Colors.white,
-          size: 30.0,
-        ),
-        ringDiameter: 325.0,
-        ringWidth: 80.0,
-        ringColor: Color.fromRGBO(64, 80, 120, 0.6),
-        animationCurve: Curves.easeInOutSine,
-        children: [
-          IconButton(
-              icon: Icon(
-                Icons.person_search_rounded,
-                size: 50.0,
-                color: Color.fromRGBO(255, 24, 255, 1),
-              ),
-              onPressed: () async {
-                print('Search based on Text');
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => Search()));
-              }),
-          IconButton(
-              icon: Icon(
-                Icons.settings_voice_sharp,
-                size: 50.0,
-                color: Color.fromRGBO(255, 24, 255, 1),
-              ),
-              onPressed: () {
-                print('Home');
-              }),
-        ],
-      );
-    }
-    return null;
   }
 }

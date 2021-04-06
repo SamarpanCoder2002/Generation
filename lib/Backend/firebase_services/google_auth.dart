@@ -19,7 +19,7 @@ class GoogleAuth {
       if (!await googleSignIn.isSignedIn()) {
         final user = await googleSignIn.signIn();
         if (user == null)
-          print("Already Signed In");
+          print("Google Sign In Not Completed");
         else {
           final GoogleSignInAuthentication googleAuth =
               await user.authentication;
@@ -120,6 +120,8 @@ class GoogleAuth {
                         validator: (inputUserName) {
                           if (inputUserName.length < 6)
                             return "User Name At Least 6 Characters";
+                          else if (inputUserName.contains(" "))
+                            return "Space Not Allowed...User '_' instead of space";
                           return null;
                         },
                         decoration: InputDecoration(
