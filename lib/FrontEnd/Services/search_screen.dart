@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/Backend/firebase_services/firestore_management.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -103,96 +105,12 @@ class _SearchState extends State<Search> {
                 isLoading = true;
               });
 
-              DocumentSnapshot documentSnapShotCurrUser =
-                  await FirebaseFirestore.instance
-                      .collection('generation_users')
-                      .doc(FirebaseAuth.instance.currentUser.email)
-                      .get();
+              await Management()
+                  .connectionRequestManager(index, searchResultSnapshot);
 
-              Map<String, dynamic> statusCollectionCurrUser =
-                  documentSnapShotCurrUser.get('status');
-
-              Map<String, dynamic> statusCollectionRequestUser =
-                  searchResultSnapshot.docs[index]['status'];
-
-              if (!statusCollectionCurrUser
-                  .containsKey(searchResultSnapshot.docs[index].id)) {
-                statusCollectionCurrUser.addAll({
-                  '${searchResultSnapshot.docs[index].id}': "Request Pending",
-                });
-                statusCollectionRequestUser.addAll({
-                  '${FirebaseAuth.instance.currentUser.email}':
-                      "Invitation Came",
-                });
-
-                setState(() {
-                  FirebaseFirestore.instance
-                      .doc(
-                          'generation_users/${searchResultSnapshot.docs[index].id}')
-                      .update({
-                    'status': statusCollectionRequestUser,
-                  });
-
-                  FirebaseFirestore.instance
-                      .doc(
-                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
-                      .update({
-                    'status': statusCollectionCurrUser,
-                  });
-
-                  initiateSearch();
-                });
-
-                print("Updated");
-              } else {
-                if (searchResultSnapshot.docs[index]['status']
-                        [FirebaseAuth.instance.currentUser.email] ==
-                    "Request Pending") {
-                  Map<String, dynamic> connectionsMapRequestUser =
-                      searchResultSnapshot.docs[index]['connections'];
-
-                  Map<String, dynamic> connectionsMapCurrUser =
-                      documentSnapShotCurrUser.get('connections');
-
-                  statusCollectionCurrUser.addAll({
-                    '${searchResultSnapshot.docs[index].id}':
-                        "Request Accepted",
-                  });
-
-                  statusCollectionRequestUser.addAll({
-                    '${FirebaseAuth.instance.currentUser.email}':
-                        "Invitation Accepted",
-                  });
-
-                  connectionsMapRequestUser.addAll({
-                    '${FirebaseAuth.instance.currentUser.email}': [],
-                  });
-
-                  connectionsMapCurrUser.addAll({
-                    '${searchResultSnapshot.docs[index].id}': [],
-                  });
-
-                  setState(() {
-                    FirebaseFirestore.instance
-                        .doc(
-                            'generation_users/${searchResultSnapshot.docs[index].id}')
-                        .update({
-                      'status': statusCollectionRequestUser,
-                      'connections': connectionsMapRequestUser,
-                    });
-
-                    FirebaseFirestore.instance
-                        .doc(
-                            'generation_users/${FirebaseAuth.instance.currentUser.email}')
-                        .update({
-                      'status': statusCollectionCurrUser,
-                      'connections': connectionsMapCurrUser,
-                    });
-
-                    initiateSearch();
-                  });
-                }
-              }
+              setState(() {
+                initiateSearch();
+              });
 
               setState(() {
                 isLoading = false;
@@ -350,7 +268,7 @@ class _SearchState extends State<Search> {
   }
 
   Widget requestIconController(int index) {
-    if (!searchResultSnapshot.docs[index]['status']
+    if (!searchResultSnapshot.docs[index]['connection_request']
         .containsKey('${FirebaseAuth.instance.currentUser.email}')) {
       return Icon(
         Icons.person_add_alt,
@@ -359,21 +277,21 @@ class _SearchState extends State<Search> {
       );
     }
 
-    if (searchResultSnapshot.docs[index]['status']
+    if (searchResultSnapshot.docs[index]['connection_request']
         .containsValue('Invitation Came')) {
       return Icon(
         Icons.pending_actions_rounded,
         size: 30.0,
         color: Colors.amber,
       );
-    } else if (searchResultSnapshot.docs[index]['status']
+    } else if (searchResultSnapshot.docs[index]['connection_request']
         .containsValue('Invitation Accepted')) {
       return Icon(
         Icons.done_all_outlined,
         size: 30.0,
         color: Colors.green,
       );
-    } else if (searchResultSnapshot.docs[index]['status']
+    } else if (searchResultSnapshot.docs[index]['connection_request']
         .containsValue('Request Pending')) {
       return Icon(
         Icons.done_outline_rounded,

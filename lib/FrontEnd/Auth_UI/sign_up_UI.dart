@@ -48,8 +48,8 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: ModalProgressHUD(
-        color: Color.fromRGBO(0, 0, 0, 0.1),
         inAsyncCall: _progressPermission,
+        color: Color.fromRGBO(0, 0, 0, 0.1),
         progressIndicator: CircularProgressIndicator(
           backgroundColor: Colors.black87,
         ),

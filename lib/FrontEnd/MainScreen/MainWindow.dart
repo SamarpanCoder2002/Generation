@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:fab_circular_menu/fab_circular_menu.dart';
 
-import 'package:generation/FrontEnd/MainScreen/ChatCollection.dart';
+import 'package:generation/FrontEnd/MainScreen/ChatAndStatusCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';

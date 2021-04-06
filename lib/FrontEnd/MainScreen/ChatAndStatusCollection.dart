@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:page_transition/page_transition.dart';
 
@@ -11,6 +13,15 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    isLoading = false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return chatScreen(context);
@@ -19,11 +30,18 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget chatScreen(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      body: ListView(
-        children: [
-          statusBarContainer(context),
-          chatList(context),
-        ],
+      body: ModalProgressHUD(
+        inAsyncCall: isLoading,
+        color: Color.fromRGBO(0, 0, 0, 0.5),
+        progressIndicator: CircularProgressIndicator(
+          backgroundColor: Colors.black87,
+        ),
+        child: ListView(
+          children: [
+            statusBarContainer(context),
+            chatList(context),
+          ],
+        ),
       ),
     );
   }

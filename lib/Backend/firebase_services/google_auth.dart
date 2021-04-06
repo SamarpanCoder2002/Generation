@@ -205,7 +205,7 @@ class GoogleAuth {
                                   'user_name': this._userName.text,
                                   'nick_name': this._nickName.text,
                                   'about': this._about.text,
-                                  'status': {},
+                                  'connection_request': {},
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":
