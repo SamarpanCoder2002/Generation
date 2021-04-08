@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 // ignore: must_be_immutable
@@ -26,6 +27,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   TextEditingController inputText = TextEditingController();
   bool _showEmojiPicker = false;
 
+  Management management = Management();
+
   String _senderMail;
   List<bool> response = [];
 
@@ -37,23 +40,45 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   void initState() {
     super.initState();
-    // ScrollController Initialization
 
     senderMail();
 
-    scrollController = ScrollController(
-      initialScrollOffset: 0.0,
-    );
+    management.getConversationMessages(this._senderMail).listen((event) {
+      // ScrollController Initialization
+      scrollController = ScrollController(
+        initialScrollOffset: 0.0,
+      );
+
+      print(event.data()['connections']);
+      List<dynamic> take = event.data()['connections'].values.first;
+      print(take);
+
+      if (take.isNotEmpty) {
+        setState(() {
+          Map<String, dynamic> takeIs = take.last;
+          chatContainer.add({
+            '${takeIs.keys.first}': "${takeIs.values.first}",
+          });
+          response.add(true);
+          // For AutoScroll to the end position
+          if (scrollController.hasClients)
+            scrollController
+                .jumpTo(scrollController.position.maxScrollExtent + 100);
+        });
+      }
+    });
 
     // For AutoScroll to the end position
     if (scrollController.hasClients)
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    if (mounted) inputText.dispose();
+  sendMessage() {
+    // Map<String, String> messageMap = {
+    //   "message": inputText.text,
+    //   "sendBy": widget._userName,
+    // };
+    management.addConversationMessages(this._senderMail, chatContainer);
   }
 
   @override
@@ -256,11 +281,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       onPressed: () async {
                         print("Send Pressed");
                         if (inputText.text.isNotEmpty) {
-                          if (response.length > 0 && response.last == false)
-                            response.add(true);
-                          else
-                            response.add(false);
-
+                          // if (response.length > 0 && response.last == false)
+                          //   response.add(true);
+                          // else
+                          //   response.add(false);
+                          //
+                          response.add(false);
                           setState(() {
                             chatContainer.add({
                               '${inputText.text}':
@@ -268,19 +294,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                             inputText.clear();
                             print(chatContainer);
-
-                            FirebaseFirestore.instance
-                                .doc("generation_users/$_senderMail")
-                                .update({
-                              'connections': {
-                                '${FirebaseAuth.instance.currentUser.email}':
-                                    chatContainer,
-                              }
-                            });
                           });
 
                           scrollController.jumpTo(
                               scrollController.position.maxScrollExtent + 100);
+
+                          sendMessage();
                           // //Close the keyboard
                           // SystemChannels.textInput.invokeMethod('TextInput.hide');
                         }
@@ -397,5 +416,4 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       ],
     );
   }
-
 }

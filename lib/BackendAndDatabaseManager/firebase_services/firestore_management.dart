@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,10 +32,26 @@ class Management {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => SignUpAuthentication()),
-            (Route<dynamic> route) => false,
+                (Route<dynamic> route) => false,
           );
         },
       ),
     );
+  }
+
+  addConversationMessages(String _senderMail,
+      List<Map<String, String>> messageMap) {
+    FirebaseFirestore.instance.doc("generation_users/$_senderMail").update({
+      'connections': {
+        '${FirebaseAuth.instance.currentUser.email}': messageMap,
+      }
+    });
+  }
+
+  Stream<DocumentSnapshot> getConversationMessages(String _senderMail) {
+    var take = FirebaseFirestore.instance
+        .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+        .snapshots();
+    return take;
   }
 }
