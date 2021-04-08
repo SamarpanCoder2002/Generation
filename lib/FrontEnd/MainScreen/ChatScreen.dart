@@ -40,26 +40,27 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   void initState() {
     super.initState();
-
     senderMail();
 
+    // ScrollController Initialization
+    scrollController = ScrollController(
+      initialScrollOffset: 0.0,
+    );
+
+    // For AutoScroll to the end position
+    if (scrollController.hasClients)
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+
     management.getConversationMessages(this._senderMail).listen((event) {
-      // ScrollController Initialization
-      scrollController = ScrollController(
-        initialScrollOffset: 0.0,
-      );
-
-      print(event.data()['connections']);
-      List<dynamic> take = event.data()['connections'].values.first;
-      print(take);
-
-      if (take.isNotEmpty) {
+      List<dynamic> messages = event.data()['connections'].values.first;
+      if (messages.isNotEmpty) {
         setState(() {
-          Map<String, dynamic> takeIs = take.last;
+          Map<String, dynamic> lastMessages = messages.last;
           chatContainer.add({
-            '${takeIs.keys.first}': "${takeIs.values.first}",
+            '${lastMessages.keys.first}': "${lastMessages.values.first}",
           });
           response.add(true);
+
           // For AutoScroll to the end position
           if (scrollController.hasClients)
             scrollController
@@ -67,18 +68,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
     });
-
-    // For AutoScroll to the end position
-    if (scrollController.hasClients)
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
-  }
-
-  sendMessage() {
-    // Map<String, String> messageMap = {
-    //   "message": inputText.text,
-    //   "sendBy": widget._userName,
-    // };
-    management.addConversationMessages(this._senderMail, chatContainer);
   }
 
   @override
@@ -299,7 +288,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           scrollController.jumpTo(
                               scrollController.position.maxScrollExtent + 100);
 
-                          sendMessage();
+                          management.addConversationMessages(
+                              this._senderMail, chatContainer);
                           // //Close the keyboard
                           // SystemChannels.textInput.invokeMethod('TextInput.hide');
                         }
