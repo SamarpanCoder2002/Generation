@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
-import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'package:generation/Backend/firebase_services/google_auth.dart';
+import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

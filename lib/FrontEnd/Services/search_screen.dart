@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:generation/Backend/firebase_services/firestore_management.dart';
-import 'package:generation/Backend/sqlite_services/local_storage_controller.dart';
+
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -129,9 +129,11 @@ class _SearchState extends State<Search> {
                     .createTable(searchResultSnapshot.docs[index]['user_name']);
                 if (response) {
                   LocalStorageHelper().insertAdditionalData(
-                      searchResultSnapshot.docs[index]['user_name'],
-                      searchResultSnapshot.docs[index]['nick_name'],
-                      searchResultSnapshot.docs[index]['about']);
+                    searchResultSnapshot.docs[index]['user_name'],
+                    searchResultSnapshot.docs[index]['nick_name'],
+                    searchResultSnapshot.docs[index]['about'],
+                    searchResultSnapshot.docs[index].id,
+                  );
                 }
 
                 connectionRequestCollectionRequestUser.addAll({
@@ -183,9 +185,11 @@ class _SearchState extends State<Search> {
                       searchResultSnapshot.docs[index]['user_name']);
                   if (response) {
                     LocalStorageHelper().insertAdditionalData(
-                        searchResultSnapshot.docs[index]['user_name'],
-                        searchResultSnapshot.docs[index]['nick_name'],
-                        searchResultSnapshot.docs[index]['about']);
+                      searchResultSnapshot.docs[index]['user_name'],
+                      searchResultSnapshot.docs[index]['nick_name'],
+                      searchResultSnapshot.docs[index]['about'],
+                      searchResultSnapshot.docs[index].id,
+                    );
                   }
 
                   connectionsMapRequestUser.addAll({
@@ -219,9 +223,11 @@ class _SearchState extends State<Search> {
                       searchResultSnapshot.docs[index]['user_name']);
                   if (response) {
                     LocalStorageHelper().insertAdditionalData(
-                        searchResultSnapshot.docs[index]['user_name'],
-                        searchResultSnapshot.docs[index]['nick_name'],
-                        searchResultSnapshot.docs[index]['about']);
+                      searchResultSnapshot.docs[index]['user_name'],
+                      searchResultSnapshot.docs[index]['nick_name'],
+                      searchResultSnapshot.docs[index]['about'],
+                      searchResultSnapshot.docs[index].id,
+                    );
                   }
                 }
               }

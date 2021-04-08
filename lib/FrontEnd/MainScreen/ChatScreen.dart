@@ -1,7 +1,20 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emoji_picker/emoji_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
+// ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
+  String _userName;
+
+  ChatScreenSetUp(this._userName);
+
   @override
   _ChatScreenSetUpState createState() => _ChatScreenSetUpState();
 }
@@ -9,14 +22,25 @@ class ChatScreenSetUp extends StatefulWidget {
 class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
   ScrollController scrollController;
-  List chatContainer = [];
+  List<Map<String, String>> chatContainer = [];
   TextEditingController inputText = TextEditingController();
+  bool _showEmojiPicker = false;
+
+  String _senderMail;
+  List<bool> response = [];
+
+  void senderMail() async {
+    _senderMail =
+        await LocalStorageHelper().fetchSendingInformation(widget._userName);
+  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     // ScrollController Initialization
+
+    senderMail();
+
     scrollController = ScrollController(
       initialScrollOffset: 0.0,
     );
@@ -28,9 +52,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
-    inputText.dispose();
+    if (mounted) inputText.dispose();
   }
 
   @override
@@ -69,7 +92,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             onSurface: Theme.of(context).primaryColor,
           ),
           child: Text(
-            "রাত জাগা তারা",
+            widget._userName,
             style: TextStyle(color: Colors.white, fontSize: 20.0),
           ),
           onPressed: () {
@@ -100,131 +123,192 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget mainBody(BuildContext context) {
-    return Container(
-      //color: Colors.lightGreenAccent,
-      width: MediaQuery.of(context).size.width,
-      //height: MediaQuery.of(context).size.height,
-      margin: EdgeInsets.only(
-        top: 20.0,
-      ),
-      child: ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          Container(
-            //color: Colors.black,
-            height: MediaQuery.of(context).size.height - 155,
-            padding: EdgeInsets.only(bottom: 10.0, top: 5.0),
-            child: Scrollbar(
-              showTrackOnHover: false,
-              thickness: 4.0,
-              child: ListView.builder(
-                shrinkWrap: true,
-                controller: scrollController,
-                itemCount: chatContainer.length,
-                itemBuilder: (context, position) {
-                  if (position % 2 == 0) return receiverList(context, position);
-                  return senderList(context, position);
-                },
+    double _chatBoxHeight = MediaQuery.of(context).size.height - 155;
+    return WillPopScope(
+      onWillPop: () async {
+        if (_showEmojiPicker) {
+          if (mounted) {
+            setState(() {
+              _showEmojiPicker = false;
+            });
+          }
+          return false;
+        }
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        return true;
+      },
+      child: Container(
+        //color: Colors.lightGreenAccent,
+        width: MediaQuery.of(context).size.width,
+        //height: MediaQuery.of(context).size.height,
+        margin: EdgeInsets.only(
+          top: 20.0,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Container(
+              //color: Colors.black,
+              height: _chatBoxHeight,
+
+              padding: EdgeInsets.only(bottom: 10.0, top: 5.0),
+              child: Scrollbar(
+                showTrackOnHover: false,
+                thickness: 4.0,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  controller: scrollController,
+                  itemCount: chatContainer.length,
+                  itemBuilder: (context, position) {
+                    if (response.length > 0 && response[position] == false)
+                      return senderList(context, position);
+                    return receiverList(context, position);
+                  },
+                ),
               ),
             ),
-          ),
-          Container(
-            //color: Colors.pinkAccent,
-            padding: EdgeInsets.only(bottom: 5.0),
-            child: Row(
-              //crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.emoji_emotions_rounded,
-                    color: Colors.orangeAccent,
-                    size: 30.0,
-                  ),
-                  onPressed: () {},
-                ),
-                Container(
-                    //color: Colors.blue,
-                    width: MediaQuery.of(context).size.width * 0.65,
-                    //height: 50.0,
-                    constraints: BoxConstraints.loose(
-                        Size(MediaQuery.of(context).size.width * 0.65, 100.0)),
-                    child: Scrollbar(
-                      showTrackOnHover: true,
-                      thickness: 10.0,
-                      radius: Radius.circular(30.0),
-                      child: TextField(
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        onTap: () {
-                          scrollController.jumpTo(
-                              scrollController.position.maxScrollExtent);
-                        },
-                        controller: inputText,
-                        maxLines: null,
-                        // For Line Break
-                        decoration: InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20.0)),
-                            borderSide: BorderSide(
-                                color: Colors.lightGreen, width: 2.0),
-                          ),
-                          hintText: 'Type Here',
-                          hintStyle: TextStyle(color: Colors.white),
-                          enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlue)),
-                        ),
-                      ),
-                    )),
-                Expanded(
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.more_vert,
+            Container(
+              //color: Colors.pinkAccent,
+              padding: EdgeInsets.only(bottom: 5.0),
+              child: Row(
+                //crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.emoji_emotions_rounded,
+                      color: Colors.orangeAccent,
                       size: 30.0,
-                      color: Colors.brown,
                     ),
                     onPressed: () {
-                      print("Options Pressed");
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.send_rounded,
-                      size: 30.0,
-                      color: Colors.green,
-                    ),
-                    onPressed: () async {
-                      print("Send Pressed");
-
-                      if (inputText.text.isNotEmpty) {
+                      //Close the keyboard
+                      SystemChannels.textInput.invokeMethod('TextInput.hide');
+                      if (mounted) {
                         setState(() {
-                          chatContainer.add(
-                            [
-                              inputText.text,
-                              "${DateTime.now().hour}:${DateTime.now().minute}"
-                            ],
-                          );
-                          inputText.clear();
+                          _chatBoxHeight -= 50;
+                          _showEmojiPicker = true;
                         });
-
-                        scrollController.jumpTo(
-                            scrollController.position.maxScrollExtent + 100);
-                        // //Close the keyboard
-                        // SystemChannels.textInput.invokeMethod('TextInput.hide');
                       }
                     },
                   ),
-                ),
-                SizedBox(
-                  height: 2.0,
-                ),
-              ],
+                  Container(
+                      //color: Colors.blue,
+                      width: MediaQuery.of(context).size.width * 0.65,
+                      //height: 50.0,
+                      constraints: BoxConstraints.loose(Size(
+                          MediaQuery.of(context).size.width * 0.65, 100.0)),
+                      child: Scrollbar(
+                        showTrackOnHover: true,
+                        thickness: 10.0,
+                        radius: Radius.circular(30.0),
+                        child: TextField(
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          onTap: () {
+                            if (mounted) {
+                              setState(() {
+                                _showEmojiPicker = false;
+                                _chatBoxHeight =
+                                    MediaQuery.of(context).size.height - 155;
+                              });
+                            }
+
+                            scrollController.jumpTo(
+                                scrollController.position.maxScrollExtent);
+                          },
+                          controller: inputText,
+                          maxLines: null,
+                          // For Line Break
+                          decoration: InputDecoration(
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20.0)),
+                              borderSide: BorderSide(
+                                  color: Colors.lightGreen, width: 2.0),
+                            ),
+                            hintText: 'Type Here',
+                            hintStyle: TextStyle(color: Colors.white),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.lightBlue)),
+                          ),
+                        ),
+                      )),
+                  Expanded(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.more_vert,
+                        size: 30.0,
+                        color: Colors.brown,
+                      ),
+                      onPressed: () {
+                        print("Options Pressed");
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.send_rounded,
+                        size: 30.0,
+                        color: Colors.green,
+                      ),
+                      onPressed: () async {
+                        print("Send Pressed");
+                        if (inputText.text.isNotEmpty) {
+                          if (response.length > 0 && response.last == false)
+                            response.add(true);
+                          else
+                            response.add(false);
+
+                          setState(() {
+                            chatContainer.add({
+                              '${inputText.text}':
+                                  "${DateTime.now().hour}:${DateTime.now().minute}",
+                            });
+                            inputText.clear();
+                            print(chatContainer);
+
+                            FirebaseFirestore.instance
+                                .doc("generation_users/$_senderMail")
+                                .update({
+                              'connections': {
+                                '${FirebaseAuth.instance.currentUser.email}':
+                                    chatContainer,
+                              }
+                            });
+                          });
+
+                          scrollController.jumpTo(
+                              scrollController.position.maxScrollExtent + 100);
+                          // //Close the keyboard
+                          // SystemChannels.textInput.invokeMethod('TextInput.hide');
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 2.0,
+                  ),
+                ],
+              ),
             ),
-          )
-        ],
+            _showEmojiPicker
+                ? EmojiPicker(
+                    rows: 3,
+                    columns: 7,
+                    buttonMode: ButtonMode.MATERIAL,
+                    bgColor: Color.fromRGBO(34, 48, 60, 1),
+                    indicatorColor: Color.fromRGBO(34, 48, 60, 1),
+                    onEmojiSelected: (item, category) {
+                      setState(() {
+                        inputText.text += item.emoji;
+                      });
+                    },
+                  )
+                : SizedBox(),
+          ],
+        ),
       ),
     );
   }
@@ -251,7 +335,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ),
             child: Text(
-              chatContainer[index][0],
+              chatContainer[index].keys.first,
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -263,7 +347,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           alignment: Alignment.centerRight,
           margin: EdgeInsets.only(right: 5.0, bottom: 5.0),
           child: Text(
-            chatContainer[index][1],
+            chatContainer[index].values.first,
             style: TextStyle(color: Colors.lightBlue),
           ),
         ),
@@ -294,7 +378,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ),
             child: Text(
-              chatContainer[index][0],
+              chatContainer[index].keys.first,
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -306,11 +390,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           alignment: Alignment.centerLeft,
           margin: EdgeInsets.only(left: 5.0, bottom: 5.0),
           child: Text(
-            chatContainer[index][1],
+            chatContainer[index].values.first,
             style: TextStyle(color: Colors.lightBlue),
           ),
         ),
       ],
     );
   }
+
 }

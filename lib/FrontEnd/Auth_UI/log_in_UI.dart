@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/Backend/firebase_services/email_pwd_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 

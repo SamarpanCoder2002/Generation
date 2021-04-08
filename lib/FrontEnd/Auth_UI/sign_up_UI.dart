@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/Backend/firebase_services/email_pwd_auth.dart';
-import 'package:generation/Backend/firebase_services/google_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -24,7 +24,6 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _pwdShowPermission = true;
     _confirmPwdShowPermission = true;
@@ -37,7 +36,6 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _email.dispose();
     _pwd.dispose();
@@ -336,8 +334,8 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
     showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          elevation: 5.0,
-          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
                 style: TextStyle(color: Colors.white),

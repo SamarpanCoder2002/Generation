@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:fab_circular_menu/fab_circular_menu.dart';
 
 import 'package:generation/FrontEnd/MainScreen/ChatAndStatusCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
@@ -17,8 +16,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  int _currentTab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -113,9 +110,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
               onTap: (index) {
                 print("\nIndex is: $index");
-                setState(() {
-                  _currentTab = index;
-                });
               },
               tabs: [
                 Tab(

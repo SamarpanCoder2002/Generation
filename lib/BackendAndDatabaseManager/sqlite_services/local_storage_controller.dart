@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -12,6 +13,7 @@ class LocalStorageHelper {
   String _colNickName = "Nick_Name";
   String _colAbout = "About";
   String _colProfileImageUrl = "DP_Url";
+  String _colEmail = "Email";
 
   // Create Singleton Objects(Only Created once in the whole application)
   static LocalStorageHelper _localStorageHelper;
@@ -48,7 +50,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colNickName TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT)");
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colNickName TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
       return true;
     } catch (e) {
       print("Error in Local Storage Create Table: ${e.toString()}");
@@ -58,15 +60,10 @@ class LocalStorageHelper {
 
   // Insert Use Additional Data to Table
   Future<int> insertAdditionalData(
-      String _tableName, String _nickName, String _about) async {
+      String _tableName, String _nickName, String _about, String _email) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
-
-    // Current Date
-    DateTime now = DateTime.now();
-    DateFormat formatter = DateFormat('yyyy-MM-dd');
-    String _dateIS = formatter.format(now);
 
     // Insert Data to Map
     _helperMap[_colMessages] = "";
@@ -76,6 +73,7 @@ class LocalStorageHelper {
     _helperMap[_colNickName] = _nickName;
     _helperMap[_colAbout] = _about;
     _helperMap[_colProfileImageUrl] = "";
+    _helperMap[_colEmail] = _email;
 
     // Result Insert to DB
     var result = await db.insert(_tableName, _helperMap);
@@ -102,6 +100,7 @@ class LocalStorageHelper {
     _helperMap[_colNickName] = "";
     _helperMap[_colAbout] = "";
     _helperMap[_colProfileImageUrl] = "";
+    _helperMap[_colEmail] = "";
 
     // Result Insert to DB
     var result = await db.insert(_tableName, _helperMap);
@@ -133,7 +132,7 @@ class LocalStorageHelper {
         await LocalStorageHelper().extractAllTablesName();
 
     if (allTables.isNotEmpty) {
-      allTables.forEach((element) {
+      allTables.forEach((element){
         allData.addFirst(element.values.toList()[0].toString());
       });
     } else
@@ -142,14 +141,12 @@ class LocalStorageHelper {
     yield allData.toList();
   }
 
-  //Checking Table is present in sqLite or not
-  Future<bool> checkDBPresence(String _tableName) async {
-    try {
-      Database db = await this.database;
-      await db.rawQuery('SELECT * FROM $_tableName');
-      return true;
-    } catch (e) {
-      return false;
-    }
+  Future<String> fetchSendingInformation(String _tableName) async {
+    Database db = await this.database;
+
+    var result = await db
+        .rawQuery("SELECT $_colEmail FROM $_tableName WHERE $_colTime = ''");
+
+    return result[0].values.toList()[0];
   }
 }

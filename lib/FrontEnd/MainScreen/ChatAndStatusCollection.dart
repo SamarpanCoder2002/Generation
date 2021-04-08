@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-
 import 'package:page_transition/page_transition.dart';
 
 import 'ChatScreen.dart';
-import 'package:generation/Backend/sqlite_services/local_storage_controller.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -19,11 +18,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void didUpdateWidget(ChatScreen oldWidget) {
-    // TODO: implement didUpdateWidget
     print("Update Widget Run");
-    setState(() {
-      _latestStream = LocalStorageHelper().extractTables();
-    });
+
+    _latestStream = LocalStorageHelper().extractTables();
+
     super.didUpdateWidget(oldWidget);
   }
 
@@ -58,7 +56,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * (1 / 8),
-      //color: Colors.greenAccent,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 10,
@@ -89,56 +86,53 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatList(BuildContext context) {
     return SafeArea(
-            child: Container(
-            margin: EdgeInsets.only(top: 35.0),
-            padding: EdgeInsets.only(top: 18.0, bottom: 10.0),
-            height: MediaQuery.of(context).size.height * (5.15 / 8),
-            decoration: BoxDecoration(
-              color: Color.fromRGBO(31, 51, 71, 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10.0,
-                  spreadRadius: 0.0,
-                  offset: Offset(0.0, -5.0), // shadow direction: bottom right
-                )
-              ],
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40.0),
-                  topRight: Radius.circular(40.0)),
-              border: Border.all(
-                color: Colors.black26,
-                width: 1.0,
-              ),
-            ),
-            child: RefreshIndicator(
-              onRefresh: () async {
-                setState(() {
-                  _latestStream = LocalStorageHelper().extractTables();
-                });
-              },
-              child: StreamBuilder<List<String>>(
-                stream: _latestStream,
-                builder: (context, snapshot) {
-                  print('Check: ${snapshot.connectionState}');
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    print(snapshot.data);
-                    return ListView.builder(
-                      itemCount:
-                          snapshot.data == null ? 0 : snapshot.data.length,
-                      itemBuilder: (context, position) {
-                        print(snapshot.connectionState);
-                        return chatTile(
-                            context, position, snapshot.data[position]);
-                      },
-                    );
-                  } else {
-                    return Container();
-                  }
+        child: Container(
+      margin: EdgeInsets.only(top: 35.0),
+      padding: EdgeInsets.only(top: 18.0, bottom: 10.0),
+      height: MediaQuery.of(context).size.height * (5.15 / 8),
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(31, 51, 71, 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10.0,
+            spreadRadius: 0.0,
+            offset: Offset(0.0, -5.0), // shadow direction: bottom right
+          )
+        ],
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
+        border: Border.all(
+          color: Colors.black26,
+          width: 1.0,
+        ),
+      ),
+      child: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            _latestStream = LocalStorageHelper().extractTables();
+          });
+        },
+        child: StreamBuilder<List<String>>(
+          stream: _latestStream,
+          builder: (context, snapshot) {
+            print('Check: ${snapshot.connectionState}');
+            if (snapshot.connectionState == ConnectionState.done) {
+              print(snapshot.data);
+              return ListView.builder(
+                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                itemBuilder: (context, position) {
+                  print(snapshot.connectionState);
+                  return chatTile(context, position, snapshot.data[position]);
                 },
-              ),
-            ),
-          ));
+              );
+            } else {
+              return Container();
+            }
+          },
+        ),
+      ),
+    ));
   }
 
   Widget chatTile(BuildContext context, int index, String _userName) {
@@ -146,7 +140,6 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0.0,
         color: Color.fromRGBO(31, 51, 71, 1),
         child: Container(
-          //color: Colors.blue,
           padding: EdgeInsets.only(left: 1.0, right: 1.0),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -162,7 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       type: PageTransitionType.rightToLeft,
                       duration: Duration(milliseconds: 300),
                       curve: Curves.slowMiddle,
-                      child: ChatScreenSetUp()));
+                      child: ChatScreenSetUp(_userName)));
             },
             child: Row(
               children: [
@@ -182,7 +175,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 Container(
-                  //color: Colors.redAccent,
                   alignment: Alignment.center,
                   width: MediaQuery.of(context).size.width / 2 + 20,
                   padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
@@ -199,8 +191,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         height: 12.0,
                       ),
                       Container(
-                        //color: Colors.blueGrey,
-                        //padding: EdgeInsets.only(left: 10.0),
                         child: Text(
                           "Latest Message",
                           style: TextStyle(
@@ -215,7 +205,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: Container(
                     alignment: Alignment.centerRight,
-                    //color: Colors.deepPurpleAccent,
                     padding: EdgeInsets.only(
                       right: 20.0,
                       top: 2.0,

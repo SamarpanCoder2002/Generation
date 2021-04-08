@@ -1,114 +1,90 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 
-class EmailAndPasswordAuth {
-  String _email, _pwd;
-  BuildContext _context;
-
+class GoogleAuth {
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
-
   TextEditingController _userName = TextEditingController();
   TextEditingController _nickName = TextEditingController();
   TextEditingController _about = TextEditingController();
 
-  EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
-    //Close the keyboard
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
-  }
+  final GoogleSignIn googleSignIn = GoogleSignIn();
 
-  Future<void> signUp() async {
+  Future<void> logIn(BuildContext context) async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: this._email, password: this._pwd);
-      userCredential.user.sendEmailVerification();
+      if (!await googleSignIn.isSignedIn()) {
+        final user = await googleSignIn.signIn();
+        if (user == null)
+          print("Google Sign In Not Completed");
+        else {
+          final GoogleSignInAuthentication googleAuth =
+              await user.authentication;
 
-      FirebaseAuth.instance.signOut();
+          final OAuthCredential oAuthCredential = GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
 
-      Navigator.pop(this._context);
-      Navigator.push(this._context,
-          MaterialPageRoute(builder: (_) => LogInAuthentication()));
+          final UserCredential userCredential =
+              await FirebaseAuth.instance.signInWithCredential(oAuthCredential);
 
-      showAlertBox(
-          "Sign-Up Successful",
-          "A Verification Link Sent to Your Registered Mail....\n\nPlease Verify Your Mail then Log-In",
-          Colors.green);
-    } catch (e) {
-      print("Sign-up Error is: $e");
-      if (e.toString() ==
-          "[firebase_auth/email-already-in-use] The email address is already in use by another account.")
-        showAlertBox(
-          "Email Already Registered",
-          "Try With Another Email",
-          Colors.yellow,
-        );
-      else
-        showAlertBox(
-          "Sign-Up Error",
-          "Undefine Error Occur... \n\nMake sure your phone Connected to the Internet",
-          Colors.redAccent,
-        );
-    }
-  }
+          DocumentSnapshot responseData = await FirebaseFirestore.instance
+              .doc("generation_users/${userCredential.user.email}")
+              .get();
 
-  Future<void> logIn() async {
-    try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: this._email, password: this._pwd);
+          print(responseData.exists);
 
-      if (userCredential.user.emailVerified) {
-        DocumentSnapshot responseData = await FirebaseFirestore.instance
-            .doc("generation_users/${userCredential.user.email}")
-            .get();
+          if (!responseData.exists) {
+            print("Email Not Present");
+            await userNameChecking(context, userCredential.user.email);
+          } else {
+            Navigator.pop(context);
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => MainScreen()));
 
-        print(responseData.exists);
-
-        if (!responseData.exists) {
-          print("Email Not Present");
-          await userNameChecking();
-        } else {
-          Navigator.pop(this._context);
-          Navigator.push(
-              this._context, MaterialPageRoute(builder: (_) => MainScreen()));
-
-          showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
+            showAlertBox(
+                context, "Log-In Successful", "Enjoy this app", Colors.green);
+          }
         }
       } else {
-        print("Email not Verified");
-        FirebaseAuth.instance.signOut();
-        showAlertBox(
-          "Log-In Error",
-          "Email Not Verified...\n\nA Verification Link Sent to Your Registered Mail.\n\nPlease Verify Your Email then Log in",
-          Colors.redAccent,
-        );
+        print("Already Logged In");
+        await logOut();
       }
     } catch (e) {
-      print("Log-in Error: $e");
+      print("Google LogIn Error: ${e.toString()}");
       showAlertBox(
-          "Log-in Error", "Email or Password not Match", Colors.redAccent);
+          context,
+          "Log In Error",
+          "Log-in not Completed or\nEmail Already Present With Other Credentials",
+          Colors.redAccent);
     }
   }
 
-  void showAlertBox(
-    String _title,
-    String _content, [
-    Color _titleColor = Colors.white,
-  ]) {
+  Future<bool> logOut() async {
+    try {
+      await googleSignIn.disconnect();
+      await googleSignIn.signOut();
+      FirebaseAuth.instance.signOut();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void showAlertBox(BuildContext context, String _title, String _content,
+      [Color _titleColor = Colors.white]) {
     showDialog<String>(
-        context: this._context,
+        context: context,
         builder: (context) => AlertDialog(
-          elevation: 5.0,
-          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
-                style: TextStyle(
-                  color: _titleColor,
-                ),
+                style: TextStyle(color: _titleColor),
               ),
               content: Text(
                 _content,
@@ -119,12 +95,12 @@ class EmailAndPasswordAuth {
             ));
   }
 
-  Future<void> userNameChecking() async {
+  Future<void> userNameChecking(BuildContext context, String _email) async {
     showDialog(
-        context: this._context,
+        context: context,
         builder: (_) => AlertDialog(
-          elevation: 5.0,
-          backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Center(
                 child: Text(
                   "Set Additional Details",
@@ -144,6 +120,8 @@ class EmailAndPasswordAuth {
                         validator: (inputUserName) {
                           if (inputUserName.length < 6)
                             return "User Name At Least 6 Characters";
+                          else if (inputUserName.contains(" "))
+                            return "Space Not Allowed...User '_' instead of space";
                           return null;
                         },
                         decoration: InputDecoration(
@@ -213,15 +191,27 @@ class EmailAndPasswordAuth {
                             if (_userNameKey.currentState.validate()) {
                               print("ok");
 
-                              QuerySnapshot querySnapShot =
+                              QuerySnapshot querySnapShotForUserNameChecking =
                                   await FirebaseFirestore.instance
                                       .collection('generation_users')
                                       .where('user_name',
                                           isEqualTo: this._userName.text)
                                       .get();
-                              print(querySnapShot.docs.isEmpty);
 
-                              if (querySnapShot.docs.isEmpty) {
+                              QuerySnapshot querySnapShotForNickNameChecking =
+                                  await FirebaseFirestore.instance
+                                      .collection('generation_users')
+                                      .where('nick_name',
+                                          isEqualTo: this._nickName.text)
+                                      .get();
+
+                              print(querySnapShotForUserNameChecking.docs);
+                              print(querySnapShotForNickNameChecking.docs);
+
+                              if (querySnapShotForUserNameChecking
+                                      .docs.isEmpty &&
+                                  querySnapShotForNickNameChecking
+                                      .docs.isEmpty) {
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
                                     .doc(_email)
@@ -229,9 +219,7 @@ class EmailAndPasswordAuth {
                                   'user_name': this._userName.text,
                                   'nick_name': this._nickName.text,
                                   'about': this._about.text,
-                                  'connection_request': {
-
-                                  },
+                                  'connection_request': {},
                                   "creation_date": DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
                                   "creation_time":
@@ -242,17 +230,39 @@ class EmailAndPasswordAuth {
                                 print("Log-In Successful: User Name: $_email");
 
                                 Navigator.pushAndRemoveUntil(
-                                    this._context,
+                                    context,
                                     MaterialPageRoute(
                                         builder: (_) => MainScreen()),
                                     (route) => false);
 
-                                showAlertBox("Log-In Successful",
+                                showAlertBox(context, "Log-In Successful",
                                     "Enjoy this app", Colors.green);
                               } else {
-                                Navigator.pop(this._context);
-                                showAlertBox("User Name Already Exist",
-                                    "Try Another User Name", Colors.yellow);
+                                if (querySnapShotForNickNameChecking
+                                        .docs.isNotEmpty &&
+                                    querySnapShotForUserNameChecking
+                                        .docs.isNotEmpty) {
+                                  //Navigator.pop(this._context);
+                                  showAlertBox(
+                                      context,
+                                      "Nick Name And User Name Already Exist",
+                                      "Try Another Nick Name or User Name",
+                                      Colors.yellow);
+                                } else if (querySnapShotForNickNameChecking
+                                    .docs.isNotEmpty) {
+                                  showAlertBox(
+                                      context,
+                                      "Nick Name Already Exist",
+                                      "Try Another Nick Name",
+                                      Colors.yellow);
+                                } else {
+                                  //Navigator.pop(this._context);
+                                  showAlertBox(
+                                      context,
+                                      "User Name Already Exist",
+                                      "Try Another User Name",
+                                      Colors.yellow);
+                                }
                               }
                             } else {
                               print("Not Validate");
