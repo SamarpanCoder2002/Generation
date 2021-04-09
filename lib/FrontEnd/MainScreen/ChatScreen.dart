@@ -1,9 +1,5 @@
-import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -152,9 +148,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         return true;
       },
       child: Container(
-        //color: Colors.lightGreenAccent,
         width: MediaQuery.of(context).size.width,
-        //height: MediaQuery.of(context).size.height,
         margin: EdgeInsets.only(
           top: 20.0,
         ),
@@ -162,9 +156,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           shrinkWrap: true,
           children: <Widget>[
             Container(
-              //color: Colors.black,
               height: _chatBoxHeight,
-
               padding: EdgeInsets.only(bottom: 10.0, top: 5.0),
               child: Scrollbar(
                 showTrackOnHover: false,
@@ -185,7 +177,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               //color: Colors.pinkAccent,
               padding: EdgeInsets.only(bottom: 5.0),
               child: Row(
-                //crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   IconButton(
                     icon: const Icon(
@@ -196,6 +187,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     onPressed: () {
                       //Close the keyboard
                       SystemChannels.textInput.invokeMethod('TextInput.hide');
+
                       if (mounted) {
                         setState(() {
                           _chatBoxHeight -= 50;
@@ -205,9 +197,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     },
                   ),
                   Container(
-                      //color: Colors.blue,
                       width: MediaQuery.of(context).size.width * 0.65,
-                      //height: 50.0,
                       constraints: BoxConstraints.loose(Size(
                           MediaQuery.of(context).size.width * 0.65, 100.0)),
                       child: Scrollbar(
@@ -270,11 +260,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       onPressed: () async {
                         print("Send Pressed");
                         if (inputText.text.isNotEmpty) {
-                          // if (response.length > 0 && response.last == false)
-                          //   response.add(true);
-                          // else
-                          //   response.add(false);
-                          //
                           response.add(false);
                           setState(() {
                             chatContainer.add({
@@ -290,8 +275,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                           management.addConversationMessages(
                               this._senderMail, chatContainer);
-                          // //Close the keyboard
-                          // SystemChannels.textInput.invokeMethod('TextInput.hide');
                         }
                       },
                     ),
