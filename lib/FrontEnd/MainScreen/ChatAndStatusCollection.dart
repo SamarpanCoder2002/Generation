@@ -13,8 +13,17 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = false;
-  List<Object> allConnections;
+  List<String> allConnections;
   Stream<List<String>> _latestStream = LocalStorageHelper().extractTables();
+
+  @override
+  void initState() {
+    print("Initialization");
+
+    _latestStream = LocalStorageHelper().extractTables();
+
+    super.initState();
+  }
 
   @override
   void didUpdateWidget(ChatScreen oldWidget) {
@@ -118,14 +127,17 @@ class _ChatScreenState extends State<ChatScreen> {
           builder: (context, snapshot) {
             print('Check: ${snapshot.connectionState}');
             if (snapshot.connectionState == ConnectionState.done) {
-              print(snapshot.data);
-              return ListView.builder(
-                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                itemBuilder: (context, position) {
-                  print(snapshot.connectionState);
-                  return chatTile(context, position, snapshot.data[position]);
-                },
-              );
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                  itemBuilder: (context, position) {
+                    print(snapshot.connectionState);
+                    return chatTile(context, position, snapshot.data[position]);
+                  },
+                );
+              } else {
+                return Container();
+              }
             } else {
               return Container();
             }

@@ -48,22 +48,31 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
     management.getConversationMessages(this._senderMail).listen((event) {
-      List<dynamic> messages = event.data()['connections'].values.first;
-      if (messages.isNotEmpty) {
-        setState(() {
-          Map<String, dynamic> lastMessages = messages.last;
-          chatContainer.add({
-            '${lastMessages.keys.first}': "${lastMessages.values.first}",
-          });
-          response.add(true);
+      if (event.data()['connections'].values.first.length > 0) {
+        List<dynamic> messages = event.data()['connections'].values.first;
 
-          // For AutoScroll to the end position
-          if (scrollController.hasClients)
-            scrollController
-                .jumpTo(scrollController.position.maxScrollExtent + 100);
-        });
+        if (mounted) {
+          setState(() {
+            Map<String, dynamic> lastMessages = messages.last;
+            chatContainer.add({
+              '${lastMessages.keys.first}': "${lastMessages.values.first}",
+            });
+            response.add(true);
+
+            // For AutoScroll to the end position
+            if (scrollController.hasClients)
+              scrollController
+                  .jumpTo(scrollController.position.maxScrollExtent + 100);
+          });
+        }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -267,7 +276,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                   "${DateTime.now().hour}:${DateTime.now().minute}",
                             });
                             inputText.clear();
-                            print(chatContainer);
                           });
 
                           scrollController.jumpTo(
