@@ -37,8 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
           setState(() {
             allConnectionRequest
                 .forEach((connectionName, connectionStatus) async {
-              if (connectionStatus.toString() == 'Request Pending' ||
-                  connectionStatus.toString() == 'Request Accepted' ||
+              if (connectionStatus.toString() == 'Request Accepted' ||
                   connectionStatus.toString() == 'Invitation Accepted') {
                 // User All Information Take
                 print("Here Also");

@@ -23,7 +23,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   TextEditingController inputText = TextEditingController();
   bool _showEmojiPicker = false;
 
-  Management management = Management();
+  final Management management = Management();
+  final LocalStorageHelper localStorageHelper = LocalStorageHelper();
 
   String _senderMail;
   List<bool> response = [];
@@ -47,6 +48,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     if (scrollController.hasClients)
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
+    // Fetch Data from FireStore
     management.getDatabaseData().listen((event) {
       if (event.data()['connections'].length > 0) {
         // Checking If Sender Mail Present or Not
@@ -59,6 +61,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               setState(() {
                 Map<String, dynamic> lastMessages =
                     messages.last; // Taking Latest Message
+
+                // Data Store in Local Storage
+                localStorageHelper.insertNewMessages(widget._userName,
+                    lastMessages.keys.first.toString(), "true");
+
                 chatContainer.add({
                   '${lastMessages.keys.first}': '${lastMessages.values.first}',
                   // Add in Local Container
@@ -74,7 +81,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else {
             print("No message Here");
           }
-        }else{
+        } else {
           print("Contacts Not Present");
         }
       }
@@ -89,72 +96,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      appBar: AppBar(
-        brightness: Brightness.dark,
-        backgroundColor: Color.fromRGBO(25, 39, 52, 1),
-        elevation: 10.0,
-        shadowColor: Colors.white70,
-        leading: Row(
-          children: <Widget>[
-            SizedBox(
-              width: 10.0,
-            ),
-            Expanded(
-              child: GestureDetector(
-                child: CircleAvatar(
-                  radius: 23.0,
-                  backgroundImage: ExactAssetImage(
-                    "images/sam.jpg",
-                  ),
-                ),
-                onTap: () {
-                  print("Pic Pressed");
-                },
-              ),
-            ),
-          ],
-        ),
-        title: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            elevation: 0.0,
-            primary: Color.fromRGBO(25, 39, 52, 1),
-            onSurface: Theme.of(context).primaryColor,
-          ),
-          child: Text(
-            widget._userName,
-            style: TextStyle(color: Colors.white, fontSize: 20.0),
-          ),
-          onPressed: () {
-            print("Name Clicked");
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.call,
-              color: Colors.green,
-            ),
-            highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.videocam_rounded,
-              color: Colors.redAccent,
-            ),
-            highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: mainBody(context),
-    );
-  }
-
-  Widget mainBody(BuildContext context) {
-    double _chatBoxHeight = MediaQuery.of(context).size.height - 155;
     return WillPopScope(
       onWillPop: () async {
         if (_showEmojiPicker) {
@@ -167,6 +108,88 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
         SystemChannels.textInput.invokeMethod('TextInput.hide');
         return true;
+      },
+      child: Scaffold(
+        backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+        appBar: AppBar(
+          brightness: Brightness.dark,
+          backgroundColor: Color.fromRGBO(25, 39, 52, 1),
+          elevation: 10.0,
+          shadowColor: Colors.white70,
+          leading: Row(
+            children: <Widget>[
+              SizedBox(
+                width: 10.0,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  child: CircleAvatar(
+                    radius: 23.0,
+                    backgroundImage: ExactAssetImage(
+                      "images/sam.jpg",
+                    ),
+                  ),
+                  onTap: () {
+                    print("Pic Pressed");
+                  },
+                ),
+              ),
+            ],
+          ),
+          title: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 0.0,
+              primary: Color.fromRGBO(25, 39, 52, 1),
+              onSurface: Theme.of(context).primaryColor,
+            ),
+            child: Text(
+              widget._userName,
+              style: TextStyle(color: Colors.white, fontSize: 20.0),
+            ),
+            onPressed: () {
+              print("Name Clicked");
+            },
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.call,
+                color: Colors.green,
+              ),
+              highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.videocam_rounded,
+                color: Colors.redAccent,
+              ),
+              highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
+              onPressed: () {},
+            ),
+          ],
+        ),
+        body: mainBody(context),
+      ),
+    );
+  }
+
+  Widget mainBody(BuildContext context) {
+    double _chatBoxHeight = MediaQuery.of(context).size.height - 155;
+    return WillPopScope(
+      onWillPop: () async {
+        if (_showEmojiPicker) {
+          if (mounted) {
+            setState(() {
+              _showEmojiPicker = false;
+              _chatBoxHeight = MediaQuery.of(context).size.height - 155;
+            });
+          }
+          return false;
+        } else {
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
+          return true;
+        }
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -282,17 +305,27 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         print("Send Pressed");
                         if (inputText.text.isNotEmpty) {
                           response.add(false);
-                          setState(() {
-                            chatContainer.add({
-                              '${inputText.text}':
-                                  "${DateTime.now().hour}:${DateTime.now().minute}",
+
+                          if (mounted) {
+                            setState(() {
+                              chatContainer.add({
+                                '${inputText.text}':
+                                    "${DateTime.now().hour}:${DateTime.now().minute}",
+                              });
+                              inputText.clear();
                             });
-                            inputText.clear();
-                          });
+                          }
 
                           scrollController.jumpTo(
                               scrollController.position.maxScrollExtent + 100);
 
+                          // Data Store in Local Storage
+                          localStorageHelper.insertNewMessages(
+                              widget._userName,
+                              chatContainer.last.keys.first.toString(),
+                              "false");
+
+                          // Data Store in Firestore
                           management.addConversationMessages(
                               this._senderMail, chatContainer);
                         }
@@ -313,9 +346,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     bgColor: Color.fromRGBO(34, 48, 60, 1),
                     indicatorColor: Color.fromRGBO(34, 48, 60, 1),
                     onEmojiSelected: (item, category) {
-                      setState(() {
-                        inputText.text += item.emoji;
-                      });
+                      if (mounted) {
+                        setState(() {
+                          inputText.text += item.emoji;
+                        });
+                      }
                     },
                   )
                 : SizedBox(),
