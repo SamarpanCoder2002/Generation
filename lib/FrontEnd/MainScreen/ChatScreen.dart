@@ -48,22 +48,24 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
     management.getConversationMessages(this._senderMail).listen((event) {
-      if (event.data()['connections'].values.first.length > 0) {
-        List<dynamic> messages = event.data()['connections'].values.first;
+      if (event.data()['connections'].length > 0) {
+        if (event.data()['connections'].values.first.length > 0) {
+          List<dynamic> messages = event.data()['connections'].values.first;
 
-        if (mounted) {
-          setState(() {
-            Map<String, dynamic> lastMessages = messages.last;
-            chatContainer.add({
-              '${lastMessages.keys.first}': "${lastMessages.values.first}",
+          if (mounted) {
+            setState(() {
+              Map<String, dynamic> lastMessages = messages.last;
+              chatContainer.add({
+                '${lastMessages.keys.first}': "${lastMessages.values.first}",
+              });
+              response.add(true);
+
+              // For AutoScroll to the end position
+              if (scrollController.hasClients)
+                scrollController
+                    .jumpTo(scrollController.position.maxScrollExtent + 100);
             });
-            response.add(true);
-
-            // For AutoScroll to the end position
-            if (scrollController.hasClients)
-              scrollController
-                  .jumpTo(scrollController.position.maxScrollExtent + 100);
-          });
+          }
         }
       }
     });
