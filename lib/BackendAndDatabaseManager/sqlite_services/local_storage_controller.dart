@@ -132,7 +132,7 @@ class LocalStorageHelper {
         await LocalStorageHelper().extractAllTablesName();
 
     if (allTables.isNotEmpty) {
-      allTables.forEach((element){
+      allTables.forEach((element) {
         allData.addFirst(element.values.toList()[0].toString());
       });
     } else
@@ -149,4 +149,12 @@ class LocalStorageHelper {
 
     return result[0].values.toList()[0];
   }
+
+  // Stream<List<Map<String, Object>>> findOutTables() {
+  //   Stream<List<Map<String, Object>>> take = LocalStorageHelper()
+  //       .extractAllTablesName()
+  //       .asStream()
+  //       .asBroadcastStream();
+  //   return take;
+  // }
 }

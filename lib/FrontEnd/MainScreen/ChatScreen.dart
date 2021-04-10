@@ -47,7 +47,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     if (scrollController.hasClients)
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
 
-    management.getConversationMessages(this._senderMail).listen((event) {
+    management.getDatabaseData().listen((event) {
+      print(event.data());
       if (event.data()['connections'].length > 0) {
         if (event.data()['connections'].values.first.length > 0) {
           List<dynamic> messages = event.data()['connections'].values.first;
@@ -66,6 +67,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     .jumpTo(scrollController.position.maxScrollExtent + 100);
             });
           }
+        } else {
+          print("No message Here");
         }
       }
     });

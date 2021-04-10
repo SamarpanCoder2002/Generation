@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -14,24 +16,61 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = false;
   List<String> allConnections;
-  Stream<List<String>> _latestStream = LocalStorageHelper().extractTables();
+
+  Management management = Management();
 
   @override
   void initState() {
     print("Initialization");
-
-    _latestStream = LocalStorageHelper().extractTables();
-
+    allConnections = [];
     super.initState();
-  }
 
-  @override
-  void didUpdateWidget(ChatScreen oldWidget) {
-    print("Update Widget Run");
+    management.getDatabaseData().listen((event) async {
+      print(event.data()['connection_request'].keys);
+      if (event.data()['connection_request'].length > 0) {
+        if (mounted) {
+          Map<String, Object> allConnectionRequest =
+              event.data()['connection_request'];
 
-    _latestStream = LocalStorageHelper().extractTables();
+          setState(() {
+            allConnectionRequest
+                .forEach((connectionName, connectionStatus) async {
+              print(connectionStatus);
+              if (connectionStatus.toString() == 'Request Pending' ||
+                  connectionStatus.toString() == 'Request Accepted') {
+                // User All Information Take
+                print("Here Also");
+                DocumentSnapshot documentSnapshot = await FirebaseFirestore
+                    .instance
+                    .doc('generation_users/$connectionName')
+                    .get();
 
-    super.didUpdateWidget(oldWidget);
+                // Checking If Same USer NAme PResent in the list or not
+                if (!allConnections.contains(documentSnapshot['user_name'])) {
+                  // Make SqLite Table With User UserName
+                  bool response = await LocalStorageHelper()
+                      .createTable(documentSnapshot['user_name']);
+                  if (response) {
+                    await LocalStorageHelper().insertAdditionalData(
+                      documentSnapshot['user_name'],
+                      documentSnapshot['nick_name'],
+                      documentSnapshot['about'],
+                      documentSnapshot.id,
+                    );
+                  }
+
+                  setState(() {
+                    allConnections.add(documentSnapshot['user_name']);
+                  });
+                } else
+                  print("Already Connection Added");
+              }
+            });
+          });
+
+        }
+      }
+    });
   }
 
   @override
@@ -116,33 +155,11 @@ class _ChatScreenState extends State<ChatScreen> {
           width: 1.0,
         ),
       ),
-      child: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            _latestStream = LocalStorageHelper().extractTables();
-          });
+      child: ListView.builder(
+        itemCount: allConnections.length,
+        itemBuilder: (context, position) {
+          return chatTile(context, position, allConnections[position]);
         },
-        child: StreamBuilder<List<String>>(
-          stream: _latestStream,
-          builder: (context, snapshot) {
-            print('Check: ${snapshot.connectionState}');
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                  itemBuilder: (context, position) {
-                    print(snapshot.connectionState);
-                    return chatTile(context, position, snapshot.data[position]);
-                  },
-                );
-              } else {
-                return Container();
-              }
-            } else {
-              return Container();
-            }
-          },
-        ),
       ),
     ));
   }

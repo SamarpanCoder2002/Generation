@@ -32,15 +32,15 @@ class Management {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => SignUpAuthentication()),
-                (Route<dynamic> route) => false,
+            (Route<dynamic> route) => false,
           );
         },
       ),
     );
   }
 
-  addConversationMessages(String _senderMail,
-      List<Map<String, String>> messageMap) {
+  void addConversationMessages(
+      String _senderMail, List<Map<String, String>> messageMap) {
     FirebaseFirestore.instance.doc("generation_users/$_senderMail").update({
       'connections': {
         '${FirebaseAuth.instance.currentUser.email}': messageMap,
@@ -48,7 +48,7 @@ class Management {
     });
   }
 
-  Stream<DocumentSnapshot> getConversationMessages(String _senderMail) {
+  Stream<DocumentSnapshot> getDatabaseData() {
     var take = FirebaseFirestore.instance
         .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
         .snapshots();

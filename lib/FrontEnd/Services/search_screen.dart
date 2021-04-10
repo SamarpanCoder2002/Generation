@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-
 class Search extends StatefulWidget {
   @override
   _SearchState createState() => _SearchState();
@@ -123,19 +121,6 @@ class _SearchState extends State<Search> {
                   '${searchResultSnapshot.docs[index].id}': "Request Pending",
                 });
 
-                // Make New Table with Name as User Name of Invited User
-                print("Add Request User Data to SQLite");
-                bool response = await LocalStorageHelper()
-                    .createTable(searchResultSnapshot.docs[index]['user_name']);
-                if (response) {
-                  LocalStorageHelper().insertAdditionalData(
-                    searchResultSnapshot.docs[index]['user_name'],
-                    searchResultSnapshot.docs[index]['nick_name'],
-                    searchResultSnapshot.docs[index]['about'],
-                    searchResultSnapshot.docs[index].id,
-                  );
-                }
-
                 connectionRequestCollectionRequestUser.addAll({
                   '${FirebaseAuth.instance.currentUser.email}':
                       "Invitation Came",
@@ -180,18 +165,6 @@ class _SearchState extends State<Search> {
                   });
                   print("Add Invited User Data to SQLite");
 
-                  // Make New Table with Name as User Name of Requested User
-                  bool response = await LocalStorageHelper().createTable(
-                      searchResultSnapshot.docs[index]['user_name']);
-                  if (response) {
-                    LocalStorageHelper().insertAdditionalData(
-                      searchResultSnapshot.docs[index]['user_name'],
-                      searchResultSnapshot.docs[index]['nick_name'],
-                      searchResultSnapshot.docs[index]['about'],
-                      searchResultSnapshot.docs[index].id,
-                    );
-                  }
-
                   connectionsMapRequestUser.addAll({
                     '${FirebaseAuth.instance.currentUser.email}': [],
                   });
@@ -219,16 +192,7 @@ class _SearchState extends State<Search> {
                     });
                   });
                 } else {
-                  bool response = await LocalStorageHelper().createTable(
-                      searchResultSnapshot.docs[index]['user_name']);
-                  if (response) {
-                    LocalStorageHelper().insertAdditionalData(
-                      searchResultSnapshot.docs[index]['user_name'],
-                      searchResultSnapshot.docs[index]['nick_name'],
-                      searchResultSnapshot.docs[index]['about'],
-                      searchResultSnapshot.docs[index].id,
-                    );
-                  }
+                  print("Nothing To Do");
                 }
               }
 
