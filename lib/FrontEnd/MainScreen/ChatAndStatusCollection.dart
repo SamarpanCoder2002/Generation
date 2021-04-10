@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,28 +17,28 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = false;
-  List<String> allConnections;
+  List<String> allConnectionsUserName;
 
   Management management = Management();
+  final LocalStorageHelper localStorageHelper = LocalStorageHelper();
 
   @override
   void initState() {
     print("Initialization");
-    allConnections = [];
+    allConnectionsUserName = [];
     super.initState();
 
     management.getDatabaseData().listen((event) async {
-      print(event.data()['connection_request'].keys);
       if (event.data()['connection_request'].length > 0) {
         if (mounted) {
           Map<String, Object> allConnectionRequest =
-              event.data()['connection_request'];
+              event.data()['connection_request']; // Take All Connection Request
 
           setState(() {
             allConnectionRequest
                 .forEach((connectionName, connectionStatus) async {
-              print(connectionName + " " + connectionStatus.toString());
               if (connectionStatus.toString() == 'Request Pending' ||
+                  connectionStatus.toString() == 'Request Accepted' ||
                   connectionStatus.toString() == 'Invitation Accepted') {
                 // User All Information Take
                 print("Here Also");
@@ -46,12 +48,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     .get();
 
                 // Checking If Same USer NAme PResent in the list or not
-                if (!allConnections.contains(documentSnapshot['user_name'])) {
+                if (!allConnectionsUserName
+                    .contains(documentSnapshot['user_name'])) {
                   // Make SqLite Table With User UserName
-                  bool response = await LocalStorageHelper()
+                  bool response = await localStorageHelper
                       .createTable(documentSnapshot['user_name']);
                   if (response) {
-                    await LocalStorageHelper().insertAdditionalData(
+                    await localStorageHelper.insertAdditionalData(
                       documentSnapshot['user_name'],
                       documentSnapshot['nick_name'],
                       documentSnapshot['about'],
@@ -60,7 +63,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   }
 
                   setState(() {
-                    allConnections.add(documentSnapshot['user_name']);
+                    allConnectionsUserName.insert(
+                        0, documentSnapshot['user_name']);
                   });
                 } else
                   print("Already Connection Added");
@@ -155,9 +159,9 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       child: ListView.builder(
-        itemCount: allConnections.length,
+        itemCount: allConnectionsUserName.length,
         itemBuilder: (context, position) {
-          return chatTile(context, position, allConnections[position]);
+          return chatTile(context, position, allConnectionsUserName[position]);
         },
       ),
     ));
@@ -177,6 +181,15 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             onPressed: () {
               print("Chat List Pressed");
+
+              if (allConnectionsUserName.length > 1) {
+                setState(() {
+                  String _latestUserName = allConnectionsUserName
+                      .removeAt(allConnectionsUserName.indexOf(_userName));
+                  allConnectionsUserName.insert(0, _latestUserName);
+                });
+              }
+
               Navigator.push(
                   context,
                   PageTransition(
