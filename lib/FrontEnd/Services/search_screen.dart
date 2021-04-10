@@ -156,12 +156,12 @@ class _SearchState extends State<Search> {
 
                   connectionRequestCollectionCurrUser.addAll({
                     '${searchResultSnapshot.docs[index].id}':
-                        "Request Accepted",
+                        "Invitation Accepted",
                   });
 
                   connectionRequestCollectionRequestUser.addAll({
                     '${FirebaseAuth.instance.currentUser.email}':
-                        "Invitation Accepted",
+                        "Request Accepted",
                   });
                   print("Add Invited User Data to SQLite");
 

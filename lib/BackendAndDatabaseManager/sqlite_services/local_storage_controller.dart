@@ -125,21 +125,21 @@ class LocalStorageHelper {
     return result;
   }
 
-  Stream<List<String>> extractTables() async* {
-    Queue<String> allData = Queue<String>();
-
-    List<Map<String, Object>> allTables =
-        await LocalStorageHelper().extractAllTablesName();
-
-    if (allTables.isNotEmpty) {
-      allTables.forEach((element) {
-        allData.addFirst(element.values.toList()[0].toString());
-      });
-    } else
-      print("No Data Present");
-
-    yield allData.toList();
-  }
+  // Stream<List<String>> extractTables() async* {
+  //   Queue<String> allData = Queue<String>();
+  //
+  //   List<Map<String, Object>> allTables =
+  //       await LocalStorageHelper().extractAllTablesName();
+  //
+  //   if (allTables.isNotEmpty) {
+  //     allTables.forEach((element) {
+  //       allData.addFirst(element.values.toList()[0].toString());
+  //     });
+  //   } else
+  //     print("No Data Present");
+  //
+  //   yield allData.toList();
+  // }
 
   Future<String> fetchSendingInformation(String _tableName) async {
     Database db = await this.database;

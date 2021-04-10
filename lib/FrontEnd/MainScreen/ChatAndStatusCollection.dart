@@ -35,9 +35,9 @@ class _ChatScreenState extends State<ChatScreen> {
           setState(() {
             allConnectionRequest
                 .forEach((connectionName, connectionStatus) async {
-              print(connectionStatus);
+              print(connectionName + " " + connectionStatus.toString());
               if (connectionStatus.toString() == 'Request Pending' ||
-                  connectionStatus.toString() == 'Request Accepted') {
+                  connectionStatus.toString() == 'Invitation Accepted') {
                 // User All Information Take
                 print("Here Also");
                 DocumentSnapshot documentSnapshot = await FirebaseFirestore
@@ -67,7 +67,6 @@ class _ChatScreenState extends State<ChatScreen> {
               }
             });
           });
-
         }
       }
     });
