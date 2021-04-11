@@ -1,4 +1,3 @@
-
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -48,7 +47,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences TEXT, $_colDate TEXT, $_colTime TEXT, $_colNickName TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colNickName TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
       return true;
     } catch (e) {
       print("Error in Local Storage Create Table: ${e.toString()}");
@@ -80,7 +79,7 @@ class LocalStorageHelper {
 
   // Insert New Messages to Table
   Future<int> insertNewMessages(
-      String _tableName, String _newMessage, String _ref) async {
+      String _tableName, String _newMessage, int _ref) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
@@ -118,8 +117,8 @@ class LocalStorageHelper {
       String _tableName) async {
     Database db = await this.database; // DB Reference
 
-    var result = db.rawQuery(
-        'SELECT $_colMessages, $_colReferences, $_colTime FROM $_tableName');
+    List<Map<String, Object>> result = await db.rawQuery(
+        'SELECT $_colMessages, $_colTime, $_colReferences FROM $_tableName WHERE $_colReferences != -1');
     return result;
   }
 
@@ -148,11 +147,11 @@ class LocalStorageHelper {
     return result[0].values.toList()[0];
   }
 
-  // Stream<List<Map<String, Object>>> findOutTables() {
-  //   Stream<List<Map<String, Object>>> take = LocalStorageHelper()
-  //       .extractAllTablesName()
-  //       .asStream()
-  //       .asBroadcastStream();
-  //   return take;
-  // }
+// Stream<List<Map<String, Object>>> findOutTables() {
+//   Stream<List<Map<String, Object>>> take = LocalStorageHelper()
+//       .extractAllTablesName()
+//       .asStream()
+//       .asBroadcastStream();
+//   return take;
+// }
 }

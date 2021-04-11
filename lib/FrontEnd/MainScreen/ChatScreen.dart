@@ -21,7 +21,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   ScrollController scrollController;
   List<Map<String, String>> chatContainer = [];
   TextEditingController inputText = TextEditingController();
-  bool _showEmojiPicker = false;
+  bool _showEmojiPicker = false, _isChatOpen = true;
 
   final Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
@@ -34,6 +34,71 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         await LocalStorageHelper().fetchSendingInformation(widget._userName);
   }
 
+  extractHistoryData() async {
+    List<Map<String, dynamic>> messagesGet =
+        await localStorageHelper.extractMessageData(widget._userName);
+
+    print(messagesGet);
+
+    if (messagesGet.isNotEmpty) {
+      for (Map<String, dynamic> message in messagesGet) {
+        print(message.values);
+        List<dynamic> messageContainer = message.values.toList();
+
+        if (messageContainer.isEmpty) {
+          if (_isChatOpen) {
+            if (mounted) {
+              setState(() {
+                _isChatOpen = false;
+
+                print("Present 0");
+                // For AutoScroll to the end position
+                if (scrollController.hasClients)
+                  scrollController
+                      .jumpTo(scrollController.position.maxScrollExtent);
+              });
+            }
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              chatContainer.add({
+                messageContainer[0].toString(): messageContainer[1].toString(),
+              });
+              if (messageContainer[2] == 1)
+                response.add(true);
+              else
+                response.add(false);
+
+
+              if(mounted){
+                setState(() {
+                  print("Present 1");
+                  // For AutoScroll to the end position
+                  if (scrollController.hasClients)
+                    scrollController
+                        .jumpTo(scrollController.position.maxScrollExtent);
+                });
+              }
+            });
+          }
+        }
+      }
+      if(mounted){
+        print("1.1");
+        setState(() {
+          if (scrollController.hasClients)
+            scrollController
+                .jumpTo(scrollController.position.maxScrollExtent);
+        });
+      }
+    } else {
+      setState(() {
+        _isChatOpen = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -44,10 +109,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       initialScrollOffset: 0.0,
     );
 
-    // For AutoScroll to the end position
-    if (scrollController.hasClients)
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    print(_isChatOpen);
 
+    if (_isChatOpen) {
+      extractHistoryData();
+    }
     // Fetch Data from FireStore
     management.getDatabaseData().listen((event) {
       if (event.data()['connections'].length > 0) {
@@ -57,26 +123,36 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               [this._senderMail]; // Take Corresponding messages of that Contact
 
           if (messages.isNotEmpty) {
-            if (mounted) {
+            if (_isChatOpen) {
               setState(() {
-                Map<String, dynamic> lastMessages =
-                    messages.last; // Taking Latest Message
-
-                // Data Store in Local Storage
-                localStorageHelper.insertNewMessages(widget._userName,
-                    lastMessages.keys.first.toString(), "true");
-
-                chatContainer.add({
-                  '${lastMessages.keys.first}': '${lastMessages.values.first}',
-                  // Add in Local Container
-                });
-                response.add(true); // Chat Position Status Added
-
-                // For AutoScroll to the end position
-                if (scrollController.hasClients)
-                  scrollController
-                      .jumpTo(scrollController.position.maxScrollExtent + 100);
+                print("Present 2");
+                _isChatOpen = false;
               });
+            } else {
+              if (mounted) {
+                setState(() {
+                  print("Present 3");
+
+                  Map<String, dynamic> lastMessages =
+                      messages.last; // Taking Latest Message
+
+                  // Data Store in Local Storage
+                  localStorageHelper.insertNewMessages(
+                      widget._userName, lastMessages.keys.first.toString(), 1);
+
+                  chatContainer.add({
+                    '${lastMessages.keys.first}':
+                        '${lastMessages.values.first}',
+                    // Add in Local Container
+                  });
+                  response.add(true); // Chat Position Status Added
+
+                  // For AutoScroll to the end position
+                  if (scrollController.hasClients)
+                    scrollController.jumpTo(
+                        scrollController.position.maxScrollExtent + 100);
+                });
+              }
             }
           } else {
             print("No message Here");
@@ -86,6 +162,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
       }
     });
+
+    if(mounted) {
+      setState(() {
+        print("Present 4");
+        // For AutoScroll to the end position
+        if (scrollController.hasClients)
+          scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      });
+    }
   }
 
   @override
@@ -320,10 +405,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               scrollController.position.maxScrollExtent + 100);
 
                           // Data Store in Local Storage
-                          localStorageHelper.insertNewMessages(
-                              widget._userName,
-                              chatContainer.last.keys.first.toString(),
-                              "false");
+                          localStorageHelper.insertNewMessages(widget._userName,
+                              chatContainer.last.keys.first.toString(), 0);
 
                           // Data Store in Firestore
                           management.addConversationMessages(
