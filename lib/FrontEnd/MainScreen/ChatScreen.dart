@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:emoji_picker/emoji_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:emoji_picker/emoji_picker.dart';
+
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
@@ -20,16 +20,27 @@ class ChatScreenSetUp extends StatefulWidget {
 
 class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
-  ScrollController scrollController;
-  List<Map<String, String>> chatContainer = [];
-  TextEditingController inputText = TextEditingController();
-  bool _showEmojiPicker = false, _isChatOpen = true;
+  // For Control the Scrolling
+  final ScrollController scrollController = ScrollController(
+    initialScrollOffset: 0.0,
+  );
 
+  // All Container List
+  List<Map<String, String>> chatContainer = [];
+  final List<bool> response = [];
+
+  // For Controller Text in Field
+  final TextEditingController inputText = TextEditingController();
+
+  // Some Boolean Value
+  bool _showEmojiPicker = false, _isChatOpenFirstTime = true;
+
+  // Object Initialization
   final Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
 
+  // Sender Mail Take out
   String _senderMail;
-  List<bool> response = [];
 
   void senderMail() async {
     _senderMail =
@@ -38,25 +49,33 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   extractHistoryData() async {
     try {
-      List<Map<String, dynamic>> messagesGet =
+      List<Map<String, dynamic>> messagesGet = [];
+      messagesGet =
           await localStorageHelper.extractMessageData(widget._userName);
+
+      // If messagesList not Empty
       if (messagesGet.isNotEmpty) {
         for (Map<String, dynamic> message in messagesGet) {
+          // Change Every Message Value to List
           List<dynamic> messageContainer = message.values.toList();
 
-          if (messageContainer.isEmpty) {
-            if (_isChatOpen) {
-              if (mounted) {
-                setState(() {
-                  _isChatOpen = false;
+          // For chat open Every First Time
+          if (_isChatOpenFirstTime) {
+            if (mounted) {
+              setState(() {
+                _isChatOpenFirstTime = false;
 
-                  // For AutoScroll to the end position
-                  if (scrollController.hasClients)
-                    scrollController
-                        .jumpTo(scrollController.position.maxScrollExtent);
-                });
-              }
+                // For AutoScroll to the end position
+                if (scrollController.hasClients)
+                  scrollController
+                      .jumpTo(scrollController.position.maxScrollExtent);
+              });
             }
+          }
+
+          // If there is no opponent's person messages
+          if (messageContainer.isEmpty) {
+            print("No messages in ChatContainer");
           } else {
             if (mounted) {
               setState(() {
@@ -89,11 +108,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
       } else {
-        setState(() {
-          _isChatOpen = false;
-        });
+        if (_isChatOpenFirstTime) {
+          if (mounted) {
+            setState(() {
+              _isChatOpenFirstTime = false;
+            });
+          }
+        }
       }
-      extractDataFromFireStore();
+      extractDataFromFireStore(); // After Get the old Conversation messages from SqLite, Take Data from Firestore
     } catch (e) {
       showDialog(
           context: context,
@@ -108,28 +131,36 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     try {
       // Fetch Data from FireStore
       management.getDatabaseData().listen((event) {
-        if (event.data()['connections'].length > 0) {
+        if (event.data()['connections'].length < 0) {
+          print("No Connections Present");
+        } else {
           // Checking If Sender Mail Present or Not
           if (event.data()['connections'].containsKey(this._senderMail)) {
-            List<dynamic> messages = event.data()['connections'][this
-                ._senderMail]; // Take Corresponding messages of that Contact
+            // Take Corresponding messages of that Contact
+            List<dynamic> messages = [];
+            messages = event.data()['connections'][this._senderMail];
 
+            // If messageContainer not Empty
             if (messages.isNotEmpty) {
-              if (_isChatOpen) {
+              // Checking Chat is open for the first time or not
+              if (_isChatOpenFirstTime) {
                 if (mounted) {
                   setState(() {
-                    print("Present 2");
-                    _isChatOpen = false;
+                    _isChatOpenFirstTime = false;
                   });
                 }
               }
+
               if (mounted) {
                 setState(() {
+                  // Take Map of Connections
                   Map<String, dynamic> allConnections =
                       event.data()['connections'] as Map;
 
+                  // Particular connection messages set to Empty
                   allConnections[this._senderMail] = [];
 
+                  // Update Data in FireStore
                   FirebaseFirestore.instance
                       .doc(
                           'generation_users/${FirebaseAuth.instance.currentUser.email}')
@@ -137,14 +168,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     'connections': allConnections,
                   });
 
+                  // Taking all the remaining messages to store in local container
                   messages.forEach((everyMessage) {
                     chatContainer.add({
                       '${everyMessage.keys.first}':
                           '${everyMessage.values.first}',
-                      // Add in Local Container
                     });
                     response.add(true); // Chat Position Status Added
 
+                    // Store Data in local Storage
                     localStorageHelper.insertNewMessages(widget._userName,
                         everyMessage.keys.first.toString(), 1);
                   });
@@ -178,12 +210,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     super.initState();
     senderMail();
 
-    // ScrollController Initialization
-    scrollController = ScrollController(
-      initialScrollOffset: 0.0,
-    );
-
-    if (_isChatOpen) {
+    if (_isChatOpenFirstTime) {
       extractHistoryData();
     }
 
@@ -198,7 +225,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -409,65 +435,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         size: 30.0,
                         color: Colors.green,
                       ),
-                      onPressed: () async {
-                        try {
-                          print("Send Pressed");
-                          if (inputText.text.isNotEmpty) {
-                            response.add(false);
-
-                            DocumentSnapshot documentSnapShot =
-                                await FirebaseFirestore.instance
-                                    .doc("generation_users/$_senderMail")
-                                    .get();
-
-                            List<dynamic> sendingMessages =
-                                documentSnapShot.data()['connections'][
-                                    FirebaseAuth.instance.currentUser.email
-                                        .toString()];
-
-                            if(sendingMessages == null)
-                              sendingMessages = [];
-
-                            if (mounted) {
-                              setState(() {
-                                sendingMessages.add({
-                                  '${inputText.text}':
-                                      "${DateTime.now().hour}:${DateTime.now().minute}",
-                                });
-
-                                chatContainer.add({
-                                  '${inputText.text}':
-                                      "${DateTime.now().hour}:${DateTime.now().minute}",
-                                });
-                                inputText.clear();
-                              });
-                            }
-
-                            scrollController.jumpTo(
-                                scrollController.position.maxScrollExtent +
-                                    100);
-
-                            // Data Store in Local Storage
-                            localStorageHelper.insertNewMessages(
-                                widget._userName,
-                                chatContainer.last.keys.first.toString(),
-                                0);
-
-                            // Data Store in Firestore
-                            management.addConversationMessages(
-                                this._senderMail, sendingMessages);
-                          }
-                        } catch (e) {
-                          showDialog(
-                              context: context,
-                              builder: (_) {
-                                return AlertDialog(
-                                  title: Text("Send Problem"),
-                                  content: Text(e.toString()),
-                                );
-                              });
-                        }
-                      },
+                      onPressed: messageSend,
                     ),
                   ),
                   SizedBox(
@@ -581,5 +549,66 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         ),
       ],
     );
+  }
+
+  messageSend() async {
+    try {
+      print("Send Pressed");
+      if (inputText.text.isNotEmpty) {
+        // Take Document Data related to old messages
+        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
+            .instance
+            .doc("generation_users/$_senderMail")
+            .get();
+
+        // Initialize Temporary List
+        List<dynamic> sendingMessages = [];
+
+        // Store Updated sending messages list
+        sendingMessages = documentSnapShot.data()['connections']
+            [FirebaseAuth.instance.currentUser.email.toString()];
+
+        if (mounted) {
+          setState(() {
+            // Add data to temporary Storage of Sending
+            sendingMessages.add({
+              '${inputText.text}':
+                  "${DateTime.now().hour}:${DateTime.now().minute}",
+            });
+
+            // Add Data to the UI related all chat Container
+            chatContainer.add({
+              '${inputText.text}':
+                  "${DateTime.now().hour}:${DateTime.now().minute}",
+            });
+
+            response
+                .add(false); // Add the data response to chat related container
+
+            inputText.clear(); // Get Clear the InputBox
+          });
+        }
+
+        // Scroll to Bottom
+        scrollController
+            .jumpTo(scrollController.position.maxScrollExtent + 100);
+
+        // Data Store in Local Storage
+        localStorageHelper.insertNewMessages(
+            widget._userName, chatContainer.last.keys.first.toString(), 0);
+
+        // Data Store in Firestore
+        management.addConversationMessages(this._senderMail, sendingMessages);
+      }
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text("Send Problem"),
+              content: Text(e.toString()),
+            );
+          });
+    }
   }
 }
