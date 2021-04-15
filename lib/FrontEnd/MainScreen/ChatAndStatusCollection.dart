@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -118,7 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget statusList(BuildContext context, int index) {
     return Container(
-      margin: EdgeInsets.only(right: 30.0),
+      margin: EdgeInsets.only(right: 15.0),
       child: GestureDetector(
         onTap: () {
           print("Status clicked");
@@ -134,8 +133,8 @@ class _ChatScreenState extends State<ChatScreen> {
             index == 0
                 ? Padding(
                     padding: EdgeInsets.only(
-                      top: 60.0,
-                      left: 40.0,
+                      top: 50.0,
+                      left: 50.0,
                     ),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -146,7 +145,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: Icon(
                         Icons.add,
                         color: Colors.white,
-                        size: 30.0,
                       ),
                       onPressed: () {
                         print("Status Add Button Pressed");
@@ -220,7 +218,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   PageTransition(
                       type: PageTransitionType.rightToLeft,
                       duration: Duration(milliseconds: 300),
-                      curve: Curves.slowMiddle,
+                      curve: Curves.easeInOutCirc,
                       child: ChatScreenSetUp(_userName)));
             },
             child: Row(
