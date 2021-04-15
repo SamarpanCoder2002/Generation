@@ -7,7 +7,6 @@ class LocalStorageHelper {
   String _colReferences = "Reference";
   String _colDate = "Date";
   String _colTime = "Time";
-  String _colNickName = "Nick_Name";
   String _colAbout = "About";
   String _colProfileImageUrl = "DP_Url";
   String _colEmail = "Email";
@@ -47,7 +46,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colNickName TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
       return true;
     } catch (e) {
       print("Error in Local Storage Create Table: ${e.toString()}");
@@ -57,7 +56,7 @@ class LocalStorageHelper {
 
   // Insert Use Additional Data to Table
   Future<int> insertAdditionalData(
-      String _tableName, String _nickName, String _about, String _email) async {
+      String _tableName, String _about, String _email) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
@@ -67,7 +66,6 @@ class LocalStorageHelper {
     _helperMap[_colReferences] = -1;
     _helperMap[_colDate] = "";
     _helperMap[_colTime] = "";
-    _helperMap[_colNickName] = _nickName;
     _helperMap[_colAbout] = _about;
     _helperMap[_colProfileImageUrl] = "";
     _helperMap[_colEmail] = _email;
@@ -94,7 +92,6 @@ class LocalStorageHelper {
     _helperMap[_colReferences] = _ref;
     _helperMap[_colDate] = _dateIS;
     _helperMap[_colTime] = '${DateTime.now().hour}: ${DateTime.now().minute}';
-    _helperMap[_colNickName] = "";
     _helperMap[_colAbout] = "";
     _helperMap[_colProfileImageUrl] = "";
     _helperMap[_colEmail] = "";

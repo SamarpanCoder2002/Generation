@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -55,7 +54,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   if (response) {
                     await localStorageHelper.insertAdditionalData(
                       documentSnapshot['user_name'],
-                      documentSnapshot['nick_name'],
                       documentSnapshot['about'],
                       documentSnapshot.id,
                     );
@@ -101,35 +99,63 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget statusBarContainer(BuildContext context) {
     return Container(
+      //color: Colors.white,
       margin: EdgeInsets.only(
         top: 23.0,
+        left: 7.0,
       ),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * (1 / 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: 20,
         itemBuilder: (context, position) {
-          return statusList(context);
+          return statusList(context, position);
         },
       ),
     );
   }
 
-  Widget statusList(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-          elevation: 0.0,
-          shape: CircleBorder(),
-          side: BorderSide(width: 1.0, color: Colors.blue)),
-      onPressed: () {
-        print("Status Clicked");
-      },
-      child: CircleAvatar(
-        backgroundImage: ExactAssetImage(
-          "images/sam.jpg",
+  Widget statusList(BuildContext context, int index) {
+    return Container(
+      margin: EdgeInsets.only(right: 30.0),
+      child: GestureDetector(
+        onTap: () {
+          print("Status clicked");
+        },
+        child: Stack(
+          children: [
+            CircleAvatar(
+              backgroundImage: ExactAssetImage(
+                "images/sam.jpg",
+              ),
+              radius: 50.0,
+            ),
+            index == 0
+                ? Padding(
+                    padding: EdgeInsets.only(
+                      top: 60.0,
+                      left: 40.0,
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0.0,
+                        primary: Colors.lightBlue,
+                        shape: CircleBorder(),
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 30.0,
+                      ),
+                      onPressed: () {
+                        print("Status Add Button Pressed");
+                      },
+                    ),
+                  )
+                : SizedBox(),
+          ],
         ),
-        radius: 50.0,
       ),
     );
   }

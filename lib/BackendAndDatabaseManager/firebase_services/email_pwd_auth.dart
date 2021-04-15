@@ -13,7 +13,6 @@ class EmailAndPasswordAuth {
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
 
   TextEditingController _userName = TextEditingController();
-  TextEditingController _nickName = TextEditingController();
   TextEditingController _about = TextEditingController();
 
   EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
@@ -158,26 +157,6 @@ class EmailAndPasswordAuth {
                         height: 15.0,
                       ),
                       TextFormField(
-                        controller: _nickName,
-                        style: TextStyle(color: Colors.white),
-                        validator: (inputUserName) {
-                          if (inputUserName.length < 6)
-                            return "Nick Name At Least 6 Characters";
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          labelText: "Nick Name / Public Friendly Name",
-                          labelStyle:
-                              TextStyle(color: Colors.white70, fontSize: 14.0),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.lightBlue),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 15.0,
-                      ),
-                      TextFormField(
                         controller: _about,
                         style: TextStyle(color: Colors.white),
                         validator: (inputUserName) {
@@ -220,33 +199,23 @@ class EmailAndPasswordAuth {
                                           isEqualTo: this._userName.text)
                                       .get();
 
-                              QuerySnapshot querySnapShotForNickNameChecking =
-                                  await FirebaseFirestore.instance
-                                      .collection('generation_users')
-                                      .where('nick_name',
-                                          isEqualTo: this._nickName.text)
-                                      .get();
-
                               print(querySnapShotForUserNameChecking.docs);
-                              print(querySnapShotForNickNameChecking.docs);
 
                               if (querySnapShotForUserNameChecking
-                                      .docs.isEmpty &&
-                                  querySnapShotForNickNameChecking
-                                      .docs.isEmpty) {
+                                  .docs.isEmpty) {
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
                                     .doc(_email)
                                     .set({
                                   'user_name': this._userName.text,
-                                  'nick_name': this._nickName.text,
                                   'about': this._about.text,
                                   'connection_request': {},
-                                  "creation_date": DateFormat('dd-MM-yyyy')
+                                  'creation_date': DateFormat('dd-MM-yyyy')
                                       .format(DateTime.now()),
-                                  "creation_time":
+                                  'creation_time':
                                       "${DateFormat('hh:mm a').format(DateTime.now())}",
-                                  "connections": {},
+                                  'connections': {},
+                                  'activity': {},
                                 });
 
                                 print("Log-In Successful: User Name: $_email");
@@ -260,19 +229,11 @@ class EmailAndPasswordAuth {
                                 showAlertBox("Log-In Successful",
                                     "Enjoy this app", Colors.green);
                               } else {
-                                if (querySnapShotForNickNameChecking
-                                        .docs.isNotEmpty &&
-                                    querySnapShotForUserNameChecking
-                                        .docs.isNotEmpty) {
-                                  //Navigator.pop(this._context);
-                                  showAlertBox(
-                                      "Nick Name And User Name Already Exist",
-                                      "Try Another Nick Name or User Name",
-                                      Colors.yellow);
-                                } else if (querySnapShotForNickNameChecking
+                                if (querySnapShotForUserNameChecking
                                     .docs.isNotEmpty) {
-                                  showAlertBox("Nick Name Already Exist",
-                                      "Try Another Nick Name", Colors.yellow);
+                                  //Navigator.pop(this._context);
+                                  showAlertBox("User Name Already Exist",
+                                      "Try Another User Name", Colors.yellow);
                                 } else {
                                   //Navigator.pop(this._context);
                                   showAlertBox("User Name Already Exist",

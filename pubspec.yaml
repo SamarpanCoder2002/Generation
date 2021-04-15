@@ -28,17 +28,22 @@ dependencies:
 
   flutter_icons: ^1.1.0
   modal_progress_hud: ^0.1.3
+  animations: ^2.0.0
+  emoji_picker: ^0.1.0
+  page_transition:
 
   circle_list:
   image_picker:
   flutter_switch:
   fab_circular_menu:
-  page_transition:
 
   firebase_core: ^1.0.2
   firebase_auth: ^1.0.1
   google_sign_in: ^5.0.1
   cloud_firestore: ^1.0.3
+  firebase_messaging: ^9.1.1
+
+  flutter_local_notifications: ^5.0.0+1
 
   sqflite: ^2.0.0+3
 

@@ -90,7 +90,7 @@ class _SearchState extends State<Search> {
                 ),
                 Text(
                   searchResultSnapshot.docs[index]
-                      [searchArgument == "about" ? "nick_name" : "about"],
+                      [searchArgument == "about" ? "user_name" : "about"],
                   style: TextStyle(color: Colors.lightBlue, fontSize: 14),
                 ),
               ],
@@ -214,7 +214,7 @@ class _SearchState extends State<Search> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    searchArgument = "nick_name";
+    searchArgument = "user_name";
   }
 
   @override
@@ -313,18 +313,6 @@ class _SearchState extends State<Search> {
                 child: ListView(
                   shrinkWrap: true,
                   children: <Widget>[
-                    TextButton(
-                      child: Text(
-                        "Nick Name",
-                        style: TextStyle(color: Colors.orange),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          searchArgument = "nick_name";
-                          Navigator.pop(context);
-                        });
-                      },
-                    ),
                     TextButton(
                       child: Text(
                         "User Name",
