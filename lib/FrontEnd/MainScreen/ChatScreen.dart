@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,67 +37,139 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   extractHistoryData() async {
-    List<Map<String, dynamic>> messagesGet =
-        await localStorageHelper.extractMessageData(widget._userName);
+    try {
+      List<Map<String, dynamic>> messagesGet =
+          await localStorageHelper.extractMessageData(widget._userName);
+      if (messagesGet.isNotEmpty) {
+        for (Map<String, dynamic> message in messagesGet) {
+          List<dynamic> messageContainer = message.values.toList();
 
-    print(messagesGet);
-
-    if (messagesGet.isNotEmpty) {
-      for (Map<String, dynamic> message in messagesGet) {
-        print(message.values);
-        List<dynamic> messageContainer = message.values.toList();
-
-        if (messageContainer.isEmpty) {
-          if (_isChatOpen) {
-            if (mounted) {
-              setState(() {
-                _isChatOpen = false;
-
-                print("Present 0");
-                // For AutoScroll to the end position
-                if (scrollController.hasClients)
-                  scrollController
-                      .jumpTo(scrollController.position.maxScrollExtent);
-              });
-            }
-          }
-        } else {
-          if (mounted) {
-            setState(() {
-              chatContainer.add({
-                messageContainer[0].toString(): messageContainer[1].toString(),
-              });
-              if (messageContainer[2] == 1)
-                response.add(true);
-              else
-                response.add(false);
-
-
-              if(mounted){
+          if (messageContainer.isEmpty) {
+            if (_isChatOpen) {
+              if (mounted) {
                 setState(() {
-                  print("Present 1");
+                  _isChatOpen = false;
+
                   // For AutoScroll to the end position
                   if (scrollController.hasClients)
                     scrollController
                         .jumpTo(scrollController.position.maxScrollExtent);
                 });
               }
-            });
+            }
+          } else {
+            if (mounted) {
+              setState(() {
+                chatContainer.add({
+                  messageContainer[0].toString():
+                      messageContainer[1].toString(),
+                });
+                if (messageContainer[2] == 1)
+                  response.add(true);
+                else
+                  response.add(false);
+
+                if (mounted) {
+                  setState(() {
+                    // For AutoScroll to the end position
+                    if (scrollController.hasClients)
+                      scrollController
+                          .jumpTo(scrollController.position.maxScrollExtent);
+                  });
+                }
+              });
+            }
           }
         }
-      }
-      if(mounted){
-        print("1.1");
+        if (mounted) {
+          setState(() {
+            if (scrollController.hasClients)
+              scrollController
+                  .jumpTo(scrollController.position.maxScrollExtent);
+          });
+        }
+      } else {
         setState(() {
-          if (scrollController.hasClients)
-            scrollController
-                .jumpTo(scrollController.position.maxScrollExtent);
+          _isChatOpen = false;
         });
       }
-    } else {
-      setState(() {
-        _isChatOpen = false;
+      extractDataFromFireStore();
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text("Local Database Error"),
+                content: Text(e.toString()),
+              ));
+    }
+  }
+
+  extractDataFromFireStore() {
+    try {
+      // Fetch Data from FireStore
+      management.getDatabaseData().listen((event) {
+        if (event.data()['connections'].length > 0) {
+          // Checking If Sender Mail Present or Not
+          if (event.data()['connections'].containsKey(this._senderMail)) {
+            List<dynamic> messages = event.data()['connections'][this
+                ._senderMail]; // Take Corresponding messages of that Contact
+
+            if (messages.isNotEmpty) {
+              if (_isChatOpen) {
+                if (mounted) {
+                  setState(() {
+                    print("Present 2");
+                    _isChatOpen = false;
+                  });
+                }
+              }
+              if (mounted) {
+                setState(() {
+                  Map<String, dynamic> allConnections =
+                      event.data()['connections'] as Map;
+
+                  allConnections[this._senderMail] = [];
+
+                  FirebaseFirestore.instance
+                      .doc(
+                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                      .update({
+                    'connections': allConnections,
+                  });
+
+                  messages.forEach((everyMessage) {
+                    chatContainer.add({
+                      '${everyMessage.keys.first}':
+                          '${everyMessage.values.first}',
+                      // Add in Local Container
+                    });
+                    response.add(true); // Chat Position Status Added
+
+                    localStorageHelper.insertNewMessages(widget._userName,
+                        everyMessage.keys.first.toString(), 1);
+                  });
+
+                  // For AutoScroll to the end position
+                  if (scrollController.hasClients)
+                    scrollController.jumpTo(
+                        scrollController.position.maxScrollExtent + 100);
+                });
+              }
+            } else {
+              print("No message Here");
+            }
+          } else {
+            print("Contacts Not Present");
+          }
+        }
       });
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text("Firestore Problem"),
+                content: Text(e.toString()),
+              ));
     }
   }
 
@@ -109,63 +183,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       initialScrollOffset: 0.0,
     );
 
-    print(_isChatOpen);
-
     if (_isChatOpen) {
       extractHistoryData();
     }
-    // Fetch Data from FireStore
-    management.getDatabaseData().listen((event) {
-      if (event.data()['connections'].length > 0) {
-        // Checking If Sender Mail Present or Not
-        if (event.data()['connections'].containsKey(this._senderMail)) {
-          List<dynamic> messages = event.data()['connections']
-              [this._senderMail]; // Take Corresponding messages of that Contact
 
-          if (messages.isNotEmpty) {
-            if (_isChatOpen) {
-              setState(() {
-                print("Present 2");
-                _isChatOpen = false;
-              });
-            } else {
-              if (mounted) {
-                setState(() {
-                  print("Present 3");
-
-                  Map<String, dynamic> lastMessages =
-                      messages.last; // Taking Latest Message
-
-                  // Data Store in Local Storage
-                  localStorageHelper.insertNewMessages(
-                      widget._userName, lastMessages.keys.first.toString(), 1);
-
-                  chatContainer.add({
-                    '${lastMessages.keys.first}':
-                        '${lastMessages.values.first}',
-                    // Add in Local Container
-                  });
-                  response.add(true); // Chat Position Status Added
-
-                  // For AutoScroll to the end position
-                  if (scrollController.hasClients)
-                    scrollController.jumpTo(
-                        scrollController.position.maxScrollExtent + 100);
-                });
-              }
-            }
-          } else {
-            print("No message Here");
-          }
-        } else {
-          print("Contacts Not Present");
-        }
-      }
-    });
-
-    if(mounted) {
+    if (mounted) {
       setState(() {
-        print("Present 4");
         // For AutoScroll to the end position
         if (scrollController.hasClients)
           scrollController.jumpTo(scrollController.position.maxScrollExtent);
@@ -387,30 +410,62 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         color: Colors.green,
                       ),
                       onPressed: () async {
-                        print("Send Pressed");
-                        if (inputText.text.isNotEmpty) {
-                          response.add(false);
+                        try {
+                          print("Send Pressed");
+                          if (inputText.text.isNotEmpty) {
+                            response.add(false);
 
-                          if (mounted) {
-                            setState(() {
-                              chatContainer.add({
-                                '${inputText.text}':
-                                    "${DateTime.now().hour}:${DateTime.now().minute}",
+                            DocumentSnapshot documentSnapShot =
+                                await FirebaseFirestore.instance
+                                    .doc("generation_users/$_senderMail")
+                                    .get();
+
+                            List<dynamic> sendingMessages =
+                                documentSnapShot.data()['connections'][
+                                    FirebaseAuth.instance.currentUser.email
+                                        .toString()];
+
+                            if(sendingMessages == null)
+                              sendingMessages = [];
+
+                            if (mounted) {
+                              setState(() {
+                                sendingMessages.add({
+                                  '${inputText.text}':
+                                      "${DateTime.now().hour}:${DateTime.now().minute}",
+                                });
+
+                                chatContainer.add({
+                                  '${inputText.text}':
+                                      "${DateTime.now().hour}:${DateTime.now().minute}",
+                                });
+                                inputText.clear();
                               });
-                              inputText.clear();
-                            });
+                            }
+
+                            scrollController.jumpTo(
+                                scrollController.position.maxScrollExtent +
+                                    100);
+
+                            // Data Store in Local Storage
+                            localStorageHelper.insertNewMessages(
+                                widget._userName,
+                                chatContainer.last.keys.first.toString(),
+                                0);
+
+                            // Data Store in Firestore
+                            management.addConversationMessages(
+                                this._senderMail, sendingMessages);
                           }
-
-                          scrollController.jumpTo(
-                              scrollController.position.maxScrollExtent + 100);
-
-                          // Data Store in Local Storage
-                          localStorageHelper.insertNewMessages(widget._userName,
-                              chatContainer.last.keys.first.toString(), 0);
-
-                          // Data Store in Firestore
-                          management.addConversationMessages(
-                              this._senderMail, chatContainer);
+                        } catch (e) {
+                          showDialog(
+                              context: context,
+                              builder: (_) {
+                                return AlertDialog(
+                                  title: Text("Send Problem"),
+                                  content: Text(e.toString()),
+                                );
+                              });
                         }
                       },
                     ),

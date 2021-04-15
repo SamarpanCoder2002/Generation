@@ -40,7 +40,7 @@ class Management {
   }
 
   void addConversationMessages(
-      String _senderMail, List<Map<String, String>> messageMap) {
+      String _senderMail, List<dynamic> messageMap) {
     FirebaseFirestore.instance.doc("generation_users/$_senderMail").update({
       'connections': {
         '${FirebaseAuth.instance.currentUser.email}': messageMap,
