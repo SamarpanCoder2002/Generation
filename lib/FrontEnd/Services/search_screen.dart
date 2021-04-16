@@ -21,9 +21,11 @@ class _SearchState extends State<Search> {
 
   initiateSearch() async {
     if (searchUser.text.isNotEmpty) {
-      setState(() {
-        isLoading = true;
-      });
+      if(mounted){
+        setState(() {
+          isLoading = true;
+        });
+      }
       await FirebaseFirestore.instance
           .collection("generation_users")
           .where(
@@ -37,10 +39,12 @@ class _SearchState extends State<Search> {
       }).then((snapshot) {
         searchResultSnapshot = snapshot;
         print("$searchResultSnapshot");
-        setState(() {
-          isLoading = false;
-          haveUserSearched = true;
-        });
+        if(mounted){
+          setState(() {
+            isLoading = false;
+            haveUserSearched = true;
+          });
+        }
       });
     }
   }
@@ -99,9 +103,11 @@ class _SearchState extends State<Search> {
           IconButton(
             icon: requestIconController(index),
             onPressed: () async {
-              setState(() {
-                isLoading = true;
-              });
+              if(mounted) {
+                setState(() {
+                  isLoading = true;
+                });
+              }
 
               DocumentSnapshot documentSnapShotCurrUser =
                   await FirebaseFirestore.instance
@@ -126,22 +132,24 @@ class _SearchState extends State<Search> {
                       "Invitation Came",
                 });
 
-                setState(() {
-                  FirebaseFirestore.instance
-                      .doc(
-                          'generation_users/${searchResultSnapshot.docs[index].id}')
-                      .update({
-                    'connection_request':
-                        connectionRequestCollectionRequestUser,
-                  });
+                if(mounted) {
+                  setState(() {
+                    FirebaseFirestore.instance
+                        .doc(
+                            'generation_users/${searchResultSnapshot.docs[index].id}')
+                        .update({
+                      'connection_request':
+                          connectionRequestCollectionRequestUser,
+                    });
 
-                  FirebaseFirestore.instance
-                      .doc(
-                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
-                      .update({
-                    'connection_request': connectionRequestCollectionCurrUser,
+                    FirebaseFirestore.instance
+                        .doc(
+                            'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                        .update({
+                      'connection_request': connectionRequestCollectionCurrUser,
+                    });
                   });
-                });
+                }
 
                 print("Updated");
               } else {
@@ -173,36 +181,42 @@ class _SearchState extends State<Search> {
                     '${searchResultSnapshot.docs[index].id}': [],
                   });
 
-                  setState(() {
-                    FirebaseFirestore.instance
-                        .doc(
-                            'generation_users/${searchResultSnapshot.docs[index].id}')
-                        .update({
-                      'connection_request':
-                          connectionRequestCollectionRequestUser,
-                      'connections': connectionsMapRequestUser,
-                    });
+                  if(mounted){
+                    setState(() {
+                      FirebaseFirestore.instance
+                          .doc(
+                          'generation_users/${searchResultSnapshot.docs[index].id}')
+                          .update({
+                        'connection_request':
+                        connectionRequestCollectionRequestUser,
+                        'connections': connectionsMapRequestUser,
+                      });
 
-                    FirebaseFirestore.instance
-                        .doc(
-                            'generation_users/${FirebaseAuth.instance.currentUser.email}')
-                        .update({
-                      'connection_request': connectionRequestCollectionCurrUser,
-                      'connections': connectionsMapCurrUser,
+                      FirebaseFirestore.instance
+                          .doc(
+                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                          .update({
+                        'connection_request': connectionRequestCollectionCurrUser,
+                        'connections': connectionsMapCurrUser,
+                      });
                     });
-                  });
+                  }
                 } else {
                   print("Nothing To Do");
                 }
               }
 
-              setState(() {
-                initiateSearch();
-              });
+              if(mounted) {
+                setState(() {
+                  initiateSearch();
+                });
+              }
 
-              setState(() {
-                isLoading = false;
-              });
+              if(mounted) {
+                setState(() {
+                  isLoading = false;
+                });
+              }
             },
           ),
         ],
@@ -319,10 +333,12 @@ class _SearchState extends State<Search> {
                         style: TextStyle(color: Colors.orange),
                       ),
                       onPressed: () {
-                        setState(() {
-                          searchArgument = "user_name";
-                          Navigator.pop(context);
-                        });
+                        if(mounted){
+                          setState(() {
+                            searchArgument = "user_name";
+                            Navigator.pop(context);
+                          });
+                        }
                       },
                     ),
                     TextButton(
@@ -331,10 +347,12 @@ class _SearchState extends State<Search> {
                         style: TextStyle(color: Colors.orange),
                       ),
                       onPressed: () {
-                        setState(() {
-                          searchArgument = "about";
-                          Navigator.pop(context);
-                        });
+                        if(mounted){
+                          setState(() {
+                            searchArgument = "about";
+                            Navigator.pop(context);
+                          });
+                        }
                       },
                     ),
                   ],

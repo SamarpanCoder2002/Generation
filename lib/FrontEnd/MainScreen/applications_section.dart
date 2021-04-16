@@ -31,6 +31,16 @@ class _ApplicationListState extends State<ApplicationList> {
             outerCircleColor: Color.fromRGBO(0, 0, 0, 0.1),
             origin: Offset(0, 0),
             rotateMode: RotateMode.allRotate,
+            centerWidget: Center(
+              child: Text(
+                "G",
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                  fontSize: 65.0,
+                  fontFamily: 'Lora',
+                ),
+              ),
+            ),
             children: <Widget>[
               Container(
                 width: 80,
@@ -41,14 +51,24 @@ class _ApplicationListState extends State<ApplicationList> {
                       color: Colors.blue,
                       width: 3,
                     )),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0.0,
-                    primary: Color.fromRGBO(0, 0, 0, 0.0),
-                    onPrimary: Colors.white70,
-                    shape: CircleBorder(),
-                  ),
-                  onPressed: () async {
+                child: GestureDetector(
+                  onLongPress: () async {
+                    print("Take Image");
+
+                    final PickedFile pickedFile =
+                        await picker.getImage(source: ImageSource.gallery);
+
+                    print(pickedFile.path);
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PreviewImageScreen(
+                            imagePath: File(pickedFile.path).path),
+                      ),
+                    );
+                  },
+                  onTap: () async {
                     final PickedFile pickedFile =
                         await picker.getImage(source: ImageSource.camera);
 
@@ -90,65 +110,14 @@ class _ApplicationListState extends State<ApplicationList> {
                       color: Colors.blue,
                       width: 3,
                     )),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0.0,
-                    primary: Color.fromRGBO(0, 0, 0, 0.0),
-                    onPrimary: Colors.white70,
-                    shape: CircleBorder(),
-                  ),
-                  onPressed: () async {
-                    print("Take Image");
-
+                child: GestureDetector(
+                  onLongPress: () async {
                     final PickedFile pickedFile =
-                        await picker.getImage(source: ImageSource.gallery);
+                        await picker.getVideo(source: ImageSource.gallery);
 
                     print(pickedFile.path);
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PreviewImageScreen(
-                            imagePath: File(pickedFile.path).path),
-                      ),
-                    );
                   },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Icon(
-                        Icons.image,
-                        size: 40,
-                        color: Colors.green,
-                      ),
-                      Text(
-                        'Images',
-                        style: TextStyle(
-                            color: Colors.orangeAccent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(
-                      color: Colors.blue,
-                      width: 3,
-                    )),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0.0,
-                    primary: Color.fromRGBO(0, 0, 0, 0.0),
-                    onPrimary: Colors.white70,
-                    shape: CircleBorder(),
-                  ),
-                  onPressed: () async {
+                  onTap: () async {
                     final PickedFile pickedFile =
                         await picker.getVideo(source: ImageSource.camera);
 
@@ -166,7 +135,7 @@ class _ApplicationListState extends State<ApplicationList> {
                         'Video',
                         style: TextStyle(
                             color: Colors.orangeAccent,
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold),
                       )
                     ],
@@ -202,7 +171,7 @@ class _ApplicationListState extends State<ApplicationList> {
                         'Call',
                         style: TextStyle(
                             color: Colors.orangeAccent,
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold),
                       )
                     ],

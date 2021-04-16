@@ -16,152 +16,166 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _currIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-          drawer: Drawer(
-            elevation: 10.0,
-            child: Container(
-              color: Color.fromRGBO(34, 48, 60, 1),
-              height: double.maxFinite,
-              width: double.maxFinite,
-              child: ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.account_box_outlined),
-                      onPressed: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => Profile()));
-                      }),
-                  IconButton(
-                      icon: Icon(Icons.settings),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SettingsWindow()));
-                      }),
-                  IconButton(
-                      icon: Icon(Icons.feedback),
-                      onPressed: () {
-                        print("Exit Clicked");
-                      }),
-                  IconButton(
-                      icon: Icon(Icons.exit_to_app),
-                      onPressed: () {
-                        print("Exit Clicked");
-                        SystemNavigator.pop();
-                      }),
+      length: 3,
+      child: WillPopScope(
+          onWillPop: () async {
+            if (_currIndex > 0) return false;
+            return true;
+          },
+          child: Scaffold(
+            key: _scaffoldKey,
+            backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+            drawer: Drawer(
+              elevation: 10.0,
+              child: Container(
+                color: Color.fromRGBO(34, 48, 60, 1),
+                height: double.maxFinite,
+                width: double.maxFinite,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    IconButton(
+                        icon: Icon(Icons.account_box_outlined),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Profile()));
+                        }),
+                    IconButton(
+                        icon: Icon(Icons.settings),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SettingsWindow()));
+                        }),
+                    IconButton(
+                        icon: Icon(Icons.feedback),
+                        onPressed: () {
+                          print("Exit Clicked");
+                        }),
+                    IconButton(
+                        icon: Icon(Icons.exit_to_app),
+                        onPressed: () {
+                          print("Exit Clicked");
+                          SystemNavigator.pop();
+                        }),
+                  ],
+                ),
+              ),
+            ),
+            appBar: AppBar(
+              brightness: Brightness.dark,
+              backgroundColor: Color.fromRGBO(25, 39, 52, 1),
+              elevation: 10.0,
+              shadowColor: Colors.white70,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40.0),
+                  bottomRight: Radius.circular(40.0),
+                ),
+                side: BorderSide(width: 0.7),
+              ),
+              title: Text(
+                "Generation",
+                style: TextStyle(
+                    fontSize: 25.0, fontFamily: 'Lora', letterSpacing: 1.0),
+              ),
+              actions: [
+                Container(
+                  padding: EdgeInsets.only(
+                    right: 20.0,
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.supervised_user_circle_outlined,
+                      size: 25.0,
+                    ),
+                    onPressed: () {
+                      print("New User Add");
+                    },
+                  ),
+                )
+              ],
+              bottom: TabBar(
+                indicatorPadding: EdgeInsets.only(left: 20.0, right: 20.0),
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white60,
+                indicator: UnderlineTabIndicator(
+                    borderSide: BorderSide(width: 2.0, color: Colors.lightBlue),
+                    insets: EdgeInsets.symmetric(horizontal: 15.0)),
+                automaticIndicatorColorAdjustment: true,
+                labelStyle: TextStyle(
+                  fontFamily: 'Lora',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 1.0,
+                ),
+                onTap: (index) {
+                  print("\nIndex is: $index");
+                  if (mounted) {
+                    setState(() {
+                      _currIndex = index;
+                    });
+                  }
+                },
+                tabs: [
+                  Tab(
+                    child: Text(
+                      "Chats",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontFamily: 'Lora',
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                  Tab(
+                    child: Text(
+                      "Logs",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontFamily: 'Lora',
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.store,
+                      size: 25.0,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          appBar: AppBar(
-            brightness: Brightness.dark,
-            backgroundColor: Color.fromRGBO(25, 39, 52, 1),
-            elevation: 10.0,
-            shadowColor: Colors.white70,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40.0),
-                bottomRight: Radius.circular(40.0),
-              ),
-              side: BorderSide(width: 0.7),
-            ),
-            title: Text(
-              "Generation",
-              style: TextStyle(
-                  fontSize: 25.0, fontFamily: 'Lora', letterSpacing: 1.0),
-            ),
-            actions: [
-              Container(
-                padding: EdgeInsets.only(
-                  right: 20.0,
+            floatingActionButton: FloatingActionButton(
+                backgroundColor: Color.fromRGBO(20, 200, 50, 1),
+                child: Icon(
+                  Icons.search_rounded,
+                  color: Colors.white,
+                  size: 30.0,
                 ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.supervised_user_circle_outlined,
-                    size: 25.0,
-                  ),
-                  onPressed: () {
-                    print("New User Add");
-                  },
-                ),
-              )
-            ],
-            bottom: TabBar(
-              indicatorPadding: EdgeInsets.only(left: 20.0, right: 20.0),
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white60,
-              indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(width: 2.0, color: Colors.lightBlue),
-                  insets: EdgeInsets.symmetric(horizontal: 15.0)),
-              automaticIndicatorColorAdjustment: true,
-              labelStyle: TextStyle(
-                fontFamily: 'Lora',
-                fontWeight: FontWeight.w500,
-                letterSpacing: 1.0,
-              ),
-              onTap: (index) {
-                print("\nIndex is: $index");
-              },
-              tabs: [
-                Tab(
-                  child: Text(
-                    "Chats",
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontFamily: 'Lora',
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    "Logs",
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontFamily: 'Lora',
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                ),
-                Tab(
-                  icon: Icon(
-                    Icons.store,
-                    size: 25.0,
-                  ),
-                ),
+                onPressed: () async {
+                  print('Search based on Text');
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (_) => Search()));
+                }),
+            body: TabBarView(
+              children: [
+                ChatScreen(),
+                ScreenLogs(),
+                ApplicationList(),
               ],
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-              backgroundColor: Color.fromRGBO(20, 200, 50, 1),
-              child: Icon(
-                Icons.search_rounded,
-                color: Colors.white,
-                size: 30.0,
-              ),
-              onPressed: () async {
-                print('Search based on Text');
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => Search()));
-              }),
-          body: TabBarView(
-            children: [
-              ChatScreen(),
-              ScreenLogs(),
-              ApplicationList(),
-            ],
-          ),
-        ));
+          )),
+    );
   }
 }

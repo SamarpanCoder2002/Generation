@@ -569,6 +569,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             [FirebaseAuth.instance.currentUser.email.toString()];
 
         if (mounted) {
+          if (sendingMessages == null) sendingMessages = [];
+
           setState(() {
             // Add data to temporary Storage of Sending
             sendingMessages.add({
