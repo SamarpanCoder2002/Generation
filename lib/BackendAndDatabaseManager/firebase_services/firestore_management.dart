@@ -52,7 +52,8 @@ class Management {
   }
 
   Stream<DocumentSnapshot> getDatabaseData() {
-    final Stream<DocumentSnapshot> streamDocumentSnapShot = FirebaseFirestore.instance
+    final Stream<DocumentSnapshot> streamDocumentSnapShot = FirebaseFirestore
+        .instance
         .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
         .snapshots();
 
@@ -103,7 +104,7 @@ class Management {
 
           currConnection.add({
             activityText:
-                '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}',
+                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}',
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email

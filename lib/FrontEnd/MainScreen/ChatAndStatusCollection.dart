@@ -4,8 +4,10 @@ import 'package:circle_list/circle_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/FrontEnd/Services/auth_error_msg_toast.dart';
 import 'package:generation/FrontEnd/Services/status_text_container.dart';
 import 'package:generation/FrontEnd/Store/images_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,6 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   List<String> allConnectionsUserName = [];
 
   List<Map<String, dynamic>> allConnectionActivity;
+  FToast fToast;
 
   Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
@@ -39,6 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
           event.data()['activity'] as Map;
 
       Map<String, dynamic> myStatusTempStore = Map<String, dynamic>();
+
+      allConnectionActivity.clear();
 
       // Activity Collection Take
       allConnectionActivityTake.forEach((connectionMail, connectionActivity) {
@@ -61,7 +66,6 @@ class _ChatScreenState extends State<ChatScreen> {
               });
             }
           }
-
         }
       });
 
@@ -129,6 +133,10 @@ class _ChatScreenState extends State<ChatScreen> {
     print("Initialization");
     allConnectionsUserName = [];
     allConnectionActivity = [];
+
+    fToast = FToast();
+    fToast.init(context);
+
     fetchRealTimeData();
   }
 
@@ -192,10 +200,54 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
-                //int red = allConnectionActivity[index].second;
-                return Container(
-                  color: Color.fromRGBO(34, 48, 60, 1),
-                );
+                int r, g, b;
+                double opacity;
+                String text;
+
+                if (allConnectionActivity.isNotEmpty) {
+                  allConnectionActivity[index].values.forEach((activityItem) {
+                    List<String> colorValues = activityItem[0]
+                        .values
+                        .toList()[0]
+                        .toString()
+                        .split("+");
+
+                    r = int.parse(colorValues[0]);
+                    g = int.parse(colorValues[1]);
+                    b = int.parse(colorValues[2]);
+                    opacity = double.parse(colorValues[3]);
+
+                    text = activityItem[0].keys.toList()[0];
+                  });
+                }
+                try {
+                  return Container(
+                    color: Color.fromRGBO(r, g, b, opacity),
+                    child: Center(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 30.0,
+                          color: Colors.white,
+                          fontFamily: 'Lora',
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ),
+                  );
+                } catch (e) {
+                  return Center(
+                    child: Text(
+                      "No Activity Present",
+                      style: TextStyle(
+                        fontSize: 30.0,
+                        color: Colors.red,
+                        fontFamily: 'Lora',
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  );
+                }
               },
               closedBuilder: (context, closeWidget) {
                 return CircleAvatar(

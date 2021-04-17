@@ -42,7 +42,7 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: pickColor,
         floatingActionButton: FloatingActionButton(
           elevation: 5.0,
           backgroundColor: Color.fromRGBO(100, 200, 10, 1),
