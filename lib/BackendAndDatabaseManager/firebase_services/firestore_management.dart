@@ -2,11 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Management {
+  final LocalStorageHelper localStorageHelper = LocalStorageHelper();
+
   Widget logOutButton(BuildContext context) {
     return Center(
       child: ElevatedButton(
@@ -39,8 +43,7 @@ class Management {
     );
   }
 
-  void addConversationMessages(
-      String _senderMail, List<dynamic> messageMap) {
+  void addConversationMessages(String _senderMail, List<dynamic> messageMap) {
     FirebaseFirestore.instance.doc("generation_users/$_senderMail").update({
       'connections': {
         '${FirebaseAuth.instance.currentUser.email}': messageMap,
@@ -49,9 +52,76 @@ class Management {
   }
 
   Stream<DocumentSnapshot> getDatabaseData() {
-    var take = FirebaseFirestore.instance
+    final Stream<DocumentSnapshot> streamDocumentSnapShot = FirebaseFirestore.instance
         .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
         .snapshots();
-    return take;
+
+    return streamDocumentSnapShot;
+  }
+
+  Future<bool> addTextActivityTextToFireStore(String activityText,
+      Color selectedBGColor, List<String> allConnectionUserName) async {
+    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+        .get();
+
+    Map<String, dynamic> activityCollection =
+        documentSnapshot.data()['activity'] as Map;
+    List<dynamic> currConnection = activityCollection['My Activity'];
+
+    if (currConnection == null) currConnection = [];
+
+    currConnection.add({
+      activityText:
+          '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}',
+    });
+
+    activityCollection['My Activity'] = currConnection;
+
+    await FirebaseFirestore.instance
+        .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+        .update({
+      'activity': activityCollection,
+    });
+
+    if (allConnectionUserName.isNotEmpty) {
+      try {
+        allConnectionUserName.forEach((String connectionUserName) async {
+          String _userMail =
+              await localStorageHelper.fetchEmail(connectionUserName);
+
+          DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+              .doc('generation_users/$_userMail')
+              .get();
+
+          Map<String, dynamic> activityCollection =
+              documentSnapshot.data()['activity'] as Map;
+          List<dynamic> currConnection = activityCollection[
+              FirebaseAuth.instance.currentUser.email.toString()];
+
+          if (currConnection == null) currConnection = [];
+
+          currConnection.add({
+            activityText:
+                '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}',
+          });
+
+          activityCollection[FirebaseAuth.instance.currentUser.email
+              .toString()] = currConnection;
+
+          await FirebaseFirestore.instance
+              .doc('generation_users/$_userMail')
+              .update({
+            'activity': activityCollection,
+          });
+        });
+
+        return true;
+      } catch (e) {
+        print("Text Status Update Error: ${e.toString()}");
+        return false;
+      }
+    } else
+      return false;
   }
 }

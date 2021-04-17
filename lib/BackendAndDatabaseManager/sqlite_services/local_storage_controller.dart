@@ -135,7 +135,7 @@ class LocalStorageHelper {
   //   yield allData.toList();
   // }
 
-  Future<String> fetchSendingInformation(String _tableName) async {
+  Future<String> fetchEmail(String _tableName) async {
     Database db = await this.database;
 
     var result = await db

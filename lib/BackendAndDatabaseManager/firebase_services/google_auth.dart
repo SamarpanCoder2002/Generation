@@ -193,7 +193,9 @@ class GoogleAuth {
                                   'creation_time':
                                       "${DateFormat('hh:mm a').format(DateTime.now())}",
                                   'connections': {},
-                                  'activity': {},
+                                  'activity': {
+                                    'My Activity': [],
+                                  },
                                 });
 
                                 print("Log-In Successful: User Name: $_email");

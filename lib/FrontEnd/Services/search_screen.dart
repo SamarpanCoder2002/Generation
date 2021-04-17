@@ -21,7 +21,7 @@ class _SearchState extends State<Search> {
 
   initiateSearch() async {
     if (searchUser.text.isNotEmpty) {
-      if(mounted){
+      if (mounted) {
         setState(() {
           isLoading = true;
         });
@@ -39,7 +39,7 @@ class _SearchState extends State<Search> {
       }).then((snapshot) {
         searchResultSnapshot = snapshot;
         print("$searchResultSnapshot");
-        if(mounted){
+        if (mounted) {
           setState(() {
             isLoading = false;
             haveUserSearched = true;
@@ -103,7 +103,7 @@ class _SearchState extends State<Search> {
           IconButton(
             icon: requestIconController(index),
             onPressed: () async {
-              if(mounted) {
+              if (mounted) {
                 setState(() {
                   isLoading = true;
                 });
@@ -132,7 +132,7 @@ class _SearchState extends State<Search> {
                       "Invitation Came",
                 });
 
-                if(mounted) {
+                if (mounted) {
                   setState(() {
                     FirebaseFirestore.instance
                         .doc(
@@ -162,6 +162,12 @@ class _SearchState extends State<Search> {
                   Map<String, dynamic> connectionsMapCurrUser =
                       documentSnapShotCurrUser.get('connections');
 
+                  Map<String, dynamic> activityMapRequestUser =
+                      searchResultSnapshot.docs[index]['activity'];
+
+                  Map<String, dynamic> activityMapCurrUser =
+                      documentSnapShotCurrUser.get('activity');
+
                   connectionRequestCollectionCurrUser.addAll({
                     '${searchResultSnapshot.docs[index].id}':
                         "Invitation Accepted",
@@ -177,27 +183,38 @@ class _SearchState extends State<Search> {
                     '${FirebaseAuth.instance.currentUser.email}': [],
                   });
 
+                  activityMapRequestUser.addAll({
+                    '${FirebaseAuth.instance.currentUser.email}': [],
+                  });
+
                   connectionsMapCurrUser.addAll({
                     '${searchResultSnapshot.docs[index].id}': [],
                   });
 
-                  if(mounted){
+                  activityMapCurrUser.addAll({
+                    '${searchResultSnapshot.docs[index].id}': [],
+                  });
+
+                  if (mounted) {
                     setState(() {
                       FirebaseFirestore.instance
                           .doc(
-                          'generation_users/${searchResultSnapshot.docs[index].id}')
+                              'generation_users/${searchResultSnapshot.docs[index].id}')
                           .update({
                         'connection_request':
-                        connectionRequestCollectionRequestUser,
+                            connectionRequestCollectionRequestUser,
                         'connections': connectionsMapRequestUser,
+                        'activity': activityMapRequestUser,
                       });
 
                       FirebaseFirestore.instance
                           .doc(
-                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                              'generation_users/${FirebaseAuth.instance.currentUser.email}')
                           .update({
-                        'connection_request': connectionRequestCollectionCurrUser,
+                        'connection_request':
+                            connectionRequestCollectionCurrUser,
                         'connections': connectionsMapCurrUser,
+                        'activity': activityMapCurrUser,
                       });
                     });
                   }
@@ -206,13 +223,13 @@ class _SearchState extends State<Search> {
                 }
               }
 
-              if(mounted) {
+              if (mounted) {
                 setState(() {
                   initiateSearch();
                 });
               }
 
-              if(mounted) {
+              if (mounted) {
                 setState(() {
                   isLoading = false;
                 });
@@ -333,7 +350,7 @@ class _SearchState extends State<Search> {
                         style: TextStyle(color: Colors.orange),
                       ),
                       onPressed: () {
-                        if(mounted){
+                        if (mounted) {
                           setState(() {
                             searchArgument = "user_name";
                             Navigator.pop(context);
@@ -347,7 +364,7 @@ class _SearchState extends State<Search> {
                         style: TextStyle(color: Colors.orange),
                       ),
                       onPressed: () {
-                        if(mounted){
+                        if (mounted) {
                           setState(() {
                             searchArgument = "about";
                             Navigator.pop(context);

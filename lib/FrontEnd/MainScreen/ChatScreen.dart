@@ -43,8 +43,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   String _senderMail;
 
   void senderMail() async {
-    _senderMail =
-        await LocalStorageHelper().fetchSendingInformation(widget._userName);
+    _senderMail = await LocalStorageHelper().fetchEmail(widget._userName);
   }
 
   extractHistoryData() async {
@@ -269,6 +268,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
               ),
             ],
+
           ),
           title: ElevatedButton(
             style: ElevatedButton.styleFrom(

@@ -22,62 +22,114 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = false;
-  List<String> allConnectionsUserName;
+  List<String> allConnectionsUserName = [];
+
+  List<Map<String, dynamic>> allConnectionActivity;
 
   Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
-  final StatusTextContainer statusContainer = StatusTextContainer();
 
-  @override
-  void initState() {
-    print("Initialization");
-    allConnectionsUserName = [];
-    super.initState();
+  void fetchRealTimeData() async {
+    setState(() {
+      isLoading = true;
+    });
 
     management.getDatabaseData().listen((event) async {
+      Map<String, dynamic> allConnectionActivityTake =
+          event.data()['activity'] as Map;
+
+      Map<String, dynamic> myStatusTempStore = Map<String, dynamic>();
+
+      // Activity Collection Take
+      allConnectionActivityTake.forEach((connectionMail, connectionActivity) {
+        if (connectionActivity.toList().isEmpty) {
+          print("Empty Container");
+        } else {
+          List<dynamic> particularConnectionActivity =
+              allConnectionActivityTake[connectionMail] as List;
+
+          if (connectionMail == 'My Activity') {
+            myStatusTempStore = {
+              connectionMail: particularConnectionActivity,
+            };
+          } else {
+            if (mounted) {
+              setState(() {
+                allConnectionActivity.add({
+                  connectionMail: particularConnectionActivity,
+                });
+              });
+            }
+          }
+
+        }
+      });
+
+      if (mounted) {
+        setState(() {
+          allConnectionActivity.insert(0, myStatusTempStore);
+        });
+      }
+
+      print("All Connection Activity: $allConnectionActivity");
+
+      // Connection Request Take
       if (event.data()['connection_request'].length > 0) {
         if (mounted) {
           Map<String, Object> allConnectionRequest =
               event.data()['connection_request']; // Take All Connection Request
 
-          setState(() {
-            allConnectionRequest
-                .forEach((connectionName, connectionStatus) async {
-              if (connectionStatus.toString() == 'Request Accepted' ||
-                  connectionStatus.toString() == 'Invitation Accepted') {
-                // User All Information Take
-                print("Here Also");
-                DocumentSnapshot documentSnapshot = await FirebaseFirestore
-                    .instance
-                    .doc('generation_users/$connectionName')
-                    .get();
+          allConnectionRequest
+              .forEach((connectionName, connectionStatus) async {
+            if (connectionStatus.toString() == 'Request Accepted' ||
+                connectionStatus.toString() == 'Invitation Accepted') {
+              // User All Information Take
 
-                // Checking If Same USer NAme PResent in the list or not
-                if (!allConnectionsUserName
-                    .contains(documentSnapshot['user_name'])) {
-                  // Make SqLite Table With User UserName
-                  bool response = await localStorageHelper
-                      .createTable(documentSnapshot['user_name']);
-                  if (response) {
-                    await localStorageHelper.insertAdditionalData(
-                      documentSnapshot['user_name'],
-                      documentSnapshot['about'],
-                      documentSnapshot.id,
-                    );
-                  }
+              DocumentSnapshot documentSnapshot = await FirebaseFirestore
+                  .instance
+                  .doc('generation_users/$connectionName')
+                  .get();
 
+              // Checking If Same USer NAme PResent in the list or not
+              if (!allConnectionsUserName
+                  .contains(documentSnapshot['user_name'])) {
+                // Make SqLite Table With User UserName
+                bool response = await localStorageHelper
+                    .createTable(documentSnapshot['user_name']);
+                if (response) {
+                  await localStorageHelper.insertAdditionalData(
+                    documentSnapshot['user_name'],
+                    documentSnapshot['about'],
+                    documentSnapshot.id,
+                  );
+                }
+
+                if (mounted) {
                   setState(() {
                     allConnectionsUserName.insert(
                         0, documentSnapshot['user_name']);
                   });
-                } else
-                  print("Already Connection Added");
-              }
-            });
+                }
+              } else
+                print("Already Connection Added");
+            }
           });
         }
       }
     });
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print("Initialization");
+    allConnectionsUserName = [];
+    allConnectionActivity = [];
+    fetchRealTimeData();
   }
 
   @override
@@ -115,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
       height: MediaQuery.of(context).size.height * (1 / 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 20,
+        itemCount: allConnectionActivity.length,
         itemBuilder: (context, position) {
           return statusList(context, position);
         },
@@ -125,11 +177,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget statusList(BuildContext context, int index) {
     return Container(
-      margin: EdgeInsets.only(right: 20.0),
+      margin: EdgeInsets.only(right: MediaQuery.of(context).size.width / 18),
       child: GestureDetector(
-        onTap: () {
-          print("Status clicked");
-        },
+        onTap: () {},
         child: Stack(
           children: [
             OpenContainer(
@@ -142,6 +192,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
+                //int red = allConnectionActivity[index].second;
                 return Container(
                   color: Color.fromRGBO(34, 48, 60, 1),
                 );
@@ -158,7 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
             index == 0
                 ? Padding(
                     padding: EdgeInsets.only(
-                      top: 50.0,
+                      top: MediaQuery.of(context).size.height * (1 / 8) - 30,
                       left: 60.0,
                     ),
                     child: Container(
@@ -334,169 +385,177 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   activityList() {
-    final ImagePicker picker = ImagePicker();
     return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50.0),
-        ),
-        backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-        title: Center(
-          child: Text(
-            "Activity",
-            style: TextStyle(
-              color: Colors.lightBlue,
-              fontSize: 20.0,
-              fontFamily: 'Lora',
-              fontWeight: FontWeight.w400,
-              letterSpacing: 1.0,
-            ),
+      builder: (context) => activityListOptions(),
+    );
+  }
+
+  activityListOptions() {
+    final ImagePicker picker = ImagePicker();
+    return AlertDialog(
+      elevation: 0.3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+      title: Center(
+        child: Text(
+          "Activity",
+          style: TextStyle(
+            color: Colors.lightBlue,
+            fontSize: 20.0,
+            fontFamily: 'Lora',
+            fontWeight: FontWeight.w400,
+            letterSpacing: 1.0,
           ),
         ),
-        content: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height / 2.7,
-          child: ListView(
-            children: [
-              CircleList(
-                initialAngle: 55,
-                outerRadius: MediaQuery.of(context).size.width / 3.2,
-                innerRadius: MediaQuery.of(context).size.width / 10,
-                showInitialAnimation: true,
-                innerCircleColor: Color.fromRGBO(34, 48, 60, 1),
-                outerCircleColor: Color.fromRGBO(0, 0, 0, 0.1),
-                origin: Offset(0, 0),
-                rotateMode: RotateMode.allRotate,
-                centerWidget: Center(
-                  child: Text(
-                    "G",
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      fontSize: 40.0,
-                      fontFamily: 'Lora',
+      ),
+      content: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height / 2.7,
+        child: ListView(
+          children: [
+            CircleList(
+              initialAngle: 55,
+              outerRadius: MediaQuery.of(context).size.width / 3.2,
+              innerRadius: MediaQuery.of(context).size.width / 10,
+              showInitialAnimation: true,
+              innerCircleColor: Color.fromRGBO(34, 48, 60, 1),
+              outerCircleColor: Color.fromRGBO(0, 0, 0, 0.1),
+              origin: Offset(0, 0),
+              rotateMode: RotateMode.allRotate,
+              centerWidget: Center(
+                child: Text(
+                  "G",
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                    fontSize: 40.0,
+                    fontFamily: 'Lora',
+                  ),
+                ),
+              ),
+              children: <Widget>[
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 3,
+                      )),
+                  child: GestureDetector(
+                    child: Icon(
+                      Icons.text_fields_rounded,
+                      color: Colors.lightGreen,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StatusTextContainer(allConnectionsUserName),
+                          ));
+                    },
+                  ),
+                ),
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 3,
+                      )),
+                  child: GestureDetector(
+                    child: Icon(
+                      Icons.image_rounded,
+                      color: Colors.lightGreen,
+                    ),
+                    onTap: () async {
+                      final PickedFile pickedFile =
+                          await picker.getImage(source: ImageSource.camera);
+
+                      print(pickedFile.path);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PreviewImageScreen(
+                              imagePath: File(pickedFile.path).path),
+                        ),
+                      );
+                    },
+                    onLongPress: () async {
+                      print("Take Image");
+
+                      final PickedFile pickedFile =
+                          await picker.getImage(source: ImageSource.gallery);
+
+                      if (pickedFile != null) {
+                        print(pickedFile.path);
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PreviewImageScreen(
+                                imagePath: File(pickedFile.path).path),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 3,
+                      )),
+                  child: GestureDetector(
+                    child: Icon(
+                      Icons.video_collection_rounded,
+                      color: Colors.lightGreen,
+                    ),
+                    onTap: () async {
+                      final PickedFile pickedFile =
+                          await picker.getVideo(source: ImageSource.camera);
+
+                      print(pickedFile.path);
+                    },
+                    onLongPress: () async {
+                      final PickedFile pickedFile =
+                          await picker.getVideo(source: ImageSource.gallery);
+
+                      print(pickedFile.path);
+                    },
+                  ),
+                ),
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 3,
+                      )),
+                  child: GestureDetector(
+                    onTap: () async {},
+                    child: Icon(
+                      Icons.create,
+                      color: Colors.lightGreen,
                     ),
                   ),
                 ),
-                children: <Widget>[
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 3,
-                        )),
-                    child: GestureDetector(
-                      child: Icon(
-                        Icons.text_fields_rounded,
-                        color: Colors.lightGreen,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StatusTextContainer(),
-                            ));
-                      },
-                    ),
-                  ),
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 3,
-                        )),
-                    child: GestureDetector(
-                      child: Icon(
-                        Icons.image_rounded,
-                        color: Colors.lightGreen,
-                      ),
-                      onTap: () async {
-                        final PickedFile pickedFile =
-                            await picker.getImage(source: ImageSource.camera);
-
-                        print(pickedFile.path);
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PreviewImageScreen(
-                                imagePath: File(pickedFile.path).path),
-                          ),
-                        );
-                      },
-                      onLongPress: () async {
-                        print("Take Image");
-
-                        final PickedFile pickedFile =
-                            await picker.getImage(source: ImageSource.gallery);
-
-                        print(pickedFile.path);
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PreviewImageScreen(
-                                imagePath: File(pickedFile.path).path),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 3,
-                        )),
-                    child: GestureDetector(
-                      child: Icon(
-                        Icons.video_collection_rounded,
-                        color: Colors.lightGreen,
-                      ),
-                      onTap: () async {
-                        final PickedFile pickedFile =
-                            await picker.getVideo(source: ImageSource.camera);
-
-                        print(pickedFile.path);
-                      },
-                      onLongPress: () async {
-                        final PickedFile pickedFile =
-                            await picker.getVideo(source: ImageSource.gallery);
-
-                        print(pickedFile.path);
-                      },
-                    ),
-                  ),
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 3,
-                        )),
-                    child: GestureDetector(
-                      onTap: () async {},
-                      child: Icon(
-                        Icons.create,
-                        color: Colors.lightGreen,
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
+              ],
+            )
+          ],
         ),
       ),
     );
