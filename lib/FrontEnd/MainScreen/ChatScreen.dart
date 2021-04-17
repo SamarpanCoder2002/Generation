@@ -259,7 +259,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   child: CircleAvatar(
                     radius: 23.0,
                     backgroundImage: ExactAssetImage(
-                      "images/sam.jpg",
+                      "assets/images/sam.jpg",
                     ),
                   ),
                   onTap: () {
@@ -268,7 +268,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
               ),
             ],
-
           ),
           title: ElevatedButton(
             style: ElevatedButton.styleFrom(

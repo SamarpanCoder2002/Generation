@@ -252,7 +252,7 @@ class _ChatScreenState extends State<ChatScreen> {
               closedBuilder: (context, closeWidget) {
                 return CircleAvatar(
                   backgroundImage: ExactAssetImage(
-                    "images/sam.jpg",
+                    "assets/images/sam.jpg",
                   ),
                   radius: 50.0,
                 );
@@ -342,7 +342,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: GestureDetector(
                     child: CircleAvatar(
                       radius: 30.0,
-                      backgroundImage: ExactAssetImage('images/sam.jpg'),
+                      backgroundImage: ExactAssetImage('assets/images/sam.jpg'),
                     ),
                     onTap: () {
                       print("Pic Pressed");

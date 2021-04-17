@@ -56,7 +56,7 @@ class _ScreenLogsState extends State<ScreenLogs> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: ExactAssetImage("images/sam.jpg"),
+                    backgroundImage: ExactAssetImage("assets/images/sam.jpg"),
                   ),
                 ),
                 Container(
