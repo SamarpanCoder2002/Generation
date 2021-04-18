@@ -56,7 +56,7 @@ class _ProfileState extends State<Profile> {
               },
               child: CircleAvatar(
                 radius: 50.0,
-                backgroundImage: ExactAssetImage('images/sam.jpg'),
+                backgroundImage: ExactAssetImage('assets/images/sam.jpg'),
               ),
             ),
           ),

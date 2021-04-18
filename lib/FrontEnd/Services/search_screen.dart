@@ -184,7 +184,9 @@ class _SearchState extends State<Search> {
                   });
 
                   activityMapRequestUser.addAll({
-                    '${FirebaseAuth.instance.currentUser.email}': [],
+                    '${FirebaseAuth.instance.currentUser.email}':
+                        await requestUserActivityTake(
+                            FirebaseAuth.instance.currentUser.email),
                   });
 
                   connectionsMapCurrUser.addAll({
@@ -192,7 +194,9 @@ class _SearchState extends State<Search> {
                   });
 
                   activityMapCurrUser.addAll({
-                    '${searchResultSnapshot.docs[index].id}': [],
+                    '${searchResultSnapshot.docs[index].id}':
+                        await requestUserActivityTake(
+                            searchResultSnapshot.docs[index].id),
                   });
 
                   if (mounted) {
@@ -239,6 +243,22 @@ class _SearchState extends State<Search> {
         ],
       ),
     );
+  }
+
+  Future<List<dynamic>> requestUserActivityTake(String oppUserEmail) async {
+    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .doc('generation_users/$oppUserEmail')
+        .get();
+
+    try {
+      List<dynamic> particularOppositeActivities =
+          documentSnapshot.data()['activity']['My Activity'] as List;
+      return particularOppositeActivities == null
+          ? []
+          : particularOppositeActivities;
+    } catch (e) {
+      return [];
+    }
   }
 
   @override

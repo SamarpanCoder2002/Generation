@@ -1,5 +1,5 @@
 name: generation
-description: A new Flutter application.
+description: What You Seek is Seeking You
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -55,10 +55,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  #flutter_launcher_icons: "^0.9.0"
+#  flutter_launcher_icons: "^0.9.0"
 
 #flutter_icons:
-#  image_path: "generation_logo"
+#  image_path: "assets/icons/generation_logo.jpg"
 #  android: true
 #  ios: true
 

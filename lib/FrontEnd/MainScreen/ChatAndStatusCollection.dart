@@ -7,8 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation/FrontEnd/Services/auth_error_msg_toast.dart';
-import 'package:generation/FrontEnd/Services/status_text_container.dart';
+import 'package:generation/FrontEnd/Services/search_screen.dart';
+import 'file:///C:/Users/dasgu/AndroidStudioProjects/generation/lib/FrontEnd/status_view/status_text_container.dart';
 import 'package:generation/FrontEnd/Store/images_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -41,9 +41,8 @@ class _ChatScreenState extends State<ChatScreen> {
       Map<String, dynamic> allConnectionActivityTake =
           event.data()['activity'] as Map;
 
-      Map<String, dynamic> myStatusTempStore = Map<String, dynamic>();
-
       allConnectionActivity.clear();
+      Map<String, dynamic> myStatusTempStore = Map<String, dynamic>();
 
       // Activity Collection Take
       allConnectionActivityTake.forEach((connectionMail, connectionActivity) {
@@ -147,6 +146,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatScreen(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: Color.fromRGBO(20, 200, 50, 1),
+          child: Icon(
+            Icons.search_rounded,
+            color: Colors.white,
+            size: 30.0,
+          ),
+          onPressed: () async {
+            print('Search based on Text');
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => Search()));
+          }),
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: ModalProgressHUD(
         inAsyncCall: isLoading,
@@ -203,6 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 int r, g, b;
                 double opacity;
                 String text;
+                double fontSize;
 
                 if (allConnectionActivity.isNotEmpty) {
                   allConnectionActivity[index].values.forEach((activityItem) {
@@ -216,6 +228,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     g = int.parse(colorValues[1]);
                     b = int.parse(colorValues[2]);
                     opacity = double.parse(colorValues[3]);
+                    fontSize = double.parse(colorValues[4]);
 
                     text = activityItem[0].keys.toList()[0];
                   });
@@ -223,14 +236,24 @@ class _ChatScreenState extends State<ChatScreen> {
                 try {
                   return Container(
                     color: Color.fromRGBO(r, g, b, opacity),
+                    constraints:
+                        BoxConstraints.loose(Size(double.maxFinite, 500.0)),
+                    padding: const EdgeInsets.only(
+                        left: 20.0, right: 20.0, top: 20.0),
                     child: Center(
-                      child: Text(
-                        text,
-                        style: const TextStyle(
-                          fontSize: 30.0,
-                          color: Colors.white,
-                          fontFamily: 'Lora',
-                          letterSpacing: 1.0,
+                      child: Scrollbar(
+                        showTrackOnHover: true,
+                        thickness: 10.0,
+                        radius: const Radius.circular(30.0),
+                        child: Text(
+                          text,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            color: Colors.white,
+                            fontFamily: 'Lora',
+                            letterSpacing: 1.0,
+                          ),
                         ),
                       ),
                     ),

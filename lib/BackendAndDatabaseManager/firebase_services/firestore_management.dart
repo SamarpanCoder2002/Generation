@@ -60,8 +60,11 @@ class Management {
     return streamDocumentSnapShot;
   }
 
-  Future<bool> addTextActivityTextToFireStore(String activityText,
-      Color selectedBGColor, List<String> allConnectionUserName) async {
+  Future<bool> addTextActivityTextToFireStore(
+      String activityText,
+      Color selectedBGColor,
+      List<String> allConnectionUserName,
+      double fontSize) async {
     DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
         .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
         .get();
@@ -74,7 +77,7 @@ class Management {
 
     currConnection.add({
       activityText:
-          '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}',
+          '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
     });
 
     activityCollection['My Activity'] = currConnection;
@@ -104,7 +107,7 @@ class Management {
 
           currConnection.add({
             activityText:
-                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}',
+                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize',
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email

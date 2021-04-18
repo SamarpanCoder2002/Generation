@@ -18,11 +18,13 @@ class StatusTextContainer extends StatefulWidget {
 }
 
 class _StatusTextContainerState extends State<StatusTextContainer> {
-  Color pickColor = Colors.lightBlue;
+  Color pickColor = Color.fromRGBO(0, 150, 250, 1);
   final Management management = Management();
   TextEditingController activityText = TextEditingController();
   bool isLoading = false;
   FToast fToast;
+
+  int _fontSizeController = 1;
 
   @override
   void initState() {
@@ -58,7 +60,10 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
               });
 
               bool response = await management.addTextActivityTextToFireStore(
-                  activityText.text, pickColor, widget._allUserNameContainer);
+                  activityText.text,
+                  pickColor,
+                  widget._allUserNameContainer,
+                  (_fontSizeController + 20).toDouble());
 
               setState(() {
                 isLoading = false;
@@ -86,10 +91,8 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
               shrinkWrap: true,
               children: [
                 Container(
-                  constraints:
-                      BoxConstraints.loose(Size(double.maxFinite, 500.0)),
-                  padding:
-                      const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+                  margin: EdgeInsets.only(top: 20.0),
+                  height: MediaQuery.of(context).size.height / 1.5,
                   child: Center(
                     child: Scrollbar(
                       showTrackOnHover: true,
@@ -99,20 +102,21 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
                         controller: activityText,
                         textAlign: TextAlign.center,
                         cursorColor: Colors.white,
-                        style: const TextStyle(
-                          fontSize: 30.0,
+                        style: TextStyle(
+                          fontSize: (_fontSizeController + 20).toDouble(),
                           color: Colors.white,
                           fontFamily: 'Lora',
                           letterSpacing: 1.0,
                         ),
                         autofocus: true,
-                        maxLines: 10,
+                        maxLines: null,
                         minLines: 1,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Type Here",
-                            hintStyle: const TextStyle(
+                            hintStyle: TextStyle(
                               color: Colors.white54,
+                              fontSize: (_fontSizeController + 20).toDouble(),
                               fontFamily: 'Lora',
                               fontStyle: FontStyle.italic,
                               letterSpacing: 1.0,
@@ -122,8 +126,6 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
                   ),
                 ),
                 Container(
-                  //color: Colors.black,
-                  //alignment: Alignment.topCenter,
                   width: double.maxFinite,
                   child: Center(
                     child: ColorPicker(
@@ -142,6 +144,29 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
                     ),
                   ),
                 ),
+                Container(
+                    height: 10,
+                    margin: EdgeInsets.only(
+                      left: 60.0,
+                      right: 65.0,
+                    ),
+                    child: Slider(
+                        value: _fontSizeController.toDouble(),
+                        min: 1.0,
+                        max: 20.0,
+                        divisions: 10,
+                        activeColor: Colors.amber,
+                        inactiveColor: Colors.lightGreenAccent,
+                        label: 'Set Font Size',
+                        onChanged: (double newValue) {
+                          setState(() {
+                            print(newValue);
+                            _fontSizeController = newValue.round();
+                          });
+                        },
+                        semanticFormatterCallback: (double newValue) {
+                          return '${newValue.round()} dollars';
+                        })),
               ],
             ),
           ),

@@ -7,7 +7,6 @@ import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
-import 'package:generation/FrontEnd/Services/search_screen.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -156,18 +155,6 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-                backgroundColor: Color.fromRGBO(20, 200, 50, 1),
-                child: Icon(
-                  Icons.search_rounded,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
-                onPressed: () async {
-                  print('Search based on Text');
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => Search()));
-                }),
             body: TabBarView(
               children: [
                 ChatScreen(),
