@@ -11,6 +11,7 @@ import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore
 import 'package:generation/FrontEnd/Services/search_screen.dart';
 import 'file:///C:/Users/dasgu/AndroidStudioProjects/generation/lib/FrontEnd/status_view/status_text_container.dart';
 import 'package:generation/FrontEnd/Store/images_preview_screen.dart';
+import 'package:generation/FrontEnd/status_view/activity_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
@@ -216,90 +217,8 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
-                statusCurrIndex = 0;
-                return allConnectionActivity[index].values.first.length > 0
-                    ? ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        controller: storyController,
-                        scrollDirection: Axis.horizontal,
-                        itemCount:
-                            allConnectionActivity[index].values.first.length,
-                        itemBuilder: (context, position) {
-                          Map<String, dynamic> activityItem =
-                              allConnectionActivity[index]
-                                  .values
-                                  .first[position];
-
-                          List<String> colorValues =
-                              activityItem.values.first.toString().split("+");
-
-                          int r = int.parse(colorValues[0]);
-                          int g = int.parse(colorValues[1]);
-                          int b = int.parse(colorValues[2]);
-                          double opacity = double.parse(colorValues[3]);
-                          double fontSize = double.parse(colorValues[4]);
-
-                          String activityText = activityItem.keys.first;
-
-                          return GestureDetector(
-                            onHorizontalDragEnd: (DragEndDetails details) {
-                              if (allConnectionActivity[index]
-                                      .values
-                                      .first
-                                      .length ==
-                                  statusCurrIndex) {
-                                Navigator.pop(context);
-                              } else {
-                                details.primaryVelocity > 0
-                                    ? statusCurrIndex -= 1
-                                    : statusCurrIndex += 1;
-
-                                storyController.animateTo(
-                                    MediaQuery.of(context).size.width *
-                                        statusCurrIndex,
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut);
-                              }
-                            },
-                            child: Container(
-                              color: Color.fromRGBO(r, g, b, opacity),
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height,
-                              padding: const EdgeInsets.only(
-                                  left: 20.0, right: 20.0, top: 20.0),
-                              child: Center(
-                                child: Scrollbar(
-                                  showTrackOnHover: true,
-                                  thickness: 10.0,
-                                  radius: const Radius.circular(30.0),
-                                  child: Text(
-                                    activityText,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: fontSize,
-                                      color: Colors.white,
-                                      fontFamily: 'Lora',
-                                      letterSpacing: 1.0,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Center(
-                        child: Text(
-                          "No Activity Present",
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            color: Colors.red,
-                            fontFamily: 'Lora',
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                      );
+                return ActivityView(
+                    allConnectionActivity, index, storyController);
               },
               closedBuilder: (context, closeWidget) {
                 return CircleAvatar(
@@ -580,7 +499,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     onTap: () async {
                       final PickedFile pickedFile =
-                          await picker.getImage(source: ImageSource.camera);
+                          await picker.getImage(source: ImageSource.camera, imageQuality: 50,);
 
                       print(pickedFile.path);
 
@@ -588,7 +507,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => PreviewImageScreen(
-                              imagePath: File(pickedFile.path).path),
+                            imageFile: File(pickedFile.path),
+                            purpose: 'status',
+                            allConnectionUserName: allConnectionsUserName,
+                          ),
                         ),
                       );
                     },
@@ -596,7 +518,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       print("Take Image");
 
                       final PickedFile pickedFile =
-                          await picker.getImage(source: ImageSource.gallery);
+                          await picker.getImage(source: ImageSource.gallery, imageQuality: 50);
 
                       if (pickedFile != null) {
                         print(pickedFile.path);
@@ -605,7 +527,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => PreviewImageScreen(
-                                imagePath: File(pickedFile.path).path),
+                              imageFile: File(pickedFile.path),
+                              allConnectionUserName: allConnectionsUserName,
+                            ),
                           ),
                         );
                       }

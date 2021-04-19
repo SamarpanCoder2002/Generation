@@ -408,26 +408,28 @@ class _SearchState extends State<Search> {
       );
     }
 
-    if (searchResultSnapshot.docs[index]['connection_request']
-        .containsValue('Invitation Came')) {
+    String oppositeConnectionStatus = searchResultSnapshot.docs[index]
+        .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
+
+    if (oppositeConnectionStatus == 'Invitation Came') {
       return Icon(
         Icons.pending_actions_rounded,
         size: 30.0,
         color: Colors.amber,
       );
-    } else if (searchResultSnapshot.docs[index]['connection_request']
-        .containsValue('Invitation Accepted')) {
-      return Icon(
-        Icons.done_all_outlined,
-        size: 30.0,
-        color: Colors.green,
-      );
-    } else if (searchResultSnapshot.docs[index]['connection_request']
-        .containsValue('Request Pending')) {
+    } else if (oppositeConnectionStatus == 'Request Pending') {
+      print("Here Also");
       return Icon(
         Icons.done_outline_rounded,
         size: 30.0,
         color: Colors.amber,
+      );
+    } else if (oppositeConnectionStatus == 'Invitation Accepted') {
+      print("Here Present");
+      return Icon(
+        Icons.done_all_outlined,
+        size: 30.0,
+        color: Colors.green,
       );
     }
     return Icon(

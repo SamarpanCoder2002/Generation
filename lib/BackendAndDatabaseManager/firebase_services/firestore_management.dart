@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -60,7 +62,7 @@ class Management {
     return streamDocumentSnapShot;
   }
 
-  Future<bool> addTextActivityTextToFireStore(
+  Future<bool> addTextActivityToFireStore(
       String activityText,
       Color selectedBGColor,
       List<String> allConnectionUserName,
@@ -126,6 +128,116 @@ class Management {
         return false;
       }
     } else
-      return false;
+      return true;
+  }
+
+  Future<bool> activityImageActivityToStorageAndFireStore(
+    File imgFile,
+    String manuallyText,
+    List<String> allConnectionUserName,
+    BuildContext context
+  ) async {
+    String imageUrl = await _uploadPictureToStorage(imgFile, context);
+
+    try{
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .get();
+
+      Map<String, dynamic> activityCollection =
+      documentSnapshot.data()['activity'] as Map;
+      List<dynamic> currConnection = activityCollection['My Activity'];
+
+      if (currConnection == null) currConnection = [];
+
+      currConnection.add({
+        imageUrl: manuallyText,
+      });
+
+      activityCollection['My Activity'] = currConnection;
+
+      await FirebaseFirestore.instance
+          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .update({
+        'activity': activityCollection,
+      });
+    }catch(e){
+      showDialog(context: context, builder: (_)=> AlertDialog(
+        title: Text("Upload Error in My Activity"),
+        content: Text(e.toString()),
+      ));
+    }
+
+    if (allConnectionUserName.isNotEmpty) {
+      try {
+        allConnectionUserName.forEach((String connectionUserName) async {
+          String _userMail =
+              await localStorageHelper.fetchEmail(connectionUserName);
+
+          DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+              .doc('generation_users/$_userMail')
+              .get();
+
+          Map<String, dynamic> activityCollection =
+              documentSnapshot.data()['activity'] as Map;
+          List<dynamic> currConnection = activityCollection[
+              FirebaseAuth.instance.currentUser.email.toString()];
+
+          if (currConnection == null) currConnection = [];
+
+          currConnection.add({
+            imageUrl: manuallyText,
+          });
+
+          activityCollection[FirebaseAuth.instance.currentUser.email
+              .toString()] = currConnection;
+
+          await FirebaseFirestore.instance
+              .doc('generation_users/$_userMail')
+              .update({
+            'activity': activityCollection,
+          });
+        });
+
+        return true;
+      } catch (e) {
+        print("Image Activity Update Error: ${e.toString()}");
+        showDialog(context: context, builder: (_)=> AlertDialog(
+          title: Text("Upload Error in Other Account"),
+          content: Text(e.toString()),
+        ));
+        return false;
+      }
+    } else {
+      return true;
+    }
+  }
+
+  Future<String> _uploadPictureToStorage(File filePath, BuildContext context) async {
+    try{
+      String downLoadUrl;
+
+      String fileName =
+          '${FirebaseAuth.instance.currentUser.uid}+${DateTime.now()}';
+
+      Reference firebaseStorageRef =
+      FirebaseStorage.instance.ref().child(fileName);
+
+      UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
+
+      await uploadTask.whenComplete(() async {
+        print("Picture Uploaded");
+        downLoadUrl = await firebaseStorageRef.getDownloadURL();
+      });
+
+      return downLoadUrl;
+    }catch(e){
+      showDialog(context: context, builder: (_)=> AlertDialog(
+        title: Text("Image Upload Error"),
+        content: Text(e.toString()),
+      ));
+      return "Samarpan";
+    }
+
   }
 }

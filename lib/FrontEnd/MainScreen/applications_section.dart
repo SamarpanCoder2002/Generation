@@ -64,7 +64,7 @@ class _ApplicationListState extends State<ApplicationList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PreviewImageScreen(
-                            imagePath: File(pickedFile.path).path),
+                            imageFile: File(pickedFile.path), allConnectionUserName: [],),
                       ),
                     );
                   },
@@ -78,7 +78,7 @@ class _ApplicationListState extends State<ApplicationList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PreviewImageScreen(
-                            imagePath: File(pickedFile.path).path),
+                            imageFile: File(pickedFile.path), allConnectionUserName: [],),
                       ),
                     );
                   },

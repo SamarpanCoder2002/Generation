@@ -2,28 +2,64 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/FrontEnd/Services/auth_error_msg_toast.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class PreviewImageScreen extends StatefulWidget {
-  final String imagePath;
+  final File imageFile;
+  final String purpose;
+  final List<String> allConnectionUserName;
 
-  PreviewImageScreen({@required this.imagePath});
+  PreviewImageScreen(
+      {@required this.imageFile,
+      this.purpose = 'contacts',
+      @required this.allConnectionUserName});
 
   @override
   _PreviewImageScreenState createState() => _PreviewImageScreenState();
 }
 
 class _PreviewImageScreenState extends State<PreviewImageScreen> {
+  bool _isLoading = false;
+  FToast fToast;
+
+  final TextEditingController manuallyTextController = TextEditingController();
+  final Management management = Management();
+
+  @override
+  void initState() {
+    manuallyTextController.text = '';
+    _isLoading = false;
+    fToast = FToast();
+    fToast.init(context);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    manuallyTextController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       floatingActionButton: floatingActionButtonCall(),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Image.file(
-          File(widget.imagePath),
-          fit: BoxFit.cover,
+      body: ModalProgressHUD(
+        inAsyncCall: _isLoading,
+        color: Color.fromRGBO(50, 20, 40, 0.8),
+        progressIndicator: CircularProgressIndicator(
+          backgroundColor: Colors.black87,
+        ),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Image.file(
+            File(widget.imageFile.path),
+          ),
         ),
       ),
     );
@@ -48,13 +84,6 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               onPressed: () {
                 //Close the keyboard
                 SystemChannels.textInput.invokeMethod('TextInput.hide');
-
-                // if (mounted) {
-                //   setState(() {
-                //     _chatBoxHeight -= 50;
-                //     _showEmojiPicker = true;
-                //   });
-                // }
               },
             ),
           ),
@@ -72,15 +101,14 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                   thickness: 10.0,
                   radius: Radius.circular(30.0),
                   child: TextField(
+                    controller: manuallyTextController,
                     cursorColor: Colors.white,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,
                     ),
                     onTap: () {},
-                    //controller: inputText,
                     maxLines: null,
-                    // For Line Break
                     decoration: InputDecoration(
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20.0)),
@@ -99,16 +127,49 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
             //color: Theme.of(context).primaryColor,
             padding: EdgeInsets.only(left: 20.0),
             child: FloatingActionButton(
-                backgroundColor: Colors.green,
-                onPressed: () {},
-                child: GestureDetector(
-                  child: Icon(
-                    Icons.send_rounded,
-                    size: 30.0,
-                    color: Colors.white,
-                  ),
-                  onTap: () {},
-                )),
+              backgroundColor: Colors.green,
+              onPressed: () async {
+                SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+                if (mounted) {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  showErrToast(
+                    "Image Uploading....\nPlease Wait",
+                    fToast,
+                    toastColor: Colors.red,
+                    toastGravity: ToastGravity.TOP,
+                    seconds: 4,
+                  );
+                }
+
+                if (widget.purpose == 'status') {
+                  bool response = await management
+                      .activityImageActivityToStorageAndFireStore(
+                          widget.imageFile,
+                          manuallyTextController.text,
+                          widget.allConnectionUserName,
+                          context);
+
+                  if (response) {
+                    if (mounted) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+                    Navigator.pop(context);
+                  }
+
+                  showErrToast("Activity Added", fToast);
+                }
+              },
+              child: Icon(
+                Icons.send_rounded,
+                size: 30.0,
+                color: Colors.white,
+              ),
+            ),
           ),
         ],
       ),

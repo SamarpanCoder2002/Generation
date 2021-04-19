@@ -59,7 +59,7 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
                 isLoading = true;
               });
 
-              bool response = await management.addTextActivityTextToFireStore(
+              bool response = await management.addTextActivityToFireStore(
                   activityText.text,
                   pickColor,
                   widget._allUserNameContainer,

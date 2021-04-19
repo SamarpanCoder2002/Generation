@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-void showErrToast(String errorMsg, FToast errToast) {
+void showErrToast(String errorMsg, FToast errToast, {Color toastColor = Colors.green, int seconds = 2, ToastGravity toastGravity = ToastGravity.BOTTOM}) {
   if (errorMsg == null) return;
   Widget toast = Container(
     padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
@@ -12,7 +12,7 @@ void showErrToast(String errorMsg, FToast errToast) {
     child: Text(
       errorMsg,
       style: TextStyle(
-        color: Colors.lightBlue,
+        color: toastColor,
         fontSize: 20.0,
         fontFamily: 'Lora',
         letterSpacing: 1.0,
@@ -23,7 +23,7 @@ void showErrToast(String errorMsg, FToast errToast) {
 
   errToast.showToast(
     child: toast,
-    gravity: ToastGravity.BOTTOM,
-    toastDuration: Duration(seconds: 2),
+    gravity: toastGravity,
+    toastDuration: Duration(seconds: seconds),
   );
 }
