@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:circle_list/circle_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -29,8 +30,12 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Map<String, dynamic>> allConnectionActivity;
   FToast fToast;
 
+  ScrollController storyController = ScrollController();
+
   Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
+
+  int statusCurrIndex = 0;
 
   void fetchRealTimeData() async {
     setState(() {
@@ -211,66 +216,90 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
-                int r, g, b;
-                double opacity;
-                String text;
-                double fontSize;
+                statusCurrIndex = 0;
+                return allConnectionActivity[index].values.first.length > 0
+                    ? ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        controller: storyController,
+                        scrollDirection: Axis.horizontal,
+                        itemCount:
+                            allConnectionActivity[index].values.first.length,
+                        itemBuilder: (context, position) {
+                          Map<String, dynamic> activityItem =
+                              allConnectionActivity[index]
+                                  .values
+                                  .first[position];
 
-                if (allConnectionActivity.isNotEmpty) {
-                  allConnectionActivity[index].values.forEach((activityItem) {
-                    List<String> colorValues = activityItem[0]
-                        .values
-                        .toList()[0]
-                        .toString()
-                        .split("+");
+                          List<String> colorValues =
+                              activityItem.values.first.toString().split("+");
 
-                    r = int.parse(colorValues[0]);
-                    g = int.parse(colorValues[1]);
-                    b = int.parse(colorValues[2]);
-                    opacity = double.parse(colorValues[3]);
-                    fontSize = double.parse(colorValues[4]);
+                          int r = int.parse(colorValues[0]);
+                          int g = int.parse(colorValues[1]);
+                          int b = int.parse(colorValues[2]);
+                          double opacity = double.parse(colorValues[3]);
+                          double fontSize = double.parse(colorValues[4]);
 
-                    text = activityItem[0].keys.toList()[0];
-                  });
-                }
-                try {
-                  return Container(
-                    color: Color.fromRGBO(r, g, b, opacity),
-                    constraints:
-                        BoxConstraints.loose(Size(double.maxFinite, 500.0)),
-                    padding: const EdgeInsets.only(
-                        left: 20.0, right: 20.0, top: 20.0),
-                    child: Center(
-                      child: Scrollbar(
-                        showTrackOnHover: true,
-                        thickness: 10.0,
-                        radius: const Radius.circular(30.0),
+                          String activityText = activityItem.keys.first;
+
+                          return GestureDetector(
+                            onHorizontalDragEnd: (DragEndDetails details) {
+                              if (allConnectionActivity[index]
+                                      .values
+                                      .first
+                                      .length ==
+                                  statusCurrIndex) {
+                                Navigator.pop(context);
+                              } else {
+                                details.primaryVelocity > 0
+                                    ? statusCurrIndex -= 1
+                                    : statusCurrIndex += 1;
+
+                                storyController.animateTo(
+                                    MediaQuery.of(context).size.width *
+                                        statusCurrIndex,
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeOut);
+                              }
+                            },
+                            child: Container(
+                              color: Color.fromRGBO(r, g, b, opacity),
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height,
+                              padding: const EdgeInsets.only(
+                                  left: 20.0, right: 20.0, top: 20.0),
+                              child: Center(
+                                child: Scrollbar(
+                                  showTrackOnHover: true,
+                                  thickness: 10.0,
+                                  radius: const Radius.circular(30.0),
+                                  child: Text(
+                                    activityText,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: fontSize,
+                                      color: Colors.white,
+                                      fontFamily: 'Lora',
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Center(
                         child: Text(
-                          text,
-                          textAlign: TextAlign.center,
+                          "No Activity Present",
                           style: TextStyle(
-                            fontSize: fontSize,
-                            color: Colors.white,
+                            fontSize: 30.0,
+                            color: Colors.red,
                             fontFamily: 'Lora',
                             letterSpacing: 1.0,
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                } catch (e) {
-                  return Center(
-                    child: Text(
-                      "No Activity Present",
-                      style: TextStyle(
-                        fontSize: 30.0,
-                        color: Colors.red,
-                        fontFamily: 'Lora',
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  );
-                }
+                      );
               },
               closedBuilder: (context, closeWidget) {
                 return CircleAvatar(
