@@ -39,9 +39,11 @@ class _ChatScreenState extends State<ChatScreen> {
   int statusCurrIndex = 0;
 
   void fetchRealTimeData() async {
-    setState(() {
-      isLoading = true;
-    });
+    if(mounted){
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     management.getDatabaseData().listen((event) async {
       Map<String, dynamic> allConnectionActivityTake =
@@ -127,9 +129,11 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    setState(() {
-      isLoading = false;
-    });
+    if(mounted){
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -330,12 +334,14 @@ class _ChatScreenState extends State<ChatScreen> {
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
                     if (allConnectionsUserName.length > 1) {
-                      setState(() {
-                        String _latestUserName =
-                            allConnectionsUserName.removeAt(
-                                allConnectionsUserName.indexOf(_userName));
-                        allConnectionsUserName.insert(0, _latestUserName);
-                      });
+                      if(mounted){
+                        setState(() {
+                          String _latestUserName =
+                          allConnectionsUserName.removeAt(
+                              allConnectionsUserName.indexOf(_userName));
+                          allConnectionsUserName.insert(0, _latestUserName);
+                        });
+                      }
                     }
                   },
                   openBuilder: (context, openWidget) {

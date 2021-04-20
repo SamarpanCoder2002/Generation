@@ -140,7 +140,6 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                     fToast,
                     toastColor: Colors.red,
                     toastGravity: ToastGravity.TOP,
-                    seconds: 4,
                   );
                 }
 
