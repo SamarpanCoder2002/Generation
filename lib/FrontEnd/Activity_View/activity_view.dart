@@ -1,10 +1,9 @@
-//import 'package:better_player/better_player.dart';
-import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
+import 'package:generation/FrontEnd/Activity_View/activity_video_view.dart';
 
 class ActivityView extends StatefulWidget {
   final List<Map<String, dynamic>> allConnectionActivity;
@@ -21,6 +20,8 @@ class _ActivityViewState extends State<ActivityView> {
   final RegExp _imageRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
+  int statusCurrIndex = 0;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -30,6 +31,7 @@ class _ActivityViewState extends State<ActivityView> {
   @override
   void dispose() {
     // TODO: implement dispose
+
     super.dispose();
   }
 
@@ -44,7 +46,7 @@ class _ActivityViewState extends State<ActivityView> {
 
   Widget statusView(List<Map<String, dynamic>> allConnectionActivity, int index,
       ScrollController storyController) {
-    int statusCurrIndex = 0;
+    //int statusCurrIndex = 0;
     try {
       return ListView.builder(
         physics: NeverScrollableScrollPhysics(),
@@ -53,12 +55,13 @@ class _ActivityViewState extends State<ActivityView> {
         scrollDirection: Axis.horizontal,
         itemCount: allConnectionActivity[index].values.first.length,
         itemBuilder: (context, position) {
-          Map<String, dynamic> activityItem =
+          final Map<String, dynamic> activityItem =
               allConnectionActivity[index].values.first[position];
 
-          if (_imageRegex.hasMatch(activityItem.keys.first)) {
+          print("Presenting: ${allConnectionActivity[index]}");
 
-            List<String> mediaDetector =
+          if (_imageRegex.hasMatch(activityItem.keys.first)) {
+            final List<String> mediaDetector =
                 activityItem.values.first.toString().split('++++++');
 
             return GestureDetector(
@@ -70,11 +73,13 @@ class _ActivityViewState extends State<ActivityView> {
                       allConnectionActivity[index].values.first.length) {
                     Navigator.pop(context);
                   } else {
+                    print("Present Here");
+
                     details.primaryVelocity > 0
                         ? statusCurrIndex -= 1
                         : statusCurrIndex += 1;
 
-                    storyController.animateTo(
+                    await storyController.animateTo(
                         MediaQuery.of(context).size.width * statusCurrIndex,
                         duration: Duration(milliseconds: 300),
                         curve: Curves.easeOut);
@@ -98,28 +103,7 @@ class _ActivityViewState extends State<ActivityView> {
                               //fit: BoxFit.fitWidth,
                             ),
                           )
-                        : SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: Text(
-                              "Video",
-                              style: TextStyle(
-                                fontSize: 30.0,
-                                color: Colors.white,
-                              ),
-                            ),
-                            // child: AspectRatio(
-                            //   aspectRatio: 16 / 9,
-                            //   child: BetterPlayer.network(
-                            //       activityItem.keys.first,
-                            //       betterPlayerConfiguration:
-                            //       BetterPlayerConfiguration(
-                            //         aspectRatio: 16 / 9,
-                            //         autoDispose: true,
-                            //         autoPlay: true,
-                            //       )),
-                            // ),
-                          ),
+                        : VideoDemo(url: activityItem.keys.first),
                     mediaDetector[0] != ''
                         ? Scrollbar(
                             showTrackOnHover: true,
@@ -171,7 +155,6 @@ class _ActivityViewState extends State<ActivityView> {
 
             return GestureDetector(
               onHorizontalDragEnd: (DragEndDetails details) {
-
                 if (statusCurrIndex + 1 ==
                     allConnectionActivity[index].values.first.length) {
                   Navigator.pop(context);
