@@ -8,10 +8,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/FrontEnd/Preview/videos_preview_screen.dart';
 import 'package:generation/FrontEnd/Services/search_screen.dart';
-import 'file:///C:/Users/dasgu/AndroidStudioProjects/generation/lib/FrontEnd/status_view/status_text_container.dart';
-import 'package:generation/FrontEnd/Store/images_preview_screen.dart';
-import 'package:generation/FrontEnd/status_view/activity_view.dart';
+import 'package:generation/FrontEnd/Activity_View/status_text_container.dart';
+import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation/FrontEnd/Activity_View/activity_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
@@ -39,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int statusCurrIndex = 0;
 
   void fetchRealTimeData() async {
-    if(mounted){
+    if (mounted) {
       setState(() {
         isLoading = true;
       });
@@ -129,7 +130,7 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     });
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         isLoading = false;
       });
@@ -334,11 +335,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
                     if (allConnectionsUserName.length > 1) {
-                      if(mounted){
+                      if (mounted) {
                         setState(() {
                           String _latestUserName =
-                          allConnectionsUserName.removeAt(
-                              allConnectionsUserName.indexOf(_userName));
+                              allConnectionsUserName.removeAt(
+                                  allConnectionsUserName.indexOf(_userName));
                           allConnectionsUserName.insert(0, _latestUserName);
                         });
                       }
@@ -504,8 +505,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: Colors.lightGreen,
                     ),
                     onTap: () async {
-                      final PickedFile pickedFile =
-                          await picker.getImage(source: ImageSource.camera, imageQuality: 50,);
+                      final PickedFile pickedFile = await picker.getImage(
+                        source: ImageSource.camera,
+                        imageQuality: 50,
+                      );
 
                       print(pickedFile.path);
 
@@ -523,8 +526,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     onLongPress: () async {
                       print("Take Image");
 
-                      final PickedFile pickedFile =
-                          await picker.getImage(source: ImageSource.gallery, imageQuality: 50);
+                      final PickedFile pickedFile = await picker.getImage(
+                          source: ImageSource.gallery, imageQuality: 50);
 
                       if (pickedFile != null) {
                         print(pickedFile.path);
@@ -557,16 +560,36 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: Colors.lightGreen,
                     ),
                     onTap: () async {
-                      final PickedFile pickedFile =
-                          await picker.getVideo(source: ImageSource.camera);
+                      final PickedFile pickedFile = await picker.getVideo(
+                          source: ImageSource.camera,
+                          maxDuration: Duration(minutes: 1));
 
                       print(pickedFile.path);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => VideoPreview(
+                                    File(pickedFile.path),
+                                    purpose: 'status',
+                                    allConnectionUserName:
+                                        allConnectionsUserName,
+                                  )));
                     },
                     onLongPress: () async {
-                      final PickedFile pickedFile =
-                          await picker.getVideo(source: ImageSource.gallery);
+                      final PickedFile pickedFile = await picker.getVideo(
+                          source: ImageSource.gallery,
+                          maxDuration: Duration(minutes: 1));
 
                       print(pickedFile.path);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => VideoPreview(
+                                    File(pickedFile.path),
+                                    purpose: 'status',
+                                    allConnectionUserName:
+                                        allConnectionsUserName,
+                                  )));
                     },
                   ),
                 ),

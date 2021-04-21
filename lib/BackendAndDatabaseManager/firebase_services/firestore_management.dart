@@ -131,27 +131,27 @@ class Management {
       return true;
   }
 
-  Future<bool> activityImageActivityToStorageAndFireStore(
-    File imgFile,
-    String manuallyText,
-    List<String> allConnectionUserName,
-    BuildContext context
-  ) async {
-    String imageUrl = await _uploadPictureToStorage(imgFile, context);
+  Future<bool> mediaActivityToStorageAndFireStore(
+      File imgFile,
+      String manuallyText,
+      List<String> allConnectionUserName,
+      BuildContext context,
+      {String mediaType = 'image'}) async {
+    String imageUrl = await _uploadMediaToStorage(imgFile, context);
 
-    try{
+    try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
           .get();
 
       Map<String, dynamic> activityCollection =
-      documentSnapshot.data()['activity'] as Map;
+          documentSnapshot.data()['activity'] as Map;
       List<dynamic> currConnection = activityCollection['My Activity'];
 
       if (currConnection == null) currConnection = [];
 
       currConnection.add({
-        imageUrl: manuallyText,
+        imageUrl: '$manuallyText++++++$mediaType',
       });
 
       activityCollection['My Activity'] = currConnection;
@@ -161,11 +161,13 @@ class Management {
           .update({
         'activity': activityCollection,
       });
-    }catch(e){
-      showDialog(context: context, builder: (_)=> AlertDialog(
-        title: Text("Upload Error in My Activity"),
-        content: Text(e.toString()),
-      ));
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text("Upload Error in My Activity"),
+                content: Text(e.toString()),
+              ));
     }
 
     if (allConnectionUserName.isNotEmpty) {
@@ -186,7 +188,7 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            imageUrl: manuallyText,
+            imageUrl: '$manuallyText++++++$mediaType',
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -202,10 +204,12 @@ class Management {
         return true;
       } catch (e) {
         print("Image Activity Update Error: ${e.toString()}");
-        showDialog(context: context, builder: (_)=> AlertDialog(
-          title: Text("Upload Error in Other Account"),
-          content: Text(e.toString()),
-        ));
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  title: Text("Upload Error in Other Account"),
+                  content: Text(e.toString()),
+                ));
         return false;
       }
     } else {
@@ -213,15 +217,16 @@ class Management {
     }
   }
 
-  Future<String> _uploadPictureToStorage(File filePath, BuildContext context) async {
-    try{
+  Future<String> _uploadMediaToStorage(
+      File filePath, BuildContext context) async {
+    try {
       String downLoadUrl;
 
       String fileName =
           '${FirebaseAuth.instance.currentUser.uid}+${DateTime.now()}';
 
       Reference firebaseStorageRef =
-      FirebaseStorage.instance.ref().child(fileName);
+          FirebaseStorage.instance.ref().child(fileName);
 
       UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
 
@@ -231,13 +236,14 @@ class Management {
       });
 
       return downLoadUrl;
-    }catch(e){
-      showDialog(context: context, builder: (_)=> AlertDialog(
-        title: Text("Image Upload Error"),
-        content: Text(e.toString()),
-      ));
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text("Image Upload Error"),
+                content: Text(e.toString()),
+              ));
       return "Samarpan";
     }
-
   }
 }

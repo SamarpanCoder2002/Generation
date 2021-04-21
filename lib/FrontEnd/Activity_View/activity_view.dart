@@ -1,4 +1,7 @@
+//import 'package:better_player/better_player.dart';
+import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
@@ -25,6 +28,12 @@ class _ActivityViewState extends State<ActivityView> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(0, 0, 0, 1),
@@ -48,20 +57,38 @@ class _ActivityViewState extends State<ActivityView> {
               allConnectionActivity[index].values.first[position];
 
           if (_imageRegex.hasMatch(activityItem.keys.first)) {
-            return GestureDetector(
-              onHorizontalDragEnd: (DragEndDetails details) {
-                if (statusCurrIndex + 1 ==
-                    allConnectionActivity[index].values.first.length) {
-                  Navigator.pop(context);
-                } else {
-                  details.primaryVelocity > 0
-                      ? statusCurrIndex -= 1
-                      : statusCurrIndex += 1;
+            print("Yes this is Media");
 
-                  storyController.animateTo(
-                      MediaQuery.of(context).size.width * statusCurrIndex,
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeOut);
+            print(activityItem.values.first);
+
+            List<String> mediaDetector =
+                activityItem.values.first.toString().split('++++++');
+
+            return GestureDetector(
+              onHorizontalDragEnd: (DragEndDetails details) async {
+                if (details.primaryVelocity == 0.0) {
+                  print("Nothing to do");
+                } else {
+                  if (statusCurrIndex + 1 ==
+                      allConnectionActivity[index].values.first.length) {
+                    //print("Video Playing State: ${betterPlayerController.isPlaying()}");
+
+                    // if (betterPlayerController.isPlaying()) {
+                    //   print("Video Playing");
+                    //   betterPlayerController.dispose(forceDispose: true);
+                    //   //await betterPlayerController.pause();
+                    // }
+                    Navigator.pop(context);
+                  } else {
+                    details.primaryVelocity > 0
+                        ? statusCurrIndex -= 1
+                        : statusCurrIndex += 1;
+
+                    storyController.animateTo(
+                        MediaQuery.of(context).size.width * statusCurrIndex,
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeOut);
+                  }
                 }
               },
               child: Container(
@@ -69,17 +96,35 @@ class _ActivityViewState extends State<ActivityView> {
                 height: MediaQuery.of(context).size.height,
                 child: Stack(
                   children: [
-                    Center(
-                      child: CachedNetworkImage(
-                        imageUrl: activityItem.keys.first,
-                        placeholder: (context, url) => Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
-                        //fit: BoxFit.fitWidth,
-                      ),
-                    ),
-                    activityItem.values.first != ''
+                    mediaDetector[1] == 'image'
+                        ? Center(
+                            child: CachedNetworkImage(
+                              imageUrl: activityItem.keys.first,
+                              placeholder: (context, url) => Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                              //fit: BoxFit.fitWidth,
+                            ),
+                          )
+                        : SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            child: Center(
+                              child: AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: BetterPlayer.network(
+                                    activityItem.keys.first,
+                                    betterPlayerConfiguration:
+                                        BetterPlayerConfiguration(
+                                      aspectRatio: 16 / 9,
+                                      autoDispose: true,
+                                      autoPlay: true,
+                                    )),
+                              ),
+                            )),
+                    mediaDetector[0] != ''
                         ? Scrollbar(
                             showTrackOnHover: true,
                             thickness: 10.0,
@@ -101,7 +146,7 @@ class _ActivityViewState extends State<ActivityView> {
                                 children: [
                                   Center(
                                     child: Text(
-                                      activityItem.values.first,
+                                      mediaDetector[0],
                                       style: TextStyle(
                                         color: Colors.white,
                                       ),
