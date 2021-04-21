@@ -57,9 +57,6 @@ class _ActivityViewState extends State<ActivityView> {
               allConnectionActivity[index].values.first[position];
 
           if (_imageRegex.hasMatch(activityItem.keys.first)) {
-            print("Yes this is Media");
-
-            print(activityItem.values.first);
 
             List<String> mediaDetector =
                 activityItem.values.first.toString().split('++++++');
@@ -71,13 +68,6 @@ class _ActivityViewState extends State<ActivityView> {
                 } else {
                   if (statusCurrIndex + 1 ==
                       allConnectionActivity[index].values.first.length) {
-                    //print("Video Playing State: ${betterPlayerController.isPlaying()}");
-
-                    // if (betterPlayerController.isPlaying()) {
-                    //   print("Video Playing");
-                    //   betterPlayerController.dispose(forceDispose: true);
-                    //   //await betterPlayerController.pause();
-                    // }
                     Navigator.pop(context);
                   } else {
                     details.primaryVelocity > 0
@@ -111,19 +101,25 @@ class _ActivityViewState extends State<ActivityView> {
                         : SizedBox(
                             width: MediaQuery.of(context).size.width,
                             height: MediaQuery.of(context).size.height,
-                            child: Center(
-                              child: AspectRatio(
-                                aspectRatio: 16 / 9,
-                                child: BetterPlayer.network(
-                                    activityItem.keys.first,
-                                    betterPlayerConfiguration:
-                                        BetterPlayerConfiguration(
-                                      aspectRatio: 16 / 9,
-                                      autoDispose: true,
-                                      autoPlay: true,
-                                    )),
+                            child: Text(
+                              "Video",
+                              style: TextStyle(
+                                fontSize: 30.0,
+                                color: Colors.white,
                               ),
-                            )),
+                            ),
+                            // child: AspectRatio(
+                            //   aspectRatio: 16 / 9,
+                            //   child: BetterPlayer.network(
+                            //       activityItem.keys.first,
+                            //       betterPlayerConfiguration:
+                            //       BetterPlayerConfiguration(
+                            //         aspectRatio: 16 / 9,
+                            //         autoDispose: true,
+                            //         autoPlay: true,
+                            //       )),
+                            // ),
+                          ),
                     mediaDetector[0] != ''
                         ? Scrollbar(
                             showTrackOnHover: true,
@@ -175,7 +171,7 @@ class _ActivityViewState extends State<ActivityView> {
 
             return GestureDetector(
               onHorizontalDragEnd: (DragEndDetails details) {
-                print(details.primaryVelocity);
+
                 if (statusCurrIndex + 1 ==
                     allConnectionActivity[index].values.first.length) {
                   Navigator.pop(context);
