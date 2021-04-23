@@ -4,7 +4,8 @@ import 'package:flutter/painting.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
+
+//import 'package:video_player/video_player.dart';
 import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {
@@ -24,7 +25,7 @@ class _ActivityViewState extends State<ActivityView>
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
   // Important Controller for Activity View
-  VideoPlayerController _videoController;
+  //VideoPlayerController _videoController;
   PageController _activityPageViewController;
   AnimationController _animationController;
 
@@ -57,7 +58,8 @@ class _ActivityViewState extends State<ActivityView>
   @override
   void initState() {
     // If Have Some Activity of Current User
-    if (widget.allConnectionActivity[widget.index] != null && widget.allConnectionActivity[widget.index].length > 0) {
+    if (widget.allConnectionActivity[widget.index] != null &&
+        widget.allConnectionActivity[widget.index].length > 0) {
       SystemChrome.setEnabledSystemUIOverlays([]); // Android StatusBar Hide
       // For EveryActivity Controller and EveryActivity Animation Controller
       _activityPageViewController = PageController();
@@ -98,9 +100,10 @@ class _ActivityViewState extends State<ActivityView>
   void dispose() {
     // TODO: implement dispose
 
-    if (widget.allConnectionActivity[widget.index] != null && widget.allConnectionActivity[widget.index].length > 0) {
+    if (widget.allConnectionActivity[widget.index] != null &&
+        widget.allConnectionActivity[widget.index].length > 0) {
       // Some Controller Dispose else may give error after current context getting pop
-      _videoController?.dispose();
+      //_videoController?.dispose();
       _animationController.dispose();
       _activityPageViewController.dispose();
 
@@ -230,26 +233,27 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   Widget videoActivityView(String videoUrl, List<String> mediaDetector) {
-    if (_videoController != null && _videoController.value.isInitialized) {
-      return SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Stack(
-            children: [
-              Center(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: _videoController.value.size.width,
-                    height: _videoController.value.size.height,
-                    child: VideoPlayer(_videoController),
-                  ),
-                ),
-              ),
-              bottomTextActivityView(mediaDetector),
-            ],
-          ));
-    }
+    // if (_videoController != null && _videoController.value.isInitialized) {
+    //   return SizedBox(
+    //       width: MediaQuery.of(context).size.width,
+    //       height: MediaQuery.of(context).size.height,
+    //       child: Stack(
+    //         children: [
+    //           Center(
+    //             child: FittedBox(
+    //               fit: BoxFit.cover,
+    //               child: SizedBox(
+    //                 width: _videoController.value.size.width,
+    //                 height: _videoController.value.size.height,
+    //                 child: Center(),
+    //                 //VideoPlayer(_videoController),
+    //               ),
+    //             ),
+    //           ),
+    //           bottomTextActivityView(mediaDetector),
+    //         ],
+    //       ));
+    // }
 
     /// For Video Play Error
     _animationController.duration = Duration(seconds: 5);
@@ -304,26 +308,33 @@ class _ActivityViewState extends State<ActivityView>
             showTrackOnHover: true,
             thickness: 10.0,
             child: Container(
-              color: Color.fromRGBO(0, 0, 0, 0.1),
-              padding: EdgeInsets.only(
+              color: const Color.fromRGBO(0, 0, 0, 0.1),
+              width: MediaQuery.of(context).size.width,
+              height: 100.0,
+              padding: const EdgeInsets.only(
                 left: 5.0,
                 right: 5.0,
-                bottom: 5.0,
+                bottom: 3.0,
+                top: 3.0,
               ),
-              width: MediaQuery.of(context).size.width,
               margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height - 105,
                 bottom: 5,
               ),
-              height: 100.0,
-              //alignment: Alignment.bottomCenter,
+              alignment: Alignment.center,
               child: ListView(
+                shrinkWrap: true,
                 children: [
                   Center(
                     child: Text(
                       mediaDetector[0],
-                      style: TextStyle(
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
                         color: Colors.white,
+                        fontSize: 16.0,
+                        fontFamily: 'Lora',
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 1.0,
                       ),
                     ),
                   ),
@@ -331,7 +342,7 @@ class _ActivityViewState extends State<ActivityView>
               ),
             ),
           )
-        : Center();
+        : const Center();
   }
 
   void _loadActivity(
@@ -345,24 +356,25 @@ class _ActivityViewState extends State<ActivityView>
 
     if (activityType == 'video') {
       try {
-        _videoController = null;
-        _videoController?.dispose(); // ?. => in a confused or excited state
+        // _videoController = null;
+        // _videoController?.dispose(); // ?. => in a confused or excited state
 
-        _videoController = VideoPlayerController.network(
-          videoUrl,
-        )..initialize().then((_) {
-            setState(() {});
-
-            _videoController.setVolume(0.0);
-            if (_videoController.value.isInitialized) {
-              _animationController.duration = _videoController.value.duration;
-              _videoController.play();
-              _animationController.forward();
-            } else {
-              _animationController.duration = Duration(seconds: 5);
-              _animationController.forward();
-            }
-          });
+        // _videoController = VideoPlayerController.network(
+        //   videoUrl,
+        // )..initialize().then((_) {
+        //     setState(() {});
+        //
+        //     _videoController.setVolume(0.0);
+        //
+        //     if (_videoController.value.isInitialized) {
+        //       _animationController.duration = _videoController.value.duration;
+        //       _videoController.play();
+        //       _animationController.forward();
+        //     } else {
+        //       _animationController.duration = Duration(seconds: 5);
+        //       _animationController.forward();
+        //     }
+        //   });
       } catch (e) {
         _animationController.duration = Duration(seconds: 5);
         _animationController.forward();
@@ -413,13 +425,13 @@ class _ActivityViewState extends State<ActivityView>
               .toString()
               .split('++++++')[1] ==
           'video') {
-        if (_videoController.value.isInitialized) {
-          _videoController.pause();
-          _animationController.stop();
-        } else {
-          _videoController.play();
-          _animationController.forward();
-        }
+        // if (_videoController.value.isInitialized) {
+        //   _videoController.pause();
+        //   _animationController.stop();
+        // } else {
+        //   _videoController.play();
+        //   _animationController.forward();
+        // }
       } else {
         _animationController.stop();
       }
@@ -436,13 +448,13 @@ class _ActivityViewState extends State<ActivityView>
               .toString()
               .split('++++++')[1] ==
           'video') {
-        if (_videoController.value.isInitialized) {
-          _videoController.pause();
-          _animationController.stop();
-        } else {
-          _videoController.play();
-          _animationController.forward();
-        }
+        // if (_videoController.value.isInitialized) {
+        //   _videoController.pause();
+        //   _animationController.stop();
+        // } else {
+        //   _videoController.play();
+        //   _animationController.forward();
+        // }
       } else {
         _animationController.forward();
       }

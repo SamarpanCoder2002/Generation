@@ -64,7 +64,9 @@ class _ApplicationListState extends State<ApplicationList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PreviewImageScreen(
-                            imageFile: File(pickedFile.path), allConnectionUserName: [],),
+                          imageFile: File(pickedFile.path),
+                          allConnectionUserName: [],
+                        ),
                       ),
                     );
                   },
@@ -78,7 +80,9 @@ class _ApplicationListState extends State<ApplicationList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PreviewImageScreen(
-                            imageFile: File(pickedFile.path), allConnectionUserName: [],),
+                          imageFile: File(pickedFile.path),
+                          allConnectionUserName: [],
+                        ),
                       ),
                     );
                   },
@@ -111,17 +115,42 @@ class _ApplicationListState extends State<ApplicationList> {
                       width: 3,
                     )),
                 child: GestureDetector(
-                  onLongPress: () async {
-                    final PickedFile pickedFile =
-                        await picker.getVideo(source: ImageSource.gallery);
-
-                    print(pickedFile.path);
-                  },
+                  // onLongPress: () async {
+                  //   final PickedFile pickedFile =
+                  //       await picker.getVideo(source: ImageSource.gallery);
+                  //
+                  //   print(pickedFile.path);
+                  // },
                   onTap: () async {
-                    final PickedFile pickedFile =
-                        await picker.getVideo(source: ImageSource.camera);
-
-                    print(pickedFile.path);
+                    showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                              elevation: 5.0,
+                              backgroundColor:
+                                  const Color.fromRGBO(34, 48, 60, 0.6),
+                              title: Text(
+                                "Video Player in Development Mode",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 16.0,
+                                  fontFamily: 'Lora',
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                              content: Text(
+                                "Due to Some Problem, We can't introduce it for now...\nBut We will introduce this feature soon",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15.0,
+                                  fontFamily: 'Lora',
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ));
+                    // final PickedFile pickedFile =
+                    //     await picker.getVideo(source: ImageSource.camera);
+                    //
+                    // print(pickedFile.path);
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,

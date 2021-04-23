@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:better_player/better_player.dart';
+// import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -51,12 +51,14 @@ class _VideoPreviewState extends State<VideoPreview> {
           child: Center(
               child: AspectRatio(
             aspectRatio: 16 / 9,
-            child: BetterPlayer.file(
-              widget.fileUrl.path,
-              betterPlayerConfiguration: BetterPlayerConfiguration(
-                aspectRatio: 16 / 9,
-              ),
-            ),
+            child: Center(),
+
+            // BetterPlayer.file(
+            //   widget.fileUrl.path,
+            //   betterPlayerConfiguration: BetterPlayerConfiguration(
+            //     aspectRatio: 16 / 9,
+            //   ),
+            // ),
           )),
         ));
   }
@@ -99,8 +101,8 @@ class _VideoPreviewState extends State<VideoPreview> {
                     thickness: 10.0,
                     radius: Radius.circular(30.0),
                     child: TextFormField(
-                      validator: (inputValue){
-                        if(inputValue.contains('++++++')){
+                      validator: (inputValue) {
+                        if (inputValue.contains('++++++')) {
                           return "'++++++' pattern not supported";
                         }
                         return null;
@@ -117,7 +119,7 @@ class _VideoPreviewState extends State<VideoPreview> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(20.0)),
                           borderSide:
-                          BorderSide(color: Colors.black54, width: 2.0),
+                              BorderSide(color: Colors.black54, width: 2.0),
                         ),
                         hintText: 'Type Here',
                         hintStyle: TextStyle(color: Colors.white),
@@ -133,9 +135,7 @@ class _VideoPreviewState extends State<VideoPreview> {
               child: FloatingActionButton(
                 backgroundColor: Colors.green,
                 onPressed: () async {
-                  if(_videoPreviewKey.currentState.validate()){
-
-                  }
+                  if (_videoPreviewKey.currentState.validate()) {}
                   SystemChannels.textInput.invokeMethod('TextInput.hide');
 
                   if (mounted) {
@@ -151,13 +151,13 @@ class _VideoPreviewState extends State<VideoPreview> {
                   }
 
                   if (widget.purpose == 'status') {
-                    bool response = await management
-                        .mediaActivityToStorageAndFireStore(
-                        widget.fileUrl,
-                        manuallyTextController.text,
-                        widget.allConnectionUserName,
-                        context,
-                        mediaType: 'video');
+                    bool response =
+                        await management.mediaActivityToStorageAndFireStore(
+                            widget.fileUrl,
+                            manuallyTextController.text,
+                            widget.allConnectionUserName,
+                            context,
+                            mediaType: 'video');
 
                     if (response) {
                       if (mounted) {
