@@ -10,14 +10,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/FrontEnd/Preview/videos_preview_screen.dart';
 import 'package:generation/FrontEnd/Services/search_screen.dart';
-import 'package:generation/FrontEnd/Activity_View/status_text_container.dart';
+import 'package:generation/FrontEnd/Activity/status_text_container.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:generation/FrontEnd/Activity_View/activity_view.dart';
+import 'package:generation/FrontEnd/Activity/activity_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 
-import 'ChatScreen.dart';
+import 'package:generation/FrontEnd/MainScreen/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -31,8 +31,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   List<Map<String, dynamic>> allConnectionActivity;
   FToast fToast;
-
-  ScrollController storyController = ScrollController();
 
   Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
@@ -222,8 +220,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
-                return ActivityView(
-                    allConnectionActivity, index, storyController);
+                return ActivityView(allConnectionActivity, index);
               },
               closedBuilder: (context, closeWidget) {
                 return CircleAvatar(

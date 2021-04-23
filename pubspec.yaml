@@ -32,19 +32,19 @@ dependencies:
   animations: ^2.0.0
   flutter_colorpicker: ^0.4.0
   fluttertoast: ^8.0.4
+  cached_network_image: ^3.0.0
 
   circle_list:
   image_picker:
   flutter_switch:
-  fab_circular_menu:
+  better_player: ^0.0.64
+  video_player: ^2.1.1
 
   firebase_core: ^1.0.2
   firebase_auth: ^1.0.1
   google_sign_in: ^5.0.1
   cloud_firestore: ^1.0.3
-  firebase_messaging: ^9.1.1
-
-  flutter_local_notifications: ^5.0.0+1
+  firebase_storage: ^8.0.3
 
   sqflite: ^2.0.0+3
 
@@ -55,7 +55,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-#  flutter_launcher_icons: "^0.9.0"
+
 
 #flutter_icons:
 #  image_path: "assets/icons/generation_logo.jpg"
