@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation/FrontEnd/Services/auth_error_msg_toast.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation_official/FrontEnd/Services/auth_error_msg_toast.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 // ignore: must_be_immutable

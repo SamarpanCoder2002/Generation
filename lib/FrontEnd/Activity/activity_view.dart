@@ -5,7 +5,7 @@ import 'package:flutter/painting.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
-import 'package:generation/FrontEnd/Activity/animation_controller.dart';
+import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {
   final List<Map<String, dynamic>> allConnectionActivity;
@@ -56,10 +56,9 @@ class _ActivityViewState extends State<ActivityView>
 
   @override
   void initState() {
-    SystemChrome.setEnabledSystemUIOverlays([]); // Android StatusBar Hide
-
     // If Have Some Activity of Current User
-    if (widget.allConnectionActivity[widget.index].length > 0) {
+    if (widget.allConnectionActivity[widget.index] != null && widget.allConnectionActivity[widget.index].length > 0) {
+      SystemChrome.setEnabledSystemUIOverlays([]); // Android StatusBar Hide
       // For EveryActivity Controller and EveryActivity Animation Controller
       _activityPageViewController = PageController();
       _animationController = AnimationController(vsync: this);
@@ -99,13 +98,15 @@ class _ActivityViewState extends State<ActivityView>
   void dispose() {
     // TODO: implement dispose
 
-    // Some Controller Dispose else may give error after current context getting pop
-    _videoController?.dispose();
-    _animationController.dispose();
-    _activityPageViewController.dispose();
+    if (widget.allConnectionActivity[widget.index] != null && widget.allConnectionActivity[widget.index].length > 0) {
+      // Some Controller Dispose else may give error after current context getting pop
+      _videoController?.dispose();
+      _animationController.dispose();
+      _activityPageViewController.dispose();
 
-    SystemChrome.setEnabledSystemUIOverlays(
-        SystemUiOverlay.values); // Android StatusBar Show
+      SystemChrome.setEnabledSystemUIOverlays(
+          SystemUiOverlay.values); // Android StatusBar Show
+    }
 
     super.dispose();
   }

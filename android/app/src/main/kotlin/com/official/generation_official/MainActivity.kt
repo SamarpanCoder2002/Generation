@@ -1,4 +1,4 @@
-package com.example.generation
+package com.official.generation_official
 
 import io.flutter.embedding.android.FlutterActivity
 

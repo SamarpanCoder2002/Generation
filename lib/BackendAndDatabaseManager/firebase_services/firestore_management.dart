@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
-import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Management {
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-import 'package:generation/FrontEnd/MainScreen/ChatAndStatusCollection.dart';
-import 'package:generation/FrontEnd/MainScreen/applications_section.dart';
-import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
-import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
-import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
+import 'package:generation_official/FrontEnd/MainScreen/ChatAndStatusCollection.dart';
+import 'package:generation_official/FrontEnd/MainScreen/applications_section.dart';
+import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
+import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
+import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
 
 class MainScreen extends StatefulWidget {
   @override

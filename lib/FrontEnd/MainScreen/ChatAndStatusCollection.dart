@@ -5,20 +5,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation/FrontEnd/Preview/videos_preview_screen.dart';
-import 'package:generation/FrontEnd/Services/search_screen.dart';
-import 'package:generation/FrontEnd/Activity/status_text_container.dart';
-import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:generation/FrontEnd/Activity/activity_view.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation_official/FrontEnd/Preview/videos_preview_screen.dart';
+import 'package:generation_official/FrontEnd/Services/search_screen.dart';
+import 'package:generation_official/FrontEnd/Activity/status_text_container.dart';
+import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation_official/FrontEnd/Activity/activity_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 
-import 'package:generation/FrontEnd/MainScreen/ChatScreen.dart';
-import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation_official/FrontEnd/MainScreen/ChatScreen.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -139,6 +140,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     print("Initialization");
+    SystemChrome.setEnabledSystemUIOverlays(
+        SystemUiOverlay.values); // Android StatusBar Show
+
+
     allConnectionsUserName = [];
     allConnectionActivity = [];
 

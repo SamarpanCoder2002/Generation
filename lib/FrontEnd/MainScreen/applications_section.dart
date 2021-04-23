@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:circle_list/circle_list.dart';
 
-import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ApplicationList extends StatefulWidget {
