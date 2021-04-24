@@ -1,3 +1,4 @@
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -5,6 +6,7 @@ class LocalStorageHelper {
   // Database Columns
   String _colMessages = "Messages";
   String _colReferences = "Reference";
+  String _colMediaType = "Media";
   String _colDate = "Date";
   String _colTime = "Time";
   String _colAbout = "About";
@@ -46,7 +48,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colDate TEXT, $_colTime TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
       return true;
     } catch (e) {
       print("Error in Local Storage Create Table: ${e.toString()}");
@@ -64,6 +66,7 @@ class LocalStorageHelper {
     // Insert Data to Map
     _helperMap[_colMessages] = "";
     _helperMap[_colReferences] = -1;
+    _helperMap[_colMediaType] = "";
     _helperMap[_colDate] = "";
     _helperMap[_colTime] = "";
     _helperMap[_colAbout] = _about;
@@ -77,7 +80,7 @@ class LocalStorageHelper {
 
   // Insert New Messages to Table
   Future<int> insertNewMessages(
-      String _tableName, String _newMessage, int _ref) async {
+      String _tableName, String _newMessage, MediaTypes _currMediaType, int _ref) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
@@ -90,6 +93,7 @@ class LocalStorageHelper {
     // Insert Data to Map
     _helperMap[_colMessages] = _newMessage;
     _helperMap[_colReferences] = _ref;
+    _helperMap[_colMediaType] = _currMediaType.toString();
     _helperMap[_colDate] = _dateIS;
     _helperMap[_colTime] = '${DateTime.now().hour}: ${DateTime.now().minute}';
     _helperMap[_colAbout] = "";
@@ -115,7 +119,7 @@ class LocalStorageHelper {
     Database db = await this.database; // DB Reference
 
     List<Map<String, Object>> result = await db.rawQuery(
-        'SELECT $_colMessages, $_colTime, $_colReferences FROM $_tableName WHERE $_colReferences != -1');
+        'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType FROM $_tableName WHERE $_colReferences != -1');
     return result;
   }
 

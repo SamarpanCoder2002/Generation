@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -20,14 +22,17 @@ class ChatScreenSetUp extends StatefulWidget {
 
 class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
+  bool _iconChanger = false;
+
   // For Control the Scrolling
   final ScrollController scrollController = ScrollController(
     initialScrollOffset: 0.0,
   );
 
   // All Container List
-  List<Map<String, String>> chatContainer = [];
+  final List<Map<String, String>> chatContainer = [];
   final List<bool> response = [];
+  final List<MediaTypes> mediaTypes = [];
 
   // For Controller Text in Field
   final TextEditingController inputText = TextEditingController();
@@ -41,6 +46,19 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   // Sender Mail Take out
   String _senderMail;
+
+  // Changer Changeable icon
+  final Icon senderIcon = Icon(
+    Icons.send_rounded,
+    size: 30.0,
+    color: Colors.green,
+  );
+
+  final Icon voiceIcon = Icon(
+    Icons.keyboard_voice_rounded,
+    size: 30.0,
+    color: Colors.green,
+  );
 
   void senderMail() async {
     _senderMail = await LocalStorageHelper().fetchEmail(widget._userName);
@@ -86,6 +104,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   response.add(true);
                 else
                   response.add(false);
+
+                if (messageContainer[3] == MediaTypes.Text.toString()) {
+                  mediaTypes.add(MediaTypes.Text);
+                } else if (messageContainer[3] == MediaTypes.Voice.toString()) {
+                  //print( messageContainer[0].toString());
+                  mediaTypes.add(MediaTypes.Voice);
+                }
 
                 if (mounted) {
                   setState(() {
@@ -167,17 +192,32 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     'connections': allConnections,
                   });
 
+                  List<String> _incomingInformationContainer = [];
+
                   // Taking all the remaining messages to store in local container
                   messages.forEach((everyMessage) {
+                    _incomingInformationContainer =
+                        everyMessage.values.first.toString().split('+');
+
                     chatContainer.add({
                       '${everyMessage.keys.first}':
-                          '${everyMessage.values.first}',
+                          '${_incomingInformationContainer[0]}',
                     });
                     response.add(true); // Chat Position Status Added
 
+                    switch (_incomingInformationContainer[1]) {
+                      case 'MediaTypes.Text':
+                        mediaTypes.add(MediaTypes.Text);
+                        break;
+                      case 'MediaTypes.Voice':
+                        mediaTypes.add(MediaTypes.Voice);
+                    }
+
+                    print("MediaTypes: ${_incomingInformationContainer[1]}");
+
                     // Store Data in local Storage
                     localStorageHelper.insertNewMessages(widget._userName,
-                        everyMessage.keys.first.toString(), 1);
+                        everyMessage.keys.first.toString(), MediaTypes.Text, 1);
                   });
 
                   // For AutoScroll to the end position
@@ -343,9 +383,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   controller: scrollController,
                   itemCount: chatContainer.length,
                   itemBuilder: (context, position) {
-                    if (response.length > 0 && response[position] == false)
-                      return senderList(context, position);
-                    return receiverList(context, position);
+                    if (mediaTypes[position] == MediaTypes.Text)
+                      return textConversationList(
+                          context, position, response[position]);
+                    return voiceConversationList(
+                        context, position, response[position]);
                   },
                 ),
               ),
@@ -428,13 +470,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     ),
                   ),
                   Expanded(
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.send_rounded,
-                        size: 30.0,
-                        color: Colors.green,
-                      ),
-                      onPressed: messageSend,
+                    child: GestureDetector(
+                      child: _iconChanger ? voiceIcon : senderIcon,
+                      onTap: _iconChanger ? voiceSend : messageSend,
+                      onLongPress: () {
+                        if (mounted) {
+                          setState(() {
+                            _iconChanger = !_iconChanger;
+                          });
+                        }
+                      },
                     ),
                   ),
                   SizedBox(
@@ -465,17 +510,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget senderList(BuildContext context, int index) {
+  Widget textConversationList(BuildContext context, int index, bool response) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Container(
-          margin: EdgeInsets.only(
-              left: MediaQuery.of(context).size.width / 3, right: 5.0),
-          alignment: Alignment.centerRight,
+          margin: response
+              ? EdgeInsets.only(
+                  right: MediaQuery.of(context).size.width / 3, left: 5.0)
+              : EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width / 3, right: 5.0),
+          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: Colors.lightBlue,
+              primary: response
+                  ? Color.fromRGBO(60, 80, 100, 1)
+                  : Color.fromRGBO(110, 160, 255, 1),
               elevation: 0.0,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
@@ -496,8 +546,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           ),
         ),
         Container(
-          alignment: Alignment.centerRight,
-          margin: EdgeInsets.only(right: 5.0, bottom: 5.0),
+          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
+          margin: response
+              ? EdgeInsets.only(left: 5.0, bottom: 5.0)
+              : EdgeInsets.only(right: 5.0, bottom: 5.0),
           child: Text(
             chatContainer[index].values.first,
             style: TextStyle(color: Colors.lightBlue),
@@ -507,40 +559,127 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget receiverList(BuildContext context, int index) {
+  Widget voiceConversationList(BuildContext context, int index, bool response) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Container(
-          margin: EdgeInsets.only(
-              right: MediaQuery.of(context).size.width / 3, left: 5.0),
-          padding: EdgeInsets.only(top: 5.0),
-          alignment: Alignment.centerLeft,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              primary: Color.fromRGBO(60, 80, 100, 1),
-              elevation: 0.0,
-              padding: EdgeInsets.all(10.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.0),
-                  bottomLeft: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
+          margin: response
+              ? EdgeInsets.only(
+                  right: MediaQuery.of(context).size.width / 3,
+                  left: 5.0,
+                  top: 5.0,
+                )
+              : EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width / 3,
+                  right: 5.0,
+                  top: 5.0,
                 ),
-              ),
+          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
+          child: Container(
+            height: 70.0,
+            width: 200.0,
+            decoration: BoxDecoration(
+              color: response
+                  ? Color.fromRGBO(60, 80, 100, 1)
+                  : Color.fromRGBO(110, 160, 255, 1),
+              borderRadius: response
+                  ? BorderRadius.only(
+                      topRight: Radius.circular(40.0),
+                      bottomLeft: Radius.circular(40.0),
+                      bottomRight: Radius.circular(40.0),
+                    )
+                  : BorderRadius.only(
+                      topLeft: Radius.circular(40.0),
+                      bottomLeft: Radius.circular(40.0),
+                      bottomRight: Radius.circular(40.0),
+                    ),
             ),
-            child: Text(
-              chatContainer[index].keys.first,
-              style: TextStyle(
-                color: Colors.white,
-              ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 20.0,
+                ),
+                GestureDetector(
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: Color.fromRGBO(10, 255, 30, 1),
+                      size: 40.0,
+                    ),
+                    onTap: () {}),
+                SizedBox(
+                  width: 5.0,
+                ),
+                Expanded(
+                  //color: Color.fromRGBO(86, 121, 192, 1),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(
+                          top: 20.0,
+                        ),
+                        child: LinearPercentIndicator(
+                          //width: 140.0,
+                          lineHeight: 5.0,
+                          percent: 0.15,
+                          backgroundColor: Colors.black26,
+                          progressColor:
+                              response ? Colors.lightBlue : Colors.amber,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(
+                          left: 10.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '0:00',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 15.0,
+                            ),
+                            Expanded(
+                              child: Text(
+                                '12:00',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
             ),
-            onPressed: () {},
           ),
         ),
         Container(
-          alignment: Alignment.centerLeft,
-          margin: EdgeInsets.only(left: 5.0, bottom: 5.0),
+          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
+          margin: response
+              ? EdgeInsets.only(
+                  left: 5.0,
+                  bottom: 5.0,
+                  top: 5.0,
+                )
+              : EdgeInsets.only(
+                  right: 5.0,
+                  bottom: 5.0,
+                  top: 5.0,
+                ),
           child: Text(
             chatContainer[index].values.first,
             style: TextStyle(color: Colors.lightBlue),
@@ -574,7 +713,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             // Add data to temporary Storage of Sending
             sendingMessages.add({
               '${inputText.text}':
-                  "${DateTime.now().hour}:${DateTime.now().minute}",
+                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
             });
 
             // Add Data to the UI related all chat Container
@@ -586,6 +725,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             response
                 .add(false); // Add the data response to chat related container
 
+            mediaTypes.add(MediaTypes.Text); // Add MediaType
+
             inputText.clear(); // Get Clear the InputBox
           });
         }
@@ -594,9 +735,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         scrollController
             .jumpTo(scrollController.position.maxScrollExtent + 100);
 
+        print('MediaTypes.Text: ${MediaTypes.Text}');
+
         // Data Store in Local Storage
-        localStorageHelper.insertNewMessages(
-            widget._userName, chatContainer.last.keys.first.toString(), 0);
+        localStorageHelper.insertNewMessages(widget._userName,
+            chatContainer.last.keys.first.toString(), MediaTypes.Text, 0);
 
         // Data Store in Firestore
         management.addConversationMessages(this._senderMail, sendingMessages);
@@ -606,7 +749,74 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           context: context,
           builder: (_) {
             return AlertDialog(
-              title: Text("Send Problem"),
+              title: Text("Text Send Problem"),
+              content: Text(e.toString()),
+            );
+          });
+    }
+  }
+
+  voiceSend() async {
+    try {
+      print("Send Pressed");
+      if (inputText.text.isNotEmpty) {
+        // Take Document Data related to old messages
+        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
+            .instance
+            .doc("generation_users/$_senderMail")
+            .get();
+
+        // Initialize Temporary List
+        List<dynamic> sendingMessages = [];
+
+        // Store Updated sending messages list
+        sendingMessages = documentSnapShot.data()['connections']
+            [FirebaseAuth.instance.currentUser.email.toString()];
+
+        if (mounted) {
+          if (sendingMessages == null) sendingMessages = [];
+
+          setState(() {
+            // Add data to temporary Storage of Sending
+            sendingMessages.add({
+              '${inputText.text}':
+                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}",
+            });
+
+            // Add Data to the UI related all chat Container
+            chatContainer.add({
+              '${inputText.text}':
+                  '${DateTime.now().hour}:${DateTime.now().minute}',
+            });
+
+            response
+                .add(false); // Add the data response to chat related container
+
+            mediaTypes.add(MediaTypes.Voice); // Add MediaType
+
+            inputText.clear(); // Get Clear the InputBox
+          });
+        }
+
+        // Scroll to Bottom
+        scrollController
+            .jumpTo(scrollController.position.maxScrollExtent + 100);
+
+        print('MediaTypes.Text: ${MediaTypes.Voice}');
+
+        // Data Store in Local Storage
+        localStorageHelper.insertNewMessages(widget._userName,
+            chatContainer.last.keys.first.toString(), MediaTypes.Voice, 0);
+
+        // Data Store in Firestore
+        management.addConversationMessages(this._senderMail, sendingMessages);
+      }
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text("Voice Send Problem"),
               content: Text(e.toString()),
             );
           });
