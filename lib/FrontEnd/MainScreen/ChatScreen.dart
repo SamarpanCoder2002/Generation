@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
@@ -22,53 +23,55 @@ class ChatScreenSetUp extends StatefulWidget {
 
 class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
-  bool _iconChanger = false;
+  bool _iconChanger = true;
 
   // For Control the Scrolling
-  final ScrollController scrollController = ScrollController(
+  final ScrollController _scrollController = ScrollController(
     initialScrollOffset: 0.0,
   );
 
   // All Container List
-  final List<Map<String, String>> chatContainer = [];
-  final List<bool> response = [];
-  final List<MediaTypes> mediaTypes = [];
+  final List<Map<String, String>> _chatContainer = [];
+  final List<bool> _response = [];
+  final List<MediaTypes> _mediaTypes = [];
 
   // For Controller Text in Field
-  final TextEditingController inputText = TextEditingController();
+  final TextEditingController _inputTextController = TextEditingController();
 
   // Some Boolean Value
   bool _showEmojiPicker = false, _isChatOpenFirstTime = true;
 
   // Object Initialization
-  final Management management = Management();
-  final LocalStorageHelper localStorageHelper = LocalStorageHelper();
+  final Management _management = Management();
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  final FlutterSoundRecorder _flutterSoundRecorder = FlutterSoundRecorder();
 
   // Sender Mail Take out
   String _senderMail;
 
   // Changer Changeable icon
-  final Icon senderIcon = Icon(
+  final Icon _senderIcon = Icon(
     Icons.send_rounded,
     size: 30.0,
     color: Colors.green,
   );
 
-  final Icon voiceIcon = Icon(
+  final Icon _voiceIcon = Icon(
     Icons.keyboard_voice_rounded,
     size: 30.0,
     color: Colors.green,
   );
 
-  void senderMail() async {
+  void _senderMailDataFetch() async {
     _senderMail = await LocalStorageHelper().fetchEmail(widget._userName);
   }
 
-  extractHistoryData() async {
+  _extractHistoryDataFromSqLite() async {
     try {
       List<Map<String, dynamic>> messagesGet = [];
       messagesGet =
-          await localStorageHelper.extractMessageData(widget._userName);
+          await _localStorageHelper.extractMessageData(widget._userName);
 
       // If messagesList not Empty
       if (messagesGet.isNotEmpty) {
@@ -83,9 +86,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 _isChatOpenFirstTime = false;
 
                 // For AutoScroll to the end position
-                if (scrollController.hasClients)
-                  scrollController
-                      .jumpTo(scrollController.position.maxScrollExtent);
+                if (_scrollController.hasClients)
+                  _scrollController
+                      .jumpTo(_scrollController.position.maxScrollExtent);
               });
             }
           }
@@ -96,28 +99,27 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else {
             if (mounted) {
               setState(() {
-                chatContainer.add({
+                _chatContainer.add({
                   messageContainer[0].toString():
                       messageContainer[1].toString(),
                 });
                 if (messageContainer[2] == 1)
-                  response.add(true);
+                  _response.add(true);
                 else
-                  response.add(false);
+                  _response.add(false);
 
                 if (messageContainer[3] == MediaTypes.Text.toString()) {
-                  mediaTypes.add(MediaTypes.Text);
+                  _mediaTypes.add(MediaTypes.Text);
                 } else if (messageContainer[3] == MediaTypes.Voice.toString()) {
-                  //print( messageContainer[0].toString());
-                  mediaTypes.add(MediaTypes.Voice);
+                  _mediaTypes.add(MediaTypes.Voice);
                 }
 
                 if (mounted) {
                   setState(() {
                     // For AutoScroll to the end position
-                    if (scrollController.hasClients)
-                      scrollController
-                          .jumpTo(scrollController.position.maxScrollExtent);
+                    if (_scrollController.hasClients)
+                      _scrollController
+                          .jumpTo(_scrollController.position.maxScrollExtent);
                   });
                 }
               });
@@ -126,9 +128,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
         if (mounted) {
           setState(() {
-            if (scrollController.hasClients)
-              scrollController
-                  .jumpTo(scrollController.position.maxScrollExtent);
+            if (_scrollController.hasClients)
+              _scrollController
+                  .jumpTo(_scrollController.position.maxScrollExtent);
           });
         }
       } else {
@@ -140,7 +142,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           }
         }
       }
-      extractDataFromFireStore(); // After Get the old Conversation messages from SqLite, Take Data from Firestore
+      _extractDataFromFireStore(); // After Get the old Conversation messages from SqLite, Take Data from Firestore
     } catch (e) {
       showDialog(
           context: context,
@@ -151,10 +153,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  extractDataFromFireStore() {
+  _extractDataFromFireStore() {
     try {
       // Fetch Data from FireStore
-      management.getDatabaseData().listen((event) {
+      _management.getDatabaseData().listen((event) {
         if (event.data()['connections'].length < 0) {
           print("No Connections Present");
         } else {
@@ -199,31 +201,31 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     _incomingInformationContainer =
                         everyMessage.values.first.toString().split('+');
 
-                    chatContainer.add({
+                    _chatContainer.add({
                       '${everyMessage.keys.first}':
                           '${_incomingInformationContainer[0]}',
                     });
-                    response.add(true); // Chat Position Status Added
+                    _response.add(true); // Chat Position Status Added
 
                     switch (_incomingInformationContainer[1]) {
                       case 'MediaTypes.Text':
-                        mediaTypes.add(MediaTypes.Text);
+                        _mediaTypes.add(MediaTypes.Text);
                         break;
                       case 'MediaTypes.Voice':
-                        mediaTypes.add(MediaTypes.Voice);
+                        _mediaTypes.add(MediaTypes.Voice);
                     }
 
                     print("MediaTypes: ${_incomingInformationContainer[1]}");
 
                     // Store Data in local Storage
-                    localStorageHelper.insertNewMessages(widget._userName,
+                    _localStorageHelper.insertNewMessages(widget._userName,
                         everyMessage.keys.first.toString(), MediaTypes.Text, 1);
                   });
 
                   // For AutoScroll to the end position
-                  if (scrollController.hasClients)
-                    scrollController.jumpTo(
-                        scrollController.position.maxScrollExtent + 100);
+                  if (_scrollController.hasClients)
+                    _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent + 100);
                 });
               }
             } else {
@@ -247,17 +249,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   void initState() {
     super.initState();
-    senderMail();
+    _senderMailDataFetch();
 
     if (_isChatOpenFirstTime) {
-      extractHistoryData();
+      _extractHistoryDataFromSqLite();
     }
 
     if (mounted) {
       setState(() {
         // For AutoScroll to the end position
-        if (scrollController.hasClients)
-          scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        if (_scrollController.hasClients)
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
     }
   }
@@ -380,14 +382,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 thickness: 4.0,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  controller: scrollController,
-                  itemCount: chatContainer.length,
+                  controller: _scrollController,
+                  itemCount: _chatContainer.length,
                   itemBuilder: (context, position) {
-                    if (mediaTypes[position] == MediaTypes.Text)
+                    if (_mediaTypes[position] == MediaTypes.Text)
                       return textConversationList(
-                          context, position, response[position]);
+                          context, position, _response[position]);
                     return voiceConversationList(
-                        context, position, response[position]);
+                        context, position, _response[position]);
                   },
                 ),
               ),
@@ -436,10 +438,20 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               });
                             }
 
-                            scrollController.jumpTo(
-                                scrollController.position.maxScrollExtent);
+                            _scrollController.jumpTo(
+                                _scrollController.position.maxScrollExtent);
                           },
-                          controller: inputText,
+                          onChanged: (inputValue) {
+                            if (mounted) {
+                              setState(() {
+                                if (inputValue == '') {
+                                  _iconChanger = true;
+                                } else
+                                  _iconChanger = false;
+                              });
+                            }
+                          },
+                          controller: _inputTextController,
                           maxLines: null,
                           // For Line Break
                           decoration: InputDecoration(
@@ -471,8 +483,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   ),
                   Expanded(
                     child: GestureDetector(
-                      child: _iconChanger ? voiceIcon : senderIcon,
-                      onTap: _iconChanger ? voiceSend : messageSend,
+                      child: _iconChanger ? _voiceIcon : _senderIcon,
+                      onTap: _iconChanger ? _voiceSend : _messageSend,
                       onLongPress: () {
                         if (mounted) {
                           setState(() {
@@ -498,7 +510,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     onEmojiSelected: (item, category) {
                       if (mounted) {
                         setState(() {
-                          inputText.text += item.emoji;
+                          _inputTextController.text += item.emoji;
                         });
                       }
                     },
@@ -510,20 +522,20 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget textConversationList(BuildContext context, int index, bool response) {
+  Widget textConversationList(BuildContext context, int index, bool _response) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Container(
-          margin: response
+          margin: _response
               ? EdgeInsets.only(
                   right: MediaQuery.of(context).size.width / 3, left: 5.0)
               : EdgeInsets.only(
                   left: MediaQuery.of(context).size.width / 3, right: 5.0),
-          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
+          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: response
+              primary: _response
                   ? Color.fromRGBO(60, 80, 100, 1)
                   : Color.fromRGBO(102, 102, 255, 1),
               elevation: 0.0,
@@ -537,7 +549,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ),
             child: Text(
-              chatContainer[index].keys.first,
+              _chatContainer[index].keys.first,
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -546,12 +558,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           ),
         ),
         Container(
-          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
-          margin: response
+          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
+          margin: _response
               ? EdgeInsets.only(left: 5.0, bottom: 5.0)
               : EdgeInsets.only(right: 5.0, bottom: 5.0),
           child: Text(
-            chatContainer[index].values.first,
+            _chatContainer[index].values.first,
             style: TextStyle(color: Colors.lightBlue),
           ),
         ),
@@ -559,12 +571,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget voiceConversationList(BuildContext context, int index, bool response) {
+  Widget voiceConversationList(
+      BuildContext context, int index, bool _response) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Container(
-          margin: response
+          margin: _response
               ? EdgeInsets.only(
                   right: MediaQuery.of(context).size.width / 3,
                   left: 5.0,
@@ -575,15 +588,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   right: 5.0,
                   top: 5.0,
                 ),
-          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
+          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
           child: Container(
             height: 70.0,
             width: 200.0,
             decoration: BoxDecoration(
-              color: response
+              color: _response
                   ? Color.fromRGBO(60, 80, 100, 1)
                   : Color.fromRGBO(102, 102, 255, 1),
-              borderRadius: response
+              borderRadius: _response
                   ? BorderRadius.only(
                       topRight: Radius.circular(40.0),
                       bottomLeft: Radius.circular(40.0),
@@ -625,7 +638,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           percent: 0.15,
                           backgroundColor: Colors.black26,
                           progressColor:
-                              response ? Colors.lightBlue : Colors.amber,
+                              _response ? Colors.lightBlue : Colors.amber,
                         ),
                       ),
                       SizedBox(
@@ -668,8 +681,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           ),
         ),
         Container(
-          alignment: response ? Alignment.centerLeft : Alignment.centerRight,
-          margin: response
+          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
+          margin: _response
               ? EdgeInsets.only(
                   left: 5.0,
                   bottom: 5.0,
@@ -681,7 +694,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   top: 5.0,
                 ),
           child: Text(
-            chatContainer[index].values.first,
+            _chatContainer[index].values.first,
             style: TextStyle(color: Colors.lightBlue),
           ),
         ),
@@ -689,10 +702,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  messageSend() async {
+  _messageSend() async {
     try {
       print("Send Pressed");
-      if (inputText.text.isNotEmpty) {
+      if (_inputTextController.text.isNotEmpty) {
         // Take Document Data related to old messages
         final DocumentSnapshot documentSnapShot = await FirebaseFirestore
             .instance
@@ -712,37 +725,39 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           setState(() {
             // Add data to temporary Storage of Sending
             sendingMessages.add({
-              '${inputText.text}':
+              '${_inputTextController.text}':
                   "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
             });
 
             // Add Data to the UI related all chat Container
-            chatContainer.add({
-              '${inputText.text}':
+            _chatContainer.add({
+              '${_inputTextController.text}':
                   "${DateTime.now().hour}:${DateTime.now().minute}",
             });
 
-            response
-                .add(false); // Add the data response to chat related container
+            _response
+                .add(false); // Add the data _response to chat related container
 
-            mediaTypes.add(MediaTypes.Text); // Add MediaType
+            _mediaTypes.add(MediaTypes.Text); // Add MediaType
 
-            inputText.clear(); // Get Clear the InputBox
+            _inputTextController.clear(); // Get Clear the InputBox
+
+            _iconChanger = true;
           });
         }
 
         // Scroll to Bottom
-        scrollController
-            .jumpTo(scrollController.position.maxScrollExtent + 100);
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 100);
 
         print('MediaTypes.Text: ${MediaTypes.Text}');
 
         // Data Store in Local Storage
-        localStorageHelper.insertNewMessages(widget._userName,
-            chatContainer.last.keys.first.toString(), MediaTypes.Text, 0);
+        _localStorageHelper.insertNewMessages(widget._userName,
+            _chatContainer.last.keys.first.toString(), MediaTypes.Text, 0);
 
         // Data Store in Firestore
-        management.addConversationMessages(this._senderMail, sendingMessages);
+        _management.addConversationMessages(this._senderMail, sendingMessages);
       }
     } catch (e) {
       showDialog(
@@ -756,10 +771,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  voiceSend() async {
+  _voiceSend() async {
     try {
       print("Send Pressed");
-      if (inputText.text.isNotEmpty) {
+      if (_inputTextController.text.isNotEmpty) {
         // Take Document Data related to old messages
         final DocumentSnapshot documentSnapShot = await FirebaseFirestore
             .instance
@@ -779,37 +794,37 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           setState(() {
             // Add data to temporary Storage of Sending
             sendingMessages.add({
-              '${inputText.text}':
+              '${_inputTextController.text}':
                   "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}",
             });
 
             // Add Data to the UI related all chat Container
-            chatContainer.add({
-              '${inputText.text}':
+            _chatContainer.add({
+              '${_inputTextController.text}':
                   '${DateTime.now().hour}:${DateTime.now().minute}',
             });
 
-            response
-                .add(false); // Add the data response to chat related container
+            _response
+                .add(false); // Add the data _response to chat related container
 
-            mediaTypes.add(MediaTypes.Voice); // Add MediaType
+            _mediaTypes.add(MediaTypes.Voice); // Add MediaType
 
-            inputText.clear(); // Get Clear the InputBox
+            _inputTextController.clear(); // Get Clear the InputBox
           });
         }
 
         // Scroll to Bottom
-        scrollController
-            .jumpTo(scrollController.position.maxScrollExtent + 100);
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 100);
 
         print('MediaTypes.Text: ${MediaTypes.Voice}');
 
         // Data Store in Local Storage
-        localStorageHelper.insertNewMessages(widget._userName,
-            chatContainer.last.keys.first.toString(), MediaTypes.Voice, 0);
+        _localStorageHelper.insertNewMessages(widget._userName,
+            _chatContainer.last.keys.first.toString(), MediaTypes.Voice, 0);
 
         // Data Store in Firestore
-        management.addConversationMessages(this._senderMail, sendingMessages);
+        _management.addConversationMessages(this._senderMail, sendingMessages);
       }
     } catch (e) {
       showDialog(
