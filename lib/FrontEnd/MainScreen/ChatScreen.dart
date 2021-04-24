@@ -525,7 +525,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             style: ElevatedButton.styleFrom(
               primary: response
                   ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(110, 160, 255, 1),
+                  : Color.fromRGBO(102, 102, 255, 1),
               elevation: 0.0,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
@@ -582,7 +582,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             decoration: BoxDecoration(
               color: response
                   ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(110, 160, 255, 1),
+                  : Color.fromRGBO(102, 102, 255, 1),
               borderRadius: response
                   ? BorderRadius.only(
                       topRight: Radius.circular(40.0),
