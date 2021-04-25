@@ -1,15 +1,23 @@
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -24,6 +32,10 @@ class ChatScreenSetUp extends StatefulWidget {
 class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
   bool _iconChanger = true;
+  bool _isMicrophonePermissionGranted = false;
+  bool isLoading = false;
+
+  double progress = 0;
 
   // For Control the Scrolling
   final ScrollController _scrollController = ScrollController(
@@ -45,7 +57,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final Management _management = Management();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  final FlutterSoundRecorder _flutterSoundRecorder = FlutterSoundRecorder();
+  FlutterSoundRecorder _flutterSoundRecorder;
+  Directory recordingPath;
+
+  ReceivePort _receivePort = ReceivePort();
 
   // Sender Mail Take out
   String _senderMail;
@@ -197,29 +212,93 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   List<String> _incomingInformationContainer = [];
 
                   // Taking all the remaining messages to store in local container
-                  messages.forEach((everyMessage) {
+                  messages.forEach((everyMessage) async {
                     _incomingInformationContainer =
                         everyMessage.values.first.toString().split('+');
 
-                    _chatContainer.add({
-                      '${everyMessage.keys.first}':
-                          '${_incomingInformationContainer[0]}',
-                    });
-                    _response.add(true); // Chat Position Status Added
-
                     switch (_incomingInformationContainer[1]) {
                       case 'MediaTypes.Text':
-                        _mediaTypes.add(MediaTypes.Text);
+                        // Store Data in local Storage
+                        _localStorageHelper.insertNewMessages(
+                            widget._userName,
+                            everyMessage.keys.first.toString(),
+                            MediaTypes.Text,
+                            1);
+
+
+                        if(mounted){
+                          setState(() {
+                            _mediaTypes.add(MediaTypes.Text);
+
+                            _chatContainer.add({
+                              '${everyMessage.keys.first}':
+                              '${_incomingInformationContainer[0]}',
+                            });
+
+                            _response.add(true); // Chat Position Status Added
+                          });
+                        }
+
                         break;
                       case 'MediaTypes.Voice':
-                        _mediaTypes.add(MediaTypes.Voice);
+                        PermissionStatus storagePermissionStatus =
+                            await Permission.storage.request();
+                        if (storagePermissionStatus.isGranted) {
+                          if (mounted) {
+                            setState(() {
+                              isLoading = true;
+                            });
+                          }
+
+                          final Directory directory =
+                              await getExternalStorageDirectory();
+
+                          final recordingStoragePath =
+                              await Directory(directory.path + '/Recordings/')
+                                  .create();
+
+                          await FlutterDownloader.enqueue(
+                            url: everyMessage.keys.first.toString(),
+                            savedDir: recordingStoragePath.path,
+                            fileName: DateTime.now().toString(),
+                          );
+
+                          await _management.deleteFilesFromFirebaseStorage(
+                              everyMessage.keys.first.toString());
+
+                          // Store Data in local Storage
+                          _localStorageHelper.insertNewMessages(
+                              widget._userName,
+                              recordingStoragePath.path,
+                              MediaTypes.Voice,
+                              1);
+
+                          if(mounted){
+                            setState(() {
+                              _mediaTypes.add(MediaTypes.Voice);
+
+                              _chatContainer.add({
+                                recordingStoragePath.path:
+                                '${_incomingInformationContainer[0]}',
+                              });
+
+                              _response.add(true); // Chat Position Status Added
+                            });
+                          }
+
+                          if (mounted) {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                        }
+
+                        break;
                     }
 
-                    print("MediaTypes: ${_incomingInformationContainer[1]}");
+                    print('Present');
 
-                    // Store Data in local Storage
-                    _localStorageHelper.insertNewMessages(widget._userName,
-                        everyMessage.keys.first.toString(), MediaTypes.Text, 1);
+                    print("MediaTypes: ${_incomingInformationContainer[1]}");
                   });
 
                   // For AutoScroll to the end position
@@ -246,10 +325,77 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
+  void _permissionSet() async {
+    try {
+      final PermissionStatus recordingPermissionStatus =
+          await Permission.microphone.request();
+      if (recordingPermissionStatus.isGranted) {
+        _isMicrophonePermissionGranted = true;
+        _flutterSoundRecorder = FlutterSoundRecorder();
+        await _flutterSoundRecorder.openAudioSession();
+        await _makeDirectoryOnce();
+      } else
+        print("Permission Denied");
+    } catch (e) {
+      print("Record Permission Status Error: ${e.toString()}");
+      _permissionSet();
+    }
+  }
+
+  Future<void> _makeDirectoryOnce() async {
+    final directory = await getExternalStorageDirectory();
+    print("Located Directory is: " + directory.path);
+
+    recordingPath = await Directory(directory.path + '/Recordings/').create();
+
+    //await getApplicationDocumentsDirectory().then((directory) => print("Testing Path: ${directory.path}"));
+  }
+
+  static staticDownloadingCallback(
+      String id, DownloadTaskStatus status, int progress) {
+    print("Present 1");
+
+    /// Looking up for a send port
+    SendPort sendPort = IsolateNameServer.lookupPortByName('Downloading');
+
+    /// Sending the data
+    sendPort.send([id, status, progress]);
+  }
+
+  _downloaderInitialize() async {
+    /// register a send port for the other isolates
+    bool response = IsolateNameServer.registerPortWithName(
+        _receivePort.sendPort, 'Downloading');
+
+    print("Response: $response");
+
+    print("Present 2");
+
+    /// Listening the real time data from other isolates
+    _receivePort.listen((message) {
+      print('Sam');
+      if (mounted) {
+        setState(() {
+          //print("Sam");
+          progress = message[2].toDouble();
+          print('Here: $progress');
+        });
+      }
+    });
+
+    FlutterDownloader.registerCallback(staticDownloadingCallback);
+  }
+
   @override
   void initState() {
     super.initState();
     _senderMailDataFetch();
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
 
     if (_isChatOpenFirstTime) {
       _extractHistoryDataFromSqLite();
@@ -262,10 +408,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       });
     }
+
+    _permissionSet();
+
+    _downloaderInitialize();
   }
 
   @override
   void dispose() {
+    _flutterSoundRecorder.closeAudioSession();
     super.dispose();
   }
 
@@ -344,7 +495,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ),
           ],
         ),
-        body: mainBody(context),
+        body: ModalProgressHUD(
+          inAsyncCall: isLoading,
+          color: Color.fromRGBO(0, 0, 0, 0.5),
+          progressIndicator: CircularProgressIndicator(
+            backgroundColor: Colors.black87,
+          ),
+          child: mainBody(context),
+        ),
       ),
     );
   }
@@ -482,16 +640,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     ),
                   ),
                   Expanded(
-                    child: GestureDetector(
-                      child: _iconChanger ? _voiceIcon : _senderIcon,
-                      onTap: _iconChanger ? _voiceSend : _messageSend,
-                      onLongPress: () {
-                        if (mounted) {
-                          setState(() {
-                            _iconChanger = !_iconChanger;
-                          });
-                        }
-                      },
+                    child: IconButton(
+                      icon: _iconChanger ? _voiceIcon : _senderIcon,
+                      onPressed: _iconChanger ? _voiceSend : _messageSend,
                     ),
                   ),
                   SizedBox(
@@ -537,7 +688,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             style: ElevatedButton.styleFrom(
               primary: _response
                   ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(102, 102, 255, 1),
+                  : Color.fromRGBO(102, 150, 255, 1),
               elevation: 0.0,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
@@ -753,7 +904,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         print('MediaTypes.Text: ${MediaTypes.Text}');
 
         // Data Store in Local Storage
-        _localStorageHelper.insertNewMessages(widget._userName,
+        await _localStorageHelper.insertNewMessages(widget._userName,
             _chatContainer.last.keys.first.toString(), MediaTypes.Text, 0);
 
         // Data Store in Firestore
@@ -771,70 +922,79 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  _voiceSend() async {
-    try {
-      print("Send Pressed");
-      if (_inputTextController.text.isNotEmpty) {
-        // Take Document Data related to old messages
-        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
-            .instance
-            .doc("generation_users/$_senderMail")
-            .get();
+  void _voiceSend() async {
+    if (!_isMicrophonePermissionGranted || _flutterSoundRecorder == null) {
+      _permissionSet();
+    }
+    if (_flutterSoundRecorder.isStopped) {
+      _flutterSoundRecorder
+          .startRecorder(
+            toFile: recordingPath.path + '${DateTime.now()}.mp3',
+          )
+          .then((value) => print("Recording"));
+    } else {
+      final String recordedFilePath =
+          await _flutterSoundRecorder.stopRecorder();
 
-        // Initialize Temporary List
-        List<dynamic> sendingMessages = [];
+      if (mounted) {
+        setState(() {
+          isLoading = true;
+        });
+        print("Start");
+      }
 
-        // Store Updated sending messages list
-        sendingMessages = documentSnapShot.data()['connections']
-            [FirebaseAuth.instance.currentUser.email.toString()];
+      final String downloadUrl = await _management.uploadMediaToStorage(
+          File(recordedFilePath), context);
+      print("Voice Download Url: $downloadUrl");
 
-        if (mounted) {
-          if (sendingMessages == null) sendingMessages = [];
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        print("End");
+      }
 
-          setState(() {
-            // Add data to temporary Storage of Sending
-            sendingMessages.add({
-              '${_inputTextController.text}':
-                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}",
-            });
+      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+          .doc("generation_users/$_senderMail")
+          .get();
 
-            // Add Data to the UI related all chat Container
-            _chatContainer.add({
-              '${_inputTextController.text}':
-                  '${DateTime.now().hour}:${DateTime.now().minute}',
-            });
+      // Initialize Temporary List
+      List<dynamic> sendingMessages = [];
 
-            _response
-                .add(false); // Add the data _response to chat related container
+      // Store Updated sending messages list
+      sendingMessages = documentSnapShot.data()['connections']
+          [FirebaseAuth.instance.currentUser.email.toString()];
 
-            _mediaTypes.add(MediaTypes.Voice); // Add MediaType
+      if (mounted) {
+        if (sendingMessages == null) sendingMessages = [];
 
-            _inputTextController.clear(); // Get Clear the InputBox
+        setState(() {
+          // Add data to temporary Storage of Sending
+          sendingMessages.add({
+            downloadUrl:
+                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}',
           });
-        }
 
-        // Scroll to Bottom
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent + 100);
+          // Add Data to the UI related all chat Container
+          _chatContainer.add({
+            recordedFilePath: '${DateTime.now().hour}:${DateTime.now().minute}',
+          });
 
-        print('MediaTypes.Text: ${MediaTypes.Voice}');
+          _response
+              .add(false); // Add the data _response to chat related container
+
+          _mediaTypes.add(MediaTypes.Voice); // Add MediaType
+
+          _inputTextController.clear(); // Get Clear the InputBox
+        });
 
         // Data Store in Local Storage
-        _localStorageHelper.insertNewMessages(widget._userName,
-            _chatContainer.last.keys.first.toString(), MediaTypes.Voice, 0);
+        await _localStorageHelper.insertNewMessages(
+            widget._userName, recordedFilePath, MediaTypes.Voice, 0);
 
         // Data Store in Firestore
         _management.addConversationMessages(this._senderMail, sendingMessages);
       }
-    } catch (e) {
-      showDialog(
-          context: context,
-          builder: (_) {
-            return AlertDialog(
-              title: Text("Voice Send Problem"),
-              content: Text(e.toString()),
-            );
-          });
     }
   }
 }

@@ -39,7 +39,9 @@ dependencies:
   image_picker:
   flutter_switch:
   flutter_sound: ^8.1.1
-#  path_provider:
+  path_provider:
+  permission_handler:
+  flutter_downloader: ^1.6.0
 #  gallery_saver:
 #  better_player: ^0.0.64
 #  video_player: ^2.1.1

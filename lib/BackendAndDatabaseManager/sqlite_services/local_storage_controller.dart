@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LocalStorageHelper {
@@ -35,8 +38,9 @@ class LocalStorageHelper {
   // For make a database
   Future<Database> initializeDatabase() async {
     // Get the directory path to store the database
-    final String dbPath = await getDatabasesPath();
-    final String path = dbPath + '/generation_local_storage.db';
+    final Directory directory = await getExternalStorageDirectory();
+    final Directory newDirectory =  await Directory(directory.path + '/.Databases/').create();
+    final String path = newDirectory.path + '/generation_local_storage.db';
 
     // create the database
     final Database getDatabase = await openDatabase(path, version: 1);
@@ -79,8 +83,8 @@ class LocalStorageHelper {
   }
 
   // Insert New Messages to Table
-  Future<int> insertNewMessages(
-      String _tableName, String _newMessage, MediaTypes _currMediaType, int _ref) async {
+  Future<int> insertNewMessages(String _tableName, String _newMessage,
+      MediaTypes _currMediaType, int _ref) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data

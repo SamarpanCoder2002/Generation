@@ -137,7 +137,7 @@ class Management {
       List<String> allConnectionUserName,
       BuildContext context,
       {String mediaType = 'image'}) async {
-    String imageUrl = await _uploadMediaToStorage(imgFile, context);
+    String imageUrl = await uploadMediaToStorage(imgFile, context);
 
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
@@ -217,7 +217,7 @@ class Management {
     }
   }
 
-  Future<String> _uploadMediaToStorage(
+  Future<String> uploadMediaToStorage(
       File filePath, BuildContext context) async {
     try {
       String downLoadUrl;
@@ -231,7 +231,7 @@ class Management {
       UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
 
       await uploadTask.whenComplete(() async {
-        print("Picture Uploaded");
+        print("Media Uploaded");
         downLoadUrl = await firebaseStorageRef.getDownloadURL();
       });
 
@@ -243,7 +243,22 @@ class Management {
                 title: Text("Image Upload Error"),
                 content: Text(e.toString()),
               ));
-      return "Samarpan";
+      return "Upload Incomplete";
+    }
+  }
+
+  Future<void> deleteFilesFromFirebaseStorage(String fileName) async {
+    try {
+      final String filePath = fileName
+          .replaceAll(
+              RegExp(
+                  r'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o'),
+              '')
+          .split('?')[0];
+
+      await FirebaseStorage.instance.ref().child(filePath).delete();
+    } catch (e) {
+      print("Delete From Firebase Storage Exception: ${e.toString()}");
     }
   }
 }
