@@ -222,17 +222,18 @@ class Management {
     try {
       String downLoadUrl;
 
-      String fileName =
-          '${FirebaseAuth.instance.currentUser.uid}+${DateTime.now()}';
+      final String fileName =
+          '${FirebaseAuth.instance.currentUser.uid}${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}${DateTime.now().millisecond}';
 
-      Reference firebaseStorageRef =
+      final Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child(fileName);
 
-      UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
+      final UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
 
       await uploadTask.whenComplete(() async {
         print("Media Uploaded");
         downLoadUrl = await firebaseStorageRef.getDownloadURL();
+        print("Download Url: $downLoadUrl}");
       });
 
       return downLoadUrl;
@@ -251,12 +252,13 @@ class Management {
     try {
       final String filePath = fileName
           .replaceAll(
-              RegExp(
-                  r'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o'),
+              'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o/',
               '')
           .split('?')[0];
 
       await FirebaseStorage.instance.ref().child(filePath).delete();
+
+      print("File Deleted");
     } catch (e) {
       print("Delete From Firebase Storage Exception: ${e.toString()}");
     }

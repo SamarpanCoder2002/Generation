@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -57,8 +58,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final Management _management = Management();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
+  final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+
   FlutterSoundRecorder _flutterSoundRecorder;
-  Directory recordingPath;
+  Directory _audioDirectory;
 
   ReceivePort _receivePort = ReceivePort();
 
@@ -225,14 +228,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             MediaTypes.Text,
                             1);
 
-
-                        if(mounted){
+                        if (mounted) {
                           setState(() {
                             _mediaTypes.add(MediaTypes.Text);
 
                             _chatContainer.add({
                               '${everyMessage.keys.first}':
-                              '${_incomingInformationContainer[0]}',
+                                  '${_incomingInformationContainer[0]}',
                             });
 
                             _response.add(true); // Chat Position Status Added
@@ -257,29 +259,31 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               await Directory(directory.path + '/Recordings/')
                                   .create();
 
+                          final String currTime = DateTime.now().toString();
+
                           await FlutterDownloader.enqueue(
                             url: everyMessage.keys.first.toString(),
                             savedDir: recordingStoragePath.path,
-                            fileName: DateTime.now().toString(),
+                            fileName: '$currTime.mp3',
                           );
 
-                          await _management.deleteFilesFromFirebaseStorage(
-                              everyMessage.keys.first.toString());
+                          print(
+                              'Recorded Path: ${recordingStoragePath.path}$currTime.mp3');
 
                           // Store Data in local Storage
                           _localStorageHelper.insertNewMessages(
                               widget._userName,
-                              recordingStoragePath.path,
+                              '${recordingStoragePath.path}$currTime.mp3',
                               MediaTypes.Voice,
                               1);
 
-                          if(mounted){
+                          if (mounted) {
                             setState(() {
                               _mediaTypes.add(MediaTypes.Voice);
 
                               _chatContainer.add({
-                                recordingStoragePath.path:
-                                '${_incomingInformationContainer[0]}',
+                                '${recordingStoragePath.path}$currTime.mp3':
+                                    '${_incomingInformationContainer[0]}',
                               });
 
                               _response.add(true); // Chat Position Status Added
@@ -292,6 +296,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                           }
                         }
+
+                        await _management.deleteFilesFromFirebaseStorage(
+                            everyMessage.keys.first.toString());
 
                         break;
                     }
@@ -325,7 +332,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  void _permissionSet() async {
+  void _permissionSetForRecording() async {
     try {
       final PermissionStatus recordingPermissionStatus =
           await Permission.microphone.request();
@@ -338,7 +345,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         print("Permission Denied");
     } catch (e) {
       print("Record Permission Status Error: ${e.toString()}");
-      _permissionSet();
+      _permissionSetForRecording();
     }
   }
 
@@ -346,7 +353,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     final directory = await getExternalStorageDirectory();
     print("Located Directory is: " + directory.path);
 
-    recordingPath = await Directory(directory.path + '/Recordings/').create();
+    _audioDirectory = await Directory(directory.path + '/Recordings/').create();
 
     //await getApplicationDocumentsDirectory().then((directory) => print("Testing Path: ${directory.path}"));
   }
@@ -409,7 +416,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
-    _permissionSet();
+    _permissionSetForRecording();
 
     _downloaderInitialize();
   }
@@ -417,6 +424,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   void dispose() {
     _flutterSoundRecorder.closeAudioSession();
+    assetsAudioPlayer.dispose();
     super.dispose();
   }
 
@@ -770,7 +778,23 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       color: Color.fromRGBO(10, 255, 30, 1),
                       size: 40.0,
                     ),
-                    onTap: () {}),
+                    onTap: () async {
+                      print("Sam");
+
+                      print('File is: ${_chatContainer[index].keys.first}');
+
+                      await assetsAudioPlayer.open(
+                        Audio.file(_chatContainer[index].keys.first),
+                      );
+                      var take = await assetsAudioPlayer.current.first;
+                      print("Take: ${take.audio.duration}");
+
+                      print("start Play");
+                      assetsAudioPlayer.showNotification;
+                      await assetsAudioPlayer.play();
+
+                      print("Stop Play");
+                    }),
                 SizedBox(
                   width: 5.0,
                 ),
@@ -924,17 +948,19 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   void _voiceSend() async {
     if (!_isMicrophonePermissionGranted || _flutterSoundRecorder == null) {
-      _permissionSet();
+      _permissionSetForRecording();
     }
     if (_flutterSoundRecorder.isStopped) {
       _flutterSoundRecorder
           .startRecorder(
-            toFile: recordingPath.path + '${DateTime.now()}.mp3',
+            toFile: _audioDirectory.path + '${DateTime.now()}.mp3',
           )
           .then((value) => print("Recording"));
     } else {
       final String recordedFilePath =
           await _flutterSoundRecorder.stopRecorder();
+
+      print("recordedFilePath: $recordedFilePath");
 
       if (mounted) {
         setState(() {

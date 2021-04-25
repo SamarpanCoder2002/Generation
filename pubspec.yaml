@@ -34,6 +34,7 @@ dependencies:
   fluttertoast: ^8.0.4
   cached_network_image: ^3.0.0
   percent_indicator: "^2.1.7+2"
+  assets_audio_player: ^3.0.3+2
 
   circle_list:
   image_picker:
