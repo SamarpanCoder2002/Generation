@@ -3,13 +3,13 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 
@@ -59,6 +59,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
   final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+
+  final Dio dio = Dio();
 
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
@@ -261,11 +263,34 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                           final String currTime = DateTime.now().toString();
 
-                          await FlutterDownloader.enqueue(
-                            url: everyMessage.keys.first.toString(),
-                            savedDir: recordingStoragePath.path,
-                            fileName: '$currTime.mp3',
-                          );
+                          // await FlutterDownloader.enqueue(
+                          //   url: everyMessage.keys.first.toString(),
+                          //   savedDir: recordingStoragePath.path,
+                          //   fileName: '$currTime.mp3',
+                          // );
+
+                          if (mounted) {
+                            setState(() {
+                              _mediaTypes.add(MediaTypes.Voice);
+
+                              _chatContainer.add({
+                                '${recordingStoragePath.path}$currTime.mp3':
+                                '${_incomingInformationContainer[0]}',
+                              });
+
+                              _response.add(true); // Chat Position Status Added
+                            });
+                          }
+
+
+                          await dio
+                              .download(everyMessage.keys.first.toString(),
+                                  '${recordingStoragePath.path}$currTime.mp3',
+                                  onReceiveProgress: _downLoadOnReceiveProgress)
+                              .whenComplete(() async {
+                            await _management.deleteFilesFromFirebaseStorage(
+                                everyMessage.keys.first.toString());
+                          });
 
                           print(
                               'Recorded Path: ${recordingStoragePath.path}$currTime.mp3');
@@ -279,26 +304,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                           if (mounted) {
                             setState(() {
-                              _mediaTypes.add(MediaTypes.Voice);
-
-                              _chatContainer.add({
-                                '${recordingStoragePath.path}$currTime.mp3':
-                                    '${_incomingInformationContainer[0]}',
-                              });
-
-                              _response.add(true); // Chat Position Status Added
-                            });
-                          }
-
-                          if (mounted) {
-                            setState(() {
                               isLoading = false;
                             });
                           }
                         }
-
-                        await _management.deleteFilesFromFirebaseStorage(
-                            everyMessage.keys.first.toString());
 
                         break;
                     }
@@ -358,40 +367,40 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     //await getApplicationDocumentsDirectory().then((directory) => print("Testing Path: ${directory.path}"));
   }
 
-  static staticDownloadingCallback(
-      String id, DownloadTaskStatus status, int progress) {
-    print("Present 1");
-
-    /// Looking up for a send port
-    SendPort sendPort = IsolateNameServer.lookupPortByName('Downloading');
-
-    /// Sending the data
-    sendPort.send([id, status, progress]);
-  }
-
-  _downloaderInitialize() async {
-    /// register a send port for the other isolates
-    bool response = IsolateNameServer.registerPortWithName(
-        _receivePort.sendPort, 'Downloading');
-
-    print("Response: $response");
-
-    print("Present 2");
-
-    /// Listening the real time data from other isolates
-    _receivePort.listen((message) {
-      print('Sam');
-      if (mounted) {
-        setState(() {
-          //print("Sam");
-          progress = message[2].toDouble();
-          print('Here: $progress');
-        });
-      }
-    });
-
-    FlutterDownloader.registerCallback(staticDownloadingCallback);
-  }
+  // static staticDownloadingCallback(
+  //     String id, DownloadTaskStatus status, int progress) {
+  //   print("Present 1");
+  //
+  //   /// Looking up for a send port
+  //   SendPort sendPort = IsolateNameServer.lookupPortByName('Downloading');
+  //
+  //   /// Sending the data
+  //   sendPort.send([id, status, progress]);
+  // }
+  //
+  // _downloaderInitialize() async {
+  //   /// register a send port for the other isolates
+  //   bool response = IsolateNameServer.registerPortWithName(
+  //       _receivePort.sendPort, 'Downloading');
+  //
+  //   print("Response: $response");
+  //
+  //   print("Present 2");
+  //
+  //   /// Listening the real time data from other isolates
+  //   _receivePort.listen((message) {
+  //     print('Sam');
+  //     if (mounted) {
+  //       setState(() {
+  //         //print("Sam");
+  //         progress = message[2].toDouble();
+  //         print('Here: $progress');
+  //       });
+  //     }
+  //   });
+  //
+  //   FlutterDownloader.registerCallback(staticDownloadingCallback);
+  // }
 
   @override
   void initState() {
@@ -418,7 +427,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     _permissionSetForRecording();
 
-    _downloaderInitialize();
+    // _downloaderInitialize();
   }
 
   @override
@@ -731,12 +740,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget voiceConversationList(
-      BuildContext context, int index, bool _response) {
+      BuildContext context, int index, bool _responseValue) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Container(
-          margin: _response
+          margin: _responseValue
               ? EdgeInsets.only(
                   right: MediaQuery.of(context).size.width / 3,
                   left: 5.0,
@@ -747,15 +756,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   right: 5.0,
                   top: 5.0,
                 ),
-          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
           child: Container(
             height: 70.0,
             width: 200.0,
             decoration: BoxDecoration(
-              color: _response
+              color: _responseValue
                   ? Color.fromRGBO(60, 80, 100, 1)
                   : Color.fromRGBO(102, 102, 255, 1),
-              borderRadius: _response
+              borderRadius: _responseValue
                   ? BorderRadius.only(
                       topRight: Radius.circular(40.0),
                       bottomLeft: Radius.circular(40.0),
@@ -772,29 +782,46 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 SizedBox(
                   width: 20.0,
                 ),
-                GestureDetector(
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: Color.fromRGBO(10, 255, 30, 1),
-                      size: 40.0,
-                    ),
-                    onTap: () async {
-                      print("Sam");
+                Stack(
+                  children: [
+                    if (_responseValue && index == _response.length - 1 && progress > 0.0 && progress<1.0)
+                      Container(
+                        margin: EdgeInsets.only(
+                          left: 1.5,
+                          top: 2.0,
+                        ),
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.black12,
+                          value: progress,
+                          valueColor:
+                          AlwaysStoppedAnimation<Color>(Colors.orange),
+                        ),
+                      ),
+                    GestureDetector(
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: Color.fromRGBO(10, 255, 30, 1),
+                          size: 40.0,
+                        ),
+                        onTap: () async {
+                          print("Sam");
 
-                      print('File is: ${_chatContainer[index].keys.first}');
+                          print('File is: ${_chatContainer[index].keys.first}');
 
-                      await assetsAudioPlayer.open(
-                        Audio.file(_chatContainer[index].keys.first),
-                      );
-                      var take = await assetsAudioPlayer.current.first;
-                      print("Take: ${take.audio.duration}");
+                          await assetsAudioPlayer.open(
+                            Audio.file(_chatContainer[index].keys.first),
+                          );
+                          var take = await assetsAudioPlayer.current.first;
+                          print("Take: ${take.audio.duration}");
 
-                      print("start Play");
-                      assetsAudioPlayer.showNotification;
-                      await assetsAudioPlayer.play();
+                          print("start Play");
+                          assetsAudioPlayer.showNotification;
+                          await assetsAudioPlayer.play();
 
-                      print("Stop Play");
-                    }),
+                          print("Stop Play");
+                        }),
+                  ],
+                ),
                 SizedBox(
                   width: 5.0,
                 ),
@@ -813,7 +840,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           percent: 0.15,
                           backgroundColor: Colors.black26,
                           progressColor:
-                              _response ? Colors.lightBlue : Colors.amber,
+                              _responseValue ? Colors.lightBlue : Colors.amber,
                         ),
                       ),
                       SizedBox(
@@ -856,8 +883,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           ),
         ),
         Container(
-          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
-          margin: _response
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+          margin: _responseValue
               ? EdgeInsets.only(
                   left: 5.0,
                   bottom: 5.0,
@@ -1021,6 +1049,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         // Data Store in Firestore
         _management.addConversationMessages(this._senderMail, sendingMessages);
       }
+    }
+  }
+
+  void _downLoadOnReceiveProgress(int count, int total) {
+    if (mounted) {
+      setState(() {
+        progress = count / total;
+      });
     }
   }
 }
