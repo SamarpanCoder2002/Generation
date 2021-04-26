@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -58,14 +57,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final Management _management = Management();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+  //final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
 
+  final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
   final Dio dio = Dio();
 
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
-
-  ReceivePort _receivePort = ReceivePort();
 
   // Sender Mail Take out
   String _senderMail;
@@ -263,25 +261,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                           final String currTime = DateTime.now().toString();
 
-                          // await FlutterDownloader.enqueue(
-                          //   url: everyMessage.keys.first.toString(),
-                          //   savedDir: recordingStoragePath.path,
-                          //   fileName: '$currTime.mp3',
-                          // );
-
                           if (mounted) {
                             setState(() {
                               _mediaTypes.add(MediaTypes.Voice);
 
                               _chatContainer.add({
                                 '${recordingStoragePath.path}$currTime.mp3':
-                                '${_incomingInformationContainer[0]}',
+                                    '${_incomingInformationContainer[0]}',
                               });
 
                               _response.add(true); // Chat Position Status Added
                             });
                           }
-
 
                           await dio
                               .download(everyMessage.keys.first.toString(),
@@ -367,41 +358,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     //await getApplicationDocumentsDirectory().then((directory) => print("Testing Path: ${directory.path}"));
   }
 
-  // static staticDownloadingCallback(
-  //     String id, DownloadTaskStatus status, int progress) {
-  //   print("Present 1");
-  //
-  //   /// Looking up for a send port
-  //   SendPort sendPort = IsolateNameServer.lookupPortByName('Downloading');
-  //
-  //   /// Sending the data
-  //   sendPort.send([id, status, progress]);
-  // }
-  //
-  // _downloaderInitialize() async {
-  //   /// register a send port for the other isolates
-  //   bool response = IsolateNameServer.registerPortWithName(
-  //       _receivePort.sendPort, 'Downloading');
-  //
-  //   print("Response: $response");
-  //
-  //   print("Present 2");
-  //
-  //   /// Listening the real time data from other isolates
-  //   _receivePort.listen((message) {
-  //     print('Sam');
-  //     if (mounted) {
-  //       setState(() {
-  //         //print("Sam");
-  //         progress = message[2].toDouble();
-  //         print('Here: $progress');
-  //       });
-  //     }
-  //   });
-  //
-  //   FlutterDownloader.registerCallback(staticDownloadingCallback);
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -432,8 +388,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   @override
   void dispose() {
-    _flutterSoundRecorder.closeAudioSession();
     assetsAudioPlayer.dispose();
+    _flutterSoundRecorder.closeAudioSession();
     super.dispose();
   }
 
@@ -784,7 +740,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
                 Stack(
                   children: [
-                    if (_responseValue && index == _response.length - 1 && progress > 0.0 && progress<1.0)
+                    if (_responseValue &&
+                        index == _response.length - 1 &&
+                        progress > 0.0 &&
+                        progress < 1.0)
                       Container(
                         margin: EdgeInsets.only(
                           left: 1.5,
@@ -794,7 +753,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           backgroundColor: Colors.black12,
                           value: progress,
                           valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.orange),
+                              AlwaysStoppedAnimation<Color>(Colors.orange),
                         ),
                       ),
                     GestureDetector(

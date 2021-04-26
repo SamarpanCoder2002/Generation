@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
+//import 'package:flutter_downloader/flutter_downloader.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
@@ -11,7 +11,7 @@ import 'package:generation_official/BackendAndDatabaseManager/firebase_services/
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize(debug: false);
+  //await FlutterDownloader.initialize(debug: false);
   await Firebase.initializeApp();
 
   runApp(MaterialApp(
