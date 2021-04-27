@@ -264,7 +264,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                         alignment: Alignment.center,
                         child: GestureDetector(
                           child: Image.asset(
-                            'assets/images/gg.png',
+                            'assets/images/gg2.png',
                             width: 45.0,
                           ),
                           onTap: () async {

@@ -142,7 +142,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
     fToast.init(context);
 
-    fetchRealTimeData();
+    try {
+      fetchRealTimeData();
+    }catch(e){
+      showDialog(context: context, builder: (_) => AlertDialog(
+        title: Text('Chat Collection Load Error'),
+        content: Text(e.toString()),
+      ));
+    }
   }
 
   @override

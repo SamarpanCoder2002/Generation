@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,6 +13,7 @@ import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -33,9 +33,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     with TickerProviderStateMixin {
   bool _iconChanger = true;
   bool _isMicrophonePermissionGranted = false;
-  bool isLoading = false;
+  bool _isLoading = false;
 
-  double progress = 0;
+  double _audioDownloadProgress = 0;
+  double _currAudioPlayingTime;
+
+  int _lastAudioPlayingIndex;
 
   // For Control the Scrolling
   final ScrollController _scrollController = ScrollController(
@@ -59,14 +62,21 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   //final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
 
-  final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
-  final Dio dio = Dio();
+  final AudioPlayer _justAudioPlayer = AudioPlayer();
+  final Dio _dio = Dio();
 
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
 
   // Sender Mail Take out
   String _senderMail;
+
+  String _totalDuration;
+  String _loadingTime;
+
+  String _hintText;
+
+  IconData _iconData = Icons.play_arrow_rounded;
 
   // Changer Changeable icon
   final Icon _senderIcon = Icon(
@@ -248,7 +258,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         if (storagePermissionStatus.isGranted) {
                           if (mounted) {
                             setState(() {
-                              isLoading = true;
+                              _isLoading = true;
                             });
                           }
 
@@ -274,7 +284,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                           }
 
-                          await dio
+                          await _dio
                               .download(everyMessage.keys.first.toString(),
                                   '${recordingStoragePath.path}$currTime.mp3',
                                   onReceiveProgress: _downLoadOnReceiveProgress)
@@ -295,7 +305,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                           if (mounted) {
                             setState(() {
-                              isLoading = false;
+                              _isLoading = false;
                             });
                           }
                         }
@@ -363,9 +373,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     super.initState();
     _senderMailDataFetch();
 
+    _hintText = 'Type Here...';
+
+    _currAudioPlayingTime = 100;
+
+    _totalDuration = '';
+    _loadingTime = '0:00';
+
     if (mounted) {
       setState(() {
-        isLoading = false;
+        _isLoading = false;
       });
     }
 
@@ -382,13 +399,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
 
     _permissionSetForRecording();
-
-    // _downloaderInitialize();
   }
 
   @override
   void dispose() {
-    assetsAudioPlayer.dispose();
+    _justAudioPlayer.dispose();
     _flutterSoundRecorder.closeAudioSession();
     super.dispose();
   }
@@ -469,7 +484,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           ],
         ),
         body: ModalProgressHUD(
-          inAsyncCall: isLoading,
+          inAsyncCall: _isLoading,
           color: Color.fromRGBO(0, 0, 0, 0.5),
           progressIndicator: CircularProgressIndicator(
             backgroundColor: Colors.black87,
@@ -592,8 +607,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               borderSide: BorderSide(
                                   color: Colors.lightGreen, width: 2.0),
                             ),
-                            hintText: 'Type Here',
-                            hintStyle: TextStyle(color: Colors.white),
+                            hintText: _hintText,
+                            hintStyle: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Lora',
+                              letterSpacing: 2.0,
+                              fontStyle: FontStyle.italic,
+                            ),
                             enabledBorder: UnderlineInputBorder(
                                 borderSide:
                                     BorderSide(color: Colors.lightBlue)),
@@ -742,8 +762,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   children: [
                     if (_responseValue &&
                         index == _response.length - 1 &&
-                        progress > 0.0 &&
-                        progress < 1.0)
+                        _audioDownloadProgress > 0.0 &&
+                        _audioDownloadProgress < 1.0)
                       Container(
                         margin: EdgeInsets.only(
                           left: 1.5,
@@ -751,33 +771,130 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         ),
                         child: CircularProgressIndicator(
                           backgroundColor: Colors.black12,
-                          value: progress,
+                          value: _audioDownloadProgress,
                           valueColor:
                               AlwaysStoppedAnimation<Color>(Colors.orange),
                         ),
                       ),
                     GestureDetector(
                         child: Icon(
-                          Icons.play_arrow_rounded,
+                          index == _lastAudioPlayingIndex
+                              ? _iconData
+                              : Icons.play_arrow_rounded,
                           color: Color.fromRGBO(10, 255, 30, 1),
-                          size: 40.0,
+                          size: 35.0,
                         ),
+                        onLongPress: ()async{
+                          if(_justAudioPlayer.playing){
+                            await _justAudioPlayer.stop();
+                            if(mounted){
+                              setState(() {
+                                print('Present 7');
+                                print('Audio Play Completed');
+                                _justAudioPlayer.stop();
+                                if (mounted) {
+                                  setState(() {
+                                    _loadingTime = '0:00';
+                                    _iconData = Icons.play_arrow_rounded;
+                                  });
+                                }
+                              });
+                            }
+                          }
+                        },
                         onTap: () async {
-                          print("Sam");
+                          _justAudioPlayer.positionStream.listen((event) {
+                            print("Going Duration: $event");
 
-                          print('File is: ${_chatContainer[index].keys.first}');
+                            if (mounted) {
+                              setState(() {
+                                _currAudioPlayingTime =
+                                    event.inMicroseconds.ceilToDouble();
+                                _loadingTime =
+                                    '${event.inMinutes} : ${event.inSeconds}';
+                              });
+                            }
+                          });
 
-                          await assetsAudioPlayer.open(
-                            Audio.file(_chatContainer[index].keys.first),
-                          );
-                          var take = await assetsAudioPlayer.current.first;
-                          print("Take: ${take.audio.duration}");
+                          _justAudioPlayer.playerStateStream.listen((event) {
+                            if (event.processingState ==
+                                ProcessingState.completed) {
+                              print('Present 7');
+                              print('Audio Play Completed');
+                              _justAudioPlayer.stop();
+                              if (mounted) {
+                                setState(() {
+                                  _loadingTime = '0:00';
+                                  _iconData = Icons.play_arrow_rounded;
+                                });
+                              }
+                            }
+                          });
 
-                          print("start Play");
-                          assetsAudioPlayer.showNotification;
-                          await assetsAudioPlayer.play();
+                          if (_lastAudioPlayingIndex != index) {
+                            print('Present 1');
+                            await _justAudioPlayer
+                                .setFilePath(_chatContainer[index].keys.first);
 
-                          print("Stop Play");
+                            if (mounted) {
+                              setState(() {
+                                _lastAudioPlayingIndex = index;
+                                _totalDuration =
+                                    '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+                                _iconData = Icons.pause;
+                              });
+                            }
+
+                            await _justAudioPlayer.play();
+                          } else {
+                            print('Present 2');
+                            print(_justAudioPlayer.processingState);
+                            if (_justAudioPlayer.processingState ==
+                                ProcessingState.idle) {
+                              await _justAudioPlayer.setFilePath(
+                                  _chatContainer[index].keys.first);
+
+                              if (mounted) {
+                                setState(() {
+                                  _lastAudioPlayingIndex = index;
+                                  _totalDuration =
+                                      '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+                                  _iconData = Icons.pause;
+                                });
+                              }
+
+                              await _justAudioPlayer.play();
+                            } else if (_justAudioPlayer.playing) {
+                              print('Present 6');
+                              if (mounted) {
+                                setState(() {
+                                  _iconData = Icons.play_arrow_rounded;
+                                });
+                              }
+
+                              await _justAudioPlayer.pause();
+                            } else if (_justAudioPlayer.processingState ==
+                                ProcessingState.ready) {
+                              if (mounted) {
+                                setState(() {
+                                  _iconData = Icons.pause;
+                                });
+                              }
+
+                              print('Present 5');
+                              await _justAudioPlayer.play();
+                            } else if (_justAudioPlayer.processingState ==
+                                ProcessingState.completed) {
+                              // print('Present 7');
+                              // print('Audio Play Completed');
+                              // _justAudioPlayer.stop();
+                              // if(mounted){
+                              //   setState(() {
+                              //     _loadingTime = '0:00';
+                              //   });
+                              // }
+                            }
+                          }
                         }),
                   ],
                 ),
@@ -791,12 +908,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     children: [
                       Container(
                         margin: EdgeInsets.only(
-                          top: 20.0,
+                          top: 26.0,
                         ),
+                        padding: EdgeInsets.only(right: 10.0),
                         child: LinearPercentIndicator(
-                          //width: 140.0,
-                          lineHeight: 5.0,
-                          percent: 0.15,
+                          percent: _justAudioPlayer.duration == null
+                              ? 0
+                              : _lastAudioPlayingIndex == index
+                                  ? _currAudioPlayingTime.toDouble() /
+                                      _justAudioPlayer.duration.inMicroseconds
+                                          .ceilToDouble()
+                                  : 0,
                           backgroundColor: Colors.black26,
                           progressColor:
                               _responseValue ? Colors.lightBlue : Colors.amber,
@@ -814,7 +936,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           children: [
                             Expanded(
                               child: Text(
-                                '0:00',
+                                _lastAudioPlayingIndex == index
+                                    ? _loadingTime
+                                    : '0:00',
                                 style: TextStyle(
                                   color: Colors.white,
                                 ),
@@ -825,7 +949,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             ),
                             Expanded(
                               child: Text(
-                                '12:00',
+                                _lastAudioPlayingIndex == index
+                                    ? _totalDuration
+                                    : '',
                                 style: TextStyle(
                                   color: Colors.white,
                                 ),
@@ -938,12 +1064,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       _permissionSetForRecording();
     }
     if (_flutterSoundRecorder.isStopped) {
+      if (mounted) {
+        setState(() {
+          _hintText = 'Recording....';
+        });
+      }
       _flutterSoundRecorder
           .startRecorder(
             toFile: _audioDirectory.path + '${DateTime.now()}.mp3',
           )
           .then((value) => print("Recording"));
     } else {
+      if (mounted) {
+        setState(() {
+          _hintText = 'Type Here...';
+        });
+      }
       final String recordedFilePath =
           await _flutterSoundRecorder.stopRecorder();
 
@@ -951,7 +1087,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       if (mounted) {
         setState(() {
-          isLoading = true;
+          _isLoading = true;
         });
         print("Start");
       }
@@ -962,7 +1098,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       if (mounted) {
         setState(() {
-          isLoading = false;
+          _isLoading = false;
         });
         print("End");
       }
@@ -1014,7 +1150,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void _downLoadOnReceiveProgress(int count, int total) {
     if (mounted) {
       setState(() {
-        progress = count / total;
+        _audioDownloadProgress = count / total;
       });
     }
   }
