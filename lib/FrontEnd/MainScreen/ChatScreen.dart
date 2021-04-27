@@ -236,7 +236,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             widget._userName,
                             everyMessage.keys.first.toString(),
                             MediaTypes.Text,
-                            1);
+                            1,_incomingInformationContainer[0]);
 
                         if (mounted) {
                           setState(() {
@@ -301,7 +301,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               widget._userName,
                               '${recordingStoragePath.path}$currTime.mp3',
                               MediaTypes.Voice,
-                              1);
+                              1, _incomingInformationContainer[0]);
 
                           if (mounted) {
                             setState(() {
@@ -1042,7 +1042,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         // Data Store in Local Storage
         await _localStorageHelper.insertNewMessages(widget._userName,
-            _chatContainer.last.keys.first.toString(), MediaTypes.Text, 0);
+            _chatContainer.last.keys.first.toString(), MediaTypes.Text, 0, _chatContainer.last.values.first.toString());
 
         // Data Store in Firestore
         _management.addConversationMessages(this._senderMail, sendingMessages);
@@ -1139,7 +1139,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         // Data Store in Local Storage
         await _localStorageHelper.insertNewMessages(
-            widget._userName, recordedFilePath, MediaTypes.Voice, 0);
+            widget._userName, recordedFilePath, MediaTypes.Voice, 0, _chatContainer.last.values.first.toString());
 
         // Data Store in Firestore
         _management.addConversationMessages(this._senderMail, sendingMessages);

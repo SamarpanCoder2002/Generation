@@ -22,12 +22,12 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   bool isLoading = false;
-  List<String> allConnectionsUserName = [];
+  final List<String> allConnectionsUserName = [];
 
-  List<Map<String, dynamic>> allConnectionActivity = [];
+  final List<Map<String, dynamic>> allConnectionActivity = [];
   final FToast fToast = FToast();
 
-  Management management = Management();
+  final Management management = Management();
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
 
   int statusCurrIndex = 0;
@@ -137,18 +137,17 @@ class _ChatScreenState extends State<ChatScreen> {
     SystemChrome.setEnabledSystemUIOverlays(
         SystemUiOverlay.values); // Android StatusBar Show
 
-    allConnectionsUserName = [];
-    allConnectionActivity = [];
-
     fToast.init(context);
 
     try {
       fetchRealTimeData();
-    }catch(e){
-      showDialog(context: context, builder: (_) => AlertDialog(
-        title: Text('Chat Collection Load Error'),
-        content: Text(e.toString()),
-      ));
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text('Chat Collection Load Error'),
+                content: Text(e.toString()),
+              ));
     }
   }
 
