@@ -233,8 +233,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       case 'MediaTypes.Text':
                         // Store Data in local Storage
                         _localStorageHelper.insertNewMessages(
-                            widget._userName,
                             everyMessage.keys.first.toString(),
+                            widget._userName,
                             MediaTypes.Text,
                             1,_incomingInformationContainer[0]);
 

@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -12,6 +13,17 @@ import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Management {
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
+  String _currAccountUserName;
+
+  _userNameExtractFromLocalDatabase() async {
+    _currAccountUserName =
+        await localStorageHelper.extractImportantDataFromThatAccount(
+            userMail: FirebaseAuth.instance.currentUser.email);
+  }
+
+  Management() {
+    _userNameExtractFromLocalDatabase();
+  }
 
   Widget logOutButton(BuildContext context) {
     return Center(
@@ -67,28 +79,37 @@ class Management {
       Color selectedBGColor,
       List<String> allConnectionUserName,
       double fontSize) async {
-    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-        .get();
+    // DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+    //     .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+    //     .get();
+    //
+    // Map<String, dynamic> activityCollection =
+    //     documentSnapshot.data()['activity'] as Map;
+    // List<dynamic> currConnection = activityCollection['My Activity'];
+    //
+    // if (currConnection == null) currConnection = [];
+    //
+    // currConnection.add({
+    //   activityText:
+    //       '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
+    // });
+    //
+    // activityCollection['My Activity'] = currConnection;
+    //
+    // await FirebaseFirestore.instance
+    //     .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+    //     .update({
+    //   'activity': activityCollection,
+    // });
 
-    Map<String, dynamic> activityCollection =
-        documentSnapshot.data()['activity'] as Map;
-    List<dynamic> currConnection = activityCollection['My Activity'];
-
-    if (currConnection == null) currConnection = [];
-
-    currConnection.add({
-      activityText:
+    await localStorageHelper.insertDataInUserActivityTable(
+      tableName: _currAccountUserName,
+      statusLinkOrString: activityText,
+      mediaTypes: MediaTypes.Text,
+      activityTime: DateTime.now().toString(),
+      bgInformation:
           '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
-    });
-
-    activityCollection['My Activity'] = currConnection;
-
-    await FirebaseFirestore.instance
-        .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-        .update({
-      'activity': activityCollection,
-    });
+    );
 
     if (allConnectionUserName.isNotEmpty) {
       try {
@@ -137,41 +158,20 @@ class Management {
       List<String> allConnectionUserName,
       BuildContext context,
       {String mediaType = 'image'}) async {
-    String imageUrl = await uploadMediaToStorage(imgFile, context);
 
-    try {
-      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-          .get();
 
-      Map<String, dynamic> activityCollection =
-          documentSnapshot.data()['activity'] as Map;
-      List<dynamic> currConnection = activityCollection['My Activity'];
-
-      if (currConnection == null) currConnection = [];
-
-      currConnection.add({
-        imageUrl: '$manuallyText++++++$mediaType',
-      });
-
-      activityCollection['My Activity'] = currConnection;
-
-      await FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-          .update({
-        'activity': activityCollection,
-      });
-    } catch (e) {
-      showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-                title: Text("Upload Error in My Activity"),
-                content: Text(e.toString()),
-              ));
-    }
+    await localStorageHelper.insertDataInUserActivityTable(
+      tableName: _currAccountUserName,
+      statusLinkOrString: imgFile.path,
+      mediaTypes: MediaTypes.Image,
+      activityTime: DateTime.now().toString(),
+      extraText: manuallyText,
+    );
 
     if (allConnectionUserName.isNotEmpty) {
       try {
+        String imageUrl = await uploadMediaToStorage(imgFile, context);
+
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
               await localStorageHelper.fetchEmail(connectionUserName);
@@ -255,6 +255,8 @@ class Management {
               'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o/',
               '')
           .split('?')[0];
+
+      print('Deleted File: $filePath');
 
       await FirebaseStorage.instance.ref().child(filePath).delete();
 

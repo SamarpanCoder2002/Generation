@@ -41,9 +41,10 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     manuallyTextController.dispose();
+    super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -165,10 +166,11 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                       if (response) {
                         if (mounted) {
                           setState(() {
+                            fToast.removeCustomToast();
                             _isLoading = false;
                           });
                         }
-                        Navigator.pop(context);
+                        Navigator.of(context,rootNavigator: true).pop();
                       }
 
                       showToast("Activity Added", fToast);

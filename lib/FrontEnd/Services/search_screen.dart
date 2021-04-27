@@ -162,12 +162,6 @@ class _SearchState extends State<Search> {
                   Map<String, dynamic> connectionsMapCurrUser =
                       documentSnapShotCurrUser.get('connections');
 
-                  Map<String, dynamic> activityMapRequestUser =
-                      searchResultSnapshot.docs[index]['activity'];
-
-                  Map<String, dynamic> activityMapCurrUser =
-                      documentSnapShotCurrUser.get('activity');
-
                   connectionRequestCollectionCurrUser.addAll({
                     '${searchResultSnapshot.docs[index].id}':
                         "Invitation Accepted",
@@ -183,20 +177,8 @@ class _SearchState extends State<Search> {
                     '${FirebaseAuth.instance.currentUser.email}': [],
                   });
 
-                  activityMapRequestUser.addAll({
-                    '${FirebaseAuth.instance.currentUser.email}':
-                        await requestUserActivityTake(
-                            FirebaseAuth.instance.currentUser.email),
-                  });
-
                   connectionsMapCurrUser.addAll({
                     '${searchResultSnapshot.docs[index].id}': [],
-                  });
-
-                  activityMapCurrUser.addAll({
-                    '${searchResultSnapshot.docs[index].id}':
-                        await requestUserActivityTake(
-                            searchResultSnapshot.docs[index].id),
                   });
 
                   if (mounted) {
@@ -208,7 +190,6 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionRequestUser,
                         'connections': connectionsMapRequestUser,
-                        'activity': activityMapRequestUser,
                       });
 
                       FirebaseFirestore.instance
@@ -218,7 +199,6 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionCurrUser,
                         'connections': connectionsMapCurrUser,
-                        'activity': activityMapCurrUser,
                       });
                     });
                   }
@@ -243,22 +223,6 @@ class _SearchState extends State<Search> {
         ],
       ),
     );
-  }
-
-  Future<List<dynamic>> requestUserActivityTake(String oppUserEmail) async {
-    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .doc('generation_users/$oppUserEmail')
-        .get();
-
-    try {
-      List<dynamic> particularOppositeActivities =
-          documentSnapshot.data()['activity']['My Activity'] as List;
-      return particularOppositeActivities == null
-          ? []
-          : particularOppositeActivities;
-    } catch (e) {
-      return [];
-    }
   }
 
   @override

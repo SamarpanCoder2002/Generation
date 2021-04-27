@@ -1,18 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
-//import 'package:video_player/video_player.dart';
 import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {
-  final List<Map<String, dynamic>> allConnectionActivity;
-  final int index;
+  final String takeParticularConnectionUserName;
 
-  ActivityView(this.allConnectionActivity, this.index);
+  ActivityView({@required this.takeParticularConnectionUserName});
 
   @override
   _ActivityViewState createState() => _ActivityViewState();
@@ -24,13 +25,15 @@ class _ActivityViewState extends State<ActivityView>
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
   // Important Controller for Activity View
   //VideoPlayerController _videoController;
   PageController _activityPageViewController;
   AnimationController _animationController;
 
   // Will Take all Activity Collection of Current User
-  List<dynamic> _currUserActivityCollection;
+  List<dynamic> _currUserActivityCollection = [];
 
   // Activity Number Initialized
   int _activityCurrIndex = 0;
@@ -38,16 +41,12 @@ class _ActivityViewState extends State<ActivityView>
   // Helper Function to Call _loadActivity Function
   void _callLoader({int activityPosition = 0}) {
     if (_mediaRegex
-        .hasMatch(_currUserActivityCollection[activityPosition].keys.first)) {
-      if (_currUserActivityCollection[activityPosition]
-              .values
-              .first
-              .toString()
-              .split('++++++')[1] ==
-          'video') {
+        .hasMatch(_currUserActivityCollection[activityPosition]['Status'])) {
+      if (_currUserActivityCollection[activityPosition]['Media'] ==
+          MediaTypes.Video.toString()) {
         _loadActivity(
             activityType: 'video',
-            videoUrl: _currUserActivityCollection[activityPosition].keys.first);
+            videoUrl: _currUserActivityCollection[activityPosition]['Status']);
       } else
         _loadActivity(animateToPage: false);
     } else {
@@ -55,21 +54,46 @@ class _ActivityViewState extends State<ActivityView>
     }
   }
 
+  void _collectCurrUserActivity() async {
+    final List<Map<String, dynamic>> _activityDataCollect =
+        await _localStorageHelper.extractActivityForParticularUserName(
+            widget.takeParticularConnectionUserName);
+
+    print('Current User Data Collect: $_activityDataCollect');
+
+    if (_activityDataCollect == null || _activityDataCollect.length == 0) {
+      if (mounted) {
+        setState(() {
+          _currUserActivityCollection.add({
+            'Status': 'No Activity Present',
+            'Status_Time': DateTime.now().toString(),
+            'Media': MediaTypes.Text.toString(),
+            'Bg_Information': '0+0+0+1.0+25.0',
+          });
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _currUserActivityCollection = _activityDataCollect;
+        });
+      }
+    }
+
+    _callLoader(); // Initially Call Loader
+  }
+
   @override
   void initState() {
     // If Have Some Activity of Current User
-    if (widget.allConnectionActivity[widget.index] != null &&
-        widget.allConnectionActivity[widget.index].length > 0) {
+    if (widget.takeParticularConnectionUserName != null) {
+      _collectCurrUserActivity();
+
       SystemChrome.setEnabledSystemUIOverlays([]); // Android StatusBar Hide
+
       // For EveryActivity Controller and EveryActivity Animation Controller
       _activityPageViewController = PageController();
       _animationController = AnimationController(vsync: this);
-
-      // Take All Activity Collection of Current User
-      _currUserActivityCollection =
-          widget.allConnectionActivity[widget.index].values.first;
-
-      _callLoader(); // Initially Call Loader
 
       // Animation Status Initialized with Add Listner Mode
       _animationController.addStatusListener((status) {
@@ -98,10 +122,8 @@ class _ActivityViewState extends State<ActivityView>
 
   @override
   void dispose() {
-    // TODO: implement dispose
-
-    if (widget.allConnectionActivity[widget.index] != null &&
-        widget.allConnectionActivity[widget.index].length > 0) {
+    if (widget.takeParticularConnectionUserName != null &&
+        _currUserActivityCollection.length > 0) {
       // Some Controller Dispose else may give error after current context getting pop
       //_videoController?.dispose();
       _animationController.dispose();
@@ -139,19 +161,18 @@ class _ActivityViewState extends State<ActivityView>
                 final Map<String, dynamic> activityItem =
                     _currUserActivityCollection[_activityCurrIndex];
 
-                if (_mediaRegex.hasMatch(activityItem.keys.first)) {
-                  final List<String> mediaDetector = activityItem.values.first
-                      .toString()
-                      .split(
-                          '++++++'); // MediaItem(Image/Video) Separated by '++++++'
-                  return mediaDetector[1] == 'image'
-                      ? imageActivityView(
-                          activityItem.keys.first, mediaDetector)
-                      : videoActivityView(
-                          activityItem.keys.first, mediaDetector);
+                if (_mediaRegex.hasMatch(activityItem['Status'])) {
+                  final String mediaDetector = activityItem[
+                      'Media']; // MediaItem(Image/Video) Separated by '++++++'
+
+                  return mediaDetector == MediaTypes.Image.toString()
+                      ? imageActivityView(activityItem['Status'],
+                          activityItem['ExtraActivityText'])
+                      : videoActivityView(activityItem['Status'],
+                          activityItem['ExtraActivityText']);
                 }
-                return textActivityView(
-                    activityItem); // If Current Activity is not Media
+                return textActivityView(activityItem['Bg_Information'],
+                    activityItem['Status']); // If Current Activity is not Media
               },
             ),
             Positioned(
@@ -196,16 +217,14 @@ class _ActivityViewState extends State<ActivityView>
     }
   }
 
-  Widget textActivityView(Map<String, dynamic> activityItem) {
-    List<String> colorValues = activityItem.values.first.toString().split("+");
+  Widget textActivityView(String activityItem, String activityText) {
+    List<String> colorAndFontValues = activityItem.split('+');
 
-    int r = int.parse(colorValues[0]);
-    int g = int.parse(colorValues[1]);
-    int b = int.parse(colorValues[2]);
-    double opacity = double.parse(colorValues[3]);
-    double fontSize = double.parse(colorValues[4]);
-
-    String activityText = activityItem.keys.first;
+    final int r = int.parse(colorAndFontValues[0]);
+    final int g = int.parse(colorAndFontValues[1]);
+    final int b = int.parse(colorAndFontValues[2]);
+    final double opacity = double.parse(colorAndFontValues[3]);
+    final double fontSize = double.parse(colorAndFontValues[4]);
 
     return Container(
       color: Color.fromRGBO(r, g, b, opacity),
@@ -222,7 +241,9 @@ class _ActivityViewState extends State<ActivityView>
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: fontSize,
-              color: Colors.white,
+              color: activityText == 'No Activity Present'
+                  ? Colors.red
+                  : Colors.white,
               fontFamily: 'Lora',
               letterSpacing: 1.0,
             ),
@@ -232,7 +253,7 @@ class _ActivityViewState extends State<ActivityView>
     );
   }
 
-  Widget videoActivityView(String videoUrl, List<String> mediaDetector) {
+  Widget videoActivityView(String videoUrl, String mediaDetector) {
     // if (_videoController != null && _videoController.value.isInitialized) {
     //   return SizedBox(
     //       width: MediaQuery.of(context).size.width,
@@ -284,26 +305,30 @@ class _ActivityViewState extends State<ActivityView>
     );
   }
 
-  Widget imageActivityView(String imageUrl, List<String> mediaDetector) {
+  Widget imageActivityView(String imagePath, String extraActivityText) {
     return Stack(
       children: [
         Center(
-          child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            placeholder: (context, url) => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
-            //fit: BoxFit.fitWidth,
+          child: Image.file(
+            File(imagePath),
           ),
+
+          // CachedNetworkImage(
+          //   imageUrl: imageUrl,
+          //   placeholder: (context, url) => const Center(
+          //     child: CircularProgressIndicator(),
+          //   ),
+          //   errorWidget: (context, url, error) => const Icon(Icons.error),
+          //   //fit: BoxFit.fitWidth,
+          // ),
         ),
-        bottomTextActivityView(mediaDetector),
+        bottomTextActivityView(extraActivityText),
       ],
     );
   }
 
-  Widget bottomTextActivityView(List<String> mediaDetector) {
-    return mediaDetector[0] != ''
+  Widget bottomTextActivityView(String extraActivityText) {
+    return extraActivityText != ''
         ? Scrollbar(
             showTrackOnHover: true,
             thickness: 10.0,
@@ -327,7 +352,7 @@ class _ActivityViewState extends State<ActivityView>
                 children: [
                   Center(
                     child: Text(
-                      mediaDetector[0],
+                      extraActivityText,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
@@ -418,13 +443,9 @@ class _ActivityViewState extends State<ActivityView>
 
   void _onTapDown(TapDownDetails details) {
     if (_mediaRegex
-        .hasMatch(_currUserActivityCollection[_activityCurrIndex].keys.first)) {
-      if (_currUserActivityCollection[_activityCurrIndex]
-              .values
-              .first
-              .toString()
-              .split('++++++')[1] ==
-          'video') {
+        .hasMatch(_currUserActivityCollection[_activityCurrIndex]['Status'])) {
+      if (_currUserActivityCollection[_activityCurrIndex]['Media'] ==
+          MediaTypes.Video.toString()) {
         // if (_videoController.value.isInitialized) {
         //   _videoController.pause();
         //   _animationController.stop();
@@ -441,13 +462,9 @@ class _ActivityViewState extends State<ActivityView>
 
   void _onTapUp(TapUpDetails details) {
     if (_mediaRegex
-        .hasMatch(_currUserActivityCollection[_activityCurrIndex].keys.first)) {
-      if (_currUserActivityCollection[_activityCurrIndex]
-              .values
-              .first
-              .toString()
-              .split('++++++')[1] ==
-          'video') {
+        .hasMatch(_currUserActivityCollection[_activityCurrIndex]['Status'])) {
+      if (_currUserActivityCollection[_activityCurrIndex]['Media'] ==
+          MediaTypes.Video.toString()) {
         // if (_videoController.value.isInitialized) {
         //   _videoController.pause();
         //   _animationController.stop();

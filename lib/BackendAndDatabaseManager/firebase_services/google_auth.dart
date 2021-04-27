@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,7 @@ class GoogleAuth {
   TextEditingController _about = TextEditingController();
 
   final GoogleSignIn googleSignIn = GoogleSignIn();
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
   Future<void> logIn(BuildContext context) async {
     try {
@@ -119,8 +121,10 @@ class GoogleAuth {
                         validator: (inputUserName) {
                           if (inputUserName.length < 6)
                             return "User Name At Least 6 Characters";
-                          else if (inputUserName.contains(" "))
-                            return "Space Not Allowed...User '_' instead of space";
+                          else if (inputUserName.contains(' ') || inputUserName.contains('@'))
+                            return "Space and '@' Not Allowed...User '_' instead of space";
+                          else if (inputUserName.contains('__'))
+                            return "'__' Not Allowed...User '_' instead of '__'";
                           return null;
                         },
                         decoration: InputDecoration(
@@ -193,10 +197,22 @@ class GoogleAuth {
                                   'creation_time':
                                       "${DateFormat('hh:mm a').format(DateTime.now())}",
                                   'connections': {},
-                                  'activity': {
-                                    'My Activity': [],
-                                  },
+                                  'activity': {},
                                 });
+
+                                await _localStorageHelper
+                                    .createTableForStorePrimaryData();
+
+                                await _localStorageHelper
+                                    .insertDataForThisAccount(
+                                    userMail: FirebaseAuth
+                                        .instance.currentUser.email,
+                                    userName: this._userName.text);
+
+                                await _localStorageHelper
+                                    .createTableForUserActivity(
+                                    this._userName.text);
+
 
                                 print("Log-In Successful: User Name: $_email");
 

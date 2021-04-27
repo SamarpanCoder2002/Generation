@@ -32,10 +32,8 @@ dependencies:
   animations: ^2.0.0
   flutter_colorpicker: ^0.4.0
   fluttertoast: ^8.0.4
-  cached_network_image: ^3.0.0
   percent_indicator: "^2.1.7+2"
   just_audio: ^0.7.4
-
 
   circle_list:
   image_picker:
