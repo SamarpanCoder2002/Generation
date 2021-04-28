@@ -61,7 +61,6 @@ class _ChatScreenState extends State<ChatScreen> {
       final Map<String, dynamic> _allUserConnectionActivityTake =
           event.data()['activity'] as Map;
 
-
       // Current Account User Name Take
       final String _thisAccountUserName =
           await localStorageHelper.extractImportantDataFromThatAccount(
@@ -251,6 +250,24 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _searchAboutExistingConnectionActivity() async {
+    final List<Map<String, Object>> _alreadyStoredUserNameList =
+        await localStorageHelper.extractAllUsersNameExceptThis();
+    _alreadyStoredUserNameList.forEach((userNameMap) async {
+      int _countTotalActivity = await localStorageHelper
+          .countTotalActivitiesForParticularUserName(userNameMap.values.first);
+      if (_countTotalActivity > 0) {
+        if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
+          if (mounted) {
+            setState(() {
+              _allUserConnectionActivity.add(userNameMap.values.first);
+            });
+          }
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -262,6 +279,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       _fetchRealTimeData();
+      _searchAboutExistingConnectionActivity();
     } catch (e) {
       showDialog(
           context: context,

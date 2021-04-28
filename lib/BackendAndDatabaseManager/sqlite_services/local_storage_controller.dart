@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:intl/intl.dart';
@@ -96,6 +97,13 @@ class LocalStorageHelper {
     return result[0].values.first;
   }
 
+  Future<List<Map<String, Object>>> extractAllUsersNameExceptThis() async {
+    Database db = await this.database;
+    List<Map<String, Object>> result = await db.rawQuery(
+        "SELECT $_colAccountUserName FROM $_allImportantDataStore WHERE $_colAccountUserMail != '${FirebaseAuth.instance.currentUser.email}'");
+    return result;
+  }
+
   // For make a table
   Future<bool> createTableForUserName(String tableName) async {
     Database db = await this.database;
@@ -160,8 +168,7 @@ class LocalStorageHelper {
     final List<Map<String, Object>> countTotalStatus =
         await db.rawQuery('SELECT COUNT(*) FROM ${tableName}_status');
 
-    print(countTotalStatus[0].values.first);
-    return int.parse(countTotalStatus[0].values.first);
+    return countTotalStatus[0].values.first;
   }
 
   // Insert Use Additional Data to Table
