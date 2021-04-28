@@ -8,26 +8,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:animations/animations.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/FrontEnd/Activity/activity_maker.dart';
 import 'package:generation_official/FrontEnd/Services/search_screen.dart';
 import 'package:generation_official/FrontEnd/Activity/activity_view.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:animations/animations.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/ChatScreen.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatsAndActivityCollection extends StatefulWidget {
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  _ChatsAndActivityCollectionState createState() =>
+      _ChatsAndActivityCollectionState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatsAndActivityCollectionState
+    extends State<ChatsAndActivityCollection> {
   bool isLoading = false;
   final List<String> allConnectionsUserName = [];
 
@@ -56,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
     PermissionStatus storagePermissionStatus =
         await Permission.storage.request();
 
-    // Listen to the realTime Data Detch
+    // Listen to the realTime Data Fetch
     management.getDatabaseData().listen((event) async {
       final Map<String, dynamic> _allUserConnectionActivityTake =
           event.data()['activity'] as Map;
@@ -66,6 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
           await localStorageHelper.extractImportantDataFromThatAccount(
               userMail: FirebaseAuth.instance.currentUser.email);
 
+      /// Checking Already This Account Name Present in Local Container or not
       if (!_allUserConnectionActivity.contains(_thisAccountUserName)) {
         if (mounted) {
           setState(() {
@@ -74,10 +77,11 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       }
 
-      // For Activity Data Store in Local Storage
+      /// For [Activity Data] Store in Local Storage
       _allUserConnectionActivityTake
           .forEach((connectionMail, connectionActivity) async {
         if (connectionActivity.toList().isEmpty) {
+          // If There no new Activity in FireStore Record
           print("Empty Container");
         } else {
           final List<dynamic> particularConnectionActivity =
@@ -85,8 +89,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
           final String _connectionUserNameFromLocalDatabase =
               await localStorageHelper.extractImportantDataFromThatAccount(
-                  userMail: connectionMail);
+                  userMail:
+                      connectionMail); // FindOut User Name from local database
 
+          /// Checking Already This Account Name Present in Local Container or not
           if (!_allUserConnectionActivity
               .contains(_connectionUserNameFromLocalDatabase)) {
             if (mounted) {
@@ -97,6 +103,7 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           }
 
+          /// Updating FireStore by Removal of Current fetch all Activity of that particular user
           if (mounted) {
             setState(() {
               _allUserConnectionActivityTake[connectionMail] = [];
@@ -128,10 +135,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       .download(everyActivity.keys.first.toString(),
                           '${activityVideoPath.path}$currTime.mp4')
                       .whenComplete(() async {
-                    await management.deleteFilesFromFirebaseStorage(
-                        everyActivity.keys.first.toString());
+                    print('Video Download Complete');
+                    // await management.deleteFilesFromFirebaseStorage(
+                    //     everyActivity.keys.first.toString());
                   });
 
+                  /// Insert Video  Activity Data to the local database for future use
                   await localStorageHelper.insertDataInUserActivityTable(
                     tableName: _connectionUserNameFromLocalDatabase,
                     statusLinkOrString:
@@ -143,26 +152,27 @@ class _ChatScreenState extends State<ChatScreen> {
                         .split('++++++')[0],
                   );
                 } else {
-                  storagePermissionStatus = await Permission.storage.request();
+                  //storagePermissionStatus = await Permission.storage.request();
+                  print('Storage Permission Denied');
                 }
               } else {
                 if (storagePermissionStatus.isGranted) {
+                  // Create new Hidden Folder once in desired location
                   final activityImagePath =
                       await Directory('${directory.path}/.ActivityImages/')
                           .create();
 
-                  print('Url path: ${activityImagePath.path}$currTime.jpg');
-                  print(
-                      'Url Something: ${everyActivity.keys.first.toString()}');
-
+                  /// Download Image Activity from Firebase Storage and store in local database
                   await dio
                       .download(everyActivity.keys.first.toString(),
                           '${activityImagePath.path}$currTime.jpg')
                       .whenComplete(() async {
-                    await management.deleteFilesFromFirebaseStorage(
-                        everyActivity.keys.first.toString());
+                    print('Image Download Complete');
+                    // await management.deleteFilesFromFirebaseStorage(
+                    //     everyActivity.keys.first.toString());
                   });
 
+                  /// Add Activity Image Data to Local Storage for Future use
                   await localStorageHelper.insertDataInUserActivityTable(
                     tableName: _connectionUserNameFromLocalDatabase,
                     statusLinkOrString:
@@ -174,10 +184,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         .split('++++++')[0],
                   );
                 } else {
-                  storagePermissionStatus = await Permission.storage.request();
+                  print('Permission Denied');
+                  //storagePermissionStatus = await Permission.storage.request();
                 }
               }
             } else {
+              /// Add Text Activity Data to Local Storage for future use
               await localStorageHelper.insertDataInUserActivityTable(
                 tableName: _connectionUserNameFromLocalDatabase,
                 statusLinkOrString: everyActivity.keys.first.toString(),
@@ -192,43 +204,48 @@ class _ChatScreenState extends State<ChatScreen> {
 
       print("All Connection Activity: $_allUserConnectionActivity");
 
-      // Connection Request Take
+      /// Connection Request Processing
       if (event.data()['connection_request'].length > 0) {
         if (mounted) {
-          Map<String, Object> allConnectionRequest =
+          final Map<String, Object> allConnectionRequest =
               event.data()['connection_request']; // Take All Connection Request
 
+          // Take all Connection Request Data to Update Connectivity
           allConnectionRequest
               .forEach((connectionName, connectionStatus) async {
             if (connectionStatus.toString() == 'Request Accepted' ||
                 connectionStatus.toString() == 'Invitation Accepted') {
               // User All Information Take
-              DocumentSnapshot documentSnapshot = await FirebaseFirestore
+              final DocumentSnapshot documentSnapshot = await FirebaseFirestore
                   .instance
                   .doc('generation_users/$connectionName')
                   .get();
 
-              // Checking If Same USer NAme PResent in the list or not
+              // Checking If Same User Name Present in the list or not
               if (!allConnectionsUserName
                   .contains(documentSnapshot['user_name'])) {
                 // Make SqLite Table With User UserName
                 bool response = await localStorageHelper
                     .createTableForUserName(documentSnapshot['user_name']);
                 if (response) {
+                  // Data Store for General Reference
                   await localStorageHelper.insertDataForThisAccount(
                       userMail: connectionName,
                       userName: documentSnapshot['user_name']);
 
+                  // Insert Additional Data to user Specific SqLite Database Table
                   await localStorageHelper.insertAdditionalData(
                     documentSnapshot['user_name'],
                     documentSnapshot['about'],
                     documentSnapshot.id,
                   );
 
+                  // Make a new table to this new connected user Activity
                   await localStorageHelper.createTableForUserActivity(
                       documentSnapshot['user_name']);
                 }
 
+                // Insert New Connected user name at the front of local container
                 if (mounted) {
                   setState(() {
                     allConnectionsUserName.insert(
@@ -250,11 +267,12 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  // Existing connection having some activity store in local database, user name add
   void _searchAboutExistingConnectionActivity() async {
     final List<Map<String, Object>> _alreadyStoredUserNameList =
         await localStorageHelper.extractAllUsersNameExceptThis();
     _alreadyStoredUserNameList.forEach((userNameMap) async {
-      int _countTotalActivity = await localStorageHelper
+      final int _countTotalActivity = await localStorageHelper
           .countTotalActivitiesForParticularUserName(userNameMap.values.first);
       if (_countTotalActivity > 0) {
         if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
@@ -275,7 +293,7 @@ class _ChatScreenState extends State<ChatScreen> {
     SystemChrome.setEnabledSystemUIOverlays(
         SystemUiOverlay.values); // Android StatusBar Show
 
-    fToast.init(context);
+    fToast.init(context); // Flutter Toast Initialized
 
     try {
       _fetchRealTimeData();
@@ -292,10 +310,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return chatScreen(context);
+    return connectionsCollection(context);
   }
 
-  Widget chatScreen(BuildContext context) {
+  Widget connectionsCollection(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
           backgroundColor: Color.fromRGBO(20, 200, 50, 1),
@@ -307,44 +325,46 @@ class _ChatScreenState extends State<ChatScreen> {
           onPressed: () async {
             print('Search based on Text');
             Navigator.push(
-                context, MaterialPageRoute(builder: (_) => Search()));
+                context,
+                MaterialPageRoute(
+                    builder: (_) => Search())); // Navigate to the search Page
           }),
       backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
       body: ModalProgressHUD(
         inAsyncCall: isLoading,
-        color: Color.fromRGBO(0, 0, 0, 0.5),
-        progressIndicator: CircularProgressIndicator(
+        color: const Color.fromRGBO(0, 0, 0, 0.5),
+        progressIndicator: const CircularProgressIndicator(
           backgroundColor: Colors.black87,
         ),
         child: ListView(
           children: [
-            statusBarContainer(context),
-            chatList(context),
+            _activityList(context),
+            _connectionList(context),
           ],
         ),
       ),
     );
   }
 
-  Widget statusBarContainer(BuildContext context) {
+  Widget _activityList(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(
+      margin: const EdgeInsets.only(
         top: 23.0,
         left: 10.0,
       ),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * (1 / 8),
       child: ListView.builder(
-        scrollDirection: Axis.horizontal,
+        scrollDirection: Axis.horizontal, // Make ListView Horizontally
         itemCount: _allUserConnectionActivity.length,
         itemBuilder: (context, position) {
-          return statusList(context, position);
+          return _activityCollectionList(context, position);
         },
       ),
     );
   }
 
-  Widget statusList(BuildContext context, int index) {
+  Widget _activityCollectionList(BuildContext context, int index) {
     return Container(
       margin: EdgeInsets.only(right: MediaQuery.of(context).size.width / 18),
       child: GestureDetector(
@@ -367,21 +387,21 @@ class _ChatScreenState extends State<ChatScreen> {
               },
               closedBuilder: (context, closeWidget) {
                 return CircleAvatar(
-                  backgroundImage: ExactAssetImage(
+                  backgroundImage: const ExactAssetImage(
                     "assets/images/sam.jpg",
                   ),
                   radius: 50.0,
                 );
               },
             ),
-            index == 0
+            index == 0 // This is for current user Account
                 ? Padding(
                     padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * (1 / 8) - 30,
                       left: 60.0,
                     ),
                     child: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.lightBlue,
                         ),
@@ -396,30 +416,30 @@ class _ChatScreenState extends State<ChatScreen> {
                               allConnectionsUserName: allConnectionsUserName),
                         )),
                   )
-                : SizedBox(),
+                : const SizedBox(),
           ],
         ),
       ),
     );
   }
 
-  Widget chatList(BuildContext context) {
+  Widget _connectionList(BuildContext context) {
     return SafeArea(
         child: Container(
-      margin: EdgeInsets.only(top: 35.0),
-      padding: EdgeInsets.only(top: 18.0, bottom: 10.0),
+      margin: const EdgeInsets.only(top: 35.0),
+      padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
       height: MediaQuery.of(context).size.height * (5.15 / 8),
       decoration: BoxDecoration(
-        color: Color.fromRGBO(31, 51, 71, 1),
+        color: const Color.fromRGBO(31, 51, 71, 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 10.0,
             spreadRadius: 0.0,
-            offset: Offset(0.0, -5.0), // shadow direction: bottom right
+            offset: const Offset(0.0, -5.0), // shadow direction: bottom right
           )
         ],
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
         border: Border.all(
           color: Colors.black26,
@@ -512,7 +532,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               "Latest Message",
                               style: TextStyle(
                                 fontSize: 15.0,
-                                color: Color.fromRGBO(150, 150, 150, 1),
+                                color: const Color.fromRGBO(150, 150, 150, 1),
                               ),
                             ),
                           )
@@ -524,7 +544,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: Container(
                     alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       right: 20.0,
                       top: 2.0,
                       bottom: 2.0,
@@ -541,7 +561,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           height: 10.0,
                         ),
                         Container(
-                          child: Icon(
+                          child: const Icon(
                             Icons.notification_important_outlined,
                             color: Colors.green,
                           ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-import 'package:generation_official/FrontEnd/MainScreen/ChatAndStatusCollection.dart';
+import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation_official/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
@@ -157,7 +157,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             body: TabBarView(
               children: [
-                ChatScreen(),
+                ChatsAndActivityCollection(),
                 ScreenLogs(),
                 ApplicationList(),
               ],

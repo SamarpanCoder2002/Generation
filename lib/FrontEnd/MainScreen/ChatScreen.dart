@@ -230,9 +230,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         everyMessage.values.first.toString().split('+');
 
                     switch (_incomingInformationContainer[1]) {
-                      case 'MediaTypes.Text':
+                      case 'MediaTypes.Text': // If Message Type is Text
                         // Store Data in local Storage
-                        _localStorageHelper.insertNewMessages(
+                        await _localStorageHelper.insertNewMessages(
                             widget._userName,
                             everyMessage.keys.first.toString(),
                             MediaTypes.Text,
@@ -241,9 +241,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                         if (mounted) {
                           setState(() {
-                            _mediaTypes.add(MediaTypes.Text);
+                            _mediaTypes.add(
+                                MediaTypes.Text); // Insert About Media Type
 
                             _chatContainer.add({
+                              // Current Running information Store
                               '${everyMessage.keys.first}':
                                   '${_incomingInformationContainer[0]}',
                             });
@@ -253,9 +255,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         }
 
                         break;
-                      case 'MediaTypes.Voice':
+                      case 'MediaTypes.Voice': // If Message type is voice
+
                         PermissionStatus storagePermissionStatus =
-                            await Permission.storage.request();
+                            await Permission.storage
+                                .request(); // Take User Permission To Take Voice
+
                         if (storagePermissionStatus.isGranted) {
                           if (mounted) {
                             setState(() {
@@ -264,20 +269,23 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           }
 
                           final Directory directory =
-                              await getExternalStorageDirectory();
+                              await getExternalStorageDirectory(); // Find Directory To Storage
 
-                          final recordingStoragePath =
-                              await Directory(directory.path + '/Recordings/')
-                                  .create();
+                          final recordingStorage = await Directory(
+                                  directory.path + '/Recordings/')
+                              .create(); // Create New Folder about the desire location
 
-                          final String currTime = DateTime.now().toString();
+                          final String currTime =
+                              DateTime.now().toString(); // Current Time Take
 
                           if (mounted) {
                             setState(() {
-                              _mediaTypes.add(MediaTypes.Voice);
+                              _mediaTypes
+                                  .add(MediaTypes.Voice); // add New Media Type
 
                               _chatContainer.add({
-                                '${recordingStoragePath.path}$currTime.mp3':
+                                // Take Messages in Local Container
+                                '${recordingStorage.path}$currTime.mp3':
                                     '${_incomingInformationContainer[0]}',
                               });
 
@@ -285,9 +293,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                           }
 
+                          // Download the voice from the Firebase Storage and delete from storage permanently
                           await _dio
                               .download(everyMessage.keys.first.toString(),
-                                  '${recordingStoragePath.path}$currTime.mp3',
+                                  '${recordingStorage.path}$currTime.mp3',
                                   onReceiveProgress: _downLoadOnReceiveProgress)
                               .whenComplete(() async {
                             await _management.deleteFilesFromFirebaseStorage(
@@ -295,12 +304,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           });
 
                           print(
-                              'Recorded Path: ${recordingStoragePath.path}$currTime.mp3');
+                              'Recorded Path: ${recordingStorage.path}$currTime.mp3');
 
                           // Store Data in local Storage
                           _localStorageHelper.insertNewMessages(
                               widget._userName,
-                              '${recordingStoragePath.path}$currTime.mp3',
+                              '${recordingStorage.path}$currTime.mp3',
                               MediaTypes.Voice,
                               1,
                               _incomingInformationContainer[0]);
@@ -314,10 +323,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                         break;
                     }
-
-                    print('Present');
-
-                    print("MediaTypes: ${_incomingInformationContainer[1]}");
                   });
 
                   // For AutoScroll to the end position
@@ -338,7 +343,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showDialog(
           context: context,
           builder: (_) => AlertDialog(
-                title: Text("Firestore Problem"),
+                title: Text("FireStore Problem"),
                 content: Text(e.toString()),
               ));
     }
@@ -348,11 +353,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     try {
       final PermissionStatus recordingPermissionStatus =
           await Permission.microphone.request();
+
       if (recordingPermissionStatus.isGranted) {
         _isMicrophonePermissionGranted = true;
-        _flutterSoundRecorder = FlutterSoundRecorder();
-        await _flutterSoundRecorder.openAudioSession();
-        await _makeDirectoryOnce();
+        _flutterSoundRecorder = FlutterSoundRecorder(); // Initialize
+        await _flutterSoundRecorder.openAudioSession(); // Active Audio Session
+        await _makeDirectoryOnce(); // Make Directory One Time
       } else
         print("Permission Denied");
     } catch (e) {
@@ -365,9 +371,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     final directory = await getExternalStorageDirectory();
     print("Located Directory is: " + directory.path);
 
-    _audioDirectory = await Directory(directory.path + '/Recordings/').create();
-
-    //await getApplicationDocumentsDirectory().then((directory) => print("Testing Path: ${directory.path}"));
+    _audioDirectory = await Directory(directory.path + '/Recordings/')
+        .create(); // This directory will create Once in whole Application
   }
 
   @override
@@ -886,16 +891,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               print('Present 5');
                               await _justAudioPlayer.play();
                             } else if (_justAudioPlayer.processingState ==
-                                ProcessingState.completed) {
-                              // print('Present 7');
-                              // print('Audio Play Completed');
-                              // _justAudioPlayer.stop();
-                              // if(mounted){
-                              //   setState(() {
-                              //     _loadingTime = '0:00';
-                              //   });
-                              // }
-                            }
+                                ProcessingState.completed) {}
                           }
                         }),
                   ],
@@ -917,7 +913,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           percent: _justAudioPlayer.duration == null
                               ? 0
                               : _lastAudioPlayingIndex == index
-                                  ? _currAudioPlayingTime.toDouble() /
+                                  ? _currAudioPlayingTime /
                                       _justAudioPlayer.duration.inMicroseconds
                                           .ceilToDouble()
                                   : 0,
@@ -1069,6 +1065,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     if (!_isMicrophonePermissionGranted || _flutterSoundRecorder == null) {
       _permissionSetForRecording();
     }
+
+    // For Recording Action
     if (_flutterSoundRecorder.isStopped) {
       if (mounted) {
         setState(() {
@@ -1081,6 +1079,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           )
           .then((value) => print("Recording"));
     } else {
+      // For recording stop after action
       if (mounted) {
         setState(() {
           _hintText = 'Type Here...';
@@ -1157,10 +1156,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  void _downLoadOnReceiveProgress(int count, int total) {
+  void _downLoadOnReceiveProgress(int countReceive, int totalReceive) {
     if (mounted) {
       setState(() {
-        _audioDownloadProgress = count / total;
+        _audioDownloadProgress = countReceive / totalReceive;
       });
     }
   }
