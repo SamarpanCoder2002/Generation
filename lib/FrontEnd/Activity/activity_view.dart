@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:photo_view/photo_view.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -307,20 +308,30 @@ class _ActivityViewState extends State<ActivityView>
   Widget imageActivityView(String imagePath, String extraActivityText) {
     return Stack(
       children: [
-        Center(
-          child: Image.file(
-            File(imagePath),
+        PhotoView(
+          imageProvider: FileImage(File(imagePath)),
+          loadingBuilder: (context, event) => Center(
+            child: CircularProgressIndicator(),
           ),
-
-          // CachedNetworkImage(
-          //   imageUrl: imageUrl,
-          //   placeholder: (context, url) => const Center(
-          //     child: CircularProgressIndicator(),
-          //   ),
-          //   errorWidget: (context, url, error) => const Icon(Icons.error),
-          //   //fit: BoxFit.fitWidth,
-          // ),
+          errorBuilder: (context, obj, stackTrace) => Center(
+              child: Text(
+            'Image not Found',
+            style: TextStyle(
+              fontSize: 23.0,
+              color: Colors.red,
+              fontFamily: 'Lora',
+              letterSpacing: 1.0,
+            ),
+          )),
+          enableRotation: true,
+          minScale: 0.5,
         ),
+        // Center(
+        //   child: Image.file(
+        //     File(imagePath),
+        //   ),
+        //
+        // ),
         bottomTextActivityView(extraActivityText),
       ],
     );

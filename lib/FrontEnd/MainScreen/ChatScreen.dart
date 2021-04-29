@@ -20,11 +20,11 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_view/photo_view.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:photo_view/photo_view.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -379,7 +379,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               '${recordingStorage.path}$currTime.jpg',
                               MediaTypes.Image,
                               1,
-                              _incomingInformationContainer[0]);
+                              '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}');
 
                           if (mounted) {
                             setState(() {
@@ -979,7 +979,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   Widget imageConversationList(
       BuildContext context, int index, bool _responseValue) {
-
     print(_chatContainer[index].values.first);
 
     return Column(
@@ -1010,8 +1009,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(20.0),
                 topLeft: Radius.circular(20.0),
-                bottomRight: _chatContainer[index].values.first.split('+')[1] != '' ?Radius.circular(20.0): Radius.circular(0.0),
-                bottomLeft: _chatContainer[index].values.first.split('+')[1] != '' ?Radius.circular(20.0): Radius.circular(0.0),
+                bottomRight:
+                    _chatContainer[index].values.first.split('+')[1] == ''
+                        ? Radius.circular(20.0)
+                        : Radius.circular(0.0),
+                bottomLeft:
+                    _chatContainer[index].values.first.split('+')[1] == ''
+                        ? Radius.circular(20.0)
+                        : Radius.circular(0.0),
               ),
             ),
             transitionDuration: Duration(
@@ -1031,60 +1036,71 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 loadingBuilder: (context, event) => Center(
                   child: CircularProgressIndicator(),
                 ),
+                errorBuilder: (context, obj, stackTrace) => Center(
+                    child: Text(
+                  'Image not Found',
+                  style: TextStyle(
+                    fontSize: 23.0,
+                    color: Colors.red,
+                    fontFamily: 'Lora',
+                    letterSpacing: 1.0,
+                  ),
+                )),
                 enableRotation: true,
-                minScale: 0.2,
+                minScale: 0.5,
               ),
             ),
           ),
         ),
-        if(_chatContainer[index].values.first.split('+')[1] != '')Scrollbar(
-          showTrackOnHover: true,
-          thickness: 10.0,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            //height: 60.0,
-            padding: const EdgeInsets.fromLTRB(
-              10.0,
-              5.0,
-              10.0,
-              5.0,
-            ),
-            margin: _responseValue
-                ? EdgeInsets.only(
-                    right: MediaQuery.of(context).size.width / 3,
-                    left: 5.0,
-                    //top: 5.0,
-                  )
-                : EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width / 3,
-                    right: 5.0,
-                    //top: 5.0,
-                  ),
-            alignment:
-                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.0),
-                bottomRight: Radius.circular(20.0),
+        if (_chatContainer[index].values.first.split('+')[1] != '')
+          Scrollbar(
+            showTrackOnHover: true,
+            thickness: 10.0,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              //height: 60.0,
+              padding: const EdgeInsets.fromLTRB(
+                10.0,
+                5.0,
+                10.0,
+                5.0,
               ),
-              color: _responseValue
-                  ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(102, 102, 255, 1),
-            ),
-            child: Center(
-              child: Text(
-                _chatContainer[index].values.first.split('+')[1],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.0,
-                  fontFamily: 'Lora',
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 1.0,
+              margin: _responseValue
+                  ? EdgeInsets.only(
+                      right: MediaQuery.of(context).size.width / 3,
+                      left: 5.0,
+                      //top: 5.0,
+                    )
+                  : EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width / 3,
+                      right: 5.0,
+                      //top: 5.0,
+                    ),
+              alignment:
+                  _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0),
+                ),
+                color: _responseValue
+                    ? Color.fromRGBO(60, 80, 100, 1)
+                    : Color.fromRGBO(102, 102, 255, 1),
+              ),
+              child: Center(
+                child: Text(
+                  _chatContainer[index].values.first.split('+')[1],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontFamily: 'Lora',
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 1.0,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         Container(
           alignment:
               _responseValue ? Alignment.centerLeft : Alignment.centerRight,
@@ -1507,7 +1523,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               color: Colors.lightGreen,
                             ),
                             onTap: () async {
-                              await _connectionExtraTextManagement();
+                              await _connectionExtraTextManagement(
+                                  ImageSource.camera);
                             },
                           ),
                         ),
@@ -1526,16 +1543,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               color: Colors.lightGreen,
                             ),
                             onTap: () async {
-                              print("Take Image");
-
-                              final PickedFile pickedFile =
-                                  await _picker.getImage(
-                                      source: ImageSource.gallery,
-                                      imageQuality: 50);
-
-                              if (pickedFile != null) {
-                                print(pickedFile.path);
-                              }
+                              await _connectionExtraTextManagement(
+                                  ImageSource.gallery);
                             },
                           ),
                         ),
@@ -1581,9 +1590,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ));
   }
 
-  Future<void> _connectionExtraTextManagement() async {
+  Future<void> _connectionExtraTextManagement(ImageSource imageSource) async {
     final PickedFile pickedFile = await _picker.getImage(
-      source: ImageSource.camera,
+      source: imageSource,
       imageQuality: 50,
     );
 
@@ -1593,6 +1602,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
+          elevation: 5.0,
           backgroundColor: Color.fromRGBO(34, 48, 60, 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(
@@ -1641,6 +1651,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     size: 30.0,
                   ),
                   onPressed: () {
+                    _mediaTextController.clear();
                     Navigator.pop(context);
                     _imageSend(File(pickedFile.path),
                         extraText: _mediaTextController.text);
