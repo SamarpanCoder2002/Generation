@@ -3,11 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
-
 import 'package:flutter/services.dart';
+
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-
 import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {

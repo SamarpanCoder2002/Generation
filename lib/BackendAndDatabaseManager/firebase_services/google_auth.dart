@@ -2,10 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
+
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 
 class GoogleAuth {
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();

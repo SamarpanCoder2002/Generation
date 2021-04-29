@@ -314,33 +314,35 @@ class _ChatsAndActivityCollectionState
   }
 
   Widget connectionsCollection(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-          backgroundColor: Color.fromRGBO(20, 200, 50, 1),
-          child: Icon(
-            Icons.search_rounded,
-            color: Colors.white,
-            size: 30.0,
+    return SafeArea(
+      child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+            backgroundColor: const Color.fromRGBO(20, 200, 50, 1),
+            child: Icon(
+              Icons.search_rounded,
+              color: Colors.white,
+              size: 30.0,
+            ),
+            onPressed: () async {
+              print('Search based on Text');
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => Search())); // Navigate to the search Page
+            }),
+        backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
+        body: ModalProgressHUD(
+          inAsyncCall: isLoading,
+          color: const Color.fromRGBO(0, 0, 0, 0.5),
+          progressIndicator: const CircularProgressIndicator(
+            backgroundColor: Colors.black87,
           ),
-          onPressed: () async {
-            print('Search based on Text');
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => Search())); // Navigate to the search Page
-          }),
-      backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
-      body: ModalProgressHUD(
-        inAsyncCall: isLoading,
-        color: const Color.fromRGBO(0, 0, 0, 0.5),
-        progressIndicator: const CircularProgressIndicator(
-          backgroundColor: Colors.black87,
-        ),
-        child: ListView(
-          children: [
-            _activityList(context),
-            _connectionList(context),
-          ],
+          child: ListView(
+            children: [
+              _activityList(context),
+              _connectionList(context),
+            ],
+          ),
         ),
       ),
     );

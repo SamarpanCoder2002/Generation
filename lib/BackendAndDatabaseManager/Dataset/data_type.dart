@@ -6,3 +6,4 @@ enum MediaTypes {
   Sticker,
   Location,
 }
+

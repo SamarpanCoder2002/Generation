@@ -4,9 +4,10 @@ import 'package:circle_list/circle_list.dart';
 import 'package:circle_list/radial_drag_gesture_detector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
+
 import 'package:generation_official/FrontEnd/Activity/status_text_container.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:image_picker/image_picker.dart';
 
 activityList(
     {@required BuildContext context,
@@ -106,18 +107,20 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                       imageQuality: 50,
                     );
 
-                    print(pickedFile.path);
+                    if(pickedFile != null){
+                      print(pickedFile.path);
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PreviewImageScreen(
-                          imageFile: File(pickedFile.path),
-                          purpose: 'status',
-                          allConnectionUserName: allConnectionsUserName,
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PreviewImageScreen(
+                            imageFile: File(pickedFile.path),
+                            purpose: 'status',
+                            allConnectionUserName: allConnectionsUserName,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                   onLongPress: () async {
                     print("Take Image");

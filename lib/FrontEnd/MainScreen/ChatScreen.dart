@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:animations/animations.dart';
+import 'package:circle_list/circle_list.dart';
+import 'package:circle_list/radial_drag_gesture_detector.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,16 +11,20 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:photo_view/photo_view.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -52,6 +59,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   // For Controller Text in Field
   final TextEditingController _inputTextController = TextEditingController();
+  final TextEditingController _mediaTextController = TextEditingController();
 
   // Some Boolean Value
   bool _showEmojiPicker = false, _isChatOpenFirstTime = true;
@@ -64,6 +72,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   final AudioPlayer _justAudioPlayer = AudioPlayer();
   final Dio _dio = Dio();
+
+  final ImagePicker _picker = ImagePicker();
 
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
@@ -82,13 +92,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final Icon _senderIcon = Icon(
     Icons.send_rounded,
     size: 30.0,
-    color: Colors.green,
+    color: const Color.fromRGBO(20, 255, 50, 1),
   );
 
   final Icon _voiceIcon = Icon(
     Icons.keyboard_voice_rounded,
     size: 30.0,
-    color: Colors.green,
+    color: const Color.fromRGBO(20, 255, 50, 1),
   );
 
   void _senderMailDataFetch() async {
@@ -140,6 +150,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   _mediaTypes.add(MediaTypes.Text);
                 } else if (messageContainer[3] == MediaTypes.Voice.toString()) {
                   _mediaTypes.add(MediaTypes.Voice);
+                } else if (messageContainer[3] == MediaTypes.Image.toString()) {
+                  _mediaTypes.add(MediaTypes.Image);
                 }
 
                 if (mounted) {
@@ -320,7 +332,76 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                           }
                         }
+                        break;
 
+                      case 'MediaTypes.Image':
+                        PermissionStatus storagePermissionStatus =
+                            await Permission.storage
+                                .request(); // Take User Permission To Take Voice
+
+                        if (storagePermissionStatus.isGranted) {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                          }
+
+                          final Directory directory =
+                              await getExternalStorageDirectory(); // Find Directory To Storage
+
+                          final recordingStorage = await Directory(
+                                  '${directory.path}/Images/')
+                              .create(); // Create New Folder about the desire location
+
+                          final String currTime = DateTime.now()
+                              .toString()
+                              .split(' ')
+                              .join('_'); // Current Time Take
+
+                          // Download the voice from the Firebase Storage and delete from storage permanently
+                          await _dio
+                              .download(
+                            everyMessage.keys.first.toString(),
+                            '${recordingStorage.path}$currTime.jpg',
+                            //onReceiveProgress: _downLoadOnReceiveProgress
+                          )
+                              .whenComplete(() async {
+                            await _management.deleteFilesFromFirebaseStorage(
+                                everyMessage.keys.first.toString());
+                          });
+
+                          print(
+                              'Recorded Path: ${recordingStorage.path}$currTime.jpg');
+
+                          // Store Data in local Storage
+                          _localStorageHelper.insertNewMessages(
+                              widget._userName,
+                              '${recordingStorage.path}$currTime.jpg',
+                              MediaTypes.Image,
+                              1,
+                              _incomingInformationContainer[0]);
+
+                          if (mounted) {
+                            setState(() {
+                              _mediaTypes
+                                  .add(MediaTypes.Image); // add New Media Type
+
+                              _chatContainer.add({
+                                // Take Messages in Local Container
+                                '${recordingStorage.path}$currTime.jpg':
+                                    '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}',
+                              });
+
+                              _response.add(true); // Chat Position Status Added
+                            });
+                          }
+
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        }
                         break;
                     }
                   });
@@ -381,6 +462,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     _senderMailDataFetch();
 
     _hintText = 'Type Here...';
+    _mediaTextController.text = '';
 
     _currAudioPlayingTime = 100;
 
@@ -412,6 +494,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void dispose() {
     _justAudioPlayer.dispose();
     _flutterSoundRecorder.closeAudioSession();
+    _mediaTextController.dispose();
+    _inputTextController.dispose();
     super.dispose();
   }
 
@@ -541,6 +625,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     if (_mediaTypes[position] == MediaTypes.Text)
                       return textConversationList(
                           context, position, _response[position]);
+                    else if (_mediaTypes[position] == MediaTypes.Image)
+                      return imageConversationList(
+                          context, position, _response[position]);
                     return voiceConversationList(
                         context, position, _response[position]);
                   },
@@ -552,23 +639,37 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               padding: EdgeInsets.only(bottom: 5.0),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.emoji_emotions_rounded,
-                      color: Colors.orangeAccent,
-                      size: 30.0,
-                    ),
-                    onPressed: () {
-                      //Close the keyboard
-                      SystemChannels.textInput.invokeMethod('TextInput.hide');
+                  Container(
+                    margin: EdgeInsets.only(left: 10.0, right: 10.0),
+                    child: GestureDetector(
+                      child: const Icon(
+                        Icons.emoji_emotions_rounded,
+                        color: Colors.orangeAccent,
+                      ),
+                      onTap: () {
+                        //Close the keyboard
+                        SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-                      if (mounted) {
-                        setState(() {
-                          _chatBoxHeight -= 50;
-                          _showEmojiPicker = true;
-                        });
-                      }
-                    },
+                        if (mounted) {
+                          setState(() {
+                            _chatBoxHeight -= 50;
+                            _showEmojiPicker = true;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(left: 5.0, right: 10.0),
+                    child: GestureDetector(
+                      child: const Icon(
+                        Entypo.link,
+                        color: Colors.lightBlue,
+                      ),
+                      onTap: () async {
+                        _showChoices();
+                      },
+                    ),
                   ),
                   Container(
                       width: MediaQuery.of(context).size.width * 0.65,
@@ -629,20 +730,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       )),
                   Expanded(
                     child: IconButton(
-                      icon: Icon(
-                        Icons.more_vert,
-                        size: 30.0,
-                        color: Colors.brown,
-                      ),
-                      onPressed: () {
-                        print("Options Pressed");
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: IconButton(
                       icon: _iconChanger ? _voiceIcon : _senderIcon,
-                      onPressed: _iconChanger ? _voiceSend : _messageSend,
+                      onPressed: _iconChanger ? _voiceSend : _textSend,
                     ),
                   ),
                   SizedBox(
@@ -784,116 +873,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         ),
                       ),
                     GestureDetector(
-                        child: Icon(
-                          index == _lastAudioPlayingIndex
-                              ? _iconData
-                              : Icons.play_arrow_rounded,
-                          color: Color.fromRGBO(10, 255, 30, 1),
-                          size: 35.0,
-                        ),
-                        onLongPress: () async {
-                          if (_justAudioPlayer.playing) {
-                            await _justAudioPlayer.stop();
-                            if (mounted) {
-                              setState(() {
-                                print('Present 7');
-                                print('Audio Play Completed');
-                                _justAudioPlayer.stop();
-                                if (mounted) {
-                                  setState(() {
-                                    _loadingTime = '0:00';
-                                    _iconData = Icons.play_arrow_rounded;
-                                  });
-                                }
-                              });
-                            }
-                          }
-                        },
-                        onTap: () async {
-                          _justAudioPlayer.positionStream.listen((event) {
-                            print("Going Duration: $event");
-
-                            if (mounted) {
-                              setState(() {
-                                _currAudioPlayingTime =
-                                    event.inMicroseconds.ceilToDouble();
-                                _loadingTime =
-                                    '${event.inMinutes} : ${event.inSeconds}';
-                              });
-                            }
-                          });
-
-                          _justAudioPlayer.playerStateStream.listen((event) {
-                            if (event.processingState ==
-                                ProcessingState.completed) {
-                              print('Present 7');
-                              print('Audio Play Completed');
-                              _justAudioPlayer.stop();
-                              if (mounted) {
-                                setState(() {
-                                  _loadingTime = '0:00';
-                                  _iconData = Icons.play_arrow_rounded;
-                                });
-                              }
-                            }
-                          });
-
-                          if (_lastAudioPlayingIndex != index) {
-                            print('Present 1');
-                            await _justAudioPlayer
-                                .setFilePath(_chatContainer[index].keys.first);
-
-                            if (mounted) {
-                              setState(() {
-                                _lastAudioPlayingIndex = index;
-                                _totalDuration =
-                                    '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
-                                _iconData = Icons.pause;
-                              });
-                            }
-
-                            await _justAudioPlayer.play();
-                          } else {
-                            print('Present 2');
-                            print(_justAudioPlayer.processingState);
-                            if (_justAudioPlayer.processingState ==
-                                ProcessingState.idle) {
-                              await _justAudioPlayer.setFilePath(
-                                  _chatContainer[index].keys.first);
-
-                              if (mounted) {
-                                setState(() {
-                                  _lastAudioPlayingIndex = index;
-                                  _totalDuration =
-                                      '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
-                                  _iconData = Icons.pause;
-                                });
-                              }
-
-                              await _justAudioPlayer.play();
-                            } else if (_justAudioPlayer.playing) {
-                              print('Present 6');
-                              if (mounted) {
-                                setState(() {
-                                  _iconData = Icons.play_arrow_rounded;
-                                });
-                              }
-
-                              await _justAudioPlayer.pause();
-                            } else if (_justAudioPlayer.processingState ==
-                                ProcessingState.ready) {
-                              if (mounted) {
-                                setState(() {
-                                  _iconData = Icons.pause;
-                                });
-                              }
-
-                              print('Present 5');
-                              await _justAudioPlayer.play();
-                            } else if (_justAudioPlayer.processingState ==
-                                ProcessingState.completed) {}
-                          }
-                        }),
+                      onLongPress: () => chatMicrophoneOnLongPressAction(),
+                      onTap: () => chatMicrophoneOnTapAction(index),
+                      child: Icon(
+                        index == _lastAudioPlayingIndex
+                            ? _iconData
+                            : Icons.play_arrow_rounded,
+                        color: Color.fromRGBO(10, 255, 30, 1),
+                        size: 35.0,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(
@@ -988,7 +977,138 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  _messageSend() async {
+  Widget imageConversationList(
+      BuildContext context, int index, bool _responseValue) {
+
+    print(_chatContainer[index].values.first);
+
+    return Column(
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height * 0.3,
+          margin: _responseValue
+              ? EdgeInsets.only(
+                  right: MediaQuery.of(context).size.width / 3,
+                  left: 5.0,
+                  top: 30.0,
+                )
+              : EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width / 3,
+                  right: 5.0,
+                  top: 15.0,
+                ),
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+          child: OpenContainer(
+            openColor: Color.fromRGBO(60, 80, 100, 1),
+            closedColor: _responseValue
+                ? Color.fromRGBO(60, 80, 100, 1)
+                : Color.fromRGBO(102, 102, 255, 1),
+            middleColor: Color.fromRGBO(60, 80, 100, 1),
+            closedElevation: 0.0,
+            closedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20.0),
+                topLeft: Radius.circular(20.0),
+                bottomRight: _chatContainer[index].values.first.split('+')[1] != '' ?Radius.circular(20.0): Radius.circular(0.0),
+                bottomLeft: _chatContainer[index].values.first.split('+')[1] != '' ?Radius.circular(20.0): Radius.circular(0.0),
+              ),
+            ),
+            transitionDuration: Duration(
+              milliseconds: 900,
+            ),
+            transitionType: ContainerTransitionType.fadeThrough,
+            openBuilder: (context, openWidget) {
+              return PreviewImageScreen(
+                imageFile: File(_chatContainer[index].keys.first),
+              );
+            },
+            closedBuilder: (context, closeWidget) => Container(
+              alignment: Alignment.center,
+              child: PhotoView(
+                imageProvider:
+                    FileImage(File(_chatContainer[index].keys.first)),
+                loadingBuilder: (context, event) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+                enableRotation: true,
+                minScale: 0.2,
+              ),
+            ),
+          ),
+        ),
+        if(_chatContainer[index].values.first.split('+')[1] != '')Scrollbar(
+          showTrackOnHover: true,
+          thickness: 10.0,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            //height: 60.0,
+            padding: const EdgeInsets.fromLTRB(
+              10.0,
+              5.0,
+              10.0,
+              5.0,
+            ),
+            margin: _responseValue
+                ? EdgeInsets.only(
+                    right: MediaQuery.of(context).size.width / 3,
+                    left: 5.0,
+                    //top: 5.0,
+                  )
+                : EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 3,
+                    right: 5.0,
+                    //top: 5.0,
+                  ),
+            alignment:
+                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(20.0),
+              ),
+              color: _responseValue
+                  ? Color.fromRGBO(60, 80, 100, 1)
+                  : Color.fromRGBO(102, 102, 255, 1),
+            ),
+            child: Center(
+              child: Text(
+                _chatContainer[index].values.first.split('+')[1],
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontFamily: 'Lora',
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Container(
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+          margin: _responseValue
+              ? EdgeInsets.only(
+                  left: 5.0,
+                  bottom: 5.0,
+                  top: 5.0,
+                )
+              : EdgeInsets.only(
+                  right: 5.0,
+                  bottom: 5.0,
+                  top: 5.0,
+                ),
+          child: Text(
+            _chatContainer[index].values.first.split('+')[0],
+            style: TextStyle(color: Colors.lightBlue),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _textSend() async {
     try {
       print("Send Pressed");
       if (_inputTextController.text.isNotEmpty) {
@@ -1156,11 +1276,381 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
+  void _imageSend(File _takeImageFile, {String extraText = ''}) async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    final String _imageDownLoadUrl =
+        await _management.uploadMediaToStorage(_takeImageFile, context);
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+        .doc("generation_users/$_senderMail")
+        .get();
+
+    // Initialize Temporary List
+    List<dynamic> _sendingMessages = [];
+
+    // Store Updated Sending Messages List
+    _sendingMessages = documentSnapShot.data()['connections']
+        [FirebaseAuth.instance.currentUser.email.toString()];
+
+    if (mounted) {
+      if (_sendingMessages == null) _sendingMessages = [];
+
+      setState(() {
+        // Add data to temporary Storage of Sending
+        _sendingMessages.add({
+          _imageDownLoadUrl:
+              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Image}+$extraText',
+        });
+
+        // Add Data to the UI related all Chat Container
+        _chatContainer.add({
+          _takeImageFile.path:
+              '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
+        });
+
+        _response
+            .add(false); // Add the data _response to chat related container
+
+        _mediaTypes.add(MediaTypes.Image); // Add MediaType
+
+        _inputTextController.clear(); // Get Clear the InputBox
+      });
+
+      // Data Store in Local Storage
+      await _localStorageHelper.insertNewMessages(
+          widget._userName,
+          _takeImageFile.path,
+          MediaTypes.Image,
+          0,
+          _chatContainer.last.values.first.toString());
+
+      // Data Store in Firestore
+      _management.addConversationMessages(this._senderMail, _sendingMessages);
+    }
+  }
+
+  void chatMicrophoneOnTapAction(int index) async {
+    _justAudioPlayer.positionStream.listen((event) {
+      print("Going Duration: $event");
+
+      if (mounted) {
+        setState(() {
+          _currAudioPlayingTime = event.inMicroseconds.ceilToDouble();
+          _loadingTime = '${event.inMinutes} : ${event.inSeconds}';
+        });
+      }
+    });
+
+    _justAudioPlayer.playerStateStream.listen((event) {
+      if (event.processingState == ProcessingState.completed) {
+        print('Present 7');
+        print('Audio Play Completed');
+        _justAudioPlayer.stop();
+        if (mounted) {
+          setState(() {
+            _loadingTime = '0:00';
+            _iconData = Icons.play_arrow_rounded;
+          });
+        }
+      }
+    });
+
+    if (_lastAudioPlayingIndex != index) {
+      print('Present 1');
+      await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
+
+      if (mounted) {
+        setState(() {
+          _lastAudioPlayingIndex = index;
+          _totalDuration =
+              '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+          _iconData = Icons.pause;
+        });
+      }
+
+      await _justAudioPlayer.play();
+    } else {
+      print('Present 2');
+      print(_justAudioPlayer.processingState);
+      if (_justAudioPlayer.processingState == ProcessingState.idle) {
+        await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
+
+        if (mounted) {
+          setState(() {
+            _lastAudioPlayingIndex = index;
+            _totalDuration =
+                '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+            _iconData = Icons.pause;
+          });
+        }
+
+        await _justAudioPlayer.play();
+      } else if (_justAudioPlayer.playing) {
+        print('Present 6');
+        if (mounted) {
+          setState(() {
+            _iconData = Icons.play_arrow_rounded;
+          });
+        }
+
+        await _justAudioPlayer.pause();
+      } else if (_justAudioPlayer.processingState == ProcessingState.ready) {
+        if (mounted) {
+          setState(() {
+            _iconData = Icons.pause;
+          });
+        }
+
+        print('Present 5');
+        await _justAudioPlayer.play();
+      } else if (_justAudioPlayer.processingState ==
+          ProcessingState.completed) {}
+    }
+  }
+
   void _downLoadOnReceiveProgress(int countReceive, int totalReceive) {
     if (mounted) {
       setState(() {
         _audioDownloadProgress = countReceive / totalReceive;
       });
+    }
+  }
+
+  void chatMicrophoneOnLongPressAction() async {
+    if (_justAudioPlayer.playing) {
+      await _justAudioPlayer.stop();
+      if (mounted) {
+        setState(() {
+          print('Present 7');
+          print('Audio Play Completed');
+          _justAudioPlayer.stop();
+          if (mounted) {
+            setState(() {
+              _loadingTime = '0:00';
+              _iconData = Icons.play_arrow_rounded;
+            });
+          }
+        });
+      }
+    }
+  }
+
+  void _showChoices() {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              elevation: 0.3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              title: Center(
+                child: Text(
+                  'Choice',
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                    fontSize: 20.0,
+                    fontFamily: 'Lora',
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+              content: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 2.7,
+                child: ListView(
+                  children: [
+                    CircleList(
+                      initialAngle: 55,
+                      outerRadius: MediaQuery.of(context).size.width / 3.2,
+                      innerRadius: MediaQuery.of(context).size.width / 10,
+                      showInitialAnimation: true,
+                      innerCircleColor: Color.fromRGBO(34, 48, 60, 1),
+                      outerCircleColor: Color.fromRGBO(0, 0, 0, 0.1),
+                      origin: Offset(0, 0),
+                      rotateMode: RotateMode.allRotate,
+                      centerWidget: Center(
+                        child: Text(
+                          "G",
+                          style: TextStyle(
+                            color: Colors.lightBlue,
+                            fontSize: 40.0,
+                            fontFamily: 'Lora',
+                          ),
+                        ),
+                      ),
+                      children: <Widget>[
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            child: Icon(
+                              Icons.camera_alt_rounded,
+                              color: Colors.lightGreen,
+                            ),
+                            onTap: () async {
+                              await _connectionExtraTextManagement();
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            child: Icon(
+                              Icons.image_rounded,
+                              color: Colors.lightGreen,
+                            ),
+                            onTap: () async {
+                              print("Take Image");
+
+                              final PickedFile pickedFile =
+                                  await _picker.getImage(
+                                      source: ImageSource.gallery,
+                                      imageQuality: 50);
+
+                              if (pickedFile != null) {
+                                print(pickedFile.path);
+                              }
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            child: Icon(
+                              Entypo.star,
+                              color: Colors.lightGreen,
+                            ),
+                            onTap: () {},
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            onTap: () async {},
+                            child: Icon(
+                              Icons.location_on_rounded,
+                              color: Colors.lightGreen,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ));
+  }
+
+  Future<void> _connectionExtraTextManagement() async {
+    final PickedFile pickedFile = await _picker.getImage(
+      source: ImageSource.camera,
+      imageQuality: 50,
+    );
+
+    if (pickedFile != null) {
+      Navigator.pop(context);
+      print(pickedFile.path);
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(
+              40.0,
+            )),
+          ),
+          title: Center(
+            child: Text(
+              'Something About Picture',
+              style: TextStyle(
+                color: Colors.lightBlue,
+                fontSize: 14.0,
+                fontFamily: 'Lora',
+                fontStyle: FontStyle.italic,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _mediaTextController,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                  decoration: InputDecoration(
+                      labelText: 'Type Here',
+                      labelStyle: TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'Lora',
+                        letterSpacing: 1.0,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlue))),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.send_rounded,
+                    color: Colors.green,
+                    size: 30.0,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _imageSend(File(pickedFile.path),
+                        extraText: _mediaTextController.text);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
   }
 }

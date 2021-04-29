@@ -13,7 +13,7 @@ class _SearchState extends State<Search> {
 
   String searchArgument;
 
-  TextEditingController searchUser = TextEditingController();
+  final TextEditingController searchUser = TextEditingController();
   QuerySnapshot searchResultSnapshot;
 
   bool isLoading = false;

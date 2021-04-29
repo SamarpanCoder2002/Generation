@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/FrontEnd/Services/auth_error_msg_toast.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+
 
 class PreviewImageScreen extends StatefulWidget {
   final File imageFile;
@@ -15,7 +17,7 @@ class PreviewImageScreen extends StatefulWidget {
   PreviewImageScreen(
       {@required this.imageFile,
       this.purpose = 'contacts',
-      @required this.allConnectionUserName});
+      this.allConnectionUserName});
 
   @override
   _PreviewImageScreenState createState() => _PreviewImageScreenState();
@@ -49,12 +51,12 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      floatingActionButton: floatingActionButtonCall(),
+      backgroundColor: Color.fromRGBO(0, 0, 0, 1),
+      floatingActionButton: widget.purpose == 'status' ? floatingActionButtonCall() : null,
       body: ModalProgressHUD(
         inAsyncCall: _isLoading,
-        color: Color.fromRGBO(50, 20, 40, 0.8),
-        progressIndicator: CircularProgressIndicator(
+        color: const Color.fromRGBO(50, 20, 40, 0.8),
+        progressIndicator: const CircularProgressIndicator(
           backgroundColor: Colors.black87,
         ),
         child: Container(
