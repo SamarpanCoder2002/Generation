@@ -324,14 +324,7 @@ class _ActivityViewState extends State<ActivityView>
             ),
           )),
           enableRotation: true,
-          minScale: 0.5,
         ),
-        // Center(
-        //   child: Image.file(
-        //     File(imagePath),
-        //   ),
-        //
-        // ),
         bottomTextActivityView(extraActivityText),
       ],
     );

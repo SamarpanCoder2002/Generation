@@ -1651,10 +1651,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     size: 30.0,
                   ),
                   onPressed: () {
-                    _mediaTextController.clear();
                     Navigator.pop(context);
                     _imageSend(File(pickedFile.path),
                         extraText: _mediaTextController.text);
+                    _mediaTextController.clear();
                   },
                 ),
               ),
