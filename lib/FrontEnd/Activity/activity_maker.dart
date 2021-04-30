@@ -136,6 +136,7 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                         MaterialPageRoute(
                           builder: (context) => PreviewImageScreen(
                             imageFile: File(pickedFile.path),
+                            purpose: 'status',
                             allConnectionUserName: allConnectionsUserName,
                           ),
                         ),

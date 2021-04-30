@@ -17,10 +17,12 @@ import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart'
 import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
@@ -152,6 +154,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   _mediaTypes.add(MediaTypes.Voice);
                 } else if (messageContainer[3] == MediaTypes.Image.toString()) {
                   _mediaTypes.add(MediaTypes.Image);
+                } else if (messageContainer[3] == MediaTypes.Video.toString()) {
+                  _mediaTypes.add(MediaTypes.Video);
                 }
 
                 if (mounted) {
@@ -297,7 +301,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                               _chatContainer.add({
                                 // Take Messages in Local Container
-                                '${recordingStorage.path}$currTime.mp3':
+                                '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}':
                                     '${_incomingInformationContainer[0]}',
                               });
 
@@ -308,7 +312,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           // Download the voice from the Firebase Storage and delete from storage permanently
                           await _dio
                               .download(everyMessage.keys.first.toString(),
-                                  '${recordingStorage.path}$currTime.mp3',
+                                  '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
                                   onReceiveProgress: _downLoadOnReceiveProgress)
                               .whenComplete(() async {
                             await _management.deleteFilesFromFirebaseStorage(
@@ -316,12 +320,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           });
 
                           print(
-                              'Recorded Path: ${recordingStorage.path}$currTime.mp3');
+                              'Recorded Path: ${recordingStorage.path}$currTime${_incomingInformationContainer[2]}');
 
                           // Store Data in local Storage
                           _localStorageHelper.insertNewMessages(
                               widget._userName,
-                              '${recordingStorage.path}$currTime.mp3',
+                              '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
                               MediaTypes.Voice,
                               1,
                               _incomingInformationContainer[0]);
@@ -335,73 +339,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         break;
 
                       case 'MediaTypes.Image':
-                        PermissionStatus storagePermissionStatus =
-                            await Permission.storage
-                                .request(); // Take User Permission To Take Voice
-
-                        if (storagePermissionStatus.isGranted) {
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                          }
-
-                          final Directory directory =
-                              await getExternalStorageDirectory(); // Find Directory To Storage
-
-                          final recordingStorage = await Directory(
-                                  '${directory.path}/Images/')
-                              .create(); // Create New Folder about the desire location
-
-                          final String currTime = DateTime.now()
-                              .toString()
-                              .split(' ')
-                              .join('_'); // Current Time Take
-
-                          // Download the voice from the Firebase Storage and delete from storage permanently
-                          await _dio
-                              .download(
-                            everyMessage.keys.first.toString(),
-                            '${recordingStorage.path}$currTime.jpg',
-                            //onReceiveProgress: _downLoadOnReceiveProgress
-                          )
-                              .whenComplete(() async {
-                            await _management.deleteFilesFromFirebaseStorage(
-                                everyMessage.keys.first.toString());
-                          });
-
-                          print(
-                              'Recorded Path: ${recordingStorage.path}$currTime.jpg');
-
-                          // Store Data in local Storage
-                          _localStorageHelper.insertNewMessages(
-                              widget._userName,
-                              '${recordingStorage.path}$currTime.jpg',
-                              MediaTypes.Image,
-                              1,
-                              '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}');
-
-                          if (mounted) {
-                            setState(() {
-                              _mediaTypes
-                                  .add(MediaTypes.Image); // add New Media Type
-
-                              _chatContainer.add({
-                                // Take Messages in Local Container
-                                '${recordingStorage.path}$currTime.jpg':
-                                    '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}',
-                              });
-
-                              _response.add(true); // Chat Position Status Added
-                            });
-                          }
-
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                        }
+                        _manageMedia(
+                            _incomingInformationContainer, everyMessage);
+                        break;
+                      case 'MediaTypes.Video':
+                        _manageMedia(
+                            _incomingInformationContainer, everyMessage);
                         break;
                     }
                   });
@@ -427,6 +370,91 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 title: Text("FireStore Problem"),
                 content: Text(e.toString()),
               ));
+    }
+  }
+
+  void _manageMedia(
+      List<String> _incomingInformationContainer, dynamic everyMessage) async {
+    print('Samarpan: $_incomingInformationContainer, $everyMessage');
+
+    PermissionStatus storagePermissionStatus = await Permission.storage
+        .request(); // Take User Permission To Take Voice
+
+    if (storagePermissionStatus.isGranted) {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
+      final Directory directory =
+          await getExternalStorageDirectory(); // Find Directory To Storage
+
+      Directory _newDirectory;
+
+      if (_incomingInformationContainer[1] == MediaTypes.Image.toString())
+        _newDirectory = await Directory('${directory.path}/Images/')
+            .create(); // Create New Folder about the desire location
+      else
+        _newDirectory = await Directory('${directory.path}/Videos/')
+            .create(); // Create New Folder about the desire location
+
+      print('New Directory: ${_newDirectory.path}');
+
+      final String currTime =
+          DateTime.now().toString().split(' ').join('_'); // Current Time Take
+
+      // Download the voice from the Firebase Storage and delete from storage permanently
+      await _dio
+          .download(
+        everyMessage.keys.first.toString(),
+        _incomingInformationContainer[1] == MediaTypes.Image.toString()
+            ? '${_newDirectory.path}$currTime.jpg'
+            : '${_newDirectory.path}$currTime.mp4',
+        //onReceiveProgress: _downLoadOnReceiveProgress
+      )
+          .whenComplete(() async {
+        await _management
+            .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+      });
+
+      print('Recorded Path: ${_newDirectory.path}$currTime');
+
+      // Store Data in local Storage
+      _localStorageHelper.insertNewMessages(
+          widget._userName,
+          _incomingInformationContainer[1] == MediaTypes.Image.toString()
+              ? '${_newDirectory.path}$currTime.jpg'
+              : '${_newDirectory.path}$currTime.mp4',
+          _incomingInformationContainer[1] == MediaTypes.Image.toString()
+              ? MediaTypes.Image
+              : MediaTypes.Video,
+          1,
+          '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}');
+
+      if (mounted) {
+        setState(() {
+          _incomingInformationContainer[1] == MediaTypes.Image.toString()
+              ? _mediaTypes.add(MediaTypes.Image)
+              : _mediaTypes.add(MediaTypes.Video); // add New Media Type
+
+          _chatContainer.add({
+            // Take Messages in Local Container
+            _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                    ? '${_newDirectory.path}$currTime.jpg'
+                    : '${_newDirectory.path}$currTime.mp4':
+                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}',
+          });
+
+          _response.add(true); // Chat Position Status Added
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -548,8 +576,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               onSurface: Theme.of(context).primaryColor,
             ),
             child: Text(
-              widget._userName,
-              style: TextStyle(color: Colors.white, fontSize: 20.0),
+              widget._userName.length <= 10
+                  ? widget._userName
+                  : '${widget._userName.replaceRange(10, widget._userName.length, '...')}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20.0,
+                fontFamily: 'Lora',
+                letterSpacing: 1.0,
+              ),
             ),
             onPressed: () {
               print("Name Clicked");
@@ -625,7 +660,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     if (_mediaTypes[position] == MediaTypes.Text)
                       return textConversationList(
                           context, position, _response[position]);
-                    else if (_mediaTypes[position] == MediaTypes.Image)
+                    else if (_mediaTypes[position] == MediaTypes.Image ||
+                        _mediaTypes[position] == MediaTypes.Video)
                       return imageConversationList(
                           context, position, _response[position]);
                     return voiceConversationList(
@@ -731,7 +767,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   Expanded(
                     child: IconButton(
                       icon: _iconChanger ? _voiceIcon : _senderIcon,
-                      onPressed: _iconChanger ? _voiceSend : _textSend,
+                      onPressed: _iconChanger ? _voiceController : _textSend,
                     ),
                   ),
                   SizedBox(
@@ -998,59 +1034,95 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
           alignment:
               _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-          child: OpenContainer(
-            openColor: Color.fromRGBO(60, 80, 100, 1),
-            closedColor: _responseValue
-                ? Color.fromRGBO(60, 80, 100, 1)
-                : Color.fromRGBO(102, 102, 255, 1),
-            middleColor: Color.fromRGBO(60, 80, 100, 1),
-            closedElevation: 0.0,
-            closedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(20.0),
-                topLeft: Radius.circular(20.0),
-                bottomRight:
-                    _chatContainer[index].values.first.split('+')[1] == ''
-                        ? Radius.circular(20.0)
-                        : Radius.circular(0.0),
-                bottomLeft:
-                    _chatContainer[index].values.first.split('+')[1] == ''
-                        ? Radius.circular(20.0)
-                        : Radius.circular(0.0),
-              ),
-            ),
-            transitionDuration: Duration(
-              milliseconds: 900,
-            ),
-            transitionType: ContainerTransitionType.fadeThrough,
-            openBuilder: (context, openWidget) {
-              return PreviewImageScreen(
-                imageFile: File(_chatContainer[index].keys.first),
-              );
-            },
-            closedBuilder: (context, closeWidget) => Container(
-              alignment: Alignment.center,
-              child: PhotoView(
-                imageProvider:
-                    FileImage(File(_chatContainer[index].keys.first)),
-                loadingBuilder: (context, event) => Center(
-                  child: CircularProgressIndicator(),
-                ),
-                errorBuilder: (context, obj, stackTrace) => Center(
-                    child: Text(
-                  'Image not Found',
-                  style: TextStyle(
-                    fontSize: 23.0,
-                    color: Colors.red,
-                    fontFamily: 'Lora',
-                    letterSpacing: 1.0,
+          child: _mediaTypes[index] == MediaTypes.Image
+              ? OpenContainer(
+                  openColor: Color.fromRGBO(60, 80, 100, 1),
+                  closedColor: _responseValue
+                      ? Color.fromRGBO(60, 80, 100, 1)
+                      : Color.fromRGBO(102, 102, 255, 1),
+                  middleColor: Color.fromRGBO(60, 80, 100, 1),
+                  closedElevation: 0.0,
+                  closedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20.0),
+                      topLeft: Radius.circular(20.0),
+                      bottomRight:
+                          _chatContainer[index].values.first.split('+')[1] == ''
+                              ? Radius.circular(20.0)
+                              : Radius.circular(0.0),
+                      bottomLeft:
+                          _chatContainer[index].values.first.split('+')[1] == ''
+                              ? Radius.circular(20.0)
+                              : Radius.circular(0.0),
+                    ),
                   ),
-                )),
-                enableRotation: true,
-                minScale: 0.5,
-              ),
-            ),
-          ),
+                  transitionDuration: Duration(
+                    milliseconds: 900,
+                  ),
+                  transitionType: ContainerTransitionType.fadeThrough,
+                  openBuilder: (context, openWidget) {
+                    return PreviewImageScreen(
+                      imageFile: File(_chatContainer[index].keys.first),
+                    );
+                  },
+                  closedBuilder: (context, closeWidget) => Container(
+                    alignment: Alignment.center,
+                    child: PhotoView(
+                      imageProvider:
+                          FileImage(File(_chatContainer[index].keys.first)),
+                      loadingBuilder: (context, event) => Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorBuilder: (context, obj, stackTrace) => Center(
+                          child: Text(
+                        'Image not Found',
+                        style: TextStyle(
+                          fontSize: 23.0,
+                          color: Colors.red,
+                          fontFamily: 'Lora',
+                          letterSpacing: 1.0,
+                        ),
+                      )),
+                      enableRotation: true,
+                      minScale: 0.5,
+                    ),
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image:
+                          ExactAssetImage('assets/images/sam.jpg', scale: 10.0),
+                    ),
+                    color: _responseValue
+                        ? Color.fromRGBO(60, 80, 100, 1)
+                        : Color.fromRGBO(102, 102, 255, 1),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20.0),
+                      topLeft: Radius.circular(20.0),
+                      bottomRight:
+                          _chatContainer[index].values.first.split('+')[1] == ''
+                              ? Radius.circular(20.0)
+                              : Radius.circular(0.0),
+                      bottomLeft:
+                          _chatContainer[index].values.first.split('+')[1] == ''
+                              ? Radius.circular(20.0)
+                              : Radius.circular(0.0),
+                    ),
+                  ),
+                  child: Center(
+                    child: IconButton(
+                      iconSize: 100.0,
+                      icon: Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                      ),
+                      onPressed: () async {
+                        await OpenFile.open(_chatContainer[index].keys.first);
+                      },
+                    ),
+                  ),
+                ),
         ),
         if (_chatContainer[index].values.first.split('+')[1] != '')
           Scrollbar(
@@ -1197,7 +1269,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  void _voiceSend() async {
+  void _voiceController() async {
     if (!_isMicrophonePermissionGranted || _flutterSoundRecorder == null) {
       _permissionSetForRecording();
     }
@@ -1226,73 +1298,80 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       print("recordedFilePath: $recordedFilePath");
 
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
-        print("Start");
-      }
-
-      final String downloadUrl = await _management.uploadMediaToStorage(
-          File(recordedFilePath), context);
-      print("Voice Download Url: $downloadUrl");
-
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        print("End");
-      }
-
-      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
-          .doc("generation_users/$_senderMail")
-          .get();
-
-      // Initialize Temporary List
-      List<dynamic> sendingMessages = [];
-
-      // Store Updated sending messages list
-      sendingMessages = documentSnapShot.data()['connections']
-          [FirebaseAuth.instance.currentUser.email.toString()];
-
-      if (mounted) {
-        if (sendingMessages == null) sendingMessages = [];
-
-        setState(() {
-          // Add data to temporary Storage of Sending
-          sendingMessages.add({
-            downloadUrl:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}',
-          });
-
-          // Add Data to the UI related all chat Container
-          _chatContainer.add({
-            recordedFilePath: '${DateTime.now().hour}:${DateTime.now().minute}',
-          });
-
-          _response
-              .add(false); // Add the data _response to chat related container
-
-          _mediaTypes.add(MediaTypes.Voice); // Add MediaType
-
-          _inputTextController.clear(); // Get Clear the InputBox
-        });
-
-        // Data Store in Local Storage
-        await _localStorageHelper.insertNewMessages(
-            widget._userName,
-            recordedFilePath,
-            MediaTypes.Voice,
-            0,
-            _chatContainer.last.values.first.toString());
-
-        // Data Store in Firestore
-        _management.addConversationMessages(this._senderMail, sendingMessages);
-      }
+      _voiceSend(recordedFilePath);
     }
   }
 
-  void _imageSend(File _takeImageFile, {String extraText = ''}) async {
+  void _voiceSend(String recordedFilePath,
+      {String audioExtension = '.mp3'}) async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+      print("Start");
+    }
+
+    final String downloadUrl =
+        await _management.uploadMediaToStorage(File(recordedFilePath), context);
+    print("Voice Download Url: $downloadUrl");
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+      print("End");
+    }
+
+    final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+        .doc("generation_users/$_senderMail")
+        .get();
+
+    // Initialize Temporary List
+    List<dynamic> sendingMessages = [];
+
+    // Store Updated sending messages list
+    sendingMessages = documentSnapShot.data()['connections']
+        [FirebaseAuth.instance.currentUser.email.toString()];
+
+    if (mounted) {
+      if (sendingMessages == null) sendingMessages = [];
+
+      setState(() {
+        // Add data to temporary Storage of Sending
+        sendingMessages.add({
+          downloadUrl:
+              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension',
+        });
+
+        // Add Data to the UI related all chat Container
+        _chatContainer.add({
+          recordedFilePath: '${DateTime.now().hour}:${DateTime.now().minute}',
+        });
+
+        _response
+            .add(false); // Add the data _response to chat related container
+
+        _mediaTypes.add(MediaTypes.Voice); // Add MediaType
+
+        _inputTextController.clear(); // Get Clear the InputBox
+      });
+
+      // Data Store in Local Storage
+      await _localStorageHelper.insertNewMessages(
+          widget._userName,
+          recordedFilePath,
+          MediaTypes.Voice,
+          0,
+          _chatContainer.last.values.first.toString());
+
+      // Data Store in Firestore
+      _management.addConversationMessages(this._senderMail, sendingMessages);
+    }
+  }
+
+  void _imageSend(File _takeImageFile,
+      {MediaTypes mediaTypesForSend = MediaTypes.Image,
+      String extraText = ''}) async {
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -1326,7 +1405,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         // Add data to temporary Storage of Sending
         _sendingMessages.add({
           _imageDownLoadUrl:
-              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Image}+$extraText',
+              '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
         });
 
         // Add Data to the UI related all Chat Container
@@ -1338,7 +1417,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _response
             .add(false); // Add the data _response to chat related container
 
-        _mediaTypes.add(MediaTypes.Image); // Add MediaType
+        _mediaTypes.add(mediaTypesForSend); // Add MediaType
 
         _inputTextController.clear(); // Get Clear the InputBox
       });
@@ -1347,7 +1426,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       await _localStorageHelper.insertNewMessages(
           widget._userName,
           _takeImageFile.path,
-          MediaTypes.Image,
+          mediaTypesForSend,
           0,
           _chatContainer.last.values.first.toString());
 
@@ -1526,23 +1605,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               await _connectionExtraTextManagement(
                                   ImageSource.camera);
                             },
-                          ),
-                        ),
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(
-                                color: Colors.blue,
-                                width: 3,
-                              )),
-                          child: GestureDetector(
-                            child: Icon(
-                              Icons.image_rounded,
-                              color: Colors.lightGreen,
-                            ),
-                            onTap: () async {
+                            onLongPress: () async {
                               await _connectionExtraTextManagement(
                                   ImageSource.gallery);
                             },
@@ -1559,10 +1622,39 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               )),
                           child: GestureDetector(
                             child: Icon(
-                              Entypo.star,
+                              Icons.music_note_rounded,
                               color: Colors.lightGreen,
                             ),
-                            onTap: () {},
+                            onTap: () async {
+                              final List<String> _allowedExtensions = const [
+                                'mp3',
+                                'm4a',
+                                'wav',
+                                'ogg',
+                              ];
+
+                              final FilePickerResult _audioFilePickerResult =
+                                  await FilePicker.platform.pickFiles(
+                                type: FileType.audio,
+                              );
+
+                              Navigator.pop(context);
+
+                              if (_audioFilePickerResult != null) {
+                                _audioFilePickerResult.files.forEach((element) {
+                                  print('Name: ${element.path}');
+                                  print('Extension: ${element.extension}');
+                                  if (_allowedExtensions
+                                      .contains(element.extension)) {
+                                    _voiceSend(element.path,
+                                        audioExtension:
+                                            '.${element.extension}');
+                                  } else {
+                                    _voiceSend(element.path);
+                                  }
+                                });
+                              }
+                            },
                           ),
                         ),
                         Container(
@@ -1582,6 +1674,30 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             ),
                           ),
                         ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            onTap: () async {
+                              //final PickedFile pickedFile = await _picker.get
+                            },
+                            onLongPress: () async {
+                              await _connectionExtraTextManagement(
+                                  ImageSource.gallery,
+                                  type: 'video');
+                            },
+                            child: Icon(
+                              Icons.video_collection,
+                              color: Colors.lightGreen,
+                            ),
+                          ),
+                        ),
                       ],
                     )
                   ],
@@ -1590,15 +1706,26 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ));
   }
 
-  Future<void> _connectionExtraTextManagement(ImageSource imageSource) async {
-    final PickedFile pickedFile = await _picker.getImage(
-      source: imageSource,
-      imageQuality: 50,
-    );
+  Future<void> _connectionExtraTextManagement(ImageSource imageSource,
+      {String type = 'image'}) async {
+    PickedFile _pickedFile;
+    FilePickerResult _videoFilePickerResult;
 
-    if (pickedFile != null) {
+    if (type == 'image')
+      _pickedFile = await _picker.getImage(
+        source: imageSource,
+        imageQuality: 50,
+      );
+    else
+      _videoFilePickerResult = await FilePicker.platform.pickFiles(
+        type: FileType.video,
+        allowMultiple: true,
+        allowCompression: true,
+      );
+
+    if (_pickedFile != null || _videoFilePickerResult != null) {
       Navigator.pop(context);
-      print(pickedFile.path);
+      //print(_pickedFile.path);
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -1652,8 +1779,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    _imageSend(File(pickedFile.path),
-                        extraText: _mediaTextController.text);
+                    if (type == 'image')
+                      _imageSend(File(_pickedFile.path),
+                          extraText: _mediaTextController.text);
+                    else {
+                      _videoFilePickerResult.files.forEach((everyFile) {
+                        _imageSend(File(everyFile.path),
+                            extraText: _mediaTextController.text,
+                            mediaTypesForSend: MediaTypes.Video);
+                      });
+                    }
                     _mediaTextController.clear();
                   },
                 ),

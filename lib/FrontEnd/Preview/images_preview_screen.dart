@@ -7,7 +7,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/FrontEnd/Services/auth_error_msg_toast.dart';
-
+import 'package:photo_view/photo_view.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final File imageFile;
@@ -47,12 +47,12 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(0, 0, 0, 1),
-      floatingActionButton: widget.purpose == 'status' ? floatingActionButtonCall() : null,
+      floatingActionButton:
+          widget.purpose == 'status' ? floatingActionButtonCall() : null,
       body: ModalProgressHUD(
         inAsyncCall: _isLoading,
         color: const Color.fromRGBO(50, 20, 40, 0.8),
@@ -62,8 +62,25 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: Image.file(
-            File(widget.imageFile.path),
+          child: PhotoView(
+            imageProvider: FileImage(
+              File(widget.imageFile.path),
+            ),
+            loadingBuilder: (context, event) => Center(
+              child: CircularProgressIndicator(),
+            ),
+            errorBuilder: (context, obj, stackTrace) => Center(
+                child: Text(
+              'Image not Found',
+              style: TextStyle(
+                fontSize: 23.0,
+                color: Colors.red,
+                fontFamily: 'Lora',
+                letterSpacing: 1.0,
+              ),
+            )),
+            enableRotation: true,
+            minScale: 0.3,
           ),
         ),
       ),
@@ -172,7 +189,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                             _isLoading = false;
                           });
                         }
-                        Navigator.of(context,rootNavigator: true).pop();
+                        Navigator.of(context, rootNavigator: true).pop();
                       }
 
                       showToast("Activity Added", fToast);

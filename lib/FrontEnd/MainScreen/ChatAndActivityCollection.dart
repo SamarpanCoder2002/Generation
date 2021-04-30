@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -316,21 +317,34 @@ class _ChatsAndActivityCollectionState
   Widget connectionsCollection(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-            backgroundColor: const Color.fromRGBO(20, 200, 50, 1),
-            child: Icon(
-              Icons.search_rounded,
-              color: Colors.white,
-              size: 30.0,
-            ),
-            onPressed: () async {
-              print('Search based on Text');
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => Search())); // Navigate to the search Page
-            }),
         backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
+        floatingActionButton: OpenContainer(
+          closedColor: const Color.fromRGBO(20, 200, 50, 1),
+          middleColor: const Color.fromRGBO(34, 48, 60, 1),
+          openColor: const Color.fromRGBO(34, 48, 60, 1),
+          closedShape: CircleBorder(),
+          closedElevation: 15.0,
+          transitionDuration: Duration(
+            milliseconds: 500,
+          ),
+          transitionType: ContainerTransitionType.fadeThrough,
+          openBuilder: (_, __) {
+            return Search();
+          },
+          closedBuilder: (_, __) {
+            return Container(
+              padding: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_rounded,
+                color: Colors.white,
+                size: 37.0,
+              ),
+            );
+          },
+        ),
         body: ModalProgressHUD(
           inAsyncCall: isLoading,
           color: const Color.fromRGBO(0, 0, 0, 0.5),
@@ -355,7 +369,9 @@ class _ChatsAndActivityCollectionState
         left: 10.0,
       ),
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * (1 / 8),
+      height: MediaQuery.of(context).orientation == Orientation.portrait
+          ? MediaQuery.of(context).size.height * (1.5 / 8)
+          : MediaQuery.of(context).size.height * (3 / 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal, // Make ListView Horizontally
         itemCount: _allUserConnectionActivity.length,
@@ -369,58 +385,94 @@ class _ChatsAndActivityCollectionState
   Widget _activityCollectionList(BuildContext context, int index) {
     return Container(
       margin: EdgeInsets.only(right: MediaQuery.of(context).size.width / 18),
-      child: GestureDetector(
-        onTap: () {},
-        child: Stack(
-          children: [
-            OpenContainer(
-              closedColor: const Color.fromRGBO(34, 48, 60, 1),
-              openColor: const Color.fromRGBO(34, 48, 60, 1),
-              middleColor: const Color.fromRGBO(34, 48, 60, 1),
-              closedElevation: 0.0,
-              transitionDuration: Duration(
-                milliseconds: 500,
-              ),
-              transitionType: ContainerTransitionType.fadeThrough,
-              openBuilder: (context, openWidget) {
-                return ActivityView(
-                    takeParticularConnectionUserName:
-                        _allUserConnectionActivity[index]);
-              },
-              closedBuilder: (context, closeWidget) {
-                return CircleAvatar(
-                  backgroundImage: const ExactAssetImage(
-                    "assets/images/sam.jpg",
-                  ),
-                  radius: 50.0,
-                );
-              },
-            ),
-            index == 0 // This is for current user Account
-                ? Padding(
-                    padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * (1 / 8) - 30,
-                      left: 60.0,
+      height: MediaQuery.of(context).size.height * (1.5 / 8),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              OpenContainer(
+                closedColor: const Color.fromRGBO(34, 48, 60, 1),
+                openColor: const Color.fromRGBO(34, 48, 60, 1),
+                middleColor: const Color.fromRGBO(34, 48, 60, 1),
+                closedElevation: 0.0,
+                transitionDuration: Duration(
+                  milliseconds: 500,
+                ),
+                transitionType: ContainerTransitionType.fadeThrough,
+                openBuilder: (context, openWidget) {
+                  return ActivityView(
+                      takeParticularConnectionUserName:
+                          _allUserConnectionActivity[index]);
+                },
+                closedBuilder: (context, closeWidget) {
+                  return CircleAvatar(
+                    backgroundImage: const ExactAssetImage(
+                      "assets/images/sam.jpg",
                     ),
-                    child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.lightBlue,
-                        ),
-                        child: GestureDetector(
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 30.0,
+                    radius: MediaQuery.of(context).orientation ==
+                            Orientation.portrait
+                        ? MediaQuery.of(context).size.height * (1.2 / 8) / 2.5
+                        : MediaQuery.of(context).size.height * (2.5 / 8) / 2.5,
+                  );
+                },
+              ),
+              index == 0 // This is for current user Account
+                  ? Padding(
+                      padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).orientation ==
+                                Orientation.portrait
+                            ? MediaQuery.of(context).size.height * (0.7 / 8) -
+                                10
+                            : MediaQuery.of(context).size.height * (1.5 / 8) -
+                                10,
+                        left: MediaQuery.of(context).orientation ==
+                                Orientation.portrait
+                            ? MediaQuery.of(context).size.width / 3 - 65
+                            : MediaQuery.of(context).size.width / 8 - 15,
+                      ),
+                      child: Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.lightBlue,
                           ),
-                          onTap: () => activityList(
-                              context: context,
-                              allConnectionsUserName: allConnectionsUserName),
-                        )),
-                  )
-                : const SizedBox(),
-          ],
-        ),
+                          child: GestureDetector(
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: MediaQuery.of(context).orientation ==
+                                      Orientation.portrait
+                                  ? MediaQuery.of(context).size.height *
+                                      (1.3 / 8) /
+                                      2.5 *
+                                      (3.5 / 6)
+                                  : MediaQuery.of(context).size.height *
+                                      (1.3 / 8) /
+                                      2,
+                            ),
+                            onTap: () => activityList(
+                                context: context,
+                                allConnectionsUserName: allConnectionsUserName),
+                          )),
+                    )
+                  : const SizedBox(),
+            ],
+          ),
+          Container(
+            alignment: Alignment.center,
+            margin: EdgeInsets.only(
+              top: 7.0,
+            ),
+            child: Text(
+              _allUserConnectionActivity[index].length <= 10
+                  ? _allUserConnectionActivity[index]
+                  : '${_allUserConnectionActivity[index].replaceRange(10, _allUserConnectionActivity[index].length, '...')}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.0,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -428,7 +480,10 @@ class _ChatsAndActivityCollectionState
   Widget _connectionList(BuildContext context) {
     return SafeArea(
         child: Container(
-      margin: const EdgeInsets.only(top: 35.0),
+      margin: EdgeInsets.only(
+          top: MediaQuery.of(context).orientation == Orientation.portrait
+              ? 5.0
+              : 0.0),
       padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
       height: MediaQuery.of(context).size.height * (5.15 / 8),
       decoration: BoxDecoration(
@@ -479,13 +534,24 @@ class _ChatsAndActivityCollectionState
                     top: 5.0,
                     bottom: 5.0,
                   ),
-                  child: GestureDetector(
-                    child: CircleAvatar(
-                      radius: 30.0,
-                      backgroundImage: ExactAssetImage('assets/images/sam.jpg'),
-                    ),
-                    onTap: () {
-                      print("Pic Pressed");
+                  child: OpenContainer(
+                    closedColor: const Color.fromRGBO(31, 51, 71, 1),
+                    openColor: const Color.fromRGBO(31, 51, 71, 1),
+                    middleColor: const Color.fromRGBO(31, 51, 71, 1),
+                    closedElevation: 0.0,
+                    openElevation: 0.0,
+                    transitionDuration: Duration(milliseconds: 500),
+                    transitionType: ContainerTransitionType.fadeThrough,
+                    openBuilder: (_, __) {
+                      return PreviewImageScreen(
+                          imageFile: File('assets/images/sam.jpg'));
+                    },
+                    closedBuilder: (_, __) {
+                      return CircleAvatar(
+                        radius: 30.0,
+                        backgroundImage:
+                            ExactAssetImage('assets/images/sam.jpg'),
+                      );
                     },
                   ),
                 ),
