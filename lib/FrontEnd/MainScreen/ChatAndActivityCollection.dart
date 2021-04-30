@@ -407,7 +407,7 @@ class _ChatsAndActivityCollectionState
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
                     backgroundImage: const ExactAssetImage(
-                      "assets/images/sam.jpg",
+                      "assets/logo/logo.jpg",
                     ),
                     radius: MediaQuery.of(context).orientation ==
                             Orientation.portrait
@@ -550,7 +550,7 @@ class _ChatsAndActivityCollectionState
                       return CircleAvatar(
                         radius: 30.0,
                         backgroundImage:
-                            ExactAssetImage('assets/images/sam.jpg'),
+                            ExactAssetImage('assets/logo/logo.jpg'),
                       );
                     },
                   ),

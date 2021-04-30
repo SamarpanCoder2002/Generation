@@ -57,13 +57,12 @@ class _ProfileState extends State<Profile> {
               },
               child: CircleAvatar(
                 radius: 50.0,
-                backgroundImage: ExactAssetImage('assets/images/sam.jpg'),
+                backgroundImage: ExactAssetImage('assets/logo/logo.jpg'),
               ),
             ),
           ),
           Expanded(
             child: Container(
-              //color: Colors.blue,
               child: Column(
                 children: [
                   SizedBox(

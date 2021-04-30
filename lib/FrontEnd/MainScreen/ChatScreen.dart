@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:flutter_filereader/flutter_filereader.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
@@ -240,8 +241,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                   List<String> _incomingInformationContainer = [];
 
+                  print('Messages: $messages');
+
                   // Taking all the remaining messages to store in local container
                   messages.forEach((everyMessage) async {
+                    print('EveryMessage: $everyMessage');
+
                     _incomingInformationContainer =
                         everyMessage.values.first.toString().split('+');
 
@@ -339,12 +344,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         break;
 
                       case 'MediaTypes.Image':
-                        _manageMedia(
+                        await _manageMedia(
                             _incomingInformationContainer, everyMessage);
                         break;
                       case 'MediaTypes.Video':
-                        _manageMedia(
-                            _incomingInformationContainer, everyMessage);
+                        await _manageMedia(
+                          _incomingInformationContainer,
+                          everyMessage,
+                        );
                         break;
                     }
                   });
@@ -373,8 +380,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  void _manageMedia(
-      List<String> _incomingInformationContainer, dynamic everyMessage) async {
+  Future<void> _manageMedia(
+    List<String> _incomingInformationContainer,
+    dynamic everyMessage,
+  ) async {
     print('Samarpan: $_incomingInformationContainer, $everyMessage');
 
     PermissionStatus storagePermissionStatus = await Permission.storage
@@ -404,6 +413,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       final String currTime =
           DateTime.now().toString().split(' ').join('_'); // Current Time Take
 
+      print('In ManageMedia: ${everyMessage.keys.first.toString()}');
+
       // Download the voice from the Firebase Storage and delete from storage permanently
       await _dio
           .download(
@@ -411,9 +422,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _incomingInformationContainer[1] == MediaTypes.Image.toString()
             ? '${_newDirectory.path}$currTime.jpg'
             : '${_newDirectory.path}$currTime.mp4',
-        //onReceiveProgress: _downLoadOnReceiveProgress
       )
           .whenComplete(() async {
+        print('In When Complete: ${everyMessage.keys.first.toString()}');
         await _management
             .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
       });
@@ -559,7 +570,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   child: CircleAvatar(
                     radius: 23.0,
                     backgroundImage: ExactAssetImage(
-                      "assets/images/sam.jpg",
+                      "assets/logo/logo.jpg",
                     ),
                   ),
                   onTap: () {
@@ -1020,97 +1031,80 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     return Column(
       children: [
         Container(
-          height: MediaQuery.of(context).size.height * 0.3,
-          margin: _responseValue
-              ? EdgeInsets.only(
-                  right: MediaQuery.of(context).size.width / 3,
-                  left: 5.0,
-                  top: 30.0,
-                )
-              : EdgeInsets.only(
-                  left: MediaQuery.of(context).size.width / 3,
-                  right: 5.0,
-                  top: 15.0,
+            height: MediaQuery.of(context).size.height * 0.3,
+            margin: _responseValue
+                ? EdgeInsets.only(
+                    right: MediaQuery.of(context).size.width / 3,
+                    left: 5.0,
+                    top: 30.0,
+                  )
+                : EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 3,
+                    right: 5.0,
+                    top: 15.0,
+                  ),
+            alignment:
+                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+            child: OpenContainer(
+              openColor: Color.fromRGBO(60, 80, 100, 1),
+              closedColor: _responseValue
+                  ? Color.fromRGBO(60, 80, 100, 1)
+                  : Color.fromRGBO(102, 102, 255, 1),
+              middleColor: Color.fromRGBO(60, 80, 100, 1),
+              closedElevation: 0.0,
+              closedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20.0),
+                  topLeft: Radius.circular(20.0),
+                  bottomRight:
+                      _chatContainer[index].values.first.split('+')[1] == ''
+                          ? Radius.circular(20.0)
+                          : Radius.circular(0.0),
+                  bottomLeft:
+                      _chatContainer[index].values.first.split('+')[1] == ''
+                          ? Radius.circular(20.0)
+                          : Radius.circular(0.0),
                 ),
-          alignment:
-              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-          child: _mediaTypes[index] == MediaTypes.Image
-              ? OpenContainer(
-                  openColor: Color.fromRGBO(60, 80, 100, 1),
-                  closedColor: _responseValue
-                      ? Color.fromRGBO(60, 80, 100, 1)
-                      : Color.fromRGBO(102, 102, 255, 1),
-                  middleColor: Color.fromRGBO(60, 80, 100, 1),
-                  closedElevation: 0.0,
-                  closedShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(20.0),
-                      topLeft: Radius.circular(20.0),
-                      bottomRight:
-                          _chatContainer[index].values.first.split('+')[1] == ''
-                              ? Radius.circular(20.0)
-                              : Radius.circular(0.0),
-                      bottomLeft:
-                          _chatContainer[index].values.first.split('+')[1] == ''
-                              ? Radius.circular(20.0)
-                              : Radius.circular(0.0),
-                    ),
-                  ),
-                  transitionDuration: Duration(
-                    milliseconds: 900,
-                  ),
-                  transitionType: ContainerTransitionType.fadeThrough,
-                  openBuilder: (context, openWidget) {
-                    return PreviewImageScreen(
-                      imageFile: File(_chatContainer[index].keys.first),
-                    );
-                  },
-                  closedBuilder: (context, closeWidget) => Container(
-                    alignment: Alignment.center,
-                    child: PhotoView(
-                      imageProvider:
-                          FileImage(File(_chatContainer[index].keys.first)),
-                      loadingBuilder: (context, event) => Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorBuilder: (context, obj, stackTrace) => Center(
-                          child: Text(
-                        'Image not Found',
-                        style: TextStyle(
-                          fontSize: 23.0,
-                          color: Colors.red,
-                          fontFamily: 'Lora',
-                          letterSpacing: 1.0,
+              ),
+              transitionDuration: Duration(
+                milliseconds: 900,
+              ),
+              transitionType: ContainerTransitionType.fadeThrough,
+              openBuilder: (context, openWidget) {
+                return _mediaTypes[index] == MediaTypes.Image
+                    ? PreviewImageScreen(
+                        imageFile: File(_chatContainer[index].keys.first),
+                      )
+                    : Container();
+              },
+              closedBuilder: (context, closeWidget) => Stack(
+                children: [
+                  if (_mediaTypes[index] == MediaTypes.Video)
+                    Container(
+                      alignment: Alignment.center,
+                      child: PhotoView(
+                        imageProvider: _mediaTypes[index] == MediaTypes.Image
+                            ? FileImage(File(_chatContainer[index].keys.first))
+                            : ExactAssetImage('assets/logo/logo.jpg'),
+                        loadingBuilder: (context, event) => Center(
+                          child: CircularProgressIndicator(),
                         ),
-                      )),
-                      enableRotation: true,
-                      minScale: 0.5,
+                        errorBuilder: (context, obj, stackTrace) => Center(
+                            child: Text(
+                          'Image not Found',
+                          style: TextStyle(
+                            fontSize: 23.0,
+                            color: Colors.red,
+                            fontFamily: 'Lora',
+                            letterSpacing: 1.0,
+                          ),
+                        )),
+                        enableRotation: true,
+                        minScale:
+                            _mediaTypes[index] == MediaTypes.Image ? 0.5 : 0.0,
+                      ),
                     ),
-                  ),
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image:
-                          ExactAssetImage('assets/images/sam.jpg', scale: 10.0),
-                    ),
-                    color: _responseValue
-                        ? Color.fromRGBO(60, 80, 100, 1)
-                        : Color.fromRGBO(102, 102, 255, 1),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(20.0),
-                      topLeft: Radius.circular(20.0),
-                      bottomRight:
-                          _chatContainer[index].values.first.split('+')[1] == ''
-                              ? Radius.circular(20.0)
-                              : Radius.circular(0.0),
-                      bottomLeft:
-                          _chatContainer[index].values.first.split('+')[1] == ''
-                              ? Radius.circular(20.0)
-                              : Radius.circular(0.0),
-                    ),
-                  ),
-                  child: Center(
+                  Center(
                     child: IconButton(
                       iconSize: 100.0,
                       icon: Icon(
@@ -1118,12 +1112,31 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         color: Colors.white,
                       ),
                       onPressed: () async {
-                        await OpenFile.open(_chatContainer[index].keys.first);
+                        OpenResult openResult = await OpenFile.open(
+                            _chatContainer[index].keys.first);
+                        if (openResult.type == ResultType.fileNotFound) {
+                          showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                    backgroundColor:
+                                        Color.fromRGBO(34, 48, 60, 1),
+                                    title: Center(
+                                        child: Text(
+                                      'Video Not Found',
+                                      style: TextStyle(
+                                        fontFamily: 'Lora',
+                                        color: Colors.red,
+                                        letterSpacing: 1.0,
+                                      ),
+                                    )),
+                                  ));
+                        }
                       },
                     ),
                   ),
-                ),
-        ),
+                ],
+              ),
+            )),
         if (_chatContainer[index].values.first.split('+')[1] != '')
           Scrollbar(
             showTrackOnHover: true,
@@ -1369,7 +1382,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  void _imageSend(File _takeImageFile,
+  Future<void> _imageSend(File _takeImageFile,
       {MediaTypes mediaTypesForSend = MediaTypes.Image,
       String extraText = ''}) async {
     if (mounted) {
@@ -1378,8 +1391,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
+    print('One: ${_takeImageFile.path}');
+
     final String _imageDownLoadUrl =
         await _management.uploadMediaToStorage(_takeImageFile, context);
+
+    print('One: ${_takeImageFile.path}');
 
     if (mounted) {
       setState(() {
@@ -1387,19 +1404,29 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
+    print('One: ${_takeImageFile.path}');
+
     final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
         .doc("generation_users/$_senderMail")
         .get();
 
+    print('Two: ${_takeImageFile.path}');
+
     // Initialize Temporary List
     List<dynamic> _sendingMessages = [];
+
+    print('Three: ${_takeImageFile.path}');
 
     // Store Updated Sending Messages List
     _sendingMessages = documentSnapShot.data()['connections']
         [FirebaseAuth.instance.currentUser.email.toString()];
 
+    print('Fourth: ${_takeImageFile.path}');
+
     if (mounted) {
       if (_sendingMessages == null) _sendingMessages = [];
+
+      print('Fifth: ${_takeImageFile.path}');
 
       setState(() {
         // Add data to temporary Storage of Sending
@@ -1408,11 +1435,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
         });
 
+        print('Six: ${_takeImageFile.path}');
+
         // Add Data to the UI related all Chat Container
         _chatContainer.add({
           _takeImageFile.path:
               '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
         });
+
+        print('Seven: ${_takeImageFile.path}');
 
         _response
             .add(false); // Add the data _response to chat related container
@@ -1422,6 +1453,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _inputTextController.clear(); // Get Clear the InputBox
       });
 
+      print('Eight: ${_takeImageFile.path}');
+
       // Data Store in Local Storage
       await _localStorageHelper.insertNewMessages(
           widget._userName,
@@ -1429,6 +1462,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           mediaTypesForSend,
           0,
           _chatContainer.last.values.first.toString());
+
+      print('Nine: ${_takeImageFile.path}');
 
       // Data Store in Firestore
       _management.addConversationMessages(this._senderMail, _sendingMessages);
@@ -1685,7 +1720,53 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               )),
                           child: GestureDetector(
                             onTap: () async {
-                              //final PickedFile pickedFile = await _picker.get
+                              List<String> _allowedExtensions = [
+                                'pdf',
+                                'doc',
+                                'docx',
+                                'ppt',
+                                'pptx',
+                                'c',
+                                'cpp',
+                                'py',
+                                'text'
+                              ];
+
+                              final FilePickerResult filePickerResult =
+                                  await FilePicker.platform.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: _allowedExtensions,
+                              );
+
+                              filePickerResult.files.forEach((file) async {
+                                print(file.path);
+                                if (_allowedExtensions.contains(file.extension))
+                                  await OpenFile.open(file.path);
+                                return FileReaderView(
+                                  filePath: file.path,
+                                );
+                              });
+                            },
+                            child: Icon(
+                              Entypo.documents,
+                              color: Colors.lightGreen,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            onTap: () async {
+                              await _connectionExtraTextManagement(
+                                  ImageSource.camera,
+                                  type: 'video');
                             },
                             onLongPress: () async {
                               await _connectionExtraTextManagement(
@@ -1709,7 +1790,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   Future<void> _connectionExtraTextManagement(ImageSource imageSource,
       {String type = 'image'}) async {
     PickedFile _pickedFile;
-    FilePickerResult _videoFilePickerResult;
 
     if (type == 'image')
       _pickedFile = await _picker.getImage(
@@ -1717,13 +1797,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         imageQuality: 50,
       );
     else
-      _videoFilePickerResult = await FilePicker.platform.pickFiles(
-        type: FileType.video,
-        allowMultiple: true,
-        allowCompression: true,
+      _pickedFile = await _picker.getVideo(
+        source: imageSource,
+        maxDuration: Duration(seconds: 15),
       );
 
-    if (_pickedFile != null || _videoFilePickerResult != null) {
+    if (_pickedFile != null) {
       Navigator.pop(context);
       //print(_pickedFile.path);
       showDialog(
@@ -1777,17 +1856,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     color: Colors.green,
                     size: 30.0,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(context);
                     if (type == 'image')
-                      _imageSend(File(_pickedFile.path),
+                      await _imageSend(File(_pickedFile.path),
                           extraText: _mediaTextController.text);
                     else {
-                      _videoFilePickerResult.files.forEach((everyFile) {
-                        _imageSend(File(everyFile.path),
-                            extraText: _mediaTextController.text,
-                            mediaTypesForSend: MediaTypes.Video);
-                      });
+                      await _imageSend(File(_pickedFile.path),
+                          extraText: _mediaTextController.text,
+                          mediaTypesForSend: MediaTypes.Video);
                     }
                     _mediaTextController.clear();
                   },

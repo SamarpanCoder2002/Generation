@@ -44,6 +44,7 @@ dependencies:
   permission_handler:
   file_picker: ^3.0.1
   open_file: ^3.2.0
+  flutter_filereader: ^2.2.0
 
   firebase_core: ^1.0.2
   firebase_auth: ^1.0.1
@@ -83,6 +84,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/logo/
     #   - images/a_dot_ham.jpeg
 
     # An image asset can refer to one or more resolution-specific "variants", see
