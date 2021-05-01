@@ -45,6 +45,7 @@ dependencies:
   file_picker: ^3.0.1
   open_file: ^3.2.0
   flutter_filereader: ^2.2.0
+  thumbnails: ^1.0.1
 
   firebase_core: ^1.0.2
   firebase_auth: ^1.0.1

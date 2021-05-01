@@ -28,6 +28,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:thumbnails/thumbnails.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -413,12 +414,20 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       final String currTime =
           DateTime.now().toString().split(' ').join('_'); // Current Time Take
 
+      final Directory _thumbNailDir =
+          await Directory('${directory.path}/.ThumbNails/')
+              .create(); // Create New Folder about the desire location;
+
       print('In ManageMedia: ${everyMessage.keys.first.toString()}');
+
+      String thumbNailPicturePath;
 
       // Download the voice from the Firebase Storage and delete from storage permanently
       await _dio
           .download(
-        everyMessage.keys.first.toString(),
+        _incomingInformationContainer[1] == MediaTypes.Video.toString()
+            ? everyMessage.keys.first.toString().split('+')[0]
+            : everyMessage.keys.first.toString(),
         _incomingInformationContainer[1] == MediaTypes.Image.toString()
             ? '${_newDirectory.path}$currTime.jpg'
             : '${_newDirectory.path}$currTime.mp4',
@@ -427,6 +436,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         print('In When Complete: ${everyMessage.keys.first.toString()}');
         await _management
             .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+
+        if (_incomingInformationContainer[1] == MediaTypes.Video.toString()) {
+          print("Video Path: ${_newDirectory.path}$currTime.mp4'");
+
+          await _dio
+              .download(
+            everyMessage.keys.first.toString().split('+')[1],
+            '${_thumbNailDir.path}$currTime.jpg',
+          )
+              .whenComplete(() async {
+            await _management.deleteFilesFromFirebaseStorage(
+                everyMessage.keys.first.toString().split('+')[1]);
+          });
+
+          print('ThumbNail Path: $thumbNailPicturePath');
+        }
       });
 
       print('Recorded Path: ${_newDirectory.path}$currTime');
@@ -441,7 +466,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ? MediaTypes.Image
               : MediaTypes.Video,
           1,
-          '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}');
+          _incomingInformationContainer[1] == MediaTypes.Image.toString()
+              ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
+              : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg');
 
       if (mounted) {
         setState(() {
@@ -452,11 +479,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.add({
             // Take Messages in Local Container
             _incomingInformationContainer[1] == MediaTypes.Image.toString()
-                    ? '${_newDirectory.path}$currTime.jpg'
-                    : '${_newDirectory.path}$currTime.mp4':
-                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}',
+                ? '${_newDirectory.path}$currTime.jpg'
+                : '${_newDirectory.path}$currTime.mp4': _incomingInformationContainer[
+                        1] ==
+                    MediaTypes.Image.toString()
+                ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
+                : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg',
           });
-
+          print('Thumbnail File Path: ${_thumbNailDir.path}$currTime.jpg');
           _response.add(true); // Chat Position Status Added
         });
       }
@@ -673,7 +703,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           context, position, _response[position]);
                     else if (_mediaTypes[position] == MediaTypes.Image ||
                         _mediaTypes[position] == MediaTypes.Video)
-                      return imageConversationList(
+                      return _imageAndVideoConversationList(
                           context, position, _response[position]);
                     return voiceConversationList(
                         context, position, _response[position]);
@@ -1024,7 +1054,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget imageConversationList(
+  Widget _imageAndVideoConversationList(
       BuildContext context, int index, bool _responseValue) {
     print(_chatContainer[index].values.first);
 
@@ -1071,69 +1101,72 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
-                return _mediaTypes[index] == MediaTypes.Image
-                    ? PreviewImageScreen(
-                        imageFile: File(_chatContainer[index].keys.first),
-                      )
-                    : Container();
+                print('MediaTypes: ${_mediaTypes[index]}');
+                return PreviewImageScreen(
+                  imageFile: _mediaTypes[index] == MediaTypes.Image
+                      ? File(_chatContainer[index].keys.first)
+                      : File(_chatContainer[index].values.first.split('+')[2]),
+                );
               },
               closedBuilder: (context, closeWidget) => Stack(
                 children: [
-                  if (_mediaTypes[index] == MediaTypes.Video)
-                    Container(
-                      alignment: Alignment.center,
-                      child: PhotoView(
-                        imageProvider: _mediaTypes[index] == MediaTypes.Image
-                            ? FileImage(File(_chatContainer[index].keys.first))
-                            : ExactAssetImage('assets/logo/logo.jpg'),
-                        loadingBuilder: (context, event) => Center(
-                          child: CircularProgressIndicator(),
+                  Container(
+                    alignment: Alignment.center,
+                    child: PhotoView(
+                      imageProvider: _mediaTypes[index] == MediaTypes.Image
+                          ? FileImage(File(_chatContainer[index].keys.first))
+                          : FileImage(File(_chatContainer[index]
+                              .values
+                              .first
+                              .split('+')[2])),
+                      loadingBuilder: (context, event) => Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorBuilder: (context, obj, stackTrace) => Center(
+                          child: Text(
+                        'Image not Found',
+                        style: TextStyle(
+                          fontSize: 23.0,
+                          color: Colors.red,
+                          fontFamily: 'Lora',
+                          letterSpacing: 1.0,
                         ),
-                        errorBuilder: (context, obj, stackTrace) => Center(
-                            child: Text(
-                          'Image not Found',
-                          style: TextStyle(
-                            fontSize: 23.0,
-                            color: Colors.red,
-                            fontFamily: 'Lora',
-                            letterSpacing: 1.0,
-                          ),
-                        )),
-                        enableRotation: true,
-                        minScale:
-                            _mediaTypes[index] == MediaTypes.Image ? 0.5 : 0.0,
-                      ),
-                    ),
-                  Center(
-                    child: IconButton(
-                      iconSize: 100.0,
-                      icon: Icon(
-                        Icons.play_arrow_rounded,
-                        color: Colors.white,
-                      ),
-                      onPressed: () async {
-                        OpenResult openResult = await OpenFile.open(
-                            _chatContainer[index].keys.first);
-                        if (openResult.type == ResultType.fileNotFound) {
-                          showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                    backgroundColor:
-                                        Color.fromRGBO(34, 48, 60, 1),
-                                    title: Center(
-                                        child: Text(
-                                      'Video Not Found',
-                                      style: TextStyle(
-                                        fontFamily: 'Lora',
-                                        color: Colors.red,
-                                        letterSpacing: 1.0,
-                                      ),
-                                    )),
-                                  ));
-                        }
-                      },
+                      )),
+                      enableRotation: true,
+                      minScale: 0.5,
                     ),
                   ),
+                  if (_mediaTypes[index] == MediaTypes.Video)
+                    Center(
+                      child: IconButton(
+                        iconSize: 100.0,
+                        icon: Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                        ),
+                        onPressed: () async {
+                          OpenResult openResult = await OpenFile.open(
+                              _chatContainer[index].keys.first);
+                          if (openResult.type == ResultType.fileNotFound) {
+                            showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                      backgroundColor:
+                                          Color.fromRGBO(34, 48, 60, 1),
+                                      title: Center(
+                                          child: Text(
+                                        'Video Not Found',
+                                        style: TextStyle(
+                                          fontFamily: 'Lora',
+                                          color: Colors.red,
+                                          letterSpacing: 1.0,
+                                        ),
+                                      )),
+                                    ));
+                          }
+                        },
+                      ),
+                    ),
                 ],
               ),
             )),
@@ -1382,7 +1415,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  Future<void> _imageSend(File _takeImageFile,
+  Future<void> _imageAndVideoSend(File _takeImageFile,
       {MediaTypes mediaTypesForSend = MediaTypes.Image,
       String extraText = ''}) async {
     if (mounted) {
@@ -1423,27 +1456,59 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     print('Fourth: ${_takeImageFile.path}');
 
+    String thumbNailPicturePath, thumbNailPicturePathUrl;
+
+    if (mediaTypesForSend == MediaTypes.Video) {
+      final Directory directory =
+          await getExternalStorageDirectory(); // Find Directory To Storage
+
+      final Directory _newDirectory =
+          await Directory('${directory.path}/.ThumbNails/')
+              .create(); // Create New Folder about the desire location;
+
+      thumbNailPicturePath = await Thumbnails.getThumbnail(
+          thumbnailFolder: _newDirectory.path,
+          videoFile: _takeImageFile.path,
+          imageType: ThumbFormat.JPEG,
+          quality: 20);
+
+      thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
+          File(thumbNailPicturePath), context);
+    }
+
     if (mounted) {
       if (_sendingMessages == null) _sendingMessages = [];
 
       print('Fifth: ${_takeImageFile.path}');
 
       setState(() {
-        // Add data to temporary Storage of Sending
-        _sendingMessages.add({
-          _imageDownLoadUrl:
-              '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
-        });
-
         print('Six: ${_takeImageFile.path}');
 
-        // Add Data to the UI related all Chat Container
-        _chatContainer.add({
-          _takeImageFile.path:
-              '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
-        });
+        if (mediaTypesForSend == MediaTypes.Video) {
+          // Add data to temporary Storage of Sending
+          _sendingMessages.add({
+            '$_imageDownLoadUrl+$thumbNailPicturePathUrl':
+                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
+          });
 
-        print('Seven: ${_takeImageFile.path}');
+          // Add Data to the UI related all Chat Container
+          _chatContainer.add({
+            _takeImageFile.path:
+                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$thumbNailPicturePath',
+          });
+        } else {
+          // Add data to temporary Storage of Sending
+          _sendingMessages.add({
+            _imageDownLoadUrl:
+                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
+          });
+
+          // Add Data to the UI related all Chat Container
+          _chatContainer.add({
+            _takeImageFile.path:
+                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
+          });
+        }
 
         _response
             .add(false); // Add the data _response to chat related container
@@ -1859,10 +1924,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   onPressed: () async {
                     Navigator.pop(context);
                     if (type == 'image')
-                      await _imageSend(File(_pickedFile.path),
+                      await _imageAndVideoSend(File(_pickedFile.path),
                           extraText: _mediaTextController.text);
                     else {
-                      await _imageSend(File(_pickedFile.path),
+                      await _imageAndVideoSend(File(_pickedFile.path),
                           extraText: _mediaTextController.text,
                           mediaTypesForSend: MediaTypes.Video);
                     }
