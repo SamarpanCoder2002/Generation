@@ -908,20 +908,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget textConversationList(BuildContext context, int index, bool _response) {
+  Widget textConversationList(
+      BuildContext context, int index, bool _responseValue) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Container(
-          margin: _response
+          margin: _responseValue
               ? EdgeInsets.only(
                   right: MediaQuery.of(context).size.width / 3, left: 5.0)
               : EdgeInsets.only(
                   left: MediaQuery.of(context).size.width / 3, right: 5.0),
-          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              primary: _response
+              primary: _responseValue
                   ? Color.fromRGBO(60, 80, 100, 1)
                   : Color.fromRGBO(102, 150, 255, 1),
               elevation: 0.0,
@@ -943,16 +945,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             onPressed: () {},
           ),
         ),
-        Container(
-          alignment: _response ? Alignment.centerLeft : Alignment.centerRight,
-          margin: _response
-              ? EdgeInsets.only(left: 5.0, bottom: 5.0)
-              : EdgeInsets.only(right: 5.0, bottom: 5.0),
-          child: Text(
-            _chatContainer[index].values.first,
-            style: TextStyle(color: Colors.lightBlue),
-          ),
-        ),
+        _conversationShowingTime(index, _responseValue),
       ],
     );
   }
@@ -1100,25 +1093,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ),
           ),
         ),
-        Container(
-          alignment:
-              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-          margin: _responseValue
-              ? EdgeInsets.only(
-                  left: 5.0,
-                  bottom: 5.0,
-                  top: 5.0,
-                )
-              : EdgeInsets.only(
-                  right: 5.0,
-                  bottom: 5.0,
-                  top: 5.0,
-                ),
-          child: Text(
-            _chatContainer[index].values.first,
-            style: TextStyle(color: Colors.lightBlue),
-          ),
-        ),
+        _conversationShowingTime(index, _responseValue),
       ],
     );
   }
@@ -1223,72 +1198,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             )),
         if (_chatContainer[index].values.first.split('+')[1] != '')
-          Scrollbar(
-            showTrackOnHover: true,
-            thickness: 10.0,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.fromLTRB(
-                10.0,
-                5.0,
-                10.0,
-                5.0,
-              ),
-              margin: _responseValue
-                  ? EdgeInsets.only(
-                      right: MediaQuery.of(context).size.width / 3,
-                      left: 5.0,
-                      //top: 5.0,
-                    )
-                  : EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width / 3,
-                      right: 5.0,
-                      //top: 5.0,
-                    ),
-              alignment:
-                  _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: const Radius.circular(20.0),
-                  bottomRight: const Radius.circular(20.0),
-                ),
-                color: _responseValue
-                    ? const Color.fromRGBO(60, 80, 100, 1)
-                    : const Color.fromRGBO(102, 102, 255, 1),
-              ),
-              child: Center(
-                child: Text(
-                  _chatContainer[index].values.first.split('+')[1],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontFamily: 'Lora',
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        Container(
-          alignment:
-              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-          margin: _responseValue
-              ? const EdgeInsets.only(
-                  left: 5.0,
-                  bottom: 5.0,
-                  top: 5.0,
-                )
-              : const EdgeInsets.only(
-                  right: 5.0,
-                  bottom: 5.0,
-                  top: 5.0,
-                ),
-          child: Text(
-            _chatContainer[index].values.first.split('+')[0],
-            style: const TextStyle(color: Colors.lightBlue),
-          ),
-        ),
+          _documentsAndMediaCommonConversationList(index, _responseValue),
+        _conversationShowingTime(index, _responseValue),
       ],
     );
   }
@@ -1326,10 +1237,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         : _responseValue
                             ? Color.fromRGBO(60, 80, 100, 1)
                             : Color.fromRGBO(102, 102, 255, 1),
-                // border:
-                //     _chatContainer[index].values.first.split('+')[2] != '.pdf'
-                //         ? Border.all(color: Colors.lightBlue, width: 2.0)
-                //         : Border(),
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20.0),
                   topLeft: Radius.circular(20.0),
@@ -1413,73 +1320,81 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     ),
             )),
         if (_chatContainer[index].values.first.split('+')[1] != '')
-          Scrollbar(
-            showTrackOnHover: true,
-            thickness: 10.0,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.fromLTRB(
-                10.0,
-                5.0,
-                10.0,
-                5.0,
+          _documentsAndMediaCommonConversationList(index, _responseValue),
+        _conversationShowingTime(index, _responseValue),
+      ],
+    );
+  }
+
+  Widget _documentsAndMediaCommonConversationList(
+      int index, bool _responseValue) {
+    return Scrollbar(
+      showTrackOnHover: true,
+      thickness: 10.0,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.fromLTRB(
+          10.0,
+          5.0,
+          10.0,
+          5.0,
+        ),
+        margin: _responseValue
+            ? EdgeInsets.only(
+                right: MediaQuery.of(context).size.width / 3,
+                left: 5.0,
+                //top: 5.0,
+              )
+            : EdgeInsets.only(
+                left: MediaQuery.of(context).size.width / 3,
+                right: 5.0,
+                //top: 5.0,
               ),
-              margin: _responseValue
-                  ? EdgeInsets.only(
-                      right: MediaQuery.of(context).size.width / 3,
-                      left: 5.0,
-                      //top: 5.0,
-                    )
-                  : EdgeInsets.only(
-                      left: MediaQuery.of(context).size.width / 3,
-                      right: 5.0,
-                      //top: 5.0,
-                    ),
-              alignment:
-                  _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: const Radius.circular(20.0),
-                  bottomRight: const Radius.circular(20.0),
-                ),
-                color: _responseValue
-                    ? const Color.fromRGBO(60, 80, 100, 1)
-                    : const Color.fromRGBO(102, 102, 255, 1),
-              ),
-              child: Center(
-                child: Text(
-                  _chatContainer[index].values.first.split('+')[1],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontFamily: 'Lora',
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
+        alignment:
+            _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: const Radius.circular(20.0),
+            bottomRight: const Radius.circular(20.0),
+          ),
+          color: _responseValue
+              ? const Color.fromRGBO(60, 80, 100, 1)
+              : const Color.fromRGBO(102, 102, 255, 1),
+        ),
+        child: Center(
+          child: Text(
+            _chatContainer[index].values.first.split('+')[1],
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16.0,
+              fontFamily: 'Lora',
+              fontWeight: FontWeight.w400,
+              letterSpacing: 1.0,
             ),
           ),
-        Container(
-          alignment:
-              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-          margin: _responseValue
-              ? const EdgeInsets.only(
-                  left: 5.0,
-                  bottom: 5.0,
-                  top: 5.0,
-                )
-              : const EdgeInsets.only(
-                  right: 5.0,
-                  bottom: 5.0,
-                  top: 5.0,
-                ),
-          child: Text(
-            _chatContainer[index].values.first.split('+')[0],
-            style: const TextStyle(color: Colors.lightBlue),
-          ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _conversationShowingTime(int index, bool _responseValue) {
+    return Container(
+      alignment: _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+      margin: _responseValue
+          ? const EdgeInsets.only(
+              left: 5.0,
+              bottom: 5.0,
+              top: 5.0,
+            )
+          : const EdgeInsets.only(
+              right: 5.0,
+              bottom: 5.0,
+              top: 5.0,
+            ),
+      child: Text(
+        _chatContainer[index].values.first.split('+')[0],
+        style: const TextStyle(color: Colors.lightBlue),
+      ),
     );
   }
 
