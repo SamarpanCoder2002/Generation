@@ -628,7 +628,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void dispose() {
     _justAudioPlayer.dispose();
     _flutterSoundRecorder.closeAudioSession();
-    _mediaTextController.dispose();
+    //_mediaTextController.dispose();
     _inputTextController.dispose();
     super.dispose();
   }
@@ -1302,7 +1302,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         Container(
             height: _chatContainer[index].values.first.split('+')[2] == '.pdf'
                 ? MediaQuery.of(context).size.height * 0.3
-                : 50.0,
+                : 70.0,
             margin: _responseValue
                 ? EdgeInsets.only(
                     right: MediaQuery.of(context).size.width / 3,
@@ -1316,197 +1316,102 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   ),
             alignment:
                 _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-            child: _mediaTypes[index] == MediaTypes.Document
-                ? Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      color: _chatContainer[index].values.first.split('+')[2] ==
-                              '.pdf'
-                          ? Colors.white
-                          : _responseValue
-                              ? Color.fromRGBO(60, 80, 100, 1)
-                              : Color.fromRGBO(102, 102, 255, 1),
-                      border:
-                          _chatContainer[index].values.first.split('+')[2] !=
-                                  '.pdf'
-                              ? Border.all(color: Colors.black, width: 2.0)
-                              : Border(),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(20.0),
-                        topLeft: Radius.circular(20.0),
-                        bottomRight:
-                            _chatContainer[index].values.first.split('+')[1] ==
-                                    ''
-                                ? Radius.circular(20.0)
-                                : Radius.circular(0.0),
-                        bottomLeft:
-                            _chatContainer[index].values.first.split('+')[1] ==
-                                    ''
-                                ? Radius.circular(20.0)
-                                : Radius.circular(0.0),
-                      ),
-                    ),
-                    child: _chatContainer[index].values.first.split('+')[2] ==
-                            '.pdf'
-                        ? Stack(
-                            children: [
-                              Center(
-                                  child: Text(
-                                'Loading Error',
-                                style: TextStyle(
-                                  fontFamily: 'Lora',
-                                  color: Colors.red,
-                                  fontSize: 20.0,
-                                  letterSpacing: 1.0,
-                                ),
-                              )),
-                              Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: PdfView(
-                                  path: _chatContainer[index].keys.first,
-                                ),
-                              ),
-                              Center(
-                                child: GestureDetector(
-                                  child: Icon(
-                                    Icons.open_in_new_rounded,
-                                    size: 40.0,
-                                    color: Colors.blue,
-                                  ),
-                                  onTap: () async {
-                                    print(_chatContainer[index].values.first);
-                                    final OpenResult openResult =
-                                        await OpenFile.open(
-                                            _chatContainer[index].keys.first);
-
-                                    openFileResultStatus(
-                                        openResult: openResult);
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                        : GestureDetector(
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                color:
+                    _chatContainer[index].values.first.split('+')[2] == '.pdf'
+                        ? Colors.white
+                        : _responseValue
+                            ? Color.fromRGBO(60, 80, 100, 1)
+                            : Color.fromRGBO(102, 102, 255, 1),
+                // border:
+                //     _chatContainer[index].values.first.split('+')[2] != '.pdf'
+                //         ? Border.all(color: Colors.lightBlue, width: 2.0)
+                //         : Border(),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20.0),
+                  topLeft: Radius.circular(20.0),
+                  bottomRight:
+                      _chatContainer[index].values.first.split('+')[1] == ''
+                          ? Radius.circular(20.0)
+                          : Radius.circular(0.0),
+                  bottomLeft:
+                      _chatContainer[index].values.first.split('+')[1] == ''
+                          ? Radius.circular(20.0)
+                          : Radius.circular(0.0),
+                ),
+              ),
+              child: _chatContainer[index].values.first.split('+')[2] == '.pdf'
+                  ? Stack(
+                      children: [
+                        Center(
+                            child: Text(
+                          'Loading Error',
+                          style: TextStyle(
+                            fontFamily: 'Lora',
+                            color: Colors.red,
+                            fontSize: 20.0,
+                            letterSpacing: 1.0,
+                          ),
+                        )),
+                        Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: PdfView(
+                            path: _chatContainer[index].keys.first,
+                          ),
+                        ),
+                        Center(
+                          child: GestureDetector(
+                            child: Icon(
+                              Icons.open_in_new_rounded,
+                              size: 40.0,
+                              color: Colors.blue,
+                            ),
                             onTap: () async {
+                              print(_chatContainer[index].values.first);
                               final OpenResult openResult = await OpenFile.open(
                                   _chatContainer[index].keys.first);
 
                               openFileResultStatus(openResult: openResult);
                             },
-                            child: Container(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Icon(
-                                      Entypo.documents,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      '${_chatContainer[index].values.first.split('+')[0].split(':').join('_')}${_chatContainer[index].values.first.split('+')[2]}',
-                                      style: TextStyle(
-                                        fontSize: 18.0,
-                                        color: Colors.white,
-                                        fontFamily: 'Lora',
-                                        letterSpacing: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                  )
-                : OpenContainer(
-                    openColor: Color.fromRGBO(60, 80, 100, 1),
-                    closedColor: _responseValue
-                        ? Color.fromRGBO(60, 80, 100, 1)
-                        : Color.fromRGBO(102, 102, 255, 1),
-                    middleColor: Color.fromRGBO(60, 80, 100, 1),
-                    closedElevation: 0.0,
-                    closedShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(20.0),
-                        topLeft: Radius.circular(20.0),
-                        bottomRight:
-                            _chatContainer[index].values.first.split('+')[1] ==
-                                    ''
-                                ? Radius.circular(20.0)
-                                : Radius.circular(0.0),
-                        bottomLeft:
-                            _chatContainer[index].values.first.split('+')[1] ==
-                                    ''
-                                ? Radius.circular(20.0)
-                                : Radius.circular(0.0),
-                      ),
-                    ),
-                    transitionDuration: Duration(
-                      milliseconds: 900,
-                    ),
-                    transitionType: ContainerTransitionType.fadeThrough,
-                    openBuilder: (context, openWidget) {
-                      print('MediaTypes: ${_mediaTypes[index]}');
-                      return PreviewImageScreen(
-                        imageFile: _mediaTypes[index] == MediaTypes.Image
-                            ? File(_chatContainer[index].keys.first)
-                            : File(_chatContainer[index]
-                                .values
-                                .first
-                                .split('+')[2]),
-                      );
-                    },
-                    closedBuilder: (context, closeWidget) => Stack(
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          child: PhotoView(
-                            imageProvider:
-                                _mediaTypes[index] == MediaTypes.Image
-                                    ? FileImage(
-                                        File(_chatContainer[index].keys.first))
-                                    : FileImage(File(_chatContainer[index]
-                                        .values
-                                        .first
-                                        .split('+')[2])),
-                            loadingBuilder: (context, event) => Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            errorBuilder: (context, obj, stackTrace) => Center(
-                                child: Text(
-                              'Image not Found',
-                              style: TextStyle(
-                                fontSize: 23.0,
-                                color: Colors.red,
-                                fontFamily: 'Lora',
-                                letterSpacing: 1.0,
-                              ),
-                            )),
-                            enableRotation: true,
-                            minScale: 0.5,
                           ),
                         ),
-                        if (_mediaTypes[index] == MediaTypes.Video)
-                          Center(
-                            child: IconButton(
-                              iconSize: 100.0,
-                              icon: const Icon(
-                                Icons.play_arrow_rounded,
+                      ],
+                    )
+                  : GestureDetector(
+                      onTap: () async {
+                        final OpenResult openResult = await OpenFile.open(
+                            _chatContainer[index].keys.first);
+
+                        openFileResultStatus(openResult: openResult);
+                      },
+                      child: Container(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Icon(
+                                Entypo.documents,
                                 color: Colors.white,
                               ),
-                              onPressed: () async {
-                                final OpenResult openResult =
-                                    await OpenFile.open(
-                                        _chatContainer[index].keys.first);
-
-                                openFileResultStatus(openResult: openResult);
-                              },
                             ),
-                          ),
-                      ],
+                            Expanded(
+                              child: Text(
+                                '${_chatContainer[index].values.first.split('+')[0].split(':').join('_')}${_chatContainer[index].values.first.split('+')[2]}',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: Colors.white,
+                                  fontFamily: 'Lora',
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  )),
+            )),
         if (_chatContainer[index].values.first.split('+')[1] != '')
           Scrollbar(
             showTrackOnHover: true,
@@ -2052,12 +1957,125 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             ),
                             onTap: () async {
                               await _connectionExtraTextManagement(
-                                  ImageSource.camera);
+                                  imageSource: ImageSource.camera,
+                                  mediaTypesForExtraText: MediaTypes.Image);
                             },
                             onLongPress: () async {
                               await _connectionExtraTextManagement(
-                                  ImageSource.gallery);
+                                  imageSource: ImageSource.gallery,
+                                  mediaTypesForExtraText: MediaTypes.Image);
                             },
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            onTap: () async {
+                              await _connectionExtraTextManagement(
+                                  imageSource: ImageSource.camera,
+                                  mediaTypesForExtraText: MediaTypes.Video);
+                            },
+                            onLongPress: () async {
+                              await _connectionExtraTextManagement(
+                                  imageSource: ImageSource.gallery,
+                                  mediaTypesForExtraText: MediaTypes.Video);
+                            },
+                            child: Icon(
+                              Icons.video_collection,
+                              color: Colors.lightGreen,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            onTap: () async {
+                              List<String> _allowedExtensions = [
+                                'pdf',
+                                'doc',
+                                'docx',
+                                'ppt',
+                                'pptx',
+                                'c',
+                                'cpp',
+                                'py',
+                                'text'
+                              ];
+
+                              try {
+                                final FilePickerResult filePickerResult =
+                                    await FilePicker.platform.pickFiles(
+                                  type: FileType.custom,
+                                  allowedExtensions: _allowedExtensions,
+                                );
+
+                                if (filePickerResult != null &&
+                                    filePickerResult.files.length > 0) {
+                                  Navigator.pop(context);
+                                  filePickerResult.files.forEach((file) async {
+                                    print(file.path);
+                                    if (_allowedExtensions
+                                        .contains(file.extension))
+                                      // _mediaSend(File(file.path),
+                                      //     mediaTypesForSend:
+                                      //         MediaTypes.Document,
+                                      //     extension: '.${file.extension}');
+
+                                      _connectionExtraTextManagement(
+                                          mediaTypesForExtraText:
+                                              MediaTypes.Document,
+                                          file: File(file.path),
+                                          extension: '.${file.extension}');
+                                    else {
+                                      _showDiaLog(
+                                        titleText:
+                                            'Not Supporting Document Format',
+                                      );
+                                    }
+                                  });
+                                }
+                              } catch (e) {
+                                _showDiaLog(
+                                    titleText: 'Some Error Occurred',
+                                    contentText:
+                                        'Please close and reopen this chat');
+                              }
+                            },
+                            child: Icon(
+                              Entypo.documents,
+                              color: Colors.lightGreen,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.blue,
+                                width: 3,
+                              )),
+                          child: GestureDetector(
+                            onTap: () async {},
+                            child: Icon(
+                              Icons.location_on_rounded,
+                              color: Colors.lightGreen,
+                            ),
                           ),
                         ),
                         Container(
@@ -2106,218 +2124,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             },
                           ),
                         ),
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(
-                                color: Colors.blue,
-                                width: 3,
-                              )),
-                          child: GestureDetector(
-                            onTap: () async {},
-                            child: Icon(
-                              Icons.location_on_rounded,
-                              color: Colors.lightGreen,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(
-                                color: Colors.blue,
-                                width: 3,
-                              )),
-                          child: GestureDetector(
-                            onTap: () async {
-                              List<String> _allowedExtensions = [
-                                'pdf',
-                                'doc',
-                                'docx',
-                                'ppt',
-                                'pptx',
-                                'c',
-                                'cpp',
-                                'py',
-                                'text'
-                              ];
-
-                              try {
-                                final FilePickerResult filePickerResult =
-                                    await FilePicker.platform.pickFiles(
-                                  type: FileType.custom,
-                                  allowedExtensions: _allowedExtensions,
-                                );
-
-                                if (filePickerResult != null &&
-                                    filePickerResult.files.length > 0) {
-                                  Navigator.pop(context);
-                                  filePickerResult.files.forEach((file) async {
-                                    print(file.path);
-                                    if (_allowedExtensions
-                                        .contains(file.extension))
-                                      _mediaSend(File(file.path),
-                                          mediaTypesForSend:
-                                              MediaTypes.Document,
-                                          extension: '.${file.extension}');
-                                    else {
-                                      showDialog(
-                                          context: context,
-                                          builder: (_) => AlertDialog(
-                                                elevation: 5.0,
-                                                backgroundColor:
-                                                    const Color.fromRGBO(
-                                                        34, 48, 60, 0.6),
-                                                title: Text(
-                                                  'Not Supporting Document Format',
-                                                  style: TextStyle(
-                                                    fontSize: 15.0,
-                                                    color: Colors.red,
-                                                  ),
-                                                ),
-                                              ));
-                                    }
-                                  });
-                                }
-                              } catch (e) {
-                                _showDiaLog(
-                                    titleText: 'Some Error Occurred',
-                                    contentText:
-                                        'Please close and reopen this chat');
-                              }
-                            },
-                            child: Icon(
-                              Entypo.documents,
-                              color: Colors.lightGreen,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(
-                                color: Colors.blue,
-                                width: 3,
-                              )),
-                          child: GestureDetector(
-                            onTap: () async {
-                              await _connectionExtraTextManagement(
-                                  ImageSource.camera,
-                                  type: 'video');
-                            },
-                            onLongPress: () async {
-                              await _connectionExtraTextManagement(
-                                  ImageSource.gallery,
-                                  type: 'video');
-                            },
-                            child: Icon(
-                              Icons.video_collection,
-                              color: Colors.lightGreen,
-                            ),
-                          ),
-                        ),
                       ],
                     )
                   ],
                 ),
               ),
             ));
-  }
-
-  Future<void> _connectionExtraTextManagement(ImageSource imageSource,
-      {String type = 'image'}) async {
-    PickedFile _pickedFile;
-
-    if (type == 'image')
-      _pickedFile = await _picker.getImage(
-        source: imageSource,
-        imageQuality: 50,
-      );
-    else
-      _pickedFile = await _picker.getVideo(
-        source: imageSource,
-        maxDuration: Duration(seconds: 15),
-      );
-
-    if (_pickedFile != null) {
-      Navigator.pop(context);
-      //print(_pickedFile.path);
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          elevation: 5.0,
-          backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(
-              40.0,
-            )),
-          ),
-          title: Center(
-            child: Text(
-              'Something About Picture',
-              style: TextStyle(
-                color: Colors.lightBlue,
-                fontSize: 14.0,
-                fontFamily: 'Lora',
-                fontStyle: FontStyle.italic,
-                letterSpacing: 1.0,
-              ),
-            ),
-          ),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _mediaTextController,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                  decoration: InputDecoration(
-                      labelText: 'Type Here',
-                      labelStyle: TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'Lora',
-                        letterSpacing: 1.0,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlue))),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 20.0),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.send_rounded,
-                    color: Colors.green,
-                    size: 30.0,
-                  ),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    if (type == 'image')
-                      await _mediaSend(File(_pickedFile.path),
-                          extraText: _mediaTextController.text);
-                    else {
-                      await _mediaSend(File(_pickedFile.path),
-                          extraText: _mediaTextController.text,
-                          mediaTypesForSend: MediaTypes.Video);
-                    }
-                    _mediaTextController.clear();
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
   }
 
   void openFileResultStatus({@required OpenResult openResult}) {
@@ -2331,11 +2143,132 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       _showDiaLog(titleText: 'Sorry, File Not Found');
   }
 
+  Future<void> _connectionExtraTextManagement(
+      {ImageSource imageSource = ImageSource.camera,
+      @required MediaTypes mediaTypesForExtraText,
+      String extension = '',
+      File file}) async {
+    PickedFile _pickedFile;
+
+    if (mediaTypesForExtraText == MediaTypes.Image) {
+      _pickedFile = await _picker.getImage(
+        source: imageSource,
+        imageQuality: 50,
+      );
+      if (_pickedFile != null) {
+        Navigator.pop(context);
+        //print(_pickedFile.path);
+        extraTextInputTakeInDialogForm(
+            fileLocation: _pickedFile.path, mediaTypesIS: MediaTypes.Image);
+      }
+    } else if (mediaTypesForExtraText == MediaTypes.Video) {
+      _pickedFile = await _picker.getVideo(
+        source: imageSource,
+        maxDuration: Duration(seconds: 15),
+      );
+      if (_pickedFile != null) {
+        Navigator.pop(context);
+        //print(_pickedFile.path);
+        extraTextInputTakeInDialogForm(
+            fileLocation: _pickedFile.path, mediaTypesIS: MediaTypes.Video);
+      }
+    } else if (mediaTypesForExtraText == MediaTypes.Document) {
+      extraTextInputTakeInDialogForm(
+          mediaTypesIS: MediaTypes.Document, file: file, extension: extension);
+    }
+  }
+
+  void extraTextInputTakeInDialogForm(
+      {String fileLocation,
+      @required MediaTypes mediaTypesIS,
+      String extension = '',
+      File file}) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        elevation: 5.0,
+        backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(
+            40.0,
+          )),
+        ),
+        title: Center(
+          child: Text(
+            'Something About That',
+            style: TextStyle(
+              color: Colors.lightBlue,
+              fontSize: 14.0,
+              fontFamily: 'Lora',
+              fontStyle: FontStyle.italic,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _mediaTextController,
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+                decoration: InputDecoration(
+                    labelText: 'Type Here',
+                    labelStyle: TextStyle(
+                      color: Colors.white70,
+                      fontFamily: 'Lora',
+                      letterSpacing: 1.0,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.lightBlue))),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 20.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.send_rounded,
+                  color: Colors.green,
+                  size: 30.0,
+                ),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  if (mediaTypesIS == MediaTypes.Image)
+                    await _mediaSend(File(fileLocation),
+                        extraText: _mediaTextController.text);
+                  else if (mediaTypesIS == MediaTypes.Video) {
+                    await _mediaSend(File(fileLocation),
+                        extraText: _mediaTextController.text,
+                        mediaTypesForSend: MediaTypes.Video);
+                  } else if (mediaTypesIS == MediaTypes.Document) {
+                    _mediaSend(
+                      file,
+                      mediaTypesForSend: mediaTypesIS,
+                      extension: extension,
+                      extraText: _mediaTextController.text,
+                    );
+                  }
+                  if (mounted) {
+                    //Navigator.pop(context);
+                    _mediaTextController.clear();
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showDiaLog({@required String titleText, String contentText = ''}) {
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
-              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Center(
                   child: Text(
                 titleText,
@@ -2343,6 +2276,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   fontFamily: 'Lora',
                   color: Colors.red,
                   letterSpacing: 1.0,
+                  fontSize: 16.0,
                 ),
               )),
               content: contentText == ''
