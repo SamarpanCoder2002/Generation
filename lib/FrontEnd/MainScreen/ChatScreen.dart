@@ -11,8 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
-import 'package:flutter_filereader/flutter_filereader.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
@@ -158,7 +158,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   _mediaTypes.add(MediaTypes.Image);
                 } else if (messageContainer[3] == MediaTypes.Video.toString()) {
                   _mediaTypes.add(MediaTypes.Video);
-                }
+                } else if (messageContainer[3] ==
+                    MediaTypes.Document.toString())
+                  _mediaTypes.add(MediaTypes.Document);
 
                 if (mounted) {
                   setState(() {
@@ -354,6 +356,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           everyMessage,
                         );
                         break;
+                      case 'MediaTypes.Document':
+                        await _manageDocument(
+                            _incomingInformationContainer, everyMessage);
                     }
                   });
 
@@ -381,13 +386,73 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
+  Future<void> _manageDocument(
+      List<String> _incomingInformationContainer, everyMessage) async {
+    final PermissionStatus storagePermissionStatus = await Permission.storage
+        .request(); // Take User Permission To Take Voice
+
+    if (storagePermissionStatus.isGranted) {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
+      final Directory directory =
+          await getExternalStorageDirectory(); // Find Directory To Storage
+
+      final Directory _newDirectory =
+          await Directory('${directory.path}/Documents/')
+              .create(); // Create New Folder about the desire location;
+
+      final String currTime =
+          DateTime.now().toString().split(' ').join('_'); // Current Time Take
+
+      await _dio
+          .download(everyMessage.keys.first.toString(),
+              '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}')
+          .whenComplete(() async {
+        print('In When Complete: ${everyMessage.keys.first.toString()}');
+        await _management
+            .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+      });
+
+      await _localStorageHelper.insertNewMessages(
+          widget._userName,
+          '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}',
+          MediaTypes.Document,
+          1,
+          '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}');
+
+      if (mounted) {
+        setState(() {
+          _mediaTypes.add(MediaTypes.Document); // add New Media Type
+
+          _chatContainer.add({
+            // Take Messages in Local Container
+            '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}':
+                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}',
+          });
+
+          _response.add(true); // Chat Position Status Added
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _manageMedia(
     List<String> _incomingInformationContainer,
     dynamic everyMessage,
   ) async {
     print('Samarpan: $_incomingInformationContainer, $everyMessage');
 
-    PermissionStatus storagePermissionStatus = await Permission.storage
+    final PermissionStatus storagePermissionStatus = await Permission.storage
         .request(); // Take User Permission To Take Voice
 
     if (storagePermissionStatus.isGranted) {
@@ -703,8 +768,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           context, position, _response[position]);
                     else if (_mediaTypes[position] == MediaTypes.Image ||
                         _mediaTypes[position] == MediaTypes.Video)
-                      return _imageAndVideoConversationList(
+                      return _mediaConversationList(
                           context, position, _response[position]);
+                    else if (_mediaTypes[position] == MediaTypes.Document) {
+                      return _documentConversationList(
+                          context, position, _response[position]);
+                    }
                     return voiceConversationList(
                         context, position, _response[position]);
                   },
@@ -1054,10 +1123,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget _imageAndVideoConversationList(
+  Widget _mediaConversationList(
       BuildContext context, int index, bool _responseValue) {
-    print(_chatContainer[index].values.first);
-
     return Column(
       children: [
         Container(
@@ -1140,30 +1207,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     Center(
                       child: IconButton(
                         iconSize: 100.0,
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.play_arrow_rounded,
                           color: Colors.white,
                         ),
                         onPressed: () async {
-                          OpenResult openResult = await OpenFile.open(
+                          final OpenResult openResult = await OpenFile.open(
                               _chatContainer[index].keys.first);
-                          if (openResult.type == ResultType.fileNotFound) {
-                            showDialog(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                      backgroundColor:
-                                          Color.fromRGBO(34, 48, 60, 1),
-                                      title: Center(
-                                          child: Text(
-                                        'Video Not Found',
-                                        style: TextStyle(
-                                          fontFamily: 'Lora',
-                                          color: Colors.red,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      )),
-                                    ));
-                          }
+
+                          openFileResultStatus(openResult: openResult);
                         },
                       ),
                     ),
@@ -1176,7 +1228,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             thickness: 10.0,
             child: Container(
               width: MediaQuery.of(context).size.width,
-              //height: 60.0,
               padding: const EdgeInsets.fromLTRB(
                 10.0,
                 5.0,
@@ -1197,13 +1248,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               alignment:
                   _responseValue ? Alignment.centerLeft : Alignment.centerRight,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: const Radius.circular(20.0),
+                  bottomRight: const Radius.circular(20.0),
                 ),
                 color: _responseValue
-                    ? Color.fromRGBO(60, 80, 100, 1)
-                    : Color.fromRGBO(102, 102, 255, 1),
+                    ? const Color.fromRGBO(60, 80, 100, 1)
+                    : const Color.fromRGBO(102, 102, 255, 1),
               ),
               child: Center(
                 child: Text(
@@ -1223,19 +1274,304 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           alignment:
               _responseValue ? Alignment.centerLeft : Alignment.centerRight,
           margin: _responseValue
-              ? EdgeInsets.only(
+              ? const EdgeInsets.only(
                   left: 5.0,
                   bottom: 5.0,
                   top: 5.0,
                 )
-              : EdgeInsets.only(
+              : const EdgeInsets.only(
                   right: 5.0,
                   bottom: 5.0,
                   top: 5.0,
                 ),
           child: Text(
             _chatContainer[index].values.first.split('+')[0],
-            style: TextStyle(color: Colors.lightBlue),
+            style: const TextStyle(color: Colors.lightBlue),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _documentConversationList(
+      BuildContext context, int index, bool _responseValue) {
+    print(_chatContainer[index].values.first);
+
+    return Column(
+      children: [
+        Container(
+            height: _chatContainer[index].values.first.split('+')[2] == '.pdf'
+                ? MediaQuery.of(context).size.height * 0.3
+                : 50.0,
+            margin: _responseValue
+                ? EdgeInsets.only(
+                    right: MediaQuery.of(context).size.width / 3,
+                    left: 5.0,
+                    top: 30.0,
+                  )
+                : EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 3,
+                    right: 5.0,
+                    top: 15.0,
+                  ),
+            alignment:
+                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+            child: _mediaTypes[index] == MediaTypes.Document
+                ? Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: _chatContainer[index].values.first.split('+')[2] ==
+                              '.pdf'
+                          ? Colors.white
+                          : _responseValue
+                              ? Color.fromRGBO(60, 80, 100, 1)
+                              : Color.fromRGBO(102, 102, 255, 1),
+                      border:
+                          _chatContainer[index].values.first.split('+')[2] !=
+                                  '.pdf'
+                              ? Border.all(color: Colors.black, width: 2.0)
+                              : Border(),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(20.0),
+                        topLeft: Radius.circular(20.0),
+                        bottomRight:
+                            _chatContainer[index].values.first.split('+')[1] ==
+                                    ''
+                                ? Radius.circular(20.0)
+                                : Radius.circular(0.0),
+                        bottomLeft:
+                            _chatContainer[index].values.first.split('+')[1] ==
+                                    ''
+                                ? Radius.circular(20.0)
+                                : Radius.circular(0.0),
+                      ),
+                    ),
+                    child: _chatContainer[index].values.first.split('+')[2] ==
+                            '.pdf'
+                        ? Stack(
+                            children: [
+                              Center(
+                                  child: Text(
+                                'Loading Error',
+                                style: TextStyle(
+                                  fontFamily: 'Lora',
+                                  color: Colors.red,
+                                  fontSize: 20.0,
+                                  letterSpacing: 1.0,
+                                ),
+                              )),
+                              Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: PdfView(
+                                  path: _chatContainer[index].keys.first,
+                                ),
+                              ),
+                              Center(
+                                child: GestureDetector(
+                                  child: Icon(
+                                    Icons.open_in_new_rounded,
+                                    size: 40.0,
+                                    color: Colors.blue,
+                                  ),
+                                  onTap: () async {
+                                    print(_chatContainer[index].values.first);
+                                    final OpenResult openResult =
+                                        await OpenFile.open(
+                                            _chatContainer[index].keys.first);
+
+                                    openFileResultStatus(
+                                        openResult: openResult);
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        : GestureDetector(
+                            onTap: () async {
+                              final OpenResult openResult = await OpenFile.open(
+                                  _chatContainer[index].keys.first);
+
+                              openFileResultStatus(openResult: openResult);
+                            },
+                            child: Container(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Icon(
+                                      Entypo.documents,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      '${_chatContainer[index].values.first.split('+')[0].split(':').join('_')}${_chatContainer[index].values.first.split('+')[2]}',
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: Colors.white,
+                                        fontFamily: 'Lora',
+                                        letterSpacing: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                  )
+                : OpenContainer(
+                    openColor: Color.fromRGBO(60, 80, 100, 1),
+                    closedColor: _responseValue
+                        ? Color.fromRGBO(60, 80, 100, 1)
+                        : Color.fromRGBO(102, 102, 255, 1),
+                    middleColor: Color.fromRGBO(60, 80, 100, 1),
+                    closedElevation: 0.0,
+                    closedShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(20.0),
+                        topLeft: Radius.circular(20.0),
+                        bottomRight:
+                            _chatContainer[index].values.first.split('+')[1] ==
+                                    ''
+                                ? Radius.circular(20.0)
+                                : Radius.circular(0.0),
+                        bottomLeft:
+                            _chatContainer[index].values.first.split('+')[1] ==
+                                    ''
+                                ? Radius.circular(20.0)
+                                : Radius.circular(0.0),
+                      ),
+                    ),
+                    transitionDuration: Duration(
+                      milliseconds: 900,
+                    ),
+                    transitionType: ContainerTransitionType.fadeThrough,
+                    openBuilder: (context, openWidget) {
+                      print('MediaTypes: ${_mediaTypes[index]}');
+                      return PreviewImageScreen(
+                        imageFile: _mediaTypes[index] == MediaTypes.Image
+                            ? File(_chatContainer[index].keys.first)
+                            : File(_chatContainer[index]
+                                .values
+                                .first
+                                .split('+')[2]),
+                      );
+                    },
+                    closedBuilder: (context, closeWidget) => Stack(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          child: PhotoView(
+                            imageProvider:
+                                _mediaTypes[index] == MediaTypes.Image
+                                    ? FileImage(
+                                        File(_chatContainer[index].keys.first))
+                                    : FileImage(File(_chatContainer[index]
+                                        .values
+                                        .first
+                                        .split('+')[2])),
+                            loadingBuilder: (context, event) => Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorBuilder: (context, obj, stackTrace) => Center(
+                                child: Text(
+                              'Image not Found',
+                              style: TextStyle(
+                                fontSize: 23.0,
+                                color: Colors.red,
+                                fontFamily: 'Lora',
+                                letterSpacing: 1.0,
+                              ),
+                            )),
+                            enableRotation: true,
+                            minScale: 0.5,
+                          ),
+                        ),
+                        if (_mediaTypes[index] == MediaTypes.Video)
+                          Center(
+                            child: IconButton(
+                              iconSize: 100.0,
+                              icon: const Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.white,
+                              ),
+                              onPressed: () async {
+                                final OpenResult openResult =
+                                    await OpenFile.open(
+                                        _chatContainer[index].keys.first);
+
+                                openFileResultStatus(openResult: openResult);
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                  )),
+        if (_chatContainer[index].values.first.split('+')[1] != '')
+          Scrollbar(
+            showTrackOnHover: true,
+            thickness: 10.0,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.fromLTRB(
+                10.0,
+                5.0,
+                10.0,
+                5.0,
+              ),
+              margin: _responseValue
+                  ? EdgeInsets.only(
+                      right: MediaQuery.of(context).size.width / 3,
+                      left: 5.0,
+                      //top: 5.0,
+                    )
+                  : EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width / 3,
+                      right: 5.0,
+                      //top: 5.0,
+                    ),
+              alignment:
+                  _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: const Radius.circular(20.0),
+                  bottomRight: const Radius.circular(20.0),
+                ),
+                color: _responseValue
+                    ? const Color.fromRGBO(60, 80, 100, 1)
+                    : const Color.fromRGBO(102, 102, 255, 1),
+              ),
+              child: Center(
+                child: Text(
+                  _chatContainer[index].values.first.split('+')[1],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontFamily: 'Lora',
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        Container(
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+          margin: _responseValue
+              ? const EdgeInsets.only(
+                  left: 5.0,
+                  bottom: 5.0,
+                  top: 5.0,
+                )
+              : const EdgeInsets.only(
+                  right: 5.0,
+                  bottom: 5.0,
+                  top: 5.0,
+                ),
+          child: Text(
+            _chatContainer[index].values.first.split('+')[0],
+            style: const TextStyle(color: Colors.lightBlue),
           ),
         ),
       ],
@@ -1415,9 +1751,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  Future<void> _imageAndVideoSend(File _takeImageFile,
+  Future<void> _mediaSend(File _takeImageFile,
       {MediaTypes mediaTypesForSend = MediaTypes.Image,
-      String extraText = ''}) async {
+      String extraText = '',
+      String extension = '.pdf'}) async {
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -1496,7 +1833,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _takeImageFile.path:
                 '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$thumbNailPicturePath',
           });
-        } else {
+        } else if (mediaTypesForSend == MediaTypes.Image) {
           // Add data to temporary Storage of Sending
           _sendingMessages.add({
             _imageDownLoadUrl:
@@ -1507,6 +1844,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.add({
             _takeImageFile.path:
                 '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
+          });
+        } else if (mediaTypesForSend == MediaTypes.Document) {
+          // Add data to temporary Storage of Sending
+          _sendingMessages.add({
+            _imageDownLoadUrl:
+                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+$extension',
+          });
+
+          // Add Data to the UI related all Chat Container
+          _chatContainer.add({
+            _takeImageFile.path:
+                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$extension',
           });
         }
 
@@ -1797,20 +2146,49 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                 'text'
                               ];
 
-                              final FilePickerResult filePickerResult =
-                                  await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: _allowedExtensions,
-                              );
-
-                              filePickerResult.files.forEach((file) async {
-                                print(file.path);
-                                if (_allowedExtensions.contains(file.extension))
-                                  await OpenFile.open(file.path);
-                                return FileReaderView(
-                                  filePath: file.path,
+                              try {
+                                final FilePickerResult filePickerResult =
+                                    await FilePicker.platform.pickFiles(
+                                  type: FileType.custom,
+                                  allowedExtensions: _allowedExtensions,
                                 );
-                              });
+
+                                if (filePickerResult != null &&
+                                    filePickerResult.files.length > 0) {
+                                  Navigator.pop(context);
+                                  filePickerResult.files.forEach((file) async {
+                                    print(file.path);
+                                    if (_allowedExtensions
+                                        .contains(file.extension))
+                                      _mediaSend(File(file.path),
+                                          mediaTypesForSend:
+                                              MediaTypes.Document,
+                                          extension: '.${file.extension}');
+                                    else {
+                                      showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                                elevation: 5.0,
+                                                backgroundColor:
+                                                    const Color.fromRGBO(
+                                                        34, 48, 60, 0.6),
+                                                title: Text(
+                                                  'Not Supporting Document Format',
+                                                  style: TextStyle(
+                                                    fontSize: 15.0,
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ));
+                                    }
+                                  });
+                                }
+                              } catch (e) {
+                                _showDiaLog(
+                                    titleText: 'Some Error Occurred',
+                                    contentText:
+                                        'Please close and reopen this chat');
+                              }
                             },
                             child: Icon(
                               Entypo.documents,
@@ -1924,10 +2302,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   onPressed: () async {
                     Navigator.pop(context);
                     if (type == 'image')
-                      await _imageAndVideoSend(File(_pickedFile.path),
+                      await _mediaSend(File(_pickedFile.path),
                           extraText: _mediaTextController.text);
                     else {
-                      await _imageAndVideoSend(File(_pickedFile.path),
+                      await _mediaSend(File(_pickedFile.path),
                           extraText: _mediaTextController.text,
                           mediaTypesForSend: MediaTypes.Video);
                     }
@@ -1940,5 +2318,43 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         ),
       );
     }
+  }
+
+  void openFileResultStatus({@required OpenResult openResult}) {
+    if (openResult.type == ResultType.permissionDenied)
+      _showDiaLog(titleText: 'Permission Denied to Open File');
+    else if (openResult.type == ResultType.noAppToOpen)
+      _showDiaLog(titleText: 'No App Found to Open');
+    else if (openResult.type == ResultType.error)
+      _showDiaLog(titleText: 'Error in Opening File');
+    else if (openResult.type == ResultType.fileNotFound)
+      _showDiaLog(titleText: 'Sorry, File Not Found');
+  }
+
+  void _showDiaLog({@required String titleText, String contentText = ''}) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+              title: Center(
+                  child: Text(
+                titleText,
+                style: TextStyle(
+                  fontFamily: 'Lora',
+                  color: Colors.red,
+                  letterSpacing: 1.0,
+                ),
+              )),
+              content: contentText == ''
+                  ? null
+                  : Text(
+                      contentText,
+                      style: TextStyle(
+                        fontFamily: 'Lora',
+                        color: Colors.white,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+            ));
   }
 }

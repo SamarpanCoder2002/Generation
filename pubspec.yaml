@@ -44,7 +44,7 @@ dependencies:
   permission_handler:
   file_picker: ^3.0.1
   open_file: ^3.2.0
-  flutter_filereader: ^2.2.0
+  pdf_viewer_plugin: ^1.1.1
   thumbnails: ^1.0.1
 
   firebase_core: ^1.0.2

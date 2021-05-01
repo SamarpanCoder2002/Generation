@@ -544,7 +544,7 @@ class _ChatsAndActivityCollectionState
                     transitionType: ContainerTransitionType.fadeThrough,
                     openBuilder: (_, __) {
                       return PreviewImageScreen(
-                          imageFile: File('assets/images/sam.jpg'));
+                          imageFile: File('assets/logo/logo.jpg'));
                     },
                     closedBuilder: (_, __) {
                       return CircleAvatar(
