@@ -2379,52 +2379,57 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   _showMap() async {
-    final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
+    try{
+      final Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
 
-    final Marker marker = Marker(
-        markerId: MarkerId('locate'),
-        zIndex: 1.0,
-        draggable: true,
-        position: LatLng(position.latitude, position.longitude));
+      final Marker marker = Marker(
+          markerId: MarkerId('locate'),
+          zIndex: 1.0,
+          draggable: true,
+          position: LatLng(position.latitude, position.longitude));
 
-    print(position.latitude);
-    print(position.longitude);
-    print(position.toJson());
+      print(position.latitude);
+      print(position.longitude);
+      print(position.toJson());
 
-    showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              backgroundColor: Colors.black26,
-              actions: [
-                FloatingActionButton(
-                  child: Icon(Icons.send),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                    _locationSend(
-                        latitude: position.latitude,
-                        longitude: position.longitude);
-                  },
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            backgroundColor: Colors.black26,
+            actions: [
+              FloatingActionButton(
+                child: Icon(Icons.send),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  _locationSend(
+                      latitude: position.latitude,
+                      longitude: position.longitude);
+                },
+              ),
+            ],
+            content: FittedBox(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
                 ),
-              ],
-              content: FittedBox(
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                  ),
-                  child: GoogleMap(
-                    mapType: MapType.hybrid,
-                    markers: Set.of([marker]),
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(position.latitude, position.longitude),
-                      zoom: 18.4746,
-                    ),
+                child: GoogleMap(
+                  mapType: MapType.hybrid,
+                  markers: Set.of([marker]),
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(position.latitude, position.longitude),
+                    zoom: 18.4746,
                   ),
                 ),
               ),
-            ));
-  }
+            ),
+          ));
+    } catch(e){
+      print('Map Show Error: ${e.toString()}');
+      _showDiaLog(titleText: 'Map Show Error', contentText: e.toString());
+    }
+    }
 }
