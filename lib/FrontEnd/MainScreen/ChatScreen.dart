@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -12,6 +13,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation_official/FrontEnd/Services/auth_error_msg_toast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
@@ -24,11 +29,11 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:thumbnails/thumbnails.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:thumbnails/thumbnails.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -78,6 +83,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final Dio _dio = Dio();
 
   final ImagePicker _picker = ImagePicker();
+  final FToast fToast = FToast();
 
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
@@ -159,8 +165,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 } else if (messageContainer[3] == MediaTypes.Video.toString()) {
                   _mediaTypes.add(MediaTypes.Video);
                 } else if (messageContainer[3] ==
-                    MediaTypes.Document.toString())
+                    MediaTypes.Document.toString()) {
                   _mediaTypes.add(MediaTypes.Document);
+                } else if (messageContainer[3] ==
+                    MediaTypes.Location.toString()) {
+                  _mediaTypes.add(MediaTypes.Location);
+                }
 
                 if (mounted) {
                   setState(() {
@@ -281,7 +291,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         break;
                       case 'MediaTypes.Voice': // If Message type is voice
 
-                        PermissionStatus storagePermissionStatus =
+                        final PermissionStatus storagePermissionStatus =
                             await Permission.storage
                                 .request(); // Take User Permission To Take Voice
 
@@ -359,6 +369,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       case 'MediaTypes.Document':
                         await _manageDocument(
                             _incomingInformationContainer, everyMessage);
+                        break;
+                      case 'MediaTypes.Location':
+                        await _manageLocation(
+                            _incomingInformationContainer, everyMessage);
+                        break;
                     }
                   });
 
@@ -383,6 +398,48 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 title: Text("FireStore Problem"),
                 content: Text(e.toString()),
               ));
+    }
+  }
+
+  Future<void> _manageLocation(
+      List<String> _incomingInformationContainer, everyMessage) async {
+    final PermissionStatus storagePermissionStatus = await Permission.storage
+        .request(); // Take User Permission To Take Voice
+
+    if (storagePermissionStatus.isGranted) {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
+      await _localStorageHelper.insertNewMessages(
+          widget._userName,
+          everyMessage.keys.first,
+          MediaTypes.Location,
+          1,
+          everyMessage.values.first);
+
+      if (mounted) {
+        setState(() {
+          _mediaTypes.add(MediaTypes.Location);
+
+          _chatContainer.add({
+            everyMessage.keys.first: everyMessage.values.first,
+          });
+
+          _response.add(true);
+        });
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      showToast('Click Red Pointer in Map to Open in Google Map', fToast,
+          seconds: 5, fontSize: 16.0);
     }
   }
 
@@ -603,6 +660,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     _totalDuration = '';
     _loadingTime = '0:00';
 
+    fToast.init(context);
+
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -628,7 +687,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void dispose() {
     _justAudioPlayer.dispose();
     _flutterSoundRecorder.closeAudioSession();
-    //_mediaTextController.dispose();
     _inputTextController.dispose();
     super.dispose();
   }
@@ -773,6 +831,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     else if (_mediaTypes[position] == MediaTypes.Document) {
                       return _documentConversationList(
                           context, position, _response[position]);
+                    } else if (_mediaTypes[position] == MediaTypes.Location) {
+                      return _locationConversationList(
+                          position, _response[position]);
                     }
                     return voiceConversationList(
                         context, position, _response[position]);
@@ -1326,6 +1387,63 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
+  Widget _locationConversationList(int index, bool _responseValue) {
+    return Column(children: [
+      Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        height: MediaQuery.of(context).size.height * 0.3,
+        margin: _responseValue
+            ? EdgeInsets.only(
+                right: MediaQuery.of(context).size.width / 3,
+                left: 5.0,
+                top: 30.0,
+              )
+            : EdgeInsets.only(
+                left: MediaQuery.of(context).size.width / 3,
+                right: 5.0,
+                top: 15.0,
+              ),
+        alignment:
+            _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+        child: Stack(
+          children: [
+            GoogleMap(
+              mapType: MapType.hybrid,
+              markers: Set.of([
+                Marker(
+                    markerId: MarkerId('locate'),
+                    zIndex: 1.0,
+                    draggable: true,
+                    position: LatLng(
+                        double.parse(
+                            _chatContainer[index].keys.first.split('+')[0]),
+                        double.parse(
+                            _chatContainer[index].keys.first.split('+')[1])))
+              ]),
+              initialCameraPosition: CameraPosition(
+                target: LatLng(
+                    double.parse(
+                        _chatContainer[index].keys.first.split('+')[0]),
+                    double.parse(
+                        _chatContainer[index].keys.first.split('+')[1])),
+                zoom: 17.4746,
+              ),
+            ),
+            GestureDetector(
+              child: Icon(Icons.add),
+              onTap: () {
+                print('Clicked');
+              },
+            ),
+          ],
+        ),
+      ),
+      _conversationShowingTime(index, _responseValue),
+    ]);
+  }
+
   Widget _documentsAndMediaCommonConversationList(
       int index, bool _responseValue) {
     return Scrollbar(
@@ -1704,6 +1822,57 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
+  void _locationSend({double latitude, double longitude}) async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+          .doc("generation_users/$_senderMail")
+          .get();
+
+      // Initialize Temporary List
+      List<dynamic> _sendingMessages = [];
+
+      // Store Updated Sending Messages List
+      _sendingMessages = documentSnapShot.data()['connections']
+          [FirebaseAuth.instance.currentUser.email.toString()];
+
+      setState(() {
+        // Add data to temporary Storage of Sending
+        _sendingMessages.add({
+          '$latitude+$longitude':
+              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+        });
+
+        _chatContainer.add({
+          '$latitude+$longitude':
+              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+        });
+
+        _response.add(false);
+
+        _mediaTypes.add(MediaTypes.Location);
+      });
+
+      // Data Store in Local Storage
+      await _localStorageHelper.insertNewMessages(
+          widget._userName,
+          '$latitude+$longitude',
+          MediaTypes.Location,
+          0,
+          _chatContainer.last.values.first.toString());
+
+      // Data Store in Firestore
+      _management.addConversationMessages(this._senderMail, _sendingMessages);
+
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   void chatMicrophoneOnTapAction(int index) async {
     _justAudioPlayer.positionStream.listen((event) {
       print("Going Duration: $event");
@@ -1945,11 +2114,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                     print(file.path);
                                     if (_allowedExtensions
                                         .contains(file.extension))
-                                      // _mediaSend(File(file.path),
-                                      //     mediaTypesForSend:
-                                      //         MediaTypes.Document,
-                                      //     extension: '.${file.extension}');
-
                                       _connectionExtraTextManagement(
                                           mediaTypesForExtraText:
                                               MediaTypes.Document,
@@ -1986,7 +2150,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                 width: 3,
                               )),
                           child: GestureDetector(
-                            onTap: () async {},
+                            onTap: () async {
+                              showToast(
+                                'Waiting for Map',
+                                fToast,
+                                fontSize: 16.0,
+                              );
+                              _showMap();
+                            },
                             child: Icon(
                               Icons.location_on_rounded,
                               color: Colors.lightGreen,
@@ -2204,6 +2375,56 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         letterSpacing: 1.0,
                       ),
                     ),
+            ));
+  }
+
+  _showMap() async {
+    final Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation);
+
+    final Marker marker = Marker(
+        markerId: MarkerId('locate'),
+        zIndex: 1.0,
+        draggable: true,
+        position: LatLng(position.latitude, position.longitude));
+
+    print(position.latitude);
+    print(position.longitude);
+    print(position.toJson());
+
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              backgroundColor: Colors.black26,
+              actions: [
+                FloatingActionButton(
+                  child: Icon(Icons.send),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    _locationSend(
+                        latitude: position.latitude,
+                        longitude: position.longitude);
+                  },
+                ),
+              ],
+              content: FittedBox(
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                  ),
+                  child: GoogleMap(
+                    mapType: MapType.hybrid,
+                    markers: Set.of([marker]),
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(position.latitude, position.longitude),
+                      zoom: 18.4746,
+                    ),
+                  ),
+                ),
+              ),
             ));
   }
 }

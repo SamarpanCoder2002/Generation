@@ -80,7 +80,6 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               ),
             )),
             enableRotation: true,
-            minScale: 0.3,
           ),
         ),
       ),
