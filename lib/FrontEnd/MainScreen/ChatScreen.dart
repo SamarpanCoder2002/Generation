@@ -1290,7 +1290,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
               ),
               transitionDuration: Duration(
-                milliseconds: 900,
+                milliseconds: 400,
               ),
               transitionType: ContainerTransitionType.fadeThrough,
               openBuilder: (context, openWidget) {
@@ -1326,7 +1326,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         ),
                       )),
                       enableRotation: true,
-                      minScale: 0.3,
+                      minScale: 0.36,
                     ),
                   ),
                   if (_mediaTypes[index] == MediaTypes.Video)
@@ -1953,7 +1953,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       if (mounted) {
         setState(() {
           _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
-              (MediaQuery.of(context).size.height * 0.5));
+              (MediaQuery.of(context).size.height * 0.8));
         });
       }
     }
@@ -2020,7 +2020,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     if (mounted) {
       setState(() {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
-            (MediaQuery.of(context).size.height * 0.5));
+            (MediaQuery.of(context).size.height * 0.8));
       });
     }
   }
