@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
+import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation_official/FrontEnd/Services/auth_error_msg_toast.dart';
@@ -34,6 +35,7 @@ import 'package:thumbnails/thumbnails.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -127,14 +129,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           // Change Every Message Value to List
           List<dynamic> messageContainer = message.values.toList();
 
-          // For chat open Every First Time
-          if (_isChatOpenFirstTime) {
-            if (mounted) {
-              setState(() {
-                _isChatOpenFirstTime = false;
-              });
-            }
-          }
+          // // For chat open Every First Time
+          // if (_isChatOpenFirstTime) {
+          //   if (mounted) {
+          //     setState(() {
+          //       _isChatOpenFirstTime = false;
+          //     });
+          //   }
+          // }
 
           // If there is no opponent's person messages
           if (messageContainer.isEmpty) {
@@ -180,13 +182,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           }
         }
       } else {
-        if (_isChatOpenFirstTime) {
-          if (mounted) {
-            setState(() {
-              _isChatOpenFirstTime = false;
-            });
-          }
-        }
+        // if (_isChatOpenFirstTime) {
+        //   if (mounted) {
+        //     setState(() {
+        //       _isChatOpenFirstTime = false;
+        //     });
+        //   }
+        // }
       }
 
       _extractDataFromFireStore(); // After Get the old Conversation messages from SqLite, Take Data from Firestore
@@ -195,7 +197,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       _scrollController.jumpTo(_scrollController.position.maxScrollExtent *
           _chatContainer.length *
           (MediaQuery.of(context).size.height) *
-          0.1);
+          0.2);
 
       showDialog(
           context: context,
@@ -208,6 +210,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   _extractDataFromFireStore() {
     try {
+      double _positionToScroll = 100;
+
       // Fetch Data from FireStore
       _management.getDatabaseData().listen((event) {
         if (event.data()['connections'].length < 0) {
@@ -221,15 +225,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
             // If messageContainer not Empty
             if (messages.isNotEmpty) {
-              // Checking Chat is open for the first time or not
-              if (_isChatOpenFirstTime) {
-                if (mounted) {
-                  setState(() {
-                    _isChatOpenFirstTime = false;
-                  });
-                }
-              }
-
               if (mounted) {
                 setState(() {
                   // Take Map of Connections
@@ -297,18 +292,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                           }
 
-                          Directory directory;
-
-                          final List<Directory> listStorageDir =
-                              await getExternalStorageDirectories();
-                          if (listStorageDir.length == 2) {
-                            directory = listStorageDir[1];
-                          } else {
-                            directory = listStorageDir[0];
-                          }
-
-                          // final Directory directory =
-                          //     await getExternalStorageDirectory(); // Find Directory To Storage
+                          final Directory directory =
+                              await getExternalStorageDirectory();
+                          print('Directory Path: ${directory.path}');
 
                           final recordingStorage = await Directory(
                                   directory.path + '/Recordings/')
@@ -362,29 +348,79 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         break;
 
                       case 'MediaTypes.Image':
+                        _positionToScroll =
+                            MediaQuery.of(context).size.height * 0.6;
                         await _manageMedia(
                             _incomingInformationContainer, everyMessage);
                         break;
                       case 'MediaTypes.Video':
+                        _positionToScroll =
+                            MediaQuery.of(context).size.height * 0.6;
                         await _manageMedia(
                           _incomingInformationContainer,
                           everyMessage,
                         );
                         break;
                       case 'MediaTypes.Document':
+                        _positionToScroll =
+                            MediaQuery.of(context).size.height * 0.6;
                         await _manageDocument(
                             _incomingInformationContainer, everyMessage);
                         break;
                       case 'MediaTypes.Location':
+                        _positionToScroll =
+                            MediaQuery.of(context).size.height * 0.6;
                         await _manageLocation(
                             _incomingInformationContainer, everyMessage);
                         break;
                     }
+
+                    print(' Chat Open Status: $_isChatOpenFirstTime');
+
+                    // For AutoScroll to the end position
+                    // Checking Chat is open for the first time or not
+                    if (_isChatOpenFirstTime) {
+                      if (mounted) {
+                        print(_positionToScroll);
+                        setState(() {
+                          _scrollController.jumpTo(_scrollController
+                                  .position.maxScrollExtent +
+                              (_chatContainer.length *
+                                  (MediaQuery.of(context).size.height * 0.1)));
+                          _isChatOpenFirstTime = false;
+                        });
+                      }
+                    } else {
+                      print('Reach Here');
+                      if (mounted) {
+                        print(_positionToScroll);
+                        setState(() {
+                          _scrollController.jumpTo(
+                              _scrollController.position.maxScrollExtent +
+                                  _positionToScroll);
+                        });
+                      }
+                    }
+                    _positionToScroll = 100;
                   });
                 });
               }
             } else {
               print("No message Here");
+              print('Status: $_isChatOpenFirstTime');
+
+              if (_isChatOpenFirstTime) {
+                if (mounted) {
+                  print(_positionToScroll);
+                  setState(() {
+                    _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent +
+                            _chatContainer.length *
+                                (MediaQuery.of(context).size.height * 0.1));
+                    _isChatOpenFirstTime = false;
+                  });
+                }
+              }
             }
           } else {
             print("Contacts Not Present");
@@ -399,10 +435,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 content: Text(e.toString()),
               ));
     }
-
-    // For AutoScroll to the end position
-    _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
-        _chatContainer.length * (MediaQuery.of(context).size.height * 0.1));
   }
 
   Future<void> _manageLocation(
@@ -445,9 +477,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showToast('Click Red Pointer in Map to Open in Google Map', fToast,
           seconds: 5, fontSize: 16.0);
     }
-
-    // // For AutoScroll to Bottom
-    // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   Future<void> _manageDocument(
@@ -462,18 +491,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      Directory directory;
-
-      final List<Directory> listStorageDir =
-          await getExternalStorageDirectories();
-      if (listStorageDir.length == 2) {
-        directory = listStorageDir[1];
-      } else {
-        directory = listStorageDir[0];
-      }
-
-      // final Directory directory =
-      //     await getExternalStorageDirectory(); // Find Directory To Storage
+      final Directory directory = await getExternalStorageDirectory();
+      print('Directory Path: ${directory.path}');
 
       final Directory _newDirectory =
           await Directory('${directory.path}/Documents/')
@@ -518,9 +537,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
     }
-
-    // // For AutoScroll to Bottom
-    // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   Future<void> _manageMedia(
@@ -539,18 +555,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      Directory directory;
-
-      final List<Directory> listStorageDir =
-          await getExternalStorageDirectories();
-      if (listStorageDir.length == 2) {
-        directory = listStorageDir[1];
-      } else {
-        directory = listStorageDir[0];
-      }
-
-      // final Directory directory =
-      //     await getExternalStorageDirectory(); // Find Directory To Storage
+      final Directory directory = await getExternalStorageDirectory();
+      print('Directory Path: ${directory.path}');
 
       Directory _newDirectory;
 
@@ -648,9 +654,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _isLoading = false;
         });
       }
-
-      // For AutoScroll to Bottom
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
@@ -673,16 +676,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Future<void> _makeDirectoryOnce() async {
-    Directory directory;
+    final Directory directory = await getExternalStorageDirectory();
+    print('Directory Path: ${directory.path}');
 
-    final List<Directory> listStorageDir =
-        await getExternalStorageDirectories();
-    if (listStorageDir.length == 2) {
-      directory = listStorageDir[1];
-    } else {
-      directory = listStorageDir[0];
-    }
-    //final directory = await getExternalStorageDirectory();
     print("Located Directory is: " + directory.path);
 
     _audioDirectory = await Directory(directory.path + '/Recordings/')
@@ -933,7 +929,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         thickness: 10.0,
                         radius: Radius.circular(30.0),
                         child: TextField(
-                          //autofocus: true,
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -1033,7 +1028,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             style: ElevatedButton.styleFrom(
               primary: _responseValue
                   ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(102, 150, 255, 1),
+                  : Color.fromRGBO(102, 102, 255, 1),
               elevation: 0.0,
               padding: EdgeInsets.all(10.0),
               shape: RoundedRectangleBorder(
@@ -1044,11 +1039,59 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
               ),
             ),
-            child: Text(
-              _chatContainer[index].keys.first,
-              style: TextStyle(
+            child: AutolinkText(
+              text: _chatContainer[index].keys.first,
+              humanize: false,
+              textStyle: TextStyle(
                 color: Colors.white,
               ),
+              linkStyle: TextStyle(
+                color: Colors.amber,
+              ),
+              onEmailTap: (matchText) async {
+                try {
+                  final Uri params = Uri(
+                    scheme: 'mailto',
+                    path: '$matchText',
+                  );
+
+                  await launch(params.toString());
+                } catch (e) {
+                  _showDiaLog(titleText: "Sorry, Can't Send Email");
+                }
+              },
+              onPhoneTap: (matchText) async {
+                try {
+                  final Uri params = Uri(
+                    scheme: 'tel',
+                    path: '$matchText',
+                  );
+
+                  await launch(params.toString());
+                } catch (e) {
+                  _showDiaLog(titleText: "Sorry, Access this number");
+                }
+              },
+              onWebLinkTap: (matchText) async {
+                try {
+                  final String _recognize =
+                      matchText.contains('https') ? 'https' : 'http';
+                  final Uri params = Uri(
+                    scheme: matchText.contains('https') ? 'https' : 'http',
+                    path: '${matchText.split(_recognize)[1]}',
+                  );
+
+                  await launch(params.toString());
+                  showToast(
+                    'Wait For launch',
+                    fToast,
+                    fontSize: 16,
+                  );
+                } catch (e) {
+                  print(e.toString);
+                  _showDiaLog(titleText: "Sorry, Can't Open This Url");
+                }
+              },
             ),
             onPressed: () {},
           ),
@@ -1283,7 +1326,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         ),
                       )),
                       enableRotation: true,
-                      minScale: 0.5,
+                      minScale: 0.3,
                     ),
                   ),
                   if (_mediaTypes[index] == MediaTypes.Video)
@@ -1565,6 +1608,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   void _textSend() async {
     try {
+      //final inputString = _inputTextController.text;
+
       print("Send Pressed");
       if (_inputTextController.text.isNotEmpty) {
         // Take Document Data related to old messages
@@ -1596,20 +1641,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   "${DateTime.now().hour}:${DateTime.now().minute}",
             });
 
+            print(_chatContainer.last);
+
             _response
                 .add(false); // Add the data _response to chat related container
 
             _mediaTypes.add(MediaTypes.Text); // Add MediaType
 
-            _inputTextController.clear(); // Get Clear the InputBox
-
             _iconChanger = true;
           });
         }
-
-        // Scroll to Bottom
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent + 100);
 
         print('MediaTypes.Text: ${MediaTypes.Text}');
 
@@ -1621,8 +1662,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             0,
             _chatContainer.last.values.first.toString());
 
+        print(sendingMessages);
+
         // Data Store in Firestore
         _management.addConversationMessages(this._senderMail, sendingMessages);
+
+        _inputTextController.clear();
+
+        // Scroll to Bottom
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 100);
       }
     } catch (e) {
       showDialog(
@@ -1634,7 +1683,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             );
           });
     }
-    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    if (mounted) {
+      setState(() {
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 100);
+      });
+    }
   }
 
   void _voiceController() async {
@@ -1649,11 +1703,19 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _hintText = 'Recording....';
         });
       }
-      _flutterSoundRecorder
-          .startRecorder(
-            toFile: _audioDirectory.path + '${DateTime.now()}.mp3',
-          )
-          .then((value) => print("Recording"));
+
+      print('${_audioDirectory.path}${DateTime.now()}.mp3');
+
+      final PermissionStatus recordingPermissionStatus =
+          await Permission.microphone.request();
+
+      if (recordingPermissionStatus.isGranted) {
+        _flutterSoundRecorder
+            .startRecorder(
+              toFile: '${_audioDirectory.path}${DateTime.now()}.mp3',
+            )
+            .then((value) => print("Recording"));
+      }
     } else {
       // For recording stop after action
       if (mounted) {
@@ -1672,6 +1734,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   void _voiceSend(String recordedFilePath,
       {String audioExtension = '.mp3'}) async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -1721,6 +1785,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         _mediaTypes.add(MediaTypes.Voice); // Add MediaType
 
+        // // Scroll to Bottom
+        // _scrollController
+        //     .jumpTo(_scrollController.position.maxScrollExtent + 100);
+
         _inputTextController.clear(); // Get Clear the InputBox
       });
 
@@ -1735,7 +1803,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       // Data Store in Firestore
       _management.addConversationMessages(this._senderMail, sendingMessages);
 
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      if (mounted) {
+        setState(() {
+          _scrollController
+              .jumpTo(_scrollController.position.maxScrollExtent + 300);
+        });
+      }
     }
   }
 
@@ -1784,18 +1857,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     String thumbNailPicturePath, thumbNailPicturePathUrl;
 
     if (mediaTypesForSend == MediaTypes.Video) {
-      Directory directory;
-
-      final List<Directory> listStorageDir =
-          await getExternalStorageDirectories();
-      if (listStorageDir.length == 2) {
-        directory = listStorageDir[1];
-      } else {
-        directory = listStorageDir[0];
-      }
-
-      // final Directory directory =
-      //     await getExternalStorageDirectory(); // Find Directory To Storage
+      final Directory directory = await getExternalStorageDirectory();
+      print('Directory Path: ${directory.path}');
 
       final Directory _newDirectory =
           await Directory('${directory.path}/.ThumbNails/')
@@ -1862,6 +1925,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         _mediaTypes.add(mediaTypesForSend); // Add MediaType
 
+        // // Scroll to Bottom
+        // _scrollController.jumpTo(
+        //     _scrollController.position.maxScrollExtent * MediaQuery
+        //         .of(context)
+        //         .size
+        //         .height * 0.8);
+
         _inputTextController.clear(); // Get Clear the InputBox
       });
 
@@ -1880,11 +1950,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       // Data Store in Firestore
       _management.addConversationMessages(this._senderMail, _sendingMessages);
 
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      if (mounted) {
+        setState(() {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
+              (MediaQuery.of(context).size.height * 0.5));
+        });
+      }
     }
   }
 
   void _locationSend({double latitude, double longitude}) async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -1916,6 +1993,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _response.add(false);
 
         _mediaTypes.add(MediaTypes.Location);
+
+        // // Scroll to Bottom
+        // _scrollController
+        //     .jumpTo(_scrollController.position.maxScrollExtent * MediaQuery
+        //     .of(context)
+        //     .size
+        //     .height * 0.8);
       });
 
       // Data Store in Local Storage
@@ -1933,7 +2017,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _isLoading = false;
       });
     }
-    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    if (mounted) {
+      setState(() {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
+            (MediaQuery.of(context).size.height * 0.5));
+      });
+    }
   }
 
   void chatMicrophoneOnTapAction(int index) async {
@@ -1950,7 +2039,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     _justAudioPlayer.playerStateStream.listen((event) {
       if (event.processingState == ProcessingState.completed) {
-        print('Present 7');
         print('Audio Play Completed');
         _justAudioPlayer.stop();
         if (mounted) {
@@ -1963,7 +2051,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     });
 
     if (_lastAudioPlayingIndex != index) {
-      print('Present 1');
       await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
 
       if (mounted) {
@@ -1977,7 +2064,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       await _justAudioPlayer.play();
     } else {
-      print('Present 2');
       print(_justAudioPlayer.processingState);
       if (_justAudioPlayer.processingState == ProcessingState.idle) {
         await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
@@ -1993,7 +2079,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         await _justAudioPlayer.play();
       } else if (_justAudioPlayer.playing) {
-        print('Present 6');
         if (mounted) {
           setState(() {
             _iconData = Icons.play_arrow_rounded;
@@ -2008,7 +2093,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
 
-        print('Present 5');
         await _justAudioPlayer.play();
       } else if (_justAudioPlayer.processingState ==
           ProcessingState.completed) {}
@@ -2028,7 +2112,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       await _justAudioPlayer.stop();
       if (mounted) {
         setState(() {
-          print('Present 7');
           print('Audio Play Completed');
           _justAudioPlayer.stop();
           if (mounted) {
@@ -2385,6 +2468,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ),
                 onPressed: () async {
                   Navigator.pop(context);
+                  SystemChannels.textInput.invokeMethod('TextInput.hide');
                   if (mediaTypesIS == MediaTypes.Image)
                     await _mediaSend(File(fileLocation),
                         extraText: _mediaTextController.text);
@@ -2417,6 +2501,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
+              elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Center(
                   child: Text(

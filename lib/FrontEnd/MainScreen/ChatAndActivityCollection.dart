@@ -122,16 +122,9 @@ class _ChatsAndActivityCollectionState
 
           particularConnectionActivity.forEach((everyActivity) async {
             if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
-              Directory directory;
+              final Directory directory = await getExternalStorageDirectory();
+              print('Directory Path: ${directory.path}');
 
-              final List<Directory> listStorageDir = await getExternalStorageDirectories();
-              if(listStorageDir.length == 2){
-                directory = listStorageDir[1];
-              }else{
-                directory = listStorageDir[0];
-              }
-
-              // final Directory directory = await getExternalStorageDirectory();
               final String currTime = DateTime.now().toString();
 
               if (everyActivity.values.first.toString().split('++++++')[1] ==
@@ -570,7 +563,7 @@ class _ChatsAndActivityCollectionState
                   middleColor: const Color.fromRGBO(31, 51, 71, 1),
                   closedElevation: 0.0,
                   openElevation: 0.0,
-                  transitionDuration: Duration(milliseconds: 500),
+                  transitionDuration: Duration(milliseconds: 200),
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
                     if (allConnectionsUserName.length > 1) {
