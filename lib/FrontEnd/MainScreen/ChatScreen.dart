@@ -386,7 +386,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           _scrollController.jumpTo(_scrollController
                                   .position.maxScrollExtent +
                               (_chatContainer.length *
-                                  (MediaQuery.of(context).size.height * 0.1)));
+                                  (MediaQuery.of(context).size.height * 0.3)));
                           _isChatOpenFirstTime = false;
                         });
                       }
