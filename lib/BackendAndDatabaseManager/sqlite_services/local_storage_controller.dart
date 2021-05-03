@@ -50,7 +50,17 @@ class LocalStorageHelper {
   // For make a database
   Future<Database> initializeDatabase() async {
     // Get the directory path to store the database
-    final Directory directory = await getExternalStorageDirectory();
+    Directory directory;
+
+    final List<Directory> listStorageDir =
+        await getExternalStorageDirectories();
+    if (listStorageDir.length == 2) {
+      directory = listStorageDir[1];
+    } else {
+      directory = listStorageDir[0];
+    }
+
+    // final Directory directory = await getExternalStorageDirectory();
     final Directory newDirectory =
         await Directory(directory.path + '/.Databases/').create();
     final String path = newDirectory.path + '/generation_local_storage.db';

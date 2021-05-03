@@ -122,7 +122,16 @@ class _ChatsAndActivityCollectionState
 
           particularConnectionActivity.forEach((everyActivity) async {
             if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
-              final Directory directory = await getExternalStorageDirectory();
+              Directory directory;
+
+              final List<Directory> listStorageDir = await getExternalStorageDirectories();
+              if(listStorageDir.length == 2){
+                directory = listStorageDir[1];
+              }else{
+                directory = listStorageDir[0];
+              }
+
+              // final Directory directory = await getExternalStorageDirectory();
               final String currTime = DateTime.now().toString();
 
               if (everyActivity.values.first.toString().split('++++++')[1] ==

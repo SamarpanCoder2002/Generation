@@ -132,11 +132,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             if (mounted) {
               setState(() {
                 _isChatOpenFirstTime = false;
-
-                // For AutoScroll to the end position
-                if (_scrollController.hasClients)
-                  _scrollController
-                      .jumpTo(_scrollController.position.maxScrollExtent);
               });
             }
           }
@@ -184,13 +179,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             }
           }
         }
-        if (mounted) {
-          setState(() {
-            if (_scrollController.hasClients)
-              _scrollController
-                  .jumpTo(_scrollController.position.maxScrollExtent);
-          });
-        }
       } else {
         if (_isChatOpenFirstTime) {
           if (mounted) {
@@ -200,8 +188,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           }
         }
       }
+
       _extractDataFromFireStore(); // After Get the old Conversation messages from SqLite, Take Data from Firestore
     } catch (e) {
+      // For AutoScroll to the end position
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent *
+          _chatContainer.length *
+          (MediaQuery.of(context).size.height) *
+          0.1);
+
       showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -302,8 +297,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             });
                           }
 
-                          final Directory directory =
-                              await getExternalStorageDirectory(); // Find Directory To Storage
+                          Directory directory;
+
+                          final List<Directory> listStorageDir =
+                              await getExternalStorageDirectories();
+                          if (listStorageDir.length == 2) {
+                            directory = listStorageDir[1];
+                          } else {
+                            directory = listStorageDir[0];
+                          }
+
+                          // final Directory directory =
+                          //     await getExternalStorageDirectory(); // Find Directory To Storage
 
                           final recordingStorage = await Directory(
                                   directory.path + '/Recordings/')
@@ -376,11 +381,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         break;
                     }
                   });
-
-                  // For AutoScroll to the end position
-                  if (_scrollController.hasClients)
-                    _scrollController.jumpTo(
-                        _scrollController.position.maxScrollExtent + 100);
                 });
               }
             } else {
@@ -399,6 +399,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 content: Text(e.toString()),
               ));
     }
+
+    // For AutoScroll to the end position
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
+        _chatContainer.length * (MediaQuery.of(context).size.height * 0.1));
   }
 
   Future<void> _manageLocation(
@@ -441,6 +445,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showToast('Click Red Pointer in Map to Open in Google Map', fToast,
           seconds: 5, fontSize: 16.0);
     }
+
+    // // For AutoScroll to Bottom
+    // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   Future<void> _manageDocument(
@@ -455,8 +462,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      final Directory directory =
-          await getExternalStorageDirectory(); // Find Directory To Storage
+      Directory directory;
+
+      final List<Directory> listStorageDir =
+          await getExternalStorageDirectories();
+      if (listStorageDir.length == 2) {
+        directory = listStorageDir[1];
+      } else {
+        directory = listStorageDir[0];
+      }
+
+      // final Directory directory =
+      //     await getExternalStorageDirectory(); // Find Directory To Storage
 
       final Directory _newDirectory =
           await Directory('${directory.path}/Documents/')
@@ -501,6 +518,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
     }
+
+    // // For AutoScroll to Bottom
+    // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   Future<void> _manageMedia(
@@ -519,8 +539,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      final Directory directory =
-          await getExternalStorageDirectory(); // Find Directory To Storage
+      Directory directory;
+
+      final List<Directory> listStorageDir =
+          await getExternalStorageDirectories();
+      if (listStorageDir.length == 2) {
+        directory = listStorageDir[1];
+      } else {
+        directory = listStorageDir[0];
+      }
+
+      // final Directory directory =
+      //     await getExternalStorageDirectory(); // Find Directory To Storage
 
       Directory _newDirectory;
 
@@ -618,6 +648,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _isLoading = false;
         });
       }
+
+      // For AutoScroll to Bottom
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
@@ -640,7 +673,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Future<void> _makeDirectoryOnce() async {
-    final directory = await getExternalStorageDirectory();
+    Directory directory;
+
+    final List<Directory> listStorageDir =
+        await getExternalStorageDirectories();
+    if (listStorageDir.length == 2) {
+      directory = listStorageDir[1];
+    } else {
+      directory = listStorageDir[0];
+    }
+    //final directory = await getExternalStorageDirectory();
     print("Located Directory is: " + directory.path);
 
     _audioDirectory = await Directory(directory.path + '/Recordings/')
@@ -676,7 +718,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       setState(() {
         // For AutoScroll to the end position
         if (_scrollController.hasClients)
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          _scrollController.animateTo(10.0,
+              duration: Duration(
+                milliseconds: 10,
+              ),
+              curve: Curves.easeInOut);
       });
     }
 
@@ -887,6 +933,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         thickness: 10.0,
                         radius: Radius.circular(30.0),
                         child: TextField(
+                          //autofocus: true,
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -1587,6 +1634,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             );
           });
     }
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   void _voiceController() async {
@@ -1686,6 +1734,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       // Data Store in Firestore
       _management.addConversationMessages(this._senderMail, sendingMessages);
+
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
@@ -1734,8 +1784,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     String thumbNailPicturePath, thumbNailPicturePathUrl;
 
     if (mediaTypesForSend == MediaTypes.Video) {
-      final Directory directory =
-          await getExternalStorageDirectory(); // Find Directory To Storage
+      Directory directory;
+
+      final List<Directory> listStorageDir =
+          await getExternalStorageDirectories();
+      if (listStorageDir.length == 2) {
+        directory = listStorageDir[1];
+      } else {
+        directory = listStorageDir[0];
+      }
+
+      // final Directory directory =
+      //     await getExternalStorageDirectory(); // Find Directory To Storage
 
       final Directory _newDirectory =
           await Directory('${directory.path}/.ThumbNails/')
@@ -1819,6 +1879,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       // Data Store in Firestore
       _management.addConversationMessages(this._senderMail, _sendingMessages);
+
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
@@ -1871,6 +1933,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _isLoading = false;
       });
     }
+    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
 
   void chatMicrophoneOnTapAction(int index) async {
@@ -2379,7 +2442,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   _showMap() async {
-    try{
+    try {
       final Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.bestForNavigation);
 
@@ -2396,40 +2459,40 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            backgroundColor: Colors.black26,
-            actions: [
-              FloatingActionButton(
-                child: Icon(Icons.send),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  _locationSend(
-                      latitude: position.latitude,
-                      longitude: position.longitude);
-                },
-              ),
-            ],
-            content: FittedBox(
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                ),
-                child: GoogleMap(
-                  mapType: MapType.hybrid,
-                  markers: Set.of([marker]),
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(position.latitude, position.longitude),
-                    zoom: 18.4746,
+                backgroundColor: Colors.black26,
+                actions: [
+                  FloatingActionButton(
+                    child: Icon(Icons.send),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      _locationSend(
+                          latitude: position.latitude,
+                          longitude: position.longitude);
+                    },
+                  ),
+                ],
+                content: FittedBox(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                    ),
+                    child: GoogleMap(
+                      mapType: MapType.hybrid,
+                      markers: Set.of([marker]),
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(position.latitude, position.longitude),
+                        zoom: 18.4746,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ));
-    } catch(e){
+              ));
+    } catch (e) {
       print('Map Show Error: ${e.toString()}');
       _showDiaLog(titleText: 'Map Show Error', contentText: e.toString());
     }
-    }
+  }
 }
