@@ -54,8 +54,6 @@ class LocalStorageHelper {
     final Directory directory = await getExternalStorageDirectory();
     print('Directory Path: ${directory.path}');
 
-
-
     final Directory newDirectory =
         await Directory(directory.path + '/.Databases/').create();
     final String path = newDirectory.path + '/generation_local_storage.db';
@@ -177,6 +175,16 @@ class LocalStorageHelper {
     return countTotalStatus[0].values.first;
   }
 
+  // Count total Messages for particular Table Name
+  Future<int> _countTotalMessagesUnderATable(String _tableName) async {
+    final Database db = await this.database;
+
+    final List<Map<String, Object>> countTotalMessagesWithOneAdditionalData =
+        await db.rawQuery('SELECT COUNT(*) FROM $_tableName');
+
+    return countTotalMessagesWithOneAdditionalData[0].values.first;
+  }
+
   // Insert Use Additional Data to Table
   Future<int> insertAdditionalData(
       String _tableName, String _about, String _email) async {
@@ -226,14 +234,6 @@ class LocalStorageHelper {
     return result;
   }
 
-  // Extract Connection Name from Table
-  Future<List<Map<String, Object>>> extractAllTablesName() async {
-    Database db = await this.database; // DB Reference
-    List<Map<String, Object>> tables = await db.rawQuery(
-        "SELECT tbl_name FROM sqlite_master WHERE tbl_name != 'android_metadata';");
-    return tables;
-  }
-
   // Extract Message from table
   Future<List<Map<String, dynamic>>> extractMessageData(
       String _tableName) async {
@@ -244,22 +244,6 @@ class LocalStorageHelper {
     return result;
   }
 
-  // Stream<List<String>> extractTables() async* {
-  //   Queue<String> allData = Queue<String>();
-  //
-  //   List<Map<String, Object>> allTables =
-  //       await LocalStorageHelper().extractAllTablesName();
-  //
-  //   if (allTables.isNotEmpty) {
-  //     allTables.forEach((element) {
-  //       allData.addFirst(element.values.toList()[0].toString());
-  //     });
-  //   } else
-  //     print("No Data Present");
-  //
-  //   yield allData.toList();
-  // }
-
   Future<String> fetchEmail(String _tableName) async {
     Database db = await this.database;
 
@@ -268,6 +252,50 @@ class LocalStorageHelper {
 
     return result[0].values.toList()[0];
   }
+
+  Future<Map<String,String>> fetchLatestMessage(String _tableName) async {
+    final Database db = await this.database;
+
+    int totalMessages = await _countTotalMessagesUnderATable(_tableName);
+
+    if (totalMessages == 1) return null;
+
+    List<Map<String, Object>> result = await db.rawQuery(
+        "SELECT $_colMessages, $_colMediaType FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
+
+    Map<String, String> map = Map<String, String>();
+    map.addAll({
+      result[0].values.toList().first:  result[0].values.toList().last,
+    });
+
+    print('Map is: $map');
+
+    return map;
+  }
+
+// // Extract Connection Name from Table
+// Future<List<Map<String, Object>>> extractAllTablesName() async {
+//   Database db = await this.database; // DB Reference
+//   List<Map<String, Object>> tables = await db.rawQuery(
+//       "SELECT tbl_name FROM sqlite_master WHERE tbl_name != 'android_metadata';");
+//   return tables;
+// }
+
+// Stream<List<String>> extractTables() async* {
+//   Queue<String> allData = Queue<String>();
+//
+//   List<Map<String, Object>> allTables =
+//       await LocalStorageHelper().extractAllTablesName();
+//
+//   if (allTables.isNotEmpty) {
+//     allTables.forEach((element) {
+//       allData.addFirst(element.values.toList()[0].toString());
+//     });
+//   } else
+//     print("No Data Present");
+//
+//   yield allData.toList();
+// }
 
 // Stream<List<Map<String, Object>>> findOutTables() {
 //   Stream<List<Map<String, Object>>> take = LocalStorageHelper()

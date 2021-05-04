@@ -7,8 +7,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,7 +20,6 @@ import 'package:generation_official/BackendAndDatabaseManager/firebase_services/
 import 'package:generation_official/FrontEnd/Activity/activity_maker.dart';
 import 'package:generation_official/FrontEnd/Services/search_screen.dart';
 import 'package:generation_official/FrontEnd/Activity/activity_view.dart';
-
 import 'package:generation_official/FrontEnd/MainScreen/ChatScreen.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
@@ -31,27 +31,28 @@ class ChatsAndActivityCollection extends StatefulWidget {
 
 class _ChatsAndActivityCollectionState
     extends State<ChatsAndActivityCollection> {
-  bool isLoading = false;
-  final List<String> allConnectionsUserName = [];
+  bool _isLoading = false;
+  final List<String> _allConnectionsUserName = [];
+  final Map<String, dynamic> _allConnectionsLatestMessage =
+      Map<String, dynamic>();
 
   final List<String> _allUserConnectionActivity = [];
-  final FToast fToast = FToast();
 
-  final Management management = Management();
-  final LocalStorageHelper localStorageHelper = LocalStorageHelper();
+  //final FToast _fToast = FToast();
 
-  final Dio dio = Dio();
+  final Management _management = Management();
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  final Dio _dio = Dio();
 
   // Regular Expression for Media Detection
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
-  int statusCurrIndex = 0;
-
   void _fetchRealTimeData() async {
     if (mounted) {
       setState(() {
-        isLoading = true;
+        _isLoading = true;
       });
     }
 
@@ -60,13 +61,13 @@ class _ChatsAndActivityCollectionState
         await Permission.storage.request();
 
     // Listen to the realTime Data Fetch
-    management.getDatabaseData().listen((event) async {
+    _management.getDatabaseData().listen((event) async {
       final Map<String, dynamic> _allUserConnectionActivityTake =
           event.data()['activity'] as Map;
 
       // Current Account User Name Take
       final String _thisAccountUserName =
-          await localStorageHelper.extractImportantDataFromThatAccount(
+          await _localStorageHelper.extractImportantDataFromThatAccount(
               userMail: FirebaseAuth.instance.currentUser.email);
 
       /// Checking Already This Account Name Present in Local Container or not
@@ -89,7 +90,7 @@ class _ChatsAndActivityCollectionState
               _allUserConnectionActivityTake[connectionMail] as List;
 
           final String _connectionUserNameFromLocalDatabase =
-              await localStorageHelper.extractImportantDataFromThatAccount(
+              await _localStorageHelper.extractImportantDataFromThatAccount(
                   userMail:
                       connectionMail); // FindOut User Name from local database
 
@@ -134,17 +135,17 @@ class _ChatsAndActivityCollectionState
                       await Directory(directory.path + '/.ActivityVideos/')
                           .create();
 
-                  await dio
+                  await _dio
                       .download(everyActivity.keys.first.toString(),
                           '${activityVideoPath.path}$currTime.mp4')
                       .whenComplete(() async {
                     print('Video Download Complete');
-                    // await management.deleteFilesFromFirebaseStorage(
+                    // await _management.deleteFilesFromFirebaseStorage(
                     //     everyActivity.keys.first.toString());
                   });
 
                   /// Insert Video  Activity Data to the local database for future use
-                  await localStorageHelper.insertDataInUserActivityTable(
+                  await _localStorageHelper.insertDataInUserActivityTable(
                     tableName: _connectionUserNameFromLocalDatabase,
                     statusLinkOrString:
                         '${activityVideoPath.path}$currTime.mp4',
@@ -166,17 +167,17 @@ class _ChatsAndActivityCollectionState
                           .create();
 
                   /// Download Image Activity from Firebase Storage and store in local database
-                  await dio
+                  await _dio
                       .download(everyActivity.keys.first.toString(),
                           '${activityImagePath.path}$currTime.jpg')
                       .whenComplete(() async {
                     print('Image Download Complete');
-                    // await management.deleteFilesFromFirebaseStorage(
+                    // await _management.deleteFilesFromFirebaseStorage(
                     //     everyActivity.keys.first.toString());
                   });
 
                   /// Add Activity Image Data to Local Storage for Future use
-                  await localStorageHelper.insertDataInUserActivityTable(
+                  await _localStorageHelper.insertDataInUserActivityTable(
                     tableName: _connectionUserNameFromLocalDatabase,
                     statusLinkOrString:
                         '${activityImagePath.path}$currTime.jpg',
@@ -193,7 +194,7 @@ class _ChatsAndActivityCollectionState
               }
             } else {
               /// Add Text Activity Data to Local Storage for future use
-              await localStorageHelper.insertDataInUserActivityTable(
+              await _localStorageHelper.insertDataInUserActivityTable(
                 tableName: _connectionUserNameFromLocalDatabase,
                 statusLinkOrString: everyActivity.keys.first.toString(),
                 mediaTypes: MediaTypes.Text,
@@ -225,38 +226,87 @@ class _ChatsAndActivityCollectionState
                   .get();
 
               // Checking If Same User Name Present in the list or not
-              if (!allConnectionsUserName
+              if (!_allConnectionsUserName
                   .contains(documentSnapshot['user_name'])) {
                 // Make SqLite Table With User UserName
-                bool response = await localStorageHelper
+                bool response = await _localStorageHelper
                     .createTableForUserName(documentSnapshot['user_name']);
                 if (response) {
                   // Data Store for General Reference
-                  await localStorageHelper.insertDataForThisAccount(
+                  await _localStorageHelper.insertDataForThisAccount(
                       userMail: connectionName,
                       userName: documentSnapshot['user_name']);
 
                   // Insert Additional Data to user Specific SqLite Database Table
-                  await localStorageHelper.insertAdditionalData(
+                  await _localStorageHelper.insertAdditionalData(
                     documentSnapshot['user_name'],
                     documentSnapshot['about'],
                     documentSnapshot.id,
                   );
 
                   // Make a new table to this new connected user Activity
-                  await localStorageHelper.createTableForUserActivity(
+                  await _localStorageHelper.createTableForUserActivity(
                       documentSnapshot['user_name']);
                 }
 
                 // Insert New Connected user name at the front of local container
                 if (mounted) {
                   setState(() {
-                    allConnectionsUserName.insert(
+                    _allConnectionsUserName.insert(
                         0, documentSnapshot['user_name']);
                   });
                 }
-              } else
+              } else {
                 print("Already Connection Added");
+              }
+
+              /// User Latest Data Fetch
+              final Map<String, dynamic> _allActiveConnections =
+                  event.data()['connections'];
+              _allConnectionsUserName.forEach((everyUserName) async {
+                final String _connectionMail = await _localStorageHelper
+                    .extractImportantDataFromThatAccount(
+                        userName: everyUserName);
+
+                List<dynamic> _allRemainingMessages =
+                    _allActiveConnections[_connectionMail];
+
+                print('All Reamining Messages: $_allRemainingMessages');
+
+                List<Map<String, String>> _lastMessage = [];
+
+                if (_allRemainingMessages == null ||
+                    _allRemainingMessages.length == 0) {
+                  Map<String, String> takeLocalData = await _localStorageHelper
+                      .fetchLatestMessage(everyUserName);
+
+                  _lastMessage.add(takeLocalData);
+                } else {
+                  _allRemainingMessages.forEach((everyMessage) {
+                    _lastMessage.add({
+                      everyMessage.keys.first.toString():
+                          everyMessage.values.first.toString(),
+                    });
+                  });
+                }
+
+                print('Last Message: $_lastMessage');
+
+                if (mounted) {
+                  setState(() {
+                    try {
+                      _allConnectionsLatestMessage[everyUserName] =
+                          _lastMessage;
+                    } catch (e) {
+                      print('Last Message Insert Error: ${e.toString()}');
+                      _allConnectionsLatestMessage.addAll({
+                        everyUserName: _lastMessage,
+                      });
+                    }
+                  });
+                }
+              });
+              //print('Take: $take');
             }
           });
         }
@@ -265,7 +315,7 @@ class _ChatsAndActivityCollectionState
 
     if (mounted) {
       setState(() {
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
@@ -273,9 +323,9 @@ class _ChatsAndActivityCollectionState
   // Existing connection having some activity store in local database, user name add
   void _searchAboutExistingConnectionActivity() async {
     final List<Map<String, Object>> _alreadyStoredUserNameList =
-        await localStorageHelper.extractAllUsersNameExceptThis();
+        await _localStorageHelper.extractAllUsersNameExceptThis();
     _alreadyStoredUserNameList.forEach((userNameMap) async {
-      final int _countTotalActivity = await localStorageHelper
+      final int _countTotalActivity = await _localStorageHelper
           .countTotalActivitiesForParticularUserName(userNameMap.values.first);
       if (_countTotalActivity > 0) {
         if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
@@ -296,7 +346,7 @@ class _ChatsAndActivityCollectionState
     SystemChrome.setEnabledSystemUIOverlays(
         SystemUiOverlay.values); // Android StatusBar Show
 
-    fToast.init(context); // Flutter Toast Initialized
+    //_fToast.init(context); // Flutter Toast Initialized
 
     try {
       _fetchRealTimeData();
@@ -348,7 +398,7 @@ class _ChatsAndActivityCollectionState
           },
         ),
         body: ModalProgressHUD(
-          inAsyncCall: isLoading,
+          inAsyncCall: _isLoading,
           color: const Color.fromRGBO(0, 0, 0, 0.5),
           progressIndicator: const CircularProgressIndicator(
             backgroundColor: Colors.black87,
@@ -453,7 +503,8 @@ class _ChatsAndActivityCollectionState
                             ),
                             onTap: () => activityList(
                                 context: context,
-                                allConnectionsUserName: allConnectionsUserName),
+                                allConnectionsUserName:
+                                    _allConnectionsUserName),
                           )),
                     )
                   : const SizedBox(),
@@ -506,9 +557,9 @@ class _ChatsAndActivityCollectionState
         ),
       ),
       child: ListView.builder(
-        itemCount: allConnectionsUserName.length,
+        itemCount: _allConnectionsUserName.length,
         itemBuilder: (context, position) {
-          return chatTile(context, position, allConnectionsUserName[position]);
+          return chatTile(context, position, _allConnectionsUserName[position]);
         },
       ),
     ));
@@ -566,13 +617,13 @@ class _ChatsAndActivityCollectionState
                   transitionDuration: Duration(milliseconds: 200),
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
-                    if (allConnectionsUserName.length > 1) {
+                    if (_allConnectionsUserName.length > 1) {
                       if (mounted) {
                         setState(() {
                           String _latestUserName =
-                              allConnectionsUserName.removeAt(
-                                  allConnectionsUserName.indexOf(_userName));
-                          allConnectionsUserName.insert(0, _latestUserName);
+                              _allConnectionsUserName.removeAt(
+                                  _allConnectionsUserName.indexOf(_userName));
+                          _allConnectionsUserName.insert(0, _latestUserName);
                         });
                       }
                     }
@@ -598,13 +649,9 @@ class _ChatsAndActivityCollectionState
                             height: 12.0,
                           ),
                           Container(
-                            child: Text(
-                              "Latest Message",
-                              style: TextStyle(
-                                fontSize: 15.0,
-                                color: const Color.fromRGBO(150, 150, 150, 1),
-                              ),
-                            ),
+                            //color: Colors.white,
+                            child:
+                                _latestDataMessageExtractPerfectly(_userName),
                           )
                         ],
                       ),
@@ -644,5 +691,247 @@ class _ChatsAndActivityCollectionState
             ),
           ),
         ));
+  }
+
+  Widget _latestDataMessageExtractPerfectly(String _userName) {
+    final List<Map<String, String>> _allLatestMessages =
+        _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
+
+    if (_allLatestMessages != null && _allLatestMessages.length > 0) {
+      final Map<String, String> _lastMessage = _allLatestMessages.last;
+
+      if (_lastMessage != null) {
+        String _mediaType = _lastMessage.values.last.toString();
+        String _remainingMessagesLength = '';
+
+        if (!_lastMessage.values.last.toString().startsWith('MediaTypes')) {
+          _mediaType = _lastMessage.values.last.toString().split('+')[1];
+          _remainingMessagesLength = _allLatestMessages.length.toString();
+        }
+
+        return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
+            _mediaType, _remainingMessagesLength);
+      }
+      return Text(
+        'No Messages',
+        style: TextStyle(color: Colors.red),
+      );
+    }
+
+    return Text('No Messages', style: TextStyle(color: Colors.red));
+  }
+
+  Widget _latestMessageTypeExtract(String _message, String _mediaTypesToString,
+      String _remainingMessagesLength) {
+    switch (_mediaTypesToString) {
+      case 'MediaTypes.Text':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              child: Text(
+                _message.length <= 15
+                    ? _message
+                    : '${_message.replaceRange(15, _message.length, '...')}',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16.0,
+                  color: const Color.fromRGBO(150, 150, 150, 1),
+                ),
+              ),
+            ),
+            //SizedBox(width: 20.0,),
+            Container(
+              margin: EdgeInsets.only(left: 25.0),
+              child: Text(
+                '$_remainingMessagesLength',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.lightGreenAccent,
+                  //backgroundColor: Colors.green,
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case 'MediaTypes.Voice':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 23.0,
+            ),
+            Icon(Icons.audiotrack_rounded),
+            Text(
+              "  Voice",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: const Color.fromRGBO(150, 150, 150, 1),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 25.0),
+              child: Text(
+                '$_remainingMessagesLength',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.lightGreenAccent,
+                  //backgroundColor: Colors.green,
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case 'MediaTypes.Image':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 23.0,
+            ),
+            Icon(Icons.camera_alt),
+            Text(
+              "  Image",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: const Color.fromRGBO(150, 150, 150, 1),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 25.0),
+              child: Text(
+                '$_remainingMessagesLength',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.lightGreenAccent,
+                  //backgroundColor: Colors.green,
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case 'MediaTypes.Video':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 23.0,
+            ),
+            Icon(Icons.video_collection_rounded),
+            Text(
+              "  Video",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: const Color.fromRGBO(150, 150, 150, 1),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 25.0),
+              child: Text(
+                '$_remainingMessagesLength',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.lightGreenAccent,
+                  //backgroundColor: Colors.green,
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case 'MediaTypes.Document':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 23.0,
+            ),
+            Icon(
+              Entypo.documents,
+            ),
+            Text(
+              "  Document",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: const Color.fromRGBO(150, 150, 150, 1),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 25.0),
+              child: Text(
+                '$_remainingMessagesLength',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.lightGreenAccent,
+                  //backgroundColor: Colors.green,
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+
+      case 'MediaTypes.Location':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 23.0,
+            ),
+            Icon(Icons.location_on),
+            Text(
+              "  Location",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: const Color.fromRGBO(150, 150, 150, 1),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 25.0),
+              child: Text(
+                '$_remainingMessagesLength',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: Colors.lightGreenAccent,
+                  //backgroundColor: Colors.green,
+                  //backgroundColor: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "No Messages",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16.0,
+            color: const Color.fromRGBO(150, 150, 150, 1),
+          ),
+        ),
+      ],
+    );
   }
 }

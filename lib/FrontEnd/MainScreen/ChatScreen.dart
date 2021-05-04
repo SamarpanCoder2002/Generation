@@ -119,6 +119,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   _extractHistoryDataFromSqLite() async {
     try {
+      double _positionToScroll = 0;
+
       List<Map<String, dynamic>> messagesGet = [];
       messagesGet =
           await _localStorageHelper.extractMessageData(widget._userName);
@@ -128,15 +130,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         for (Map<String, dynamic> message in messagesGet) {
           // Change Every Message Value to List
           List<dynamic> messageContainer = message.values.toList();
-
-          // // For chat open Every First Time
-          // if (_isChatOpenFirstTime) {
-          //   if (mounted) {
-          //     setState(() {
-          //       _isChatOpenFirstTime = false;
-          //     });
-          //   }
-          // }
 
           // If there is no opponent's person messages
           if (messageContainer.isEmpty) {
@@ -154,46 +147,49 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   _response.add(false);
 
                 if (messageContainer[3] == MediaTypes.Text.toString()) {
+                  _positionToScroll += 100;
                   _mediaTypes.add(MediaTypes.Text);
                 } else if (messageContainer[3] == MediaTypes.Voice.toString()) {
+                  _positionToScroll += 150;
                   _mediaTypes.add(MediaTypes.Voice);
                 } else if (messageContainer[3] == MediaTypes.Image.toString()) {
+                  _positionToScroll += MediaQuery.of(context).size.height * 0.6;
                   _mediaTypes.add(MediaTypes.Image);
                 } else if (messageContainer[3] == MediaTypes.Video.toString()) {
+                  _positionToScroll += MediaQuery.of(context).size.height * 0.6;
                   _mediaTypes.add(MediaTypes.Video);
                 } else if (messageContainer[3] ==
                     MediaTypes.Document.toString()) {
+                  _positionToScroll += MediaQuery.of(context).size.height * 0.6;
                   _mediaTypes.add(MediaTypes.Document);
                 } else if (messageContainer[3] ==
                     MediaTypes.Location.toString()) {
+                  _positionToScroll += MediaQuery.of(context).size.height * 0.6;
                   _mediaTypes.add(MediaTypes.Location);
-                }
-
-                if (mounted) {
-                  setState(() {
-                    // For AutoScroll to the end position
-                    if (_scrollController.hasClients)
-                      _scrollController
-                          .jumpTo(_scrollController.position.maxScrollExtent);
-                  });
                 }
               });
             }
           }
         }
+
+        /// Auto Scroll Control
+        if (mounted) {
+          setState(() {
+            _scrollController.jumpTo(
+                _scrollController.position.maxScrollExtent + _positionToScroll);
+          });
+        }
       } else {
-        // if (_isChatOpenFirstTime) {
-        //   if (mounted) {
-        //     setState(() {
-        //       _isChatOpenFirstTime = false;
-        //     });
-        //   }
-        // }
+        print('No Old Messages in Local Database');
       }
 
-      _extractDataFromFireStore(); // After Get the old Conversation messages from SqLite, Take Data from Firestore
+      /// After Get the old Conversation messages from SqLite, Take Data from Firestore
+      _extractDataFromFireStore();
     } catch (e) {
       // For AutoScroll to the end position
+
+      print('Error in Extract Data From Local Storage: ${e.toString()}');
+
       _scrollController.jumpTo(_scrollController.position.maxScrollExtent *
           _chatContainer.length *
           (MediaQuery.of(context).size.height) *
@@ -233,6 +229,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                   // Particular connection messages set to Empty
                   allConnections[this._senderMail] = [];
+
+                  if (_isChatOpenFirstTime) {
+                    _mediaTypes.add(MediaTypes.Indicator);
+                    _chatContainer.add({
+                      'New Messages': '',
+                    });
+                    _response.add(null);
+                  }
 
                   // Update Data in FireStore
                   FirebaseFirestore.instance
@@ -376,51 +380,35 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     }
 
                     print(' Chat Open Status: $_isChatOpenFirstTime');
-
-                    // For AutoScroll to the end position
-                    // Checking Chat is open for the first time or not
                     if (_isChatOpenFirstTime) {
-                      if (mounted) {
-                        print(_positionToScroll);
-                        setState(() {
-                          _scrollController.jumpTo(_scrollController
-                                  .position.maxScrollExtent +
-                              (_chatContainer.length *
-                                  (MediaQuery.of(context).size.height * 0.3)));
-                          _isChatOpenFirstTime = false;
-                        });
-                      }
+                      print('Chat Opened First Time');
                     } else {
                       print('Reach Here');
-                      if (mounted) {
-                        print(_positionToScroll);
-                        setState(() {
-                          _scrollController.jumpTo(
-                              _scrollController.position.maxScrollExtent +
-                                  _positionToScroll);
-                        });
-                      }
+
+                      print(_positionToScroll);
+
+                      _scrollController.jumpTo(
+                          _scrollController.position.maxScrollExtent +
+                              _positionToScroll);
+
+                      _positionToScroll = 100;
                     }
-                    _positionToScroll = 100;
                   });
                 });
               }
             } else {
               print("No message Here");
-              print('Status: $_isChatOpenFirstTime');
+            }
 
-              if (_isChatOpenFirstTime) {
-                if (mounted) {
-                  print(_positionToScroll);
-                  setState(() {
-                    _scrollController.jumpTo(
-                        _scrollController.position.maxScrollExtent +
-                            _chatContainer.length *
-                                (MediaQuery.of(context).size.height * 0.1));
-                    _isChatOpenFirstTime = false;
-                  });
+            // For AutoScroll to the end position
+            // Checking Chat is open for the first time or not
+            if (mounted) {
+              setState(() {
+                /// Make Control in isChatOpenFirstTime
+                if (_isChatOpenFirstTime) {
+                  _isChatOpenFirstTime = false;
                 }
-              }
+              });
             }
           } else {
             print("Contacts Not Present");
@@ -863,7 +851,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   controller: _scrollController,
                   itemCount: _chatContainer.length,
                   itemBuilder: (context, position) {
-                    if (_mediaTypes[position] == MediaTypes.Text)
+                    if (_mediaTypes[position] == MediaTypes.Indicator) {
+                      return newMessageIndicator(context);
+                    } else if (_mediaTypes[position] == MediaTypes.Text)
                       return textConversationList(
                           context, position, _response[position]);
                     else if (_mediaTypes[position] == MediaTypes.Image ||
@@ -1006,6 +996,33 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   )
                 : SizedBox(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget newMessageIndicator(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(
+        left: MediaQuery.of(context).size.width / 5,
+        right: MediaQuery.of(context).size.width / 5,
+        top: 10.0,
+        bottom: 20.0,
+      ),
+      //width: MediaQuery.of(context).size.width / 2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.0),
+        color: Colors.red,
+      ),
+      child: Text(
+        'New Messages',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16.0,
+          //fontFamily: 'Lora',
+          letterSpacing: 1.0,
         ),
       ),
     );
