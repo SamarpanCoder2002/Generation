@@ -751,7 +751,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         backgroundColor: Color.fromRGBO(34, 48, 60, 1),
         appBar: AppBar(
           brightness: Brightness.dark,
-          backgroundColor: Color.fromRGBO(25, 39, 52, 1),
+          backgroundColor: const Color.fromRGBO(25, 39, 52, 1),
           elevation: 10.0,
           shadowColor: Colors.white70,
           leading: Row(
@@ -777,7 +777,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           title: ElevatedButton(
             style: ElevatedButton.styleFrom(
               elevation: 0.0,
-              primary: Color.fromRGBO(25, 39, 52, 1),
+              primary: const Color.fromRGBO(25, 39, 52, 1),
               onSurface: Theme.of(context).primaryColor,
             ),
             child: Text(
