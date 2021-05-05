@@ -233,7 +233,6 @@ class LocalStorageHelper {
     var result = await db.insert(_tableName, _helperMap);
     print(result);
 
-
     return result;
   }
 
@@ -248,33 +247,24 @@ class LocalStorageHelper {
     return result;
   }
 
-  Future<String> fetchEmail(String _tableName) async {
-    Database db = await this.database;
-
-    var result = await db
-        .rawQuery("SELECT $_colEmail FROM $_tableName WHERE $_colTime = ''");
-
-    return result[0].values.toList()[0];
-  }
-
-  Future<Map<String,String>> fetchLatestMessage(String _tableName) async {
+  Future<Map<String, String>> fetchLatestMessage(String _tableName) async {
     final Database db = await this.database;
 
-    int totalMessages = await _countTotalMessagesUnderATable(_tableName);
+    final int totalMessages = await _countTotalMessagesUnderATable(_tableName);
 
     if (totalMessages == 1) return null;
 
-    // List<Map<String, Object>> result = await db.rawQuery(
-    //     "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages-1}");
-
-    List<Map<String, Object>> result = await db.transaction<List<Map<String, Object>>>((txn){
-       print('txn: $txn');
-       return txn.rawQuery("SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages-1}");
+    final List<Map<String, Object>> result =
+        await db.transaction<List<Map<String, Object>>>((txn) {
+      print('txn: $txn');
+      return txn.rawQuery(
+          "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
     });
 
-    String _time = result[0][_colTime].toString().split('+')[0];
+    final String _time = result[0][_colTime].toString().split('+')[0];
 
-    Map<String, String> map = Map<String, String>();
+    final Map<String, String> map = Map<String, String>();
+
     map.addAll({
       result[0][_colMessages]: '$_time+${result[0][_colMediaType]}+localDb',
     });

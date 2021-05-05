@@ -30,8 +30,10 @@ class ChatsAndActivityCollection extends StatefulWidget {
 
 class _ChatsAndActivityCollectionState
     extends State<ChatsAndActivityCollection> {
+  /// For Modal Progress HUD Control
   bool _isLoading = false;
 
+  /// Initialize Some Containers to Store data in Future
   final List<String> _allConnectionsUserName = [];
   final Map<String, dynamic> _allConnectionsLatestMessage =
       Map<String, dynamic>();
@@ -40,12 +42,16 @@ class _ChatsAndActivityCollectionState
 
   //final FToast _fToast = FToast();
 
+  /// For FireStore Management Purpose
   final Management _management = Management();
+
+  /// For Local Database Management Purpose
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
+  /// For Downloading Purpose
   final Dio _dio = Dio();
 
-  // Regular Expression for Media Detection
+  /// Regular Expression for Media Detection
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
@@ -56,16 +62,16 @@ class _ChatsAndActivityCollectionState
       });
     }
 
-    // Storage Request
+    /// Storage Request
     final PermissionStatus storagePermissionStatus =
         await Permission.storage.request();
 
-    // Listen to the realTime Data Fetch
+    /// Listen to the realTime Data Fetch
     _management.getDatabaseData().listen((event) async {
       final Map<String, dynamic> _allUserConnectionActivityTake =
           event.data()['activity'] as Map;
 
-      // Current Account User Name Take
+      /// Current Account User Name Take
       final String _thisAccountUserName =
           await _localStorageHelper.extractImportantDataFromThatAccount(
               userMail: FirebaseAuth.instance.currentUser.email);
@@ -82,8 +88,8 @@ class _ChatsAndActivityCollectionState
       /// For [Activity Data] Store in Local Storage
       _allUserConnectionActivityTake
           .forEach((connectionMail, connectionActivity) async {
+        /// If There no new Activity in FireStore Record
         if (connectionActivity.toList().isEmpty) {
-          // If There no new Activity in FireStore Record
           print("Empty Container");
         } else {
           final List<dynamic> particularConnectionActivity =
@@ -122,7 +128,6 @@ class _ChatsAndActivityCollectionState
           particularConnectionActivity.forEach((everyActivity) async {
             if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
               final Directory directory = await getExternalStorageDirectory();
-              print('Directory Path: ${directory.path}');
 
               final String currTime = DateTime.now().toString();
 
@@ -138,8 +143,6 @@ class _ChatsAndActivityCollectionState
                           '${activityVideoPath.path}$currTime.mp4')
                       .whenComplete(() async {
                     print('Video Download Complete');
-                    // await _management.deleteFilesFromFirebaseStorage(
-                    //     everyActivity.keys.first.toString());
                   });
 
                   /// Insert Video  Activity Data to the local database for future use
@@ -154,12 +157,11 @@ class _ChatsAndActivityCollectionState
                         .split('++++++')[0],
                   );
                 } else {
-                  //storagePermissionStatus = await Permission.storage.request();
                   print('Storage Permission Denied');
                 }
               } else {
                 if (storagePermissionStatus.isGranted) {
-                  // Create new Hidden Folder once in desired location
+                  /// Create new Hidden Folder once in desired location
                   final activityImagePath =
                       await Directory('${directory.path}/.ActivityImages/')
                           .create();
@@ -210,42 +212,43 @@ class _ChatsAndActivityCollectionState
           final Map<String, Object> allConnectionRequest =
               event.data()['connection_request']; // Take All Connection Request
 
-          // Take all Connection Request Data to Update Connectivity
+          /// Take all Connection Request Data to Update Connectivity
           allConnectionRequest
               .forEach((connectionName, connectionStatus) async {
             if (connectionStatus.toString() == 'Request Accepted' ||
                 connectionStatus.toString() == 'Invitation Accepted') {
-              // User All Information Take
+              /// User All Information Take
               final DocumentSnapshot documentSnapshot = await FirebaseFirestore
                   .instance
                   .doc('generation_users/$connectionName')
                   .get();
 
-              // Checking If Same User Name Present in the list or not
+              /// Checking If Same User Name Present in the list or not
               if (!_allConnectionsUserName
                   .contains(documentSnapshot['user_name'])) {
-                // Make SqLite Table With User UserName
-                bool response = await _localStorageHelper
+                /// Make SqLite Table With User UserName
+                final bool response = await _localStorageHelper
                     .createTableForUserName(documentSnapshot['user_name']);
+
                 if (response) {
-                  // Data Store for General Reference
+                  /// Data Store for General Reference
                   await _localStorageHelper.insertDataForThisAccount(
                       userMail: connectionName,
                       userName: documentSnapshot['user_name']);
 
-                  // Insert Additional Data to user Specific SqLite Database Table
+                  /// Insert Additional Data to user Specific SqLite Database Table
                   await _localStorageHelper.insertAdditionalData(
                     documentSnapshot['user_name'],
                     documentSnapshot['about'],
                     documentSnapshot.id,
                   );
 
-                  // Make a new table to this new connected user Activity
+                  /// Make a new table to this new connected user Activity
                   await _localStorageHelper.createTableForUserActivity(
                       documentSnapshot['user_name']);
                 }
 
-                // Insert New Connected user name at the front of local container
+                /// Insert New Connected user name at the front of local container
                 if (mounted) {
                   setState(() {
                     _allConnectionsUserName.insert(
@@ -259,20 +262,23 @@ class _ChatsAndActivityCollectionState
               /// User Latest Data Fetch
               final Map<String, dynamic> _allActiveConnections =
                   event.data()['connections'];
+
+              /// For Every Connection, Latest Data to Show
               _allConnectionsUserName.forEach((everyUserName) async {
                 final String _connectionMail = await _localStorageHelper
                     .extractImportantDataFromThatAccount(
                         userName: everyUserName);
 
-                List<dynamic> _allRemainingMessages =
+                final List<dynamic> _allRemainingMessages =
                     _allActiveConnections[_connectionMail];
 
-                List<Map<String, String>> _lastMessage = [];
+                final List<Map<String, String>> _lastMessage = [];
 
                 if (_allRemainingMessages == null ||
                     _allRemainingMessages.length == 0) {
-                  Map<String, String> takeLocalData = await _localStorageHelper
-                      .fetchLatestMessage(everyUserName);
+                  final Map<String, String> takeLocalData =
+                      await _localStorageHelper
+                          .fetchLatestMessage(everyUserName);
 
                   _lastMessage.add(takeLocalData);
                 } else {
@@ -311,7 +317,7 @@ class _ChatsAndActivityCollectionState
     }
   }
 
-  // Existing connection having some activity store in local database, user name add
+  /// Existing connection having some activity store in local database, user name add
   void _searchAboutExistingConnectionActivity() async {
     final List<Map<String, Object>> _alreadyStoredUserNameList =
         await _localStorageHelper.extractAllUsersNameExceptThis();
@@ -608,6 +614,7 @@ class _ChatsAndActivityCollectionState
                   transitionDuration: Duration(milliseconds: 50),
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
+                    // For Set the Latest Close chat index at beginning
                     if (_allConnectionsUserName.length > 1) {
                       if (mounted) {
                         setState(() {
@@ -619,6 +626,7 @@ class _ChatsAndActivityCollectionState
                       }
                     }
 
+                    // Irrespectively make changes when a chat just Close
                     _localStorageHelper
                         .fetchLatestMessage(_userName)
                         .then((Map<String, String> takeLocalData) {
@@ -653,11 +661,8 @@ class _ChatsAndActivityCollectionState
                           SizedBox(
                             height: 12.0,
                           ),
-                          Container(
-                            //color: Colors.white,
-                            child: _latestDataForConnectionExtractPerfectly(
-                                _userName),
-                          )
+                          // For Extract latest Conversation Message
+                          _latestDataForConnectionExtractPerfectly(_userName)
                         ],
                       ),
                     );
@@ -673,10 +678,9 @@ class _ChatsAndActivityCollectionState
                     ),
                     child: Column(
                       children: [
+                        // For Extract latest Conversation Time
                         _latestDataForConnectionExtractPerfectly(_userName,
                             purpose: 'lastConnectionTime'),
-                        // _latestDataForConnectionExtractPerfectly(_userName,
-                        //     purpose: 'lastConnectionTime'),
                         SizedBox(
                           height: 10.0,
                         ),
@@ -696,40 +700,45 @@ class _ChatsAndActivityCollectionState
         ));
   }
 
+  /// Latest Message Extract
   Widget _latestDataForConnectionExtractPerfectly(String _userName,
       {String purpose = 'lastMessage'}) {
     final List<Map<String, String>> _allLatestMessages =
         _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
 
+    /// Extract UserName Specific Messages from temp storage
+
     if (_allLatestMessages != null && _allLatestMessages.length > 0) {
       final Map<String, String> _lastMessage = _allLatestMessages.last;
 
+      /// For Extract Last Conversation Time
       if (purpose == 'lastConnectionTime') {
         return _latestConversationTime(_lastMessage);
       }
 
+      /// For Extract Last Conversation Message
       if (_lastMessage != null) {
         String _mediaType = _lastMessage.values.last.toString().split('+')[1];
         String _remainingMessagesLength = '';
 
-        if (!_lastMessage.values.last.toString().startsWith('MediaTypes')) {
-          _mediaType = _lastMessage.values.last.toString().split('+')[1];
+        /// If Last Message Not From Local Database
+        if (_lastMessage.values.last.toString().split('+').length != 3 ||
+            _lastMessage.values.last.toString().split('+')[2] != 'localDb')
+          _remainingMessagesLength = _allLatestMessages.length.toString();
 
-          /// If Last Message Not From Local Database
-          if (_lastMessage.values.last.toString().split('+').length != 3 ||
-              _lastMessage.values.last.toString().split('+')[2] != 'localDb')
-            _remainingMessagesLength = _allLatestMessages.length.toString();
-        }
-
+        /// After Filtering Extract Latest Message and Return Message Widget
         return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
             _mediaType, _remainingMessagesLength);
       }
+
+      /// If there is no last message
       return Text(
         'No Messages',
         style: TextStyle(color: Colors.red),
       );
     }
 
+    /// For Extract Last Connection Time
     if (purpose == 'lastConnectionTime')
       return Container(
           child: Text(
@@ -737,22 +746,27 @@ class _ChatsAndActivityCollectionState
         style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
       ));
 
+    /// For Null Control
     return Text('No Messages', style: TextStyle(color: Colors.red));
   }
 
+  /// Message Type Extract
   Widget _latestMessageTypeExtract(String _message, String _mediaTypesToString,
       String _remainingMessagesLength) {
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
+        bool _blankMsgIndicator = false;
+
         final List<String> splitMsg = _message.split('\n');
 
         while (splitMsg.contains('')) {
           splitMsg.remove('');
         }
 
-        if (splitMsg == null || splitMsg.length == 0)
+        if (splitMsg == null || splitMsg.length == 0) {
           _message = 'Blank Message';
-        else
+          _blankMsgIndicator = true;
+        } else
           _message = splitMsg[0];
 
         return Row(
@@ -766,13 +780,12 @@ class _ChatsAndActivityCollectionState
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.0,
-                  color: _message == 'Blank Message'
+                  color: _blankMsgIndicator
                       ? Colors.redAccent
                       : const Color.fromRGBO(150, 150, 150, 1),
                 ),
               ),
             ),
-            //SizedBox(width: 20.0,),
             if (_remainingMessagesLength != '')
               _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
@@ -782,7 +795,10 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.audiotrack_rounded),
+            Icon(
+              Icons.audiotrack_rounded,
+              color: Colors.lightBlueAccent,
+            ),
             Text(
               "  Voice",
               textAlign: TextAlign.center,
@@ -800,7 +816,10 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.camera_alt),
+            Icon(
+              Icons.camera_alt,
+              color: Colors.lightBlueAccent,
+            ),
             Text(
               "  Image",
               textAlign: TextAlign.center,
@@ -818,7 +837,10 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_collection_rounded),
+            Icon(
+              Icons.video_collection_rounded,
+              color: Colors.lightBlueAccent,
+            ),
             Text(
               "  Video",
               textAlign: TextAlign.center,
@@ -838,6 +860,7 @@ class _ChatsAndActivityCollectionState
           children: [
             Icon(
               Entypo.documents,
+              color: Colors.lightBlueAccent,
             ),
             Text(
               "  Document",
@@ -856,7 +879,10 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.location_on),
+            Icon(
+              Icons.location_on,
+              color: Colors.lightBlueAccent,
+            ),
             Text(
               "  Location",
               textAlign: TextAlign.center,
@@ -886,6 +912,7 @@ class _ChatsAndActivityCollectionState
     );
   }
 
+  /// Count Total Remaining Messages
   Widget _totalRemainingMessagesTake(String _remainingMessagesLength) {
     return Container(
       margin: EdgeInsets.only(left: 25.0),
@@ -895,12 +922,12 @@ class _ChatsAndActivityCollectionState
         style: TextStyle(
           fontSize: 18.0,
           color: Colors.lightGreenAccent,
-          //backgroundColor: Colors.green,
         ),
       ),
     );
   }
 
+  /// Extract last Conversation Message
   Widget _latestConversationTime(Map<String, String> _lastMessage) {
     String _willReturnTime = '';
     if (_lastMessage != null &&

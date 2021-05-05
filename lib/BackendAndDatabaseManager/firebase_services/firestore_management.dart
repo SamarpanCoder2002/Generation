@@ -115,7 +115,7 @@ class Management {
       try {
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
-              await localStorageHelper.fetchEmail(connectionUserName);
+              await localStorageHelper.extractImportantDataFromThatAccount(userName: connectionUserName);
 
           DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
@@ -174,7 +174,7 @@ class Management {
 
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
-              await localStorageHelper.fetchEmail(connectionUserName);
+              await localStorageHelper.extractImportantDataFromThatAccount(userName: connectionUserName);
 
           DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
