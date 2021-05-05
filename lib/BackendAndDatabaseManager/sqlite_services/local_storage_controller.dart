@@ -231,6 +231,9 @@ class LocalStorageHelper {
 
     // Result Insert to DB
     var result = await db.insert(_tableName, _helperMap);
+    print(result);
+
+
     return result;
   }
 
@@ -241,6 +244,7 @@ class LocalStorageHelper {
 
     List<Map<String, Object>> result = await db.rawQuery(
         'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType FROM $_tableName WHERE $_colReferences != -1');
+
     return result;
   }
 
@@ -260,12 +264,19 @@ class LocalStorageHelper {
 
     if (totalMessages == 1) return null;
 
-    List<Map<String, Object>> result = await db.rawQuery(
-        "SELECT $_colMessages, $_colMediaType FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
+    // List<Map<String, Object>> result = await db.rawQuery(
+    //     "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages-1}");
+
+    List<Map<String, Object>> result = await db.transaction<List<Map<String, Object>>>((txn){
+       print('txn: $txn');
+       return txn.rawQuery("SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages-1}");
+    });
+
+    String _time = result[0][_colTime].toString().split('+')[0];
 
     Map<String, String> map = Map<String, String>();
     map.addAll({
-      result[0].values.toList().first:  result[0].values.toList().last,
+      result[0][_colMessages]: '$_time+${result[0][_colMediaType]}+localDb',
     });
 
     print('Map is: $map');

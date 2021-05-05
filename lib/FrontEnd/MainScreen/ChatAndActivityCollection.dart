@@ -9,7 +9,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:intl/intl.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -32,6 +31,7 @@ class ChatsAndActivityCollection extends StatefulWidget {
 class _ChatsAndActivityCollectionState
     extends State<ChatsAndActivityCollection> {
   bool _isLoading = false;
+
   final List<String> _allConnectionsUserName = [];
   final Map<String, dynamic> _allConnectionsLatestMessage =
       Map<String, dynamic>();
@@ -57,7 +57,7 @@ class _ChatsAndActivityCollectionState
     }
 
     // Storage Request
-    PermissionStatus storagePermissionStatus =
+    final PermissionStatus storagePermissionStatus =
         await Permission.storage.request();
 
     // Listen to the realTime Data Fetch
@@ -109,15 +109,13 @@ class _ChatsAndActivityCollectionState
           if (mounted) {
             setState(() {
               _allUserConnectionActivityTake[connectionMail] = [];
-              print(
-                  'Event Data: ${_allUserConnectionActivityTake[connectionMail]}');
+
               FirebaseFirestore.instance
                   .doc(
                       'generation_users/${FirebaseAuth.instance.currentUser.email}')
                   .update({
                 'activity': _allUserConnectionActivityTake,
               });
-              print('Data Activity Removed');
             });
           }
 
@@ -206,8 +204,6 @@ class _ChatsAndActivityCollectionState
         }
       });
 
-      print("All Connection Activity: $_allUserConnectionActivity");
-
       /// Connection Request Processing
       if (event.data()['connection_request'].length > 0) {
         if (mounted) {
@@ -271,8 +267,6 @@ class _ChatsAndActivityCollectionState
                 List<dynamic> _allRemainingMessages =
                     _allActiveConnections[_connectionMail];
 
-                print('All Reamining Messages: $_allRemainingMessages');
-
                 List<Map<String, String>> _lastMessage = [];
 
                 if (_allRemainingMessages == null ||
@@ -290,8 +284,6 @@ class _ChatsAndActivityCollectionState
                   });
                 }
 
-                print('Last Message: $_lastMessage');
-
                 if (mounted) {
                   setState(() {
                     try {
@@ -306,7 +298,6 @@ class _ChatsAndActivityCollectionState
                   });
                 }
               });
-              //print('Take: $take');
             }
           });
         }
@@ -614,7 +605,7 @@ class _ChatsAndActivityCollectionState
                   middleColor: const Color.fromRGBO(31, 51, 71, 1),
                   closedElevation: 0.0,
                   openElevation: 0.0,
-                  transitionDuration: Duration(milliseconds: 200),
+                  transitionDuration: Duration(milliseconds: 50),
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
                     if (_allConnectionsUserName.length > 1) {
@@ -627,6 +618,20 @@ class _ChatsAndActivityCollectionState
                         });
                       }
                     }
+
+                    _localStorageHelper
+                        .fetchLatestMessage(_userName)
+                        .then((Map<String, String> takeLocalData) {
+                      if (takeLocalData.values.toString().split('+')[0] != '') {
+                        _allConnectionsLatestMessage[_userName].clear();
+                        if (mounted) {
+                          setState(() {
+                            _allConnectionsLatestMessage[_userName]
+                                .add(takeLocalData);
+                          });
+                        }
+                      }
+                    });
                   },
                   openBuilder: (context, openWidget) {
                     return ChatScreenSetUp(_userName);
@@ -650,8 +655,8 @@ class _ChatsAndActivityCollectionState
                           ),
                           Container(
                             //color: Colors.white,
-                            child:
-                                _latestDataMessageExtractPerfectly(_userName),
+                            child: _latestDataForConnectionExtractPerfectly(
+                                _userName),
                           )
                         ],
                       ),
@@ -668,12 +673,10 @@ class _ChatsAndActivityCollectionState
                     ),
                     child: Column(
                       children: [
-                        Container(
-                            child: Text(
-                          "12:00",
-                          style: TextStyle(
-                              fontSize: 13.0, color: Colors.lightBlue),
-                        )),
+                        _latestDataForConnectionExtractPerfectly(_userName,
+                            purpose: 'lastConnectionTime'),
+                        // _latestDataForConnectionExtractPerfectly(_userName,
+                        //     purpose: 'lastConnectionTime'),
                         SizedBox(
                           height: 10.0,
                         ),
@@ -693,20 +696,29 @@ class _ChatsAndActivityCollectionState
         ));
   }
 
-  Widget _latestDataMessageExtractPerfectly(String _userName) {
+  Widget _latestDataForConnectionExtractPerfectly(String _userName,
+      {String purpose = 'lastMessage'}) {
     final List<Map<String, String>> _allLatestMessages =
         _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
 
     if (_allLatestMessages != null && _allLatestMessages.length > 0) {
       final Map<String, String> _lastMessage = _allLatestMessages.last;
 
+      if (purpose == 'lastConnectionTime') {
+        return _latestConversationTime(_lastMessage);
+      }
+
       if (_lastMessage != null) {
-        String _mediaType = _lastMessage.values.last.toString();
+        String _mediaType = _lastMessage.values.last.toString().split('+')[1];
         String _remainingMessagesLength = '';
 
         if (!_lastMessage.values.last.toString().startsWith('MediaTypes')) {
           _mediaType = _lastMessage.values.last.toString().split('+')[1];
-          _remainingMessagesLength = _allLatestMessages.length.toString();
+
+          /// If Last Message Not From Local Database
+          if (_lastMessage.values.last.toString().split('+').length != 3 ||
+              _lastMessage.values.last.toString().split('+')[2] != 'localDb')
+            _remainingMessagesLength = _allLatestMessages.length.toString();
         }
 
         return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
@@ -718,6 +730,13 @@ class _ChatsAndActivityCollectionState
       );
     }
 
+    if (purpose == 'lastConnectionTime')
+      return Container(
+          child: Text(
+        '',
+        style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+      ));
+
     return Text('No Messages', style: TextStyle(color: Colors.red));
   }
 
@@ -725,6 +744,17 @@ class _ChatsAndActivityCollectionState
       String _remainingMessagesLength) {
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
+        final List<String> splitMsg = _message.split('\n');
+
+        while (splitMsg.contains('')) {
+          splitMsg.remove('');
+        }
+
+        if (splitMsg == null || splitMsg.length == 0)
+          _message = 'Blank Message';
+        else
+          _message = splitMsg[0];
+
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -736,24 +766,15 @@ class _ChatsAndActivityCollectionState
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.0,
-                  color: const Color.fromRGBO(150, 150, 150, 1),
+                  color: _message == 'Blank Message'
+                      ? Colors.redAccent
+                      : const Color.fromRGBO(150, 150, 150, 1),
                 ),
               ),
             ),
             //SizedBox(width: 20.0,),
-            Container(
-              margin: EdgeInsets.only(left: 25.0),
-              child: Text(
-                '$_remainingMessagesLength',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.lightGreenAccent,
-                  //backgroundColor: Colors.green,
-                  //backgroundColor: Colors.green,
-                ),
-              ),
-            ),
+            if (_remainingMessagesLength != '')
+              _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
         );
 
@@ -761,9 +782,6 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 23.0,
-            ),
             Icon(Icons.audiotrack_rounded),
             Text(
               "  Voice",
@@ -773,19 +791,8 @@ class _ChatsAndActivityCollectionState
                 color: const Color.fromRGBO(150, 150, 150, 1),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 25.0),
-              child: Text(
-                '$_remainingMessagesLength',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.lightGreenAccent,
-                  //backgroundColor: Colors.green,
-                  //backgroundColor: Colors.green,
-                ),
-              ),
-            ),
+            if (_remainingMessagesLength != '')
+              _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
         );
 
@@ -793,9 +800,6 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 23.0,
-            ),
             Icon(Icons.camera_alt),
             Text(
               "  Image",
@@ -805,19 +809,8 @@ class _ChatsAndActivityCollectionState
                 color: const Color.fromRGBO(150, 150, 150, 1),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 25.0),
-              child: Text(
-                '$_remainingMessagesLength',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.lightGreenAccent,
-                  //backgroundColor: Colors.green,
-                  //backgroundColor: Colors.green,
-                ),
-              ),
-            ),
+            if (_remainingMessagesLength != '')
+              _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
         );
 
@@ -825,9 +818,6 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 23.0,
-            ),
             Icon(Icons.video_collection_rounded),
             Text(
               "  Video",
@@ -837,19 +827,8 @@ class _ChatsAndActivityCollectionState
                 color: const Color.fromRGBO(150, 150, 150, 1),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 25.0),
-              child: Text(
-                '$_remainingMessagesLength',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.lightGreenAccent,
-                  //backgroundColor: Colors.green,
-                  //backgroundColor: Colors.green,
-                ),
-              ),
-            ),
+            if (_remainingMessagesLength != '')
+              _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
         );
 
@@ -857,9 +836,6 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 23.0,
-            ),
             Icon(
               Entypo.documents,
             ),
@@ -871,19 +847,8 @@ class _ChatsAndActivityCollectionState
                 color: const Color.fromRGBO(150, 150, 150, 1),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 25.0),
-              child: Text(
-                '$_remainingMessagesLength',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.lightGreenAccent,
-                  //backgroundColor: Colors.green,
-                  //backgroundColor: Colors.green,
-                ),
-              ),
-            ),
+            if (_remainingMessagesLength != '')
+              _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
         );
 
@@ -891,9 +856,6 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 23.0,
-            ),
             Icon(Icons.location_on),
             Text(
               "  Location",
@@ -903,19 +865,8 @@ class _ChatsAndActivityCollectionState
                 color: const Color.fromRGBO(150, 150, 150, 1),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 25.0),
-              child: Text(
-                '$_remainingMessagesLength',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.lightGreenAccent,
-                  //backgroundColor: Colors.green,
-                  //backgroundColor: Colors.green,
-                ),
-              ),
-            ),
+            if (_remainingMessagesLength != '')
+              _totalRemainingMessagesTake(_remainingMessagesLength),
           ],
         );
     }
@@ -933,5 +884,43 @@ class _ChatsAndActivityCollectionState
         ),
       ],
     );
+  }
+
+  Widget _totalRemainingMessagesTake(String _remainingMessagesLength) {
+    return Container(
+      margin: EdgeInsets.only(left: 25.0),
+      child: Text(
+        '$_remainingMessagesLength',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 18.0,
+          color: Colors.lightGreenAccent,
+          //backgroundColor: Colors.green,
+        ),
+      ),
+    );
+  }
+
+  Widget _latestConversationTime(Map<String, String> _lastMessage) {
+    String _willReturnTime = '';
+    if (_lastMessage != null &&
+        _lastMessage.values.last.toString().split('+')[0].toString() != '') {
+      _willReturnTime =
+          _lastMessage.values.last.toString().split('+')[0].toString();
+
+      if (int.parse(_willReturnTime.split(':')[0]) < 10)
+        _willReturnTime = _willReturnTime.replaceRange(0,
+            _willReturnTime.indexOf(':'), '0${_willReturnTime.split(':')[0]}');
+      if (int.parse(_willReturnTime.split(':')[1]) < 10)
+        _willReturnTime = _willReturnTime.replaceRange(
+            _willReturnTime.indexOf(':') + 1,
+            _willReturnTime.length,
+            '0${_willReturnTime.split(':')[1]}');
+    }
+    return Container(
+        child: Text(
+      _willReturnTime,
+      style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+    ));
   }
 }

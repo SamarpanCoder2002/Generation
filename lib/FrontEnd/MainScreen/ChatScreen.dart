@@ -172,7 +172,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           }
         }
 
-        /// Auto Scroll Control
+        /// Auto Scroll Control to the latest Message
         if (mounted) {
           setState(() {
             _scrollController.jumpTo(
@@ -183,7 +183,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         print('No Old Messages in Local Database');
       }
 
-      /// After Get the old Conversation messages from SqLite, Take Data from Firestore
+      /// After Get the old Conversation messages from SqLite, Take New Messages Data from FireStore
       _extractDataFromFireStore();
     } catch (e) {
       // For AutoScroll to the end position
@@ -259,96 +259,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                     switch (_incomingInformationContainer[1]) {
                       case 'MediaTypes.Text': // If Message Type is Text
-                        // Store Data in local Storage
-                        await _localStorageHelper.insertNewMessages(
-                            widget._userName,
-                            everyMessage.keys.first.toString(),
-                            MediaTypes.Text,
-                            1,
-                            _incomingInformationContainer[0]);
 
-                        if (mounted) {
-                          setState(() {
-                            _mediaTypes.add(
-                                MediaTypes.Text); // Insert About Media Type
-
-                            _chatContainer.add({
-                              // Current Running information Store
-                              '${everyMessage.keys.first}':
-                                  '${_incomingInformationContainer[0]}',
-                            });
-
-                            _response.add(true); // Chat Position Status Added
-                          });
-                        }
+                        await _manageText(
+                            _incomingInformationContainer, everyMessage);
 
                         break;
                       case 'MediaTypes.Voice': // If Message type is voice
 
-                        final PermissionStatus storagePermissionStatus =
-                            await Permission.storage
-                                .request(); // Take User Permission To Take Voice
-
-                        if (storagePermissionStatus.isGranted) {
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                          }
-
-                          final Directory directory =
-                              await getExternalStorageDirectory();
-                          print('Directory Path: ${directory.path}');
-
-                          final recordingStorage = await Directory(
-                                  directory.path + '/Recordings/')
-                              .create(); // Create New Folder about the desire location
-
-                          final String currTime =
-                              DateTime.now().toString(); // Current Time Take
-
-                          if (mounted) {
-                            setState(() {
-                              _mediaTypes
-                                  .add(MediaTypes.Voice); // add New Media Type
-
-                              _chatContainer.add({
-                                // Take Messages in Local Container
-                                '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}':
-                                    '${_incomingInformationContainer[0]}',
-                              });
-
-                              _response.add(true); // Chat Position Status Added
-                            });
-                          }
-
-                          // Download the voice from the Firebase Storage and delete from storage permanently
-                          await _dio
-                              .download(everyMessage.keys.first.toString(),
-                                  '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
-                                  onReceiveProgress: _downLoadOnReceiveProgress)
-                              .whenComplete(() async {
-                            await _management.deleteFilesFromFirebaseStorage(
-                                everyMessage.keys.first.toString());
-                          });
-
-                          print(
-                              'Recorded Path: ${recordingStorage.path}$currTime${_incomingInformationContainer[2]}');
-
-                          // Store Data in local Storage
-                          _localStorageHelper.insertNewMessages(
-                              widget._userName,
-                              '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
-                              MediaTypes.Voice,
-                              1,
-                              _incomingInformationContainer[0]);
-
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                        }
+                        await _manageVoice(
+                            _incomingInformationContainer, everyMessage);
                         break;
 
                       case 'MediaTypes.Image':
@@ -400,11 +319,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               print("No message Here");
             }
 
-            // For AutoScroll to the end position
-            // Checking Chat is open for the first time or not
+            /// Make Control in isChatOpenFirstTime
             if (mounted) {
               setState(() {
-                /// Make Control in isChatOpenFirstTime
                 if (_isChatOpenFirstTime) {
                   _isChatOpenFirstTime = false;
                 }
@@ -422,6 +339,95 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 title: Text("FireStore Problem"),
                 content: Text(e.toString()),
               ));
+    }
+  }
+
+  Future<void> _manageText(
+      List<String> _incomingInformationContainer, everyMessage) async {
+    // Store Data in local Storage
+    await _localStorageHelper.insertNewMessages(
+        widget._userName,
+        everyMessage.keys.first.toString(),
+        MediaTypes.Text,
+        1,
+        _incomingInformationContainer[0]);
+
+    if (mounted) {
+      setState(() {
+        _mediaTypes.add(MediaTypes.Text); // Insert About Media Type
+
+        print('Time is: ${_incomingInformationContainer[0]}');
+
+        _chatContainer.add({
+          // Current Running information Store
+          '${everyMessage.keys.first}': '${_incomingInformationContainer[0]}',
+        });
+
+        _response.add(true); // Chat Position Status Added
+      });
+    }
+  }
+
+  Future<void> _manageVoice(
+      List<String> _incomingInformationContainer, everyMessage) async {
+    final PermissionStatus storagePermissionStatus = await Permission.storage
+        .request(); // Take User Permission To Take Voice
+
+    if (storagePermissionStatus.isGranted) {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
+      final Directory directory = await getExternalStorageDirectory();
+      print('Directory Path: ${directory.path}');
+
+      final recordingStorage = await Directory(directory.path + '/Recordings/')
+          .create(); // Create New Folder about the desire location
+
+      final String currTime = DateTime.now().toString(); // Current Time Take
+
+      if (mounted) {
+        setState(() {
+          _mediaTypes.add(MediaTypes.Voice); // add New Media Type
+
+          _chatContainer.add({
+            // Take Messages in Local Container
+            '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}':
+                '${_incomingInformationContainer[0]}',
+          });
+
+          _response.add(true); // Chat Position Status Added
+        });
+      }
+
+      // Download the voice from the Firebase Storage and delete from storage permanently
+      await _dio
+          .download(everyMessage.keys.first.toString(),
+              '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
+              onReceiveProgress: _downLoadOnReceiveProgress)
+          .whenComplete(() async {
+        await _management
+            .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+      });
+
+      print(
+          'Recorded Path: ${recordingStorage.path}$currTime${_incomingInformationContainer[2]}');
+
+      // Store Data in local Storage
+      _localStorageHelper.insertNewMessages(
+          widget._userName,
+          '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
+          MediaTypes.Voice,
+          1,
+          _incomingInformationContainer[0]);
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -1005,15 +1011,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     return Container(
       alignment: Alignment.center,
       margin: EdgeInsets.only(
-        left: MediaQuery.of(context).size.width / 5,
-        right: MediaQuery.of(context).size.width / 5,
+        left: MediaQuery.of(context).size.width / 4,
+        right: MediaQuery.of(context).size.width / 4,
         top: 10.0,
         bottom: 20.0,
       ),
       //width: MediaQuery.of(context).size.width / 2,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.0),
-        color: Colors.red,
+        color: Colors.redAccent,
       ),
       child: Text(
         'New Messages',
@@ -1616,10 +1622,23 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               bottom: 5.0,
               top: 5.0,
             ),
-      child: Text(
-        _chatContainer[index].values.first.split('+')[0],
-        style: const TextStyle(color: Colors.lightBlue),
-      ),
+      child: _timeReFormat(_chatContainer[index].values.first.split('+')[0]),
+    );
+  }
+
+  Widget _timeReFormat(String _willReturnTime) {
+    if (int.parse(_willReturnTime.split(':')[0]) < 10)
+      _willReturnTime = _willReturnTime.replaceRange(
+          0, _willReturnTime.indexOf(':'), '0${_willReturnTime.split(':')[0]}');
+    if (int.parse(_willReturnTime.split(':')[1]) < 10)
+      _willReturnTime = _willReturnTime.replaceRange(
+          _willReturnTime.indexOf(':') + 1,
+          _willReturnTime.length,
+          '0${_willReturnTime.split(':')[1]}');
+
+    return Text(
+      _willReturnTime,
+      style: const TextStyle(color: Colors.lightBlue),
     );
   }
 
@@ -1839,12 +1858,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
-    print('One: ${_takeImageFile.path}');
-
     final String _imageDownLoadUrl =
         await _management.uploadMediaToStorage(_takeImageFile, context);
-
-    print('One: ${_takeImageFile.path}');
 
     if (mounted) {
       setState(() {
@@ -1852,30 +1867,21 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
-    print('One: ${_takeImageFile.path}');
-
     final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
         .doc("generation_users/$_senderMail")
         .get();
 
-    print('Two: ${_takeImageFile.path}');
-
     // Initialize Temporary List
     List<dynamic> _sendingMessages = [];
-
-    print('Three: ${_takeImageFile.path}');
 
     // Store Updated Sending Messages List
     _sendingMessages = documentSnapShot.data()['connections']
         [FirebaseAuth.instance.currentUser.email.toString()];
 
-    print('Fourth: ${_takeImageFile.path}');
-
     String thumbNailPicturePath, thumbNailPicturePathUrl;
 
     if (mediaTypesForSend == MediaTypes.Video) {
       final Directory directory = await getExternalStorageDirectory();
-      print('Directory Path: ${directory.path}');
 
       final Directory _newDirectory =
           await Directory('${directory.path}/.ThumbNails/')
@@ -1894,11 +1900,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     if (mounted) {
       if (_sendingMessages == null) _sendingMessages = [];
 
-      print('Fifth: ${_takeImageFile.path}');
-
       setState(() {
-        print('Six: ${_takeImageFile.path}');
-
         if (mediaTypesForSend == MediaTypes.Video) {
           // Add data to temporary Storage of Sending
           _sendingMessages.add({
@@ -1942,17 +1944,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         _mediaTypes.add(mediaTypesForSend); // Add MediaType
 
-        // // Scroll to Bottom
-        // _scrollController.jumpTo(
-        //     _scrollController.position.maxScrollExtent * MediaQuery
-        //         .of(context)
-        //         .size
-        //         .height * 0.8);
-
         _inputTextController.clear(); // Get Clear the InputBox
       });
-
-      print('Eight: ${_takeImageFile.path}');
 
       // Data Store in Local Storage
       await _localStorageHelper.insertNewMessages(
@@ -1961,8 +1954,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           mediaTypesForSend,
           0,
           _chatContainer.last.values.first.toString());
-
-      print('Nine: ${_takeImageFile.path}');
 
       // Data Store in Firestore
       _management.addConversationMessages(this._senderMail, _sendingMessages);
@@ -2010,13 +2001,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _response.add(false);
 
         _mediaTypes.add(MediaTypes.Location);
-
-        // // Scroll to Bottom
-        // _scrollController
-        //     .jumpTo(_scrollController.position.maxScrollExtent * MediaQuery
-        //     .of(context)
-        //     .size
-        //     .height * 0.8);
       });
 
       // Data Store in Local Storage
@@ -2044,8 +2028,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   void chatMicrophoneOnTapAction(int index) async {
     _justAudioPlayer.positionStream.listen((event) {
-      print("Going Duration: $event");
-
       if (mounted) {
         setState(() {
           _currAudioPlayingTime = event.inMicroseconds.ceilToDouble();
@@ -2056,7 +2038,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     _justAudioPlayer.playerStateStream.listen((event) {
       if (event.processingState == ProcessingState.completed) {
-        print('Audio Play Completed');
         _justAudioPlayer.stop();
         if (mounted) {
           setState(() {
@@ -2553,10 +2534,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           zIndex: 1.0,
           draggable: true,
           position: LatLng(position.latitude, position.longitude));
-
-      print(position.latitude);
-      print(position.longitude);
-      print(position.toJson());
 
       showDialog(
           context: context,
