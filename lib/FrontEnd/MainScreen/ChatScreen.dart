@@ -92,6 +92,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   String _senderMail;
   String _connectionToken;
+  String _currAccountUserName;
 
   String _totalDuration;
   String _loadingTime;
@@ -118,6 +119,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         userName: widget._userName);
 
     _connectionToken = await _localStorageHelper.extractToken(this._senderMail);
+
+    _currAccountUserName = await _localStorageHelper.extractImportantDataFromThatAccount(userMail: FirebaseAuth.instance.currentUser.email);
   }
 
   _extractHistoryDataFromSqLite() async {
@@ -1696,6 +1699,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
 
+        _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent + 100);
+
         /// Data Store in Local Storage
         await _localStorageHelper.insertNewMessages(
             widget._userName,
@@ -1713,13 +1719,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         await _messageNotification(MediaTypes.Text, textMsg: _textToSend);
 
-        if (mounted) {
-          print('Here');
-          setState(() {
-            _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent + 100);
-          });
-        }
+        // if (mounted) {
+        //   print('Here');
+        //   setState(() {
+        //     _scrollController
+        //         .jumpTo(_scrollController.position.maxScrollExtent + 100);
+        //   });
+        // }
       }
     } catch (e) {
       showDialog(
@@ -2043,51 +2049,65 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     switch (mediaTypes) {
       case MediaTypes.Text:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Message",
-            body: textMsg);
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Message",
+          body: textMsg,
+          context: context,
+        );
         break;
 
       case MediaTypes.Voice:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Voice",
-            body: '');
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Voice",
+          body: '',
+          context: context,
+        );
         break;
 
       case MediaTypes.Image:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Image",
-            body: textMsg);
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Image",
+          body: textMsg,
+          context: context,
+        );
         break;
 
       case MediaTypes.Video:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Video",
-            body: textMsg);
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Video",
+          body: textMsg,
+          context: context,
+        );
         break;
 
       case MediaTypes.Sticker:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Sticker",
-            body: '');
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Sticker",
+          body: '',
+          context: context,
+        );
         break;
 
       case MediaTypes.Location:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Location",
-            body: textMsg);
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Location",
+          body: textMsg,
+          context: context,
+        );
         break;
 
       case MediaTypes.Document:
         await sendNotification(
-            token: _connectionToken,
-            title: "${widget._userName} Send You a Document",
-            body: textMsg);
+          token: _connectionToken,
+          title: "$_currAccountUserName Send You a Document",
+          body: textMsg,
+          context: context,
+        );
         break;
 
       case MediaTypes.Indicator:

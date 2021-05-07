@@ -10,6 +10,9 @@ import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 
+
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -46,8 +49,10 @@ void _receiveAndShowNotificationInitialization(
       ForeGroundNotificationReceiveAndShow();
 
   /// Show Notification When App is On
+  print('Here');
+
   await _foregroundNotificationReceiveAndShow.showNotification(
-      title: title, body: body);
+      title: title, body: body,);
 }
 
 Future<void> notificationInitialize() async {

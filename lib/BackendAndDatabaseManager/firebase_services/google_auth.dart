@@ -41,26 +41,26 @@ class GoogleAuth {
 
           print(responseData.exists);
 
-          if (responseData.exists)
-            await FirebaseFirestore.instance
-                .doc(
-                    'generation_users/${FirebaseAuth.instance.currentUser.email}')
-                .delete();
-
-          print("Email Not Present");
-          await userNameChecking(context, userCredential.user.email);
-
-          // if (!responseData.exists) {
-          //   print("Email Not Present");
-          //   await userNameChecking(context, userCredential.user.email);
-          // } else {
-          //   Navigator.pop(context);
-          //   Navigator.push(
-          //       context, MaterialPageRoute(builder: (_) => MainScreen()));
+          // if (responseData.exists)
+          //   await FirebaseFirestore.instance
+          //       .doc(
+          //           'generation_users/${FirebaseAuth.instance.currentUser.email}')
+          //       .delete();
           //
-          //   showAlertBox(
-          //       context, "Log-In Successful", "Enjoy this app", Colors.green);
-          // }
+          // print("Email Not Present");
+          // await userNameChecking(context, userCredential.user.email);
+
+          if (!responseData.exists) {
+            print("Email Not Present");
+            await userNameChecking(context, userCredential.user.email);
+          } else {
+            Navigator.pop(context);
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => MainScreen()));
+
+            showAlertBox(
+                context, "Log-In Successful", "Enjoy this app", Colors.green);
+          }
         }
       } else {
         print("Already Logged In");
@@ -242,22 +242,8 @@ class GoogleAuth {
                                 showAlertBox(context, "Log-In Successful",
                                     "Enjoy this app", Colors.green);
                               } else {
-                                if (querySnapShotForUserNameChecking
-                                    .docs.isNotEmpty) {
-                                  //Navigator.pop(this._context);
-                                  showAlertBox(
-                                      context,
-                                      "User Name Already Exist",
-                                      "Try Another User Name",
-                                      Colors.yellow);
-                                } else {
-                                  //Navigator.pop(this._context);
-                                  showAlertBox(
-                                      context,
-                                      "User Name Already Exist",
-                                      "Try Another User Name",
-                                      Colors.yellow);
-                                }
+                                showAlertBox(context, "User Name Already Exist",
+                                    "Try Another User Name", Colors.yellow);
                               }
                             } else {
                               print("Not Validate");

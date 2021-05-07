@@ -157,7 +157,8 @@ class _SearchState extends State<Search> {
                     token: searchResultSnapshot.docs[index]['token'],
                     title: 'New Connection Request',
                     body:
-                        '${documentSnapShotCurrUser.get('user_name')} Send You a Connection Request');
+                        '${documentSnapShotCurrUser.get('user_name')} Send You a Connection Request',
+                    context: context);
 
                 print("Updated");
               } else {
@@ -216,7 +217,8 @@ class _SearchState extends State<Search> {
                       token: searchResultSnapshot.docs[index]['token'],
                       title: 'Connection Request Accepted',
                       body:
-                          '${documentSnapShotCurrUser.get('user_name')} Accept Your Connection Request');
+                          '${documentSnapShotCurrUser.get('user_name')} Accept Your Connection Request',
+                      context: context);
                 } else {
                   print("Nothing To Do");
                 }

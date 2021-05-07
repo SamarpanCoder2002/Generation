@@ -71,25 +71,25 @@ class EmailAndPasswordAuth {
 
         print(responseData.exists);
 
-        if (responseData.exists)
-          await FirebaseFirestore.instance
-              .doc(
-                  'generation_users/${FirebaseAuth.instance.currentUser.email}')
-              .delete();
-
-        print("Email Not Present");
-        await userNameChecking();
-
-        // if (!responseData.exists) {
-        //   print("Email Not Present");
-        //   await userNameChecking();
-        // } else {
-        //   Navigator.pop(this._context);
-        //   Navigator.push(
-        //       this._context, MaterialPageRoute(builder: (_) => MainScreen()));
+        // if (responseData.exists)
+        //   await FirebaseFirestore.instance
+        //       .doc(
+        //           'generation_users/${FirebaseAuth.instance.currentUser.email}')
+        //       .delete();
         //
-        //   showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
-        // }
+        // print("Email Not Present");
+        // await userNameChecking();
+
+        if (!responseData.exists) {
+          print("Email Not Present");
+          await userNameChecking();
+        } else {
+          Navigator.pop(this._context);
+          Navigator.push(
+              this._context, MaterialPageRoute(builder: (_) => MainScreen()));
+
+          showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
+        }
       } else {
         print("Email not Verified");
         FirebaseAuth.instance.signOut();
@@ -266,16 +266,8 @@ class EmailAndPasswordAuth {
                                 showAlertBox("Log-In Successful",
                                     "Enjoy this app", Colors.green);
                               } else {
-                                if (querySnapShotForUserNameChecking
-                                    .docs.isNotEmpty) {
-                                  //Navigator.pop(this._context);
-                                  showAlertBox("User Name Already Exist",
-                                      "Try Another User Name", Colors.yellow);
-                                } else {
-                                  //Navigator.pop(this._context);
-                                  showAlertBox("User Name Already Exist",
-                                      "Try Another User Name", Colors.yellow);
-                                }
+                                showAlertBox("User Name Already Exist",
+                                    "Try Another User Name", Colors.yellow);
                               }
                             } else {
                               print("Not Validate");

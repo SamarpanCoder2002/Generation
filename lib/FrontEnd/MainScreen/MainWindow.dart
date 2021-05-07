@@ -101,7 +101,7 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () async {
                       print("New User Add");
                       await ForeGroundNotificationReceiveAndShow()
-                          .showNotification(title: 'Title', body: 'Body');
+                          .showNotification(title: 'Title', body: 'Body', context: context);
                     },
                   ),
                 )
