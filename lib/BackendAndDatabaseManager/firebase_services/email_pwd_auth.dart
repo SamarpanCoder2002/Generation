@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation_official/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
-
 
 class EmailAndPasswordAuth {
   String _email, _pwd;
@@ -71,16 +71,25 @@ class EmailAndPasswordAuth {
 
         print(responseData.exists);
 
-        if (!responseData.exists) {
-          print("Email Not Present");
-          await userNameChecking();
-        } else {
-          Navigator.pop(this._context);
-          Navigator.push(
-              this._context, MaterialPageRoute(builder: (_) => MainScreen()));
+        if (responseData.exists)
+          await FirebaseFirestore.instance
+              .doc(
+                  'generation_users/${FirebaseAuth.instance.currentUser.email}')
+              .delete();
 
-          showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
-        }
+        print("Email Not Present");
+        await userNameChecking();
+
+        // if (!responseData.exists) {
+        //   print("Email Not Present");
+        //   await userNameChecking();
+        // } else {
+        //   Navigator.pop(this._context);
+        //   Navigator.push(
+        //       this._context, MaterialPageRoute(builder: (_) => MainScreen()));
+        //
+        //   showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
+        // }
       } else {
         print("Email not Verified");
         FirebaseAuth.instance.signOut();
@@ -212,6 +221,9 @@ class EmailAndPasswordAuth {
 
                               if (querySnapShotForUserNameChecking
                                   .docs.isEmpty) {
+                                final String _getToken =
+                                    await FirebaseMessaging.instance.getToken();
+
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
                                     .doc(_email)
@@ -225,6 +237,7 @@ class EmailAndPasswordAuth {
                                       "${DateFormat('hh:mm a').format(DateTime.now())}",
                                   'connections': {},
                                   'activity': {},
+                                  'token': _getToken,
                                 });
 
                                 await _localStorageHelper
@@ -232,9 +245,11 @@ class EmailAndPasswordAuth {
 
                                 await _localStorageHelper
                                     .insertDataForThisAccount(
-                                        userMail: FirebaseAuth
-                                            .instance.currentUser.email,
-                                        userName: this._userName.text);
+                                  userMail:
+                                      FirebaseAuth.instance.currentUser.email,
+                                  userName: this._userName.text,
+                                  userToken: _getToken,
+                                );
 
                                 await _localStorageHelper
                                     .createTableForUserActivity(

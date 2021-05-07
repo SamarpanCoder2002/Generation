@@ -15,6 +15,7 @@ import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 import 'package:generation_official/FrontEnd/Services/toast_message_manage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -90,6 +91,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   Directory _audioDirectory;
 
   String _senderMail;
+  String _connectionToken;
 
   String _totalDuration;
   String _loadingTime;
@@ -111,9 +113,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     color: const Color.fromRGBO(20, 255, 50, 1),
   );
 
-  void _senderMailDataFetch() async {
+  void _essentialExtract() async {
     _senderMail = await _localStorageHelper.extractImportantDataFromThatAccount(
         userName: widget._userName);
+
+    _connectionToken = await _localStorageHelper.extractToken(this._senderMail);
   }
 
   _extractHistoryDataFromSqLite() async {
@@ -687,7 +691,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   void initState() {
     super.initState();
-    _senderMailDataFetch();
+    _essentialExtract();
 
     _hintText = 'Type Here...';
     _mediaTextController.text = '';
@@ -1703,11 +1707,19 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         /// Data Store in Firestore
         _management.addConversationMessages(this._senderMail, sendingMessages);
 
+        final String _textToSend = _inputTextController.text;
+
         _inputTextController.clear();
 
-        /// Scroll to Bottom
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent + 100);
+        await _messageNotification(MediaTypes.Text, textMsg: _textToSend);
+
+        if (mounted) {
+          print('Here');
+          setState(() {
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent + 100);
+          });
+        }
       }
     } catch (e) {
       showDialog(
@@ -1718,12 +1730,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               content: Text(e.toString()),
             );
           });
-    }
-    if (mounted) {
-      setState(() {
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent + 100);
-      });
     }
   }
 
@@ -1836,6 +1842,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               .jumpTo(_scrollController.position.maxScrollExtent + 300);
         });
       }
+
+      await _messageNotification(MediaTypes.Voice);
     }
   }
 
@@ -1955,6 +1963,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               (MediaQuery.of(context).size.height * 0.8));
         });
       }
+
+      if (mediaTypesForSend == MediaTypes.Video) {
+        await _messageNotification(MediaTypes.Video, textMsg: extraText);
+      } else if (mediaTypesForSend == MediaTypes.Image) {
+        await _messageNotification(MediaTypes.Image, textMsg: extraText);
+      } else if (mediaTypesForSend == MediaTypes.Document) {
+        await _messageNotification(MediaTypes.Document, textMsg: extraText);
+      }
     }
   }
 
@@ -2014,6 +2030,68 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
             (MediaQuery.of(context).size.height * 0.8));
       });
+    }
+
+    await _messageNotification(MediaTypes.Location,
+        textMsg: 'Click Red Pointer in Map to Open in Google Map');
+  }
+
+  Future<void> _messageNotification(MediaTypes mediaTypes,
+      {String textMsg = ''}) async {
+    print('Token is: $_connectionToken');
+
+    switch (mediaTypes) {
+      case MediaTypes.Text:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Message",
+            body: textMsg);
+        break;
+
+      case MediaTypes.Voice:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Voice",
+            body: '');
+        break;
+
+      case MediaTypes.Image:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Image",
+            body: textMsg);
+        break;
+
+      case MediaTypes.Video:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Video",
+            body: textMsg);
+        break;
+
+      case MediaTypes.Sticker:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Sticker",
+            body: '');
+        break;
+
+      case MediaTypes.Location:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Location",
+            body: textMsg);
+        break;
+
+      case MediaTypes.Document:
+        await sendNotification(
+            token: _connectionToken,
+            title: "${widget._userName} Send You a Document",
+            body: textMsg);
+        break;
+
+      case MediaTypes.Indicator:
+        break;
     }
   }
 

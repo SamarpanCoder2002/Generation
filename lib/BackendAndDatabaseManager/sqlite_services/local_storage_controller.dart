@@ -18,6 +18,7 @@ class LocalStorageHelper {
   final String _colAbout = "About";
   final String _colProfileImageUrl = "DP_Url";
   final String _colEmail = "Email";
+  final String _colToken = "Token";
 
   final String _colActivity = 'Status';
   final String _colTimeActivity = 'Status_Time';
@@ -67,7 +68,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -75,12 +76,13 @@ class LocalStorageHelper {
   }
 
   Future<void> insertDataForThisAccount(
-      {@required String userName, @required String userMail}) async {
+      {@required String userName, @required String userMail, @required String userToken}) async {
     Database db = await this.database;
     Map<String, dynamic> _accountData = Map<String, dynamic>();
 
     _accountData[_colAccountUserName] = userName;
     _accountData[_colAccountUserMail] = userMail;
+    _accountData[_colToken] = userToken;
 
     await db.insert(_allImportantDataStore, _accountData);
   }
@@ -99,6 +101,16 @@ class LocalStorageHelper {
           "SELECT $_colAccountUserMail FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
     return result[0].values.first;
+  }
+
+  Future<String> extractToken(String _tableName) async{
+    Database db = await this.database;
+
+    List<Map<String, Object>> result = await db.rawQuery(
+        "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$_tableName'");
+
+    return result[0].values.first;
+
   }
 
   Future<List<Map<String, Object>>> extractAllUsersNameExceptThis() async {

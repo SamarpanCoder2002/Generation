@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -40,17 +41,26 @@ class GoogleAuth {
 
           print(responseData.exists);
 
-          if (!responseData.exists) {
-            print("Email Not Present");
-            await userNameChecking(context, userCredential.user.email);
-          } else {
-            Navigator.pop(context);
-            Navigator.push(
-                context, MaterialPageRoute(builder: (_) => MainScreen()));
+          if (responseData.exists)
+            await FirebaseFirestore.instance
+                .doc(
+                    'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                .delete();
 
-            showAlertBox(
-                context, "Log-In Successful", "Enjoy this app", Colors.green);
-          }
+          print("Email Not Present");
+          await userNameChecking(context, userCredential.user.email);
+
+          // if (!responseData.exists) {
+          //   print("Email Not Present");
+          //   await userNameChecking(context, userCredential.user.email);
+          // } else {
+          //   Navigator.pop(context);
+          //   Navigator.push(
+          //       context, MaterialPageRoute(builder: (_) => MainScreen()));
+          //
+          //   showAlertBox(
+          //       context, "Log-In Successful", "Enjoy this app", Colors.green);
+          // }
         }
       } else {
         print("Already Logged In");
@@ -122,7 +132,8 @@ class GoogleAuth {
                         validator: (inputUserName) {
                           if (inputUserName.length < 6)
                             return "User Name At Least 6 Characters";
-                          else if (inputUserName.contains(' ') || inputUserName.contains('@'))
+                          else if (inputUserName.contains(' ') ||
+                              inputUserName.contains('@'))
                             return "Space and '@' Not Allowed...User '_' instead of space";
                           else if (inputUserName.contains('__'))
                             return "'__' Not Allowed...User '_' instead of '__'";
@@ -186,6 +197,9 @@ class GoogleAuth {
 
                               if (querySnapShotForUserNameChecking
                                   .docs.isEmpty) {
+                                final String _getToken =
+                                    await FirebaseMessaging.instance.getToken();
+
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
                                     .doc(_email)
@@ -199,6 +213,7 @@ class GoogleAuth {
                                       "${DateFormat('hh:mm a').format(DateTime.now())}",
                                   'connections': {},
                                   'activity': {},
+                                  'token': _getToken,
                                 });
 
                                 await _localStorageHelper
@@ -206,14 +221,15 @@ class GoogleAuth {
 
                                 await _localStorageHelper
                                     .insertDataForThisAccount(
-                                    userMail: FirebaseAuth
-                                        .instance.currentUser.email,
-                                    userName: this._userName.text);
+                                  userMail:
+                                      FirebaseAuth.instance.currentUser.email,
+                                  userName: this._userName.text,
+                                  userToken: _getToken,
+                                );
 
                                 await _localStorageHelper
                                     .createTableForUserActivity(
-                                    this._userName.text);
-
+                                        this._userName.text);
 
                                 print("Log-In Successful: User Name: $_email");
 

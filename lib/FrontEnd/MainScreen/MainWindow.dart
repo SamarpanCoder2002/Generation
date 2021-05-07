@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation_official/FrontEnd/MainScreen/applications_section.dart';
 import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
+import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -96,8 +98,10 @@ class _MainScreenState extends State<MainScreen> {
                       Icons.supervised_user_circle_outlined,
                       size: 25.0,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       print("New User Add");
+                      await ForeGroundNotificationReceiveAndShow()
+                          .showNotification(title: 'Title', body: 'Body');
                     },
                   ),
                 )
