@@ -76,7 +76,9 @@ class LocalStorageHelper {
   }
 
   Future<void> insertDataForThisAccount(
-      {@required String userName, @required String userMail, @required String userToken}) async {
+      {@required String userName,
+      @required String userMail,
+      @required String userToken}) async {
     Database db = await this.database;
     Map<String, dynamic> _accountData = Map<String, dynamic>();
 
@@ -103,20 +105,25 @@ class LocalStorageHelper {
     return result[0].values.first;
   }
 
-  Future<String> extractToken(String _tableName) async{
+  Future<String> extractToken(String _tableName) async {
     Database db = await this.database;
 
     List<Map<String, Object>> result = await db.rawQuery(
         "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$_tableName'");
 
     return result[0].values.first;
-
   }
 
-  Future<List<Map<String, Object>>> extractAllUsersNameExceptThis() async {
+  Future<List<Map<String, Object>>> extractAllUsersName({bool thisAccountAllowed = false}) async {
     Database db = await this.database;
-    List<Map<String, Object>> result = await db.rawQuery(
+    List<Map<String, Object>> result;
+
+    if(!thisAccountAllowed)
+    result = await db.rawQuery(
         "SELECT $_colAccountUserName FROM $_allImportantDataStore WHERE $_colAccountUserMail != '${FirebaseAuth.instance.currentUser.email}'");
+    else
+      result = await db.rawQuery(
+          "SELECT $_colAccountUserName FROM $_allImportantDataStore");
     return result;
   }
 
@@ -171,10 +178,27 @@ class LocalStorageHelper {
   // Extract Status from Table Name
   Future<List<Map<String, dynamic>>> extractActivityForParticularUserName(
       String tableName) async {
-    final Database db = await this.database;
-    final List<Map<String, Object>> tables =
-        await db.rawQuery("SELECT * FROM ${tableName}_status");
-    return tables;
+    try {
+      final Database db = await this.database;
+      final List<Map<String, Object>> tables =
+          await db.rawQuery("SELECT * FROM ${tableName}_status");
+      return tables;
+    } catch (e) {
+      print('Extract USer Name Activity Exception: ${e.toString()}');
+      return null;
+    }
+  }
+
+  /// Delete Particular Activity record From Activity Container
+  Future<void> deleteParticularActivity(
+      {@required String tableName, @required String activity}) async {
+    try {
+      final Database db = await this.database;
+      await db.rawDelete(
+          "DELETE FROM ${tableName}_status WHERE $_colActivity = '$activity'");
+    } catch (e) {
+      print('Delete Activity From Database Error: ${e.toString()}');
+    }
   }
 
   // Count Total Statuses for particular Table Name

@@ -324,7 +324,7 @@ class _ChatsAndActivityCollectionState
   /// Existing connection having some activity store in local database, user name add
   void _searchAboutExistingConnectionActivity() async {
     final List<Map<String, Object>> _alreadyStoredUserNameList =
-        await _localStorageHelper.extractAllUsersNameExceptThis();
+        await _localStorageHelper.extractAllUsersName();
     _alreadyStoredUserNameList.forEach((userNameMap) async {
       final int _countTotalActivity = await _localStorageHelper
           .countTotalActivitiesForParticularUserName(userNameMap.values.first);

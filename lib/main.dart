@@ -4,14 +4,15 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 
-
-final navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,8 @@ void main() async {
     );
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
+
+
   runApp(MaterialApp(
     title: 'Generation',
     debugShowCheckedModeBanner: false,
@@ -52,7 +55,9 @@ void _receiveAndShowNotificationInitialization(
   print('Here');
 
   await _foregroundNotificationReceiveAndShow.showNotification(
-      title: title, body: body,);
+    title: title,
+    body: body,
+  );
 }
 
 Future<void> notificationInitialize() async {

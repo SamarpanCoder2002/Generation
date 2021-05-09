@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation_official/FrontEnd/MainScreen/applications_section.dart';
@@ -9,6 +10,75 @@ import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
 import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
+import 'package:workmanager/workmanager.dart';
+
+/// For WorkManager Callback Function
+void deleteOldActivity() async {
+  Workmanager().executeTask((taskName, inputData) async {
+    switch (taskName) {
+      case "deleteActivity":
+        print('Delete Activity Executing');
+        await _deleteActivitySeparately();
+        print('All After Delete Activity');
+        break;
+    }
+
+    return Future.value(true);
+  });
+}
+
+Future<void> _deleteActivitySeparately() async {
+  print('Here Delete Activity');
+
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  final List<Map<String, dynamic>> _connectionUserName =
+      await _localStorageHelper.extractAllUsersName(thisAccountAllowed: true);
+
+  print('Delete Activity Executing 2: $_connectionUserName');
+
+  _connectionUserName.forEach((everyUser) async {
+    final List<Map<String, dynamic>> _thisUserActivityCollection =
+        await _localStorageHelper
+            .extractActivityForParticularUserName(everyUser.values.first);
+
+    print('Now 1: $_thisUserActivityCollection');
+
+    if (_thisUserActivityCollection != null) {
+      if (_thisUserActivityCollection.length == 0) {
+        print('User Has No Activity');
+      } else {
+        print('Now 2: $_thisUserActivityCollection');
+
+        _thisUserActivityCollection
+            .forEach((Map<String, dynamic> everyActivity) async {
+          final String _activityDateTime = everyActivity['Status_Time'];
+
+          print('Now 3: $_thisUserActivityCollection');
+
+          final currDate = DateTime.now().toString().split(' ')[0];
+          final int currHour = DateTime.now().hour;
+          final int currMinute = DateTime.now().minute;
+
+          if (_activityDateTime.split(' ')[0] != currDate) {
+            final List<String> _timeDistribution =
+                _activityDateTime.split(' ')[1].split(':');
+
+
+            if (int.parse(_timeDistribution[0]) <= currHour) {
+              if (int.parse(_timeDistribution[1]) <= currMinute) {
+                print('Delete that Status');
+                await _localStorageHelper.deleteParticularActivity(
+                    tableName: everyUser.values.first,
+                    activity: everyActivity['Status']);
+              }
+            }
+          }
+        });
+      }
+    }
+  });
+}
 
 class MainScreen extends StatefulWidget {
   @override
@@ -18,6 +88,28 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currIndex = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    Workmanager().initialize(
+        deleteOldActivity, // The top level function, aka callbackDispatcher
+        isInDebugMode:
+            true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+        );
+
+    /// Periodic task registration
+    Workmanager().registerPeriodicTask(
+      "1",
+      "deleteActivity",
+      frequency: Duration(
+          minutes:
+              15), // Minimum frequency is 15 min. Android will automatically change your frequency to 15 min if you have configured a lower frequency.
+    );
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +193,8 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () async {
                       print("New User Add");
                       await ForeGroundNotificationReceiveAndShow()
-                          .showNotification(title: 'Title', body: 'Body', context: context);
+                          .showNotification(
+                              title: 'Title', body: 'Body', context: context);
                     },
                   ),
                 )
