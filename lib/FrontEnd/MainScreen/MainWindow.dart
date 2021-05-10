@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -14,7 +13,7 @@ import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
 import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 import 'package:workmanager/workmanager.dart';
 
-List<String> _activityLinkDeleteFromStorage = [];
+final List<String> _activityLinkDeleteFromStorage = [];
 
 /// For WorkManager Callback Function
 void deleteOldActivity() async {
@@ -38,6 +37,7 @@ void deleteOldActivity() async {
   });
 }
 
+/// Delete From Firebase Storage
 Future<void> _deleteFromStorage() async {
   final Management _management = Management(takeTotalUserName: false);
 
@@ -49,6 +49,7 @@ Future<void> _deleteFromStorage() async {
   });
 }
 
+/// Delete Activity Path From Local Database
 Future<void> _deleteActivitySeparately() async {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
@@ -76,53 +77,63 @@ Future<void> _deleteActivitySeparately() async {
             .forEach((Map<String, dynamic> everyActivity) async {
           print('Activity: ${everyActivity['Status']}');
 
-          if (everyActivity['Status'].contains('+')) {
-            print('Problem 1: ${everyActivity['Status']}');
+          // await _localStorageHelper.showParticularUserAllActivity(
+          //     tableName: everyUser.values.first);
 
-            print('Normal Delete');
-            await _localStorageHelper.deleteParticularActivity(
-                tableName: everyUser.values.first,
-                activity: everyActivity['Status']);
+          final String _activityDateTime = everyActivity['Status_Time'];
 
-            print('Problem 1.1: ${everyActivity['Media']}');
+          print('Now 3: $_thisUserActivityCollection');
 
-            _activityLinkDeleteFromStorage
-                .add(everyActivity['Status'].split('+')[1]);
-
-            print('Activity Storage List: $_activityLinkDeleteFromStorage');
-          } else {
-            print('Problem 2: ${everyActivity['Media']}');
-
-            await _localStorageHelper.deleteParticularActivity(
-                tableName: everyUser.values.first,
-                activity: everyActivity['Status']);
-          }
-
-          await _localStorageHelper.showParticularUserAllActivity(
-              tableName: everyUser.values.first);
-
-          // final String _activityDateTime = everyActivity['Status_Time'];
-          //
-          // print('Now 3: $_thisUserActivityCollection');
-          //
           // final currDate = DateTime.now().toString().split(' ')[0];
           // final int currHour = DateTime.now().hour;
           // final int currMinute = DateTime.now().minute;
+
+          /// Delete Particular Activity
+          await _localStorageHelper.deleteParticularActivity(
+              tableName: everyUser.values.first,
+              activity: everyActivity['Status']);
+
+          /// For This Current Account Status
+          if (everyActivity['Status'].contains('+') &&
+              (everyActivity['Media'] == MediaTypes.Image.toString() ||
+                  everyActivity['Media'] ==
+                      MediaTypes.Video.toString())) {
+
+            /// Store in Local Container about Media Store in Firebase Storage
+            _activityLinkDeleteFromStorage
+                .add(everyActivity['Status'].split('+')[1]);
+
+            print(
+                'Activity Storage List: $_activityLinkDeleteFromStorage');
+          }
 
           // if (_activityDateTime.split(' ')[0] != currDate) {
           //   final List<String> _timeDistribution =
           //       _activityDateTime.split(' ')[1].split(':');
           //
-          //   print('Also Here');
-          //   print(currMinute);
-          //   print(currHour);
           //
           //   if (int.parse(_timeDistribution[0]) <= currHour) {
           //     if (int.parse(_timeDistribution[1]) <= currMinute) {
           //       print('Delete that Status');
+          //
+          //       /// Delete Particular Activity
           //       await _localStorageHelper.deleteParticularActivity(
           //           tableName: everyUser.values.first,
           //           activity: everyActivity['Status']);
+          //
+          //       /// For This Current Account Status
+          //       if (everyActivity['Status'].contains('+') &&
+          //           (everyActivity['Media'] == MediaTypes.Image.toString() ||
+          //               everyActivity['Media'] ==
+          //                   MediaTypes.Video.toString())) {
+          //
+          //         /// Store in Local Container about Media Store in Firebase Storage
+          //         _activityLinkDeleteFromStorage
+          //             .add(everyActivity['Status'].split('+')[1]);
+          //
+          //         print(
+          //             'Activity Storage List: $_activityLinkDeleteFromStorage');
+          //       }
           //     }
           //   }
           // }

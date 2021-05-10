@@ -3,14 +3,12 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -41,8 +39,6 @@ class _ChatsAndActivityCollectionState
       Map<String, dynamic>();
 
   final List<String> _allUserConnectionActivity = [];
-
-  //final FToast _fToast = FToast();
 
   /// For FireStore Management Purpose
   final Management _management = Management();
