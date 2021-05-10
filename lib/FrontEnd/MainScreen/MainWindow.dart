@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
@@ -12,6 +14,8 @@ import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
 import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
 import 'package:workmanager/workmanager.dart';
 
+List<String> _activityLinkDeleteFromStorage = [];
+
 /// For WorkManager Callback Function
 void deleteOldActivity() async {
   Workmanager().executeTask((taskName, inputData) async {
@@ -19,18 +23,36 @@ void deleteOldActivity() async {
       case "deleteActivity":
         print('Delete Activity Executing');
         await _deleteActivitySeparately();
+        await Future.delayed(
+          Duration(seconds: 20),
+        );
+        await _deleteFromStorage();
+        await Future.delayed(
+          Duration(seconds: 10),
+        );
         print('All After Delete Activity');
         break;
     }
 
-    return Future.value(true);
+    return true;
+  });
+}
+
+Future<void> _deleteFromStorage() async {
+  final Management _management = Management(takeTotalUserName: false);
+
+  _activityLinkDeleteFromStorage.forEach((storageElementToDelete) async {
+    if (storageElementToDelete.contains('https')) {
+      await _management.deleteFilesFromFirebaseStorage(storageElementToDelete,
+          specialPurpose: true);
+    }
   });
 }
 
 Future<void> _deleteActivitySeparately() async {
-  print('Here Delete Activity');
-
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  print('Here Delete Activity');
 
   final List<Map<String, dynamic>> _connectionUserName =
       await _localStorageHelper.extractAllUsersName(thisAccountAllowed: true);
@@ -52,28 +74,58 @@ Future<void> _deleteActivitySeparately() async {
 
         _thisUserActivityCollection
             .forEach((Map<String, dynamic> everyActivity) async {
-          final String _activityDateTime = everyActivity['Status_Time'];
+          print('Activity: ${everyActivity['Status']}');
 
-          print('Now 3: $_thisUserActivityCollection');
+          if (everyActivity['Status'].contains('+')) {
+            print('Problem 1: ${everyActivity['Status']}');
 
-          final currDate = DateTime.now().toString().split(' ')[0];
-          final int currHour = DateTime.now().hour;
-          final int currMinute = DateTime.now().minute;
+            print('Normal Delete');
+            await _localStorageHelper.deleteParticularActivity(
+                tableName: everyUser.values.first,
+                activity: everyActivity['Status']);
 
-          if (_activityDateTime.split(' ')[0] != currDate) {
-            final List<String> _timeDistribution =
-                _activityDateTime.split(' ')[1].split(':');
+            print('Problem 1.1: ${everyActivity['Media']}');
 
+            _activityLinkDeleteFromStorage
+                .add(everyActivity['Status'].split('+')[1]);
 
-            if (int.parse(_timeDistribution[0]) <= currHour) {
-              if (int.parse(_timeDistribution[1]) <= currMinute) {
-                print('Delete that Status');
-                await _localStorageHelper.deleteParticularActivity(
-                    tableName: everyUser.values.first,
-                    activity: everyActivity['Status']);
-              }
-            }
+            print('Activity Storage List: $_activityLinkDeleteFromStorage');
+          } else {
+            print('Problem 2: ${everyActivity['Media']}');
+
+            await _localStorageHelper.deleteParticularActivity(
+                tableName: everyUser.values.first,
+                activity: everyActivity['Status']);
           }
+
+          await _localStorageHelper.showParticularUserAllActivity(
+              tableName: everyUser.values.first);
+
+          // final String _activityDateTime = everyActivity['Status_Time'];
+          //
+          // print('Now 3: $_thisUserActivityCollection');
+          //
+          // final currDate = DateTime.now().toString().split(' ')[0];
+          // final int currHour = DateTime.now().hour;
+          // final int currMinute = DateTime.now().minute;
+
+          // if (_activityDateTime.split(' ')[0] != currDate) {
+          //   final List<String> _timeDistribution =
+          //       _activityDateTime.split(' ')[1].split(':');
+          //
+          //   print('Also Here');
+          //   print(currMinute);
+          //   print(currHour);
+          //
+          //   if (int.parse(_timeDistribution[0]) <= currHour) {
+          //     if (int.parse(_timeDistribution[1]) <= currMinute) {
+          //       print('Delete that Status');
+          //       await _localStorageHelper.deleteParticularActivity(
+          //           tableName: everyUser.values.first,
+          //           activity: everyActivity['Status']);
+          //     }
+          //   }
+          // }
         });
       }
     }
@@ -103,6 +155,7 @@ class _MainScreenState extends State<MainScreen> {
     Workmanager().registerPeriodicTask(
       "1",
       "deleteActivity",
+      initialDelay: Duration(seconds: 30),
       frequency: Duration(
           minutes:
               15), // Minimum frequency is 15 min. Android will automatically change your frequency to 15 min if you have configured a lower frequency.

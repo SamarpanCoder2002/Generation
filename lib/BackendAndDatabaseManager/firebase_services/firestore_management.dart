@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,8 +22,8 @@ class Management {
             userMail: FirebaseAuth.instance.currentUser.email);
   }
 
-  Management() {
-    _userNameExtractFromLocalDatabase();
+  Management({bool takeTotalUserName = true}) {
+    if (takeTotalUserName) _userNameExtractFromLocalDatabase();
   }
 
   Widget logOutButton(BuildContext context) {
@@ -115,7 +116,8 @@ class Management {
       try {
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
-              await localStorageHelper.extractImportantDataFromThatAccount(userName: connectionUserName);
+              await localStorageHelper.extractImportantDataFromThatAccount(
+                  userName: connectionUserName);
 
           DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
@@ -158,23 +160,31 @@ class Management {
       List<String> allConnectionUserName,
       BuildContext context,
       {String mediaType = 'image'}) async {
-
-
-    await localStorageHelper.insertDataInUserActivityTable(
-      tableName: _currAccountUserName,
-      statusLinkOrString: imgFile.path,
-      mediaTypes: MediaTypes.Image,
-      activityTime: DateTime.now().toString(),
-      extraText: manuallyText,
-    );
-
-    if (allConnectionUserName.isNotEmpty) {
+    if (allConnectionUserName.isEmpty) {
+      await localStorageHelper.insertDataInUserActivityTable(
+        tableName: _currAccountUserName,
+        statusLinkOrString: imgFile.path,
+        mediaTypes: MediaTypes.Image,
+        activityTime: DateTime.now().toString(),
+        extraText: manuallyText,
+      );
+      return true;
+    } else {
       try {
-        String imageUrl = await uploadMediaToStorage(imgFile, context);
+        final String imageUrl = await uploadMediaToStorage(imgFile, context);
+
+        await localStorageHelper.insertDataInUserActivityTable(
+          tableName: _currAccountUserName,
+          statusLinkOrString: '${imgFile.path}+$imageUrl',
+          mediaTypes: MediaTypes.Image,
+          activityTime: DateTime.now().toString(),
+          extraText: manuallyText,
+        );
 
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
-              await localStorageHelper.extractImportantDataFromThatAccount(userName: connectionUserName);
+              await localStorageHelper.extractImportantDataFromThatAccount(
+                  userName: connectionUserName);
 
           DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
@@ -212,8 +222,6 @@ class Management {
                 ));
         return false;
       }
-    } else {
-      return true;
     }
   }
 
@@ -248,7 +256,8 @@ class Management {
     }
   }
 
-  Future<void> deleteFilesFromFirebaseStorage(String fileName) async {
+  Future<void> deleteFilesFromFirebaseStorage(String fileName,
+      {bool specialPurpose = false}) async {
     try {
       final String filePath = fileName
           .replaceAll(
@@ -258,11 +267,31 @@ class Management {
 
       print('Deleted File: $filePath');
 
+      try {
+        if (specialPurpose) await Firebase.initializeApp();
+      } catch (e) {
+        print(
+            'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
+
+        print('Firebase Already Initialized');
+      }
+
       await FirebaseStorage.instance.ref().child(filePath).delete();
 
       print("File Deleted");
     } catch (e) {
       print("Delete From Firebase Storage Exception: ${e.toString()}");
+    }
+  }
+
+  Future<void> deleteParticularActivityLink(
+      {@required String fileName, @required String connectionMail}) async {
+    try {
+      await FirebaseFirestore.instance
+          .doc('generation_users/activity/$fileName')
+          .delete();
+    } catch (e) {
+      print('Delete Particular Activity Link Error: ${e.toString()}');
     }
   }
 }

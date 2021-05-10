@@ -158,6 +158,9 @@ class _ChatsAndActivityCollectionState
                         .toString()
                         .split('++++++')[0],
                   );
+
+                  // /// Delete Record From FireStore
+                  // await _management.deleteParticularActivityLink(fileName: everyActivity, connectionMail: connectionMail);
                 } else {
                   print('Storage Permission Denied');
                 }
@@ -189,6 +192,9 @@ class _ChatsAndActivityCollectionState
                         .toString()
                         .split('++++++')[0],
                   );
+
+                  // /// Delete Record From FireStore
+                  // await _management.deleteParticularActivityLink(fileName: everyActivity.keys.first, connectionMail: connectionMail);
                 } else {
                   print('Permission Denied');
                   //storagePermissionStatus = await Permission.storage.request();

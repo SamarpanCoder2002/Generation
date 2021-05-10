@@ -114,16 +114,17 @@ class LocalStorageHelper {
     return result[0].values.first;
   }
 
-  Future<List<Map<String, Object>>> extractAllUsersName({bool thisAccountAllowed = false}) async {
+  Future<List<Map<String, Object>>> extractAllUsersName(
+      {bool thisAccountAllowed = false}) async {
     Database db = await this.database;
     List<Map<String, Object>> result;
 
-    if(!thisAccountAllowed)
-    result = await db.rawQuery(
-        "SELECT $_colAccountUserName FROM $_allImportantDataStore WHERE $_colAccountUserMail != '${FirebaseAuth.instance.currentUser.email}'");
-    else
+    if (!thisAccountAllowed)
       result = await db.rawQuery(
-          "SELECT $_colAccountUserName FROM $_allImportantDataStore");
+          "SELECT $_colAccountUserName FROM $_allImportantDataStore WHERE $_colAccountUserMail != '${FirebaseAuth.instance.currentUser.email}'");
+    else
+      result = await db
+          .rawQuery("SELECT $_colAccountUserName FROM $_allImportantDataStore");
     return result;
   }
 
@@ -194,10 +195,28 @@ class LocalStorageHelper {
       {@required String tableName, @required String activity}) async {
     try {
       final Database db = await this.database;
-      await db.rawDelete(
+
+      print('Here in Delete Particular Activity: $tableName   $activity');
+
+      int result = await db.rawDelete(
           "DELETE FROM ${tableName}_status WHERE $_colActivity = '$activity'");
+
+      print('Deletion Result: $result');
     } catch (e) {
       print('Delete Activity From Database Error: ${e.toString()}');
+    }
+  }
+
+  /// For Debugging Purpose
+  Future<void> showParticularUserAllActivity(
+      {@required String tableName}) async {
+    try {
+      final Database db = await this.database;
+      var take = await db.rawQuery("SELECT * FROM ${tableName}_status");
+
+      print('All Activity: $take');
+    } catch (e) {
+      print('showParticularUserAllActivity Error: ${e.toString()}');
     }
   }
 

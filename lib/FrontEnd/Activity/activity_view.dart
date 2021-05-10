@@ -165,10 +165,17 @@ class _ActivityViewState extends State<ActivityView>
                   final String mediaDetector = activityItem[
                       'Media']; // MediaItem(Image/Video) Separated by '++++++'
 
+                  String activityMediaActivityFromLocal =
+                      activityItem['Status'];
+
+                  if (activityItem['Status'].contains('+'))
+                    activityMediaActivityFromLocal =
+                        activityMediaActivityFromLocal.split('+')[0];
+
                   return mediaDetector == MediaTypes.Image.toString()
-                      ? imageActivityView(activityItem['Status'],
+                      ? imageActivityView(activityMediaActivityFromLocal,
                           activityItem['ExtraActivityText'])
-                      : videoActivityView(activityItem['Status'],
+                      : videoActivityView(activityMediaActivityFromLocal,
                           activityItem['ExtraActivityText']);
                 }
                 return textActivityView(activityItem['Bg_Information'],
