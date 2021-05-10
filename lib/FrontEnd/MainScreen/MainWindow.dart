@@ -39,14 +39,18 @@ void deleteOldActivity() async {
 
 /// Delete From Firebase Storage
 Future<void> _deleteFromStorage() async {
-  final Management _management = Management(takeTotalUserName: false);
+  if (_activityLinkDeleteFromStorage.isNotEmpty) {
+    final Management _management = Management(takeTotalUserName: false);
 
-  _activityLinkDeleteFromStorage.forEach((storageElementToDelete) async {
-    if (storageElementToDelete.contains('https')) {
-      await _management.deleteFilesFromFirebaseStorage(storageElementToDelete,
-          specialPurpose: true);
-    }
-  });
+    _activityLinkDeleteFromStorage.forEach((storageElementToDelete) async {
+      if (storageElementToDelete.contains('https')) {
+        await _management.deleteFilesFromFirebaseStorage(storageElementToDelete,
+            specialPurpose: true);
+      }
+    });
+
+    _activityLinkDeleteFromStorage.clear();
+  }
 }
 
 /// Delete Activity Path From Local Database
@@ -155,8 +159,8 @@ class _MainScreenState extends State<MainScreen> {
       "deleteActivity",
       initialDelay: Duration(seconds: 30),
       frequency: Duration(
-          minutes:
-              15), // Minimum frequency is 15 min. For Debug that, Please change that to 1 Hour
+          hours:
+              1), // Minimum frequency is 15 min. For Debug that, Please change that to 1 Hour
     );
 
     super.initState();
