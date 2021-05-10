@@ -77,66 +77,53 @@ Future<void> _deleteActivitySeparately() async {
             .forEach((Map<String, dynamic> everyActivity) async {
           print('Activity: ${everyActivity['Status']}');
 
-          // await _localStorageHelper.showParticularUserAllActivity(
-          //     tableName: everyUser.values.first);
+          /// Backup Plan
+          // /// Delete Particular Activity
+          // await _localStorageHelper.deleteParticularActivity(
+          //     tableName: everyUser.values.first,
+          //     activity: everyActivity['Status']);
+          //
+          // /// For This Current Account Status
+          // if (everyActivity['Status'].contains('+') &&
+          //     (everyActivity['Media'] == MediaTypes.Image.toString() ||
+          //         everyActivity['Media'] ==
+          //             MediaTypes.Video.toString())) {
+          //   /// Store in Local Container about Media Store in Firebase Storage
+          //   _activityLinkDeleteFromStorage
+          //       .add(everyActivity['Status'].split('+')[1]);
+          // }
 
           final String _activityDateTime = everyActivity['Status_Time'];
 
           print('Now 3: $_thisUserActivityCollection');
 
-          // final currDate = DateTime.now().toString().split(' ')[0];
-          // final int currHour = DateTime.now().hour;
-          // final int currMinute = DateTime.now().minute;
+          final String currDate = DateTime.now().toString().split(' ')[0];
+          final int currHour = DateTime.now().hour;
+          final int currMinute = DateTime.now().minute;
 
-          /// Delete Particular Activity
-          await _localStorageHelper.deleteParticularActivity(
-              tableName: everyUser.values.first,
-              activity: everyActivity['Status']);
+          final List<String> _timeDistribution =
+              _activityDateTime.split(' ')[1].split(':');
 
-          /// For This Current Account Status
-          if (everyActivity['Status'].contains('+') &&
-              (everyActivity['Media'] == MediaTypes.Image.toString() ||
-                  everyActivity['Media'] ==
-                      MediaTypes.Video.toString())) {
+          /// Accurate Work
+          if (_activityDateTime.split(' ')[0] != currDate &&
+              int.parse(_timeDistribution[0]) <= currHour &&
+              int.parse(_timeDistribution[1]) <= currMinute) {
+            print('Delete that Status');
 
-            /// Store in Local Container about Media Store in Firebase Storage
-            _activityLinkDeleteFromStorage
-                .add(everyActivity['Status'].split('+')[1]);
+            /// Delete Particular Activity
+            await _localStorageHelper.deleteParticularActivity(
+                tableName: everyUser.values.first,
+                activity: everyActivity['Status']);
 
-            print(
-                'Activity Storage List: $_activityLinkDeleteFromStorage');
+            /// For This Current Account Status For Media
+            if (everyActivity['Status'].contains('+') &&
+                (everyActivity['Media'] == MediaTypes.Image.toString() ||
+                    everyActivity['Media'] == MediaTypes.Video.toString())) {
+              /// Store in Local Container about Media Store in Firebase Storage
+              _activityLinkDeleteFromStorage
+                  .add(everyActivity['Status'].split('+')[1]);
+            }
           }
-
-          // if (_activityDateTime.split(' ')[0] != currDate) {
-          //   final List<String> _timeDistribution =
-          //       _activityDateTime.split(' ')[1].split(':');
-          //
-          //
-          //   if (int.parse(_timeDistribution[0]) <= currHour) {
-          //     if (int.parse(_timeDistribution[1]) <= currMinute) {
-          //       print('Delete that Status');
-          //
-          //       /// Delete Particular Activity
-          //       await _localStorageHelper.deleteParticularActivity(
-          //           tableName: everyUser.values.first,
-          //           activity: everyActivity['Status']);
-          //
-          //       /// For This Current Account Status
-          //       if (everyActivity['Status'].contains('+') &&
-          //           (everyActivity['Media'] == MediaTypes.Image.toString() ||
-          //               everyActivity['Media'] ==
-          //                   MediaTypes.Video.toString())) {
-          //
-          //         /// Store in Local Container about Media Store in Firebase Storage
-          //         _activityLinkDeleteFromStorage
-          //             .add(everyActivity['Status'].split('+')[1]);
-          //
-          //         print(
-          //             'Activity Storage List: $_activityLinkDeleteFromStorage');
-          //       }
-          //     }
-          //   }
-          // }
         });
       }
     }
@@ -169,7 +156,7 @@ class _MainScreenState extends State<MainScreen> {
       initialDelay: Duration(seconds: 30),
       frequency: Duration(
           minutes:
-              15), // Minimum frequency is 15 min. Android will automatically change your frequency to 15 min if you have configured a lower frequency.
+              15), // Minimum frequency is 15 min. For Debug that, Please change that to 1 Hour
     );
 
     super.initState();
