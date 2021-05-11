@@ -52,6 +52,7 @@ class _ChatsAndActivityCollectionState
   /// Regular Expression for Media Detection
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
+  final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
   void _fetchRealTimeData() async {
     if (mounted) {
@@ -764,6 +765,7 @@ class _ChatsAndActivityCollectionState
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
         bool _blankMsgIndicator = false;
+        bool _onlyEmoji = false;
 
         final List<String> splitMsg = _message.split('\n');
 
@@ -776,6 +778,11 @@ class _ChatsAndActivityCollectionState
           _blankMsgIndicator = true;
         } else
           _message = splitMsg[0];
+
+        print('_message is: ${_message.length}');
+
+        /// If Message Only have Emoji, for that...   Otherwise gives error string is not well-formed UTF-16
+        if (!_messageRegex.hasMatch(_message)) _message = '.$_message';
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -791,6 +798,7 @@ class _ChatsAndActivityCollectionState
                   color: _blankMsgIndicator
                       ? Colors.redAccent
                       : const Color.fromRGBO(150, 150, 150, 1),
+                  fontFamily: _onlyEmoji ? 'Apple Color Emoji' : 'Arial',
                 ),
               ),
             ),

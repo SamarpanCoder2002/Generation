@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
-import 'package:generation_official/FrontEnd/MainScreen/applications_section.dart';
+import 'package:generation_official/FrontEnd/MainScreen/generation_applications_section.dart';
 import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
 import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
-import 'package:workmanager/workmanager.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
@@ -145,8 +145,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
-
     Workmanager().initialize(
         deleteOldActivity, // The top level function, aka callbackDispatcher
         isInDebugMode:
