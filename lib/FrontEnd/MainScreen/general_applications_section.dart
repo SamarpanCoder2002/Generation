@@ -37,7 +37,7 @@ class _ApplicationListState extends State<ApplicationList> {
             child: CircleList(
           initialAngle: 55,
           outerRadius: MediaQuery.of(context).size.width / 2.2,
-          innerRadius: MediaQuery.of(context).size.width / 5,
+          innerRadius: MediaQuery.of(context).size.width / 4,
           showInitialAnimation: true,
           innerCircleColor: Color.fromRGBO(34, 48, 60, 1),
           outerCircleColor: Color.fromRGBO(0, 0, 0, 0.1),
@@ -55,8 +55,8 @@ class _ApplicationListState extends State<ApplicationList> {
           ),
           children: <Widget>[
             Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
@@ -73,13 +73,13 @@ class _ApplicationListState extends State<ApplicationList> {
                 child: Icon(
                   Icons.camera_alt_rounded,
                   color: Colors.lightGreen,
-                  size: 40.0,
+                  size: 30.0,
                 ),
               ),
             ),
             Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
@@ -98,13 +98,33 @@ class _ApplicationListState extends State<ApplicationList> {
                 child: Icon(
                   Icons.video_collection,
                   color: Colors.lightGreen,
-                  size: 40.0,
+                  size: 30.0,
                 ),
               ),
             ),
             Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: Colors.blue,
+                    width: 3,
+                  )),
+              child: GestureDetector(
+                onTap: () async {
+                  _extraTextManagement(MediaTypes.Text);
+                },
+                child: Icon(
+                  Icons.text_fields_rounded,
+                  color: Colors.lightGreen,
+                  size: 30.0,
+                ),
+              ),
+            ),
+            Container(
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
@@ -118,13 +138,13 @@ class _ApplicationListState extends State<ApplicationList> {
                 child: Icon(
                   Entypo.documents,
                   color: Colors.lightGreen,
-                  size: 40.0,
+                  size: 30.0,
                 ),
               ),
             ),
             Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
@@ -138,13 +158,13 @@ class _ApplicationListState extends State<ApplicationList> {
                 child: Icon(
                   Icons.location_on_rounded,
                   color: Colors.lightGreen,
-                  size: 40.0,
+                  size: 30.0,
                 ),
               ),
             ),
             Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(
@@ -155,7 +175,7 @@ class _ApplicationListState extends State<ApplicationList> {
                 child: Icon(
                   Icons.music_note_rounded,
                   color: Colors.lightGreen,
-                  size: 40.0,
+                  size: 30.0,
                 ),
                 onTap: () async {
                   await _voiceSend();
@@ -178,8 +198,10 @@ class _ApplicationListState extends State<ApplicationList> {
             source: imageSource, maxDuration: Duration(seconds: 15));
 
     if (pickedFile != null)
-      _extraTextManagement(File(pickedFile.path),
-          type == 'image' ? MediaTypes.Image : MediaTypes.Video);
+      _extraTextManagement(
+        type == 'image' ? MediaTypes.Image : MediaTypes.Video,
+        file: File(pickedFile.path),
+      );
   }
 
   Future<void> _documentSend() async {
@@ -206,8 +228,11 @@ class _ApplicationListState extends State<ApplicationList> {
         filePickerResult.files.forEach((file) async {
           print(file.path);
           if (_allowedExtensions.contains(file.extension))
-            _extraTextManagement(File(file.path), MediaTypes.Document,
-                extension: '.${file.extension}');
+            _extraTextManagement(
+              MediaTypes.Document,
+              extension: '.${file.extension}',
+              file: File(file.path),
+            );
           else {
             _showDiaLog(
               titleText: 'Not Supporting Document Format',
@@ -310,8 +335,8 @@ class _ApplicationListState extends State<ApplicationList> {
     }
   }
 
-  void _extraTextManagement(File file, MediaTypes mediaTypes,
-      {String extension = ''}) {
+  void _extraTextManagement(MediaTypes mediaTypes,
+      {String extension = '', File file}) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(

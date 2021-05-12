@@ -163,7 +163,17 @@ class _SelectConnectionState extends State<SelectConnection> {
               break;
 
             case MediaTypes.Text:
+              _generalMessage = GeneralMessage(
+                  sendMessage: widget.extraText,
+                  storeMessage:  widget.extraText,
+                  sendTime:
+                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
+                  storeTime:
+                  "${DateTime.now().hour}:${DateTime.now().minute}",
+                  mediaType: widget.mediaType,
+                  selectedUsersName: _allConnectionsUserName);
               break;
+
             case MediaTypes.Sticker:
               break;
             case MediaTypes.Location:
