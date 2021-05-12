@@ -603,9 +603,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             : '${_newDirectory.path}$currTime.mp4',
       )
           .whenComplete(() async {
-        print('In When Complete: ${everyMessage.keys.first.toString()}');
-        await _management
-            .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+        print('In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
+        if (_incomingInformationContainer.length < 4)
+          await _management.deleteFilesFromFirebaseStorage(
+              everyMessage.keys.first.toString());
 
         if (_incomingInformationContainer[1] == MediaTypes.Video.toString()) {
           print("Video Path: ${_newDirectory.path}$currTime.mp4'");
@@ -616,8 +617,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             '${_thumbNailDir.path}$currTime.jpg',
           )
               .whenComplete(() async {
-            await _management.deleteFilesFromFirebaseStorage(
-                everyMessage.keys.first.toString().split('+')[1]);
+            if (_incomingInformationContainer.length < 4)
+              await _management.deleteFilesFromFirebaseStorage(
+                  everyMessage.keys.first.toString().split('+')[1]);
           });
 
           print('ThumbNail Path: $thumbNailPicturePath');

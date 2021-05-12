@@ -36,10 +36,10 @@ void main() async {
     );
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
-  /// Change Navigation Bar Color
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.black54,
-  ));
+  // /// Change Navigation Bar Color
+  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  //   systemNavigationBarColor: Colors.black54,
+  // ));
 
   runApp(MaterialApp(
     title: 'Generation',

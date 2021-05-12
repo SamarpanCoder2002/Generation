@@ -85,10 +85,12 @@ class _ApplicationListState extends State<ApplicationList> {
                   )),
               child: GestureDetector(
                 onTap: () async {
-                  _imageOrVideoSend(imageSource: ImageSource.camera, type: 'video');
+                  _imageOrVideoSend(
+                      imageSource: ImageSource.camera, type: 'video');
                 },
                 onLongPress: () async {
-                  _imageOrVideoSend(imageSource: ImageSource.gallery, type: 'video');
+                  _imageOrVideoSend(
+                      imageSource: ImageSource.gallery, type: 'video');
                 },
                 child: Icon(
                   Icons.video_collection,
@@ -166,9 +168,9 @@ class _ApplicationListState extends State<ApplicationList> {
         : pickedFile = await picker.getVideo(
             source: imageSource, maxDuration: Duration(seconds: 15));
 
-    if(pickedFile != null)
-    _extraTextManagement(File(pickedFile.path),
-        type == 'image' ? MediaTypes.Image : MediaTypes.Video);
+    if (pickedFile != null)
+      _extraTextManagement(File(pickedFile.path),
+          type == 'image' ? MediaTypes.Image : MediaTypes.Video);
   }
 
   void _extraTextManagement(File file, MediaTypes mediaTypes) {

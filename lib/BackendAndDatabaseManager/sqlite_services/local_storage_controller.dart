@@ -29,6 +29,10 @@ class LocalStorageHelper {
   final String _colAccountUserName = 'User_Name';
   final String _colAccountUserMail = 'User_Mail';
 
+  final String _allRemainingLinksToDeleteFromFirebaseStorage =
+      '__RemainingLinksToDelete__';
+  final String _colLinks = 'New_Link';
+
   // Create Singleton Objects(Only Created once in the whole application)
   static LocalStorageHelper _localStorageHelper;
   static Database _database;
@@ -334,6 +338,57 @@ class LocalStorageHelper {
     print('Map is: $map');
 
     return map;
+  }
+
+  Future<void> createTableForRemainingLinks() async {
+    final Database db = await this.database;
+
+    await db.transaction((txn) async {
+      return await txn.rawQuery(
+          'CREATE TABLE $_allRemainingLinksToDeleteFromFirebaseStorage($_colLinks TEXT, $_colTime TEXT)');
+    });
+  }
+
+  Future<void> insertNewLinkInLinkRemainingTable(
+      {@required String link}) async {
+    try {
+      final Database db = await this.database;
+
+      final Map<String, String> map = Map<String, String>();
+      map[_colLinks] = link;
+      map[_colTime] = DateTime.now().toString();
+
+      await db.transaction((txn) async {
+        return await txn.insert(
+            _allRemainingLinksToDeleteFromFirebaseStorage, map);
+      });
+    } catch (e) {
+      print('Insert Remaining Links Error: ${e.toString()}');
+      await createTableForRemainingLinks();
+      await insertNewLinkInLinkRemainingTable(link: link);
+    }
+  }
+
+  Future<Map<String, String>> extractRemainingLinks() async {
+    try{
+      final Database db = await this.database;
+
+      final List<Map<String, Object>> result = await db.rawQuery(
+          'SELECT * FROM $_allRemainingLinksToDeleteFromFirebaseStorage');
+
+      Map<String, String> map = Map<String, String>();
+
+      result.forEach((everyResult) {
+        map.addAll({
+          everyResult[_colLinks].toString(): everyResult[_colTime].toString(),
+        });
+      });
+
+      return map;
+    }catch(e){
+      print('Extract Links Error: ${e.toString()}');
+      return Map<String,String>();
+    }
   }
 
 // // Extract Connection Name from Table

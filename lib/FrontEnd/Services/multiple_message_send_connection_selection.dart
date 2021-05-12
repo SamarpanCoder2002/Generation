@@ -97,11 +97,15 @@ class _SelectConnectionState extends State<SelectConnection> {
                   sendMessage: _imageDownLoadUrl,
                   storeMessage: widget.mediaFile.path,
                   sendTime:
-                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extraText}',
+                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extraText}+multipleConnectionSource',
                   storeTime:
                       '${DateTime.now().hour}:${DateTime.now().minute}+${widget.extraText}',
                   mediaType: widget.mediaType,
                   selectedUsersName: _allConnectionsUserName);
+
+              await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+                  link: _imageDownLoadUrl);
+
               break;
 
             case MediaTypes.Video:
@@ -129,14 +133,19 @@ class _SelectConnectionState extends State<SelectConnection> {
                   sendMessage: '$_videoDownLoadUrl+$thumbNailPicturePathUrl',
                   storeMessage: widget.mediaFile.path,
                   sendTime:
-                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extraText}',
+                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extraText}+multipleConnectionSource',
                   storeTime:
                       '${DateTime.now().hour}:${DateTime.now().minute}+${widget.extraText}+$thumbNailPicturePath',
                   mediaType: widget.mediaType,
                   selectedUsersName: _allConnectionsUserName);
-              break;
+
+              await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+                  link: _videoDownLoadUrl);
+              await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+                  link: thumbNailPicturePathUrl);
 
               break;
+
             case MediaTypes.Text:
               break;
             case MediaTypes.Sticker:

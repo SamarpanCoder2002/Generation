@@ -12,7 +12,6 @@ import 'package:generation_official/FrontEnd/MainScreen/general_applications_sec
 import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
-import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
@@ -22,13 +21,17 @@ void deleteOldActivity() async {
     switch (taskName) {
       case "deleteActivity":
         print('Delete Activity Executing');
-        await _deleteActivitySeparately();
+        await _deleteOldTask(true);
         await Future.delayed(
-          Duration(seconds: 20),
+          Duration(seconds: 10),
+        );
+        await _deleteOldTask(false);
+        await Future.delayed(
+          Duration(seconds: 7),
         );
         await _deleteFromStorage();
         await Future.delayed(
-          Duration(seconds: 10),
+          Duration(seconds: 13),
         );
         print('All After Delete Activity');
         break;
@@ -55,85 +58,114 @@ Future<void> _deleteFromStorage() async {
 }
 
 /// Delete Activity Path From Local Database
-Future<void> _deleteActivitySeparately() async {
+Future<void> _deleteOldTask(bool response) async {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  print('Here Delete Activity');
+  if (response) {
+    print('Here Delete Activity');
 
-  final List<Map<String, dynamic>> _connectionUserName =
-      await _localStorageHelper.extractAllUsersName(thisAccountAllowed: true);
+    final List<Map<String, dynamic>> _connectionUserName =
+        await _localStorageHelper.extractAllUsersName(thisAccountAllowed: true);
 
-  print('Delete Activity Executing 2: $_connectionUserName');
+    print('Delete Activity Executing 2: $_connectionUserName');
 
-  _connectionUserName.forEach((everyUser) async {
-    final List<Map<String, dynamic>> _thisUserActivityCollection =
-        await _localStorageHelper
-            .extractActivityForParticularUserName(everyUser.values.first);
+    _connectionUserName.forEach((everyUser) async {
+      final List<Map<String, dynamic>> _thisUserActivityCollection =
+          await _localStorageHelper
+              .extractActivityForParticularUserName(everyUser.values.first);
 
-    print('Now 1: $_thisUserActivityCollection');
+      print('Now 1: $_thisUserActivityCollection');
 
-    if (_thisUserActivityCollection != null) {
-      if (_thisUserActivityCollection.length == 0) {
-        print('User Has No Activity');
-      } else {
-        print('Now 2: $_thisUserActivityCollection');
+      if (_thisUserActivityCollection != null) {
+        if (_thisUserActivityCollection.length == 0) {
+          print('User Has No Activity');
+        } else {
+          print('Now 2: $_thisUserActivityCollection');
 
-        _thisUserActivityCollection
-            .forEach((Map<String, dynamic> everyActivity) async {
-          print('Activity: ${everyActivity['Status']}');
+          _thisUserActivityCollection
+              .forEach((Map<String, dynamic> everyActivity) async {
+            print('Activity: ${everyActivity['Status']}');
 
-          /// Backup Plan
-          // /// Delete Particular Activity
-          // await _localStorageHelper.deleteParticularActivity(
-          //     tableName: everyUser.values.first,
-          //     activity: everyActivity['Status']);
-          //
-          // /// For This Current Account Status
-          // if (everyActivity['Status'].contains('+') &&
-          //     (everyActivity['Media'] == MediaTypes.Image.toString() ||
-          //         everyActivity['Media'] ==
-          //             MediaTypes.Video.toString())) {
-          //   /// Store in Local Container about Media Store in Firebase Storage
-          //   _activityLinkDeleteFromStorage
-          //       .add(everyActivity['Status'].split('+')[1]);
-          // }
+            /// Backup Plan
+            // /// Delete Particular Activity
+            // await _localStorageHelper.deleteParticularActivity(
+            //     tableName: everyUser.values.first,
+            //     activity: everyActivity['Status']);
+            //
+            // /// For This Current Account Status
+            // if (everyActivity['Status'].contains('+') &&
+            //     (everyActivity['Media'] == MediaTypes.Image.toString() ||
+            //         everyActivity['Media'] ==
+            //             MediaTypes.Video.toString())) {
+            //   /// Store in Local Container about Media Store in Firebase Storage
+            //   _activityLinkDeleteFromStorage
+            //       .add(everyActivity['Status'].split('+')[1]);
+            // }
 
-          final String _activityDateTime = everyActivity['Status_Time'];
+            final String _activityDateTime = everyActivity['Status_Time'];
 
-          print('Now 3: $_thisUserActivityCollection');
+            print('Now 3: $_thisUserActivityCollection');
 
-          final String currDate = DateTime.now().toString().split(' ')[0];
-          final int currHour = DateTime.now().hour;
-          final int currMinute = DateTime.now().minute;
+            final String currDate = DateTime.now().toString().split(' ')[0];
+            final int currHour = DateTime.now().hour;
+            final int currMinute = DateTime.now().minute;
 
-          final List<String> _timeDistribution =
-              _activityDateTime.split(' ')[1].split(':');
+            final List<String> _timeDistribution =
+                _activityDateTime.split(' ')[1].split(':');
 
-          /// Accurate Work
-          if (_activityDateTime.split(' ')[0] != currDate &&
-              ((int.parse(_timeDistribution[0]) == currHour &&
-                      int.parse(_timeDistribution[1]) <= currMinute) ||
-                  int.parse(_timeDistribution[0]) < currHour)) {
-            print('Delete that Status');
+            /// Accurate Work
+            if (_activityDateTime.split(' ')[0] != currDate &&
+                ((int.parse(_timeDistribution[0]) == currHour &&
+                        int.parse(_timeDistribution[1]) <= currMinute) ||
+                    int.parse(_timeDistribution[0]) < currHour)) {
+              print('Delete that Status');
 
-            /// Delete Particular Activity
-            await _localStorageHelper.deleteParticularActivity(
-                tableName: everyUser.values.first,
-                activity: everyActivity['Status']);
+              /// Delete Particular Activity
+              await _localStorageHelper.deleteParticularActivity(
+                  tableName: everyUser.values.first,
+                  activity: everyActivity['Status']);
 
-            /// For This Current Account Status For Media
-            if (everyActivity['Status'].contains('+') &&
-                (everyActivity['Media'] == MediaTypes.Image.toString() ||
-                    everyActivity['Media'] == MediaTypes.Video.toString())) {
-              /// Store in Local Container about Media Store in Firebase Storage
-              _activityLinkDeleteFromStorage
-                  .add(everyActivity['Status'].split('+')[1]);
+              /// For This Current Account Status For Media
+              if (everyActivity['Status'].contains('+') &&
+                  (everyActivity['Media'] == MediaTypes.Image.toString() ||
+                      everyActivity['Media'] == MediaTypes.Video.toString())) {
+                /// Store in Local Container about Media Store in Firebase Storage
+                _activityLinkDeleteFromStorage
+                    .add(everyActivity['Status'].split('+')[1]);
+              }
             }
-          }
-        });
+          });
+        }
       }
+    });
+  } else {
+    final Map<String, String> _linksMap =
+        await _localStorageHelper.extractRemainingLinks();
+
+    final String currDate = DateTime.now().toString().split(' ')[0];
+    final int currHour = DateTime.now().hour;
+    final int currMinute = DateTime.now().minute;
+
+    if (_linksMap != null && _linksMap.length > 0) {
+      _linksMap.forEach((_link, _time) async {
+        final List<String> _timeDistribution = _time.split(' ')[1].split(':');
+
+        print('Delete Multiple Connection Media Added');
+
+        _activityLinkDeleteFromStorage.add(_link);
+
+        // if (_time.split(' ')[0] != currDate &&
+        //     ((int.parse(_timeDistribution[0]) == currHour &&
+        //             int.parse(_timeDistribution[1]) <= currMinute) ||
+        //         int.parse(_timeDistribution[0]) < currHour)) {
+        //
+        //   print('Delete Multiple Connection Media Added');
+        //
+        //   _activityLinkDeleteFromStorage.add(_link);
+        // }
+      });
     }
-  });
+  }
 }
 
 class MainScreen extends StatefulWidget {
@@ -160,7 +192,7 @@ class _MainScreenState extends State<MainScreen> {
       initialDelay: Duration(seconds: 30),
       frequency: Duration(
           minutes:
-              30), // Minimum frequency is 15 min. For Debug that, Please change that to 15 min
+              15), // Minimum frequency is 15 min. For Debug that, Please change that to 15 min
     );
 
     super.initState();
