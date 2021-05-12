@@ -152,6 +152,9 @@ Future<void> _deleteOldTask(bool response) async {
 
         print('Delete Multiple Connection Media Added');
 
+        await _localStorageHelper.deleteRemainingLinksFromLocalStore(
+            link: _link);
+
         _activityLinkDeleteFromStorage.add(_link);
 
         // if (_time.split(' ')[0] != currDate &&

@@ -59,7 +59,7 @@ class SendNotification {
       case MediaTypes.Location:
         await sendNotification(
           token: connectionToken,
-          title: "$currAccountUserName Send You a Location",
+          title: "$currAccountUserName Send You Device Location",
           body: textMsg,
         );
         break;

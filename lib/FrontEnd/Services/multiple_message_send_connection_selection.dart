@@ -2,23 +2,23 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:thumbnails/thumbnails.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/general_services/general_message_send.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:thumbnails/thumbnails.dart';
 
 // ignore: must_be_immutable
 class SelectConnection extends StatefulWidget {
-  String message;
+  String extra;
   final MediaTypes mediaType;
   String extraText;
   File mediaFile;
 
   SelectConnection({
-    this.message,
+    this.extra,
     @required this.mediaType,
     this.extraText = '',
     this.mediaFile,
@@ -87,8 +87,24 @@ class _SelectConnectionState extends State<SelectConnection> {
 
           switch (widget.mediaType) {
             case MediaTypes.Voice:
-              // TODO: Handle this case.
+              final String _voiceDownloadUrl = await _management
+                  .uploadMediaToStorage(widget.mediaFile, context);
+
+              _generalMessage = GeneralMessage(
+                sendMessage: _voiceDownloadUrl,
+                storeMessage: widget.mediaFile.path,
+                sendTime:
+                    '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extra}+multipleConnectionSource',
+                storeTime: '${DateTime.now().hour}:${DateTime.now().minute}',
+                mediaType: widget.mediaType,
+                selectedUsersName: _allConnectionsUserName,
+              );
+
+              await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+                  link: _voiceDownloadUrl);
+
               break;
+
             case MediaTypes.Image:
               final String _imageDownLoadUrl = await _management
                   .uploadMediaToStorage(widget.mediaFile, this.context);
@@ -151,10 +167,34 @@ class _SelectConnectionState extends State<SelectConnection> {
             case MediaTypes.Sticker:
               break;
             case MediaTypes.Location:
-              // TODO: Handle this case.
+              _generalMessage = GeneralMessage(
+                  sendMessage: widget.extra,
+                  storeMessage: widget.extra,
+                  sendTime:
+                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
+                  storeTime:
+                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
+                  mediaType: widget.mediaType,
+                  selectedUsersName: _allConnectionsUserName);
               break;
+
             case MediaTypes.Document:
-              // TODO: Handle this case.
+              final String _documentDownLoadUrl = await _management
+                  .uploadMediaToStorage(widget.mediaFile, context);
+
+              _generalMessage = GeneralMessage(
+                  sendMessage: _documentDownLoadUrl,
+                  storeMessage: widget.mediaFile.path,
+                  sendTime:
+                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extraText}+${widget.extra}+multipleConnectionSource',
+                  storeTime:
+                      '${DateTime.now().hour}:${DateTime.now().minute}+${widget.extraText}+${widget.extra}',
+                  mediaType: widget.mediaType,
+                  selectedUsersName: _allConnectionsUserName);
+
+              await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+                  link: _documentDownLoadUrl);
+
               break;
             case MediaTypes.Indicator:
               break;

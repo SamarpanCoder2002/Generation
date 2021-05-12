@@ -391,6 +391,17 @@ class LocalStorageHelper {
     }
   }
 
+  Future<void> deleteRemainingLinksFromLocalStore({@required String link}) async{
+     try{
+       final Database db = await this.database;
+
+       await db.rawDelete("DELETE FROM $_allRemainingLinksToDeleteFromFirebaseStorage WHERE $_colLinks = '$link'");
+
+     }catch(e){
+       print('Remaining Links Deletion Exception: ${e.toString()}');
+     }
+  }
+
 // // Extract Connection Name from Table
 // Future<List<Map<String, Object>>> extractAllTablesName() async {
 //   Database db = await this.database; // DB Reference

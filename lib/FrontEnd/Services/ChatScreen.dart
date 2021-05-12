@@ -425,8 +425,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
               onReceiveProgress: _downLoadOnReceiveProgress)
           .whenComplete(() async {
-        await _management
-            .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+        print('After Download: $_incomingInformationContainer');
+        if (_incomingInformationContainer.length < 4)
+          await _management.deleteFilesFromFirebaseStorage(
+              everyMessage.keys.first.toString());
       });
 
       print(
@@ -519,9 +521,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           .download(everyMessage.keys.first.toString(),
               '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}')
           .whenComplete(() async {
-        print('In When Complete: ${everyMessage.keys.first.toString()}');
-        await _management
-            .deleteFilesFromFirebaseStorage(everyMessage.keys.first.toString());
+        print(
+            'In When Complete: ${everyMessage.keys.first.toString()}   $_incomingInformationContainer');
+        if (_incomingInformationContainer.length < 5)
+          await _management.deleteFilesFromFirebaseStorage(
+              everyMessage.keys.first.toString());
       });
 
       await _localStorageHelper.insertNewMessages(
@@ -603,7 +607,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             : '${_newDirectory.path}$currTime.mp4',
       )
           .whenComplete(() async {
-        print('In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
+        print(
+            'In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
         if (_incomingInformationContainer.length < 4)
           await _management.deleteFilesFromFirebaseStorage(
               everyMessage.keys.first.toString());

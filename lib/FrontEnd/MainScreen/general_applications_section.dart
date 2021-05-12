@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:circle_list/circle_list.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/FrontEnd/Services/multiple_message_send_connection_selection.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:image_picker/image_picker.dart';
 
@@ -109,7 +112,9 @@ class _ApplicationListState extends State<ApplicationList> {
                     width: 3,
                   )),
               child: GestureDetector(
-                onTap: () async {},
+                onTap: () async {
+                  await _documentSend();
+                },
                 child: Icon(
                   Entypo.documents,
                   color: Colors.lightGreen,
@@ -127,7 +132,9 @@ class _ApplicationListState extends State<ApplicationList> {
                     width: 3,
                   )),
               child: GestureDetector(
-                onTap: () async {},
+                onTap: () async {
+                  await _locationSend();
+                },
                 child: Icon(
                   Icons.location_on_rounded,
                   color: Colors.lightGreen,
@@ -150,7 +157,9 @@ class _ApplicationListState extends State<ApplicationList> {
                   color: Colors.lightGreen,
                   size: 40.0,
                 ),
-                onTap: () async {},
+                onTap: () async {
+                  await _voiceSend();
+                },
               ),
             ),
           ],
@@ -173,7 +182,136 @@ class _ApplicationListState extends State<ApplicationList> {
           type == 'image' ? MediaTypes.Image : MediaTypes.Video);
   }
 
-  void _extraTextManagement(File file, MediaTypes mediaTypes) {
+  Future<void> _documentSend() async {
+    List<String> _allowedExtensions = [
+      'pdf',
+      'doc',
+      'docx',
+      'ppt',
+      'pptx',
+      'c',
+      'cpp',
+      'py',
+      'text'
+    ];
+
+    try {
+      final FilePickerResult filePickerResult =
+          await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: _allowedExtensions,
+      );
+
+      if (filePickerResult != null && filePickerResult.files.length > 0) {
+        filePickerResult.files.forEach((file) async {
+          print(file.path);
+          if (_allowedExtensions.contains(file.extension))
+            _extraTextManagement(File(file.path), MediaTypes.Document,
+                extension: '.${file.extension}');
+          else {
+            _showDiaLog(
+              titleText: 'Not Supporting Document Format',
+            );
+          }
+        });
+      }
+    } catch (e) {
+      _showDiaLog(
+          titleText: 'Some Error Occurred',
+          contentText: 'Please close and reopen this chat');
+    }
+  }
+
+  _locationSend() async {
+    try {
+      final Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
+
+      final Marker marker = Marker(
+          markerId: MarkerId('locate'),
+          zIndex: 1.0,
+          draggable: true,
+          position: LatLng(position.latitude, position.longitude));
+
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                backgroundColor: Colors.black26,
+                actions: [
+                  FloatingActionButton(
+                    child: Icon(Icons.send),
+                    onPressed: () {
+                      Navigator.pop(context);
+
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => SelectConnection(
+                                    mediaType: MediaTypes.Location,
+                                    extra:
+                                        '${position.latitude}+${position.longitude}',
+                                  )));
+                    },
+                  ),
+                ],
+                content: FittedBox(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                    ),
+                    child: GoogleMap(
+                      mapType: MapType.hybrid,
+                      markers: Set.of([marker]),
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(position.latitude, position.longitude),
+                        zoom: 18.4746,
+                      ),
+                    ),
+                  ),
+                ),
+              ));
+    } catch (e) {
+      print('Map Show Error: ${e.toString()}');
+      _showDiaLog(titleText: 'Map Show Error', contentText: e.toString());
+    }
+  }
+
+  Future<void> _voiceSend() async {
+    final List<String> _allowedExtensions = const [
+      'mp3',
+      'm4a',
+      'wav',
+      'ogg',
+    ];
+
+    final FilePickerResult _audioFilePickerResult =
+        await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+    );
+
+    if (_audioFilePickerResult != null) {
+      _audioFilePickerResult.files.forEach((element) async {
+        print('Name: ${element.path}');
+        print('Extension: ${element.extension}');
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => SelectConnection(
+                      mediaType: MediaTypes.Voice,
+                      mediaFile: File(element.path),
+                      extra: _allowedExtensions.contains(element.extension)
+                          ? '.${element.extension}'
+                          : '.mp3',
+                    )));
+      });
+    }
+  }
+
+  void _extraTextManagement(File file, MediaTypes mediaTypes,
+      {String extension = ''}) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -235,9 +373,8 @@ class _ApplicationListState extends State<ApplicationList> {
                                 mediaType: mediaTypes,
                                 mediaFile: file,
                                 extraText: _mediaController.text,
+                                extra: extension,
                               )));
-
-                  _mediaController.clear();
                 },
               ),
             ),
@@ -245,5 +382,34 @@ class _ApplicationListState extends State<ApplicationList> {
         ),
       ),
     );
+  }
+
+  void _showDiaLog({@required String titleText, String contentText = ''}) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              title: Center(
+                  child: Text(
+                titleText,
+                style: TextStyle(
+                  fontFamily: 'Lora',
+                  color: Colors.red,
+                  letterSpacing: 1.0,
+                  fontSize: 16.0,
+                ),
+              )),
+              content: contentText == ''
+                  ? null
+                  : Text(
+                      contentText,
+                      style: TextStyle(
+                        fontFamily: 'Lora',
+                        color: Colors.white,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+            ));
   }
 }
