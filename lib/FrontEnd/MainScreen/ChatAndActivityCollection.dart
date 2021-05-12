@@ -367,6 +367,10 @@ class _ChatsAndActivityCollectionState
       _fetchThisAccountUserName();
       _fetchRealTimeData();
       _searchAboutExistingConnectionActivity();
+
+      /// For Unique User Name[Because SomeTimes Duplicate UserName showing after opening the app]
+      _allConnectionsUserName.toSet().toList();
+      _allUserConnectionActivity.toSet().toList();
     } catch (e) {
       showDialog(
           context: context,
