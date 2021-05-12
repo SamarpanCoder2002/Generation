@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -86,17 +88,21 @@ Future<void> _deleteOldTask(bool response) async {
               .forEach((Map<String, dynamic> everyActivity) async {
             print('Activity: ${everyActivity['Status']}');
 
-            /// Backup Plan
+            // /// Backup Plan
+            // print('Delete that Status');
+            //
             // /// Delete Particular Activity
             // await _localStorageHelper.deleteParticularActivity(
             //     tableName: everyUser.values.first,
             //     activity: everyActivity['Status']);
             //
-            // /// For This Current Account Status
+            // await File(everyActivity['Status'].split('+')[0])
+            //     .delete(recursive: true);
+            //
+            // /// For This Current Account Status For Media
             // if (everyActivity['Status'].contains('+') &&
             //     (everyActivity['Media'] == MediaTypes.Image.toString() ||
-            //         everyActivity['Media'] ==
-            //             MediaTypes.Video.toString())) {
+            //         everyActivity['Media'] == MediaTypes.Video.toString())) {
             //   /// Store in Local Container about Media Store in Firebase Storage
             //   _activityLinkDeleteFromStorage
             //       .add(everyActivity['Status'].split('+')[1]);
@@ -125,6 +131,9 @@ Future<void> _deleteOldTask(bool response) async {
                   tableName: everyUser.values.first,
                   activity: everyActivity['Status']);
 
+              await File(everyActivity['Status'].split('+')[0])
+                  .delete(recursive: true);
+
               /// For This Current Account Status For Media
               if (everyActivity['Status'].contains('+') &&
                   (everyActivity['Media'] == MediaTypes.Image.toString() ||
@@ -150,22 +159,17 @@ Future<void> _deleteOldTask(bool response) async {
       _linksMap.forEach((_link, _time) async {
         final List<String> _timeDistribution = _time.split(' ')[1].split(':');
 
-        print('Delete Multiple Connection Media Added');
+        if (_time.split(' ')[0] != currDate &&
+            ((int.parse(_timeDistribution[0]) == currHour &&
+                    int.parse(_timeDistribution[1]) <= currMinute) ||
+                int.parse(_timeDistribution[0]) < currHour)) {
+          print('Delete Multiple Connection Media Added');
 
-        await _localStorageHelper.deleteRemainingLinksFromLocalStore(
-            link: _link);
+          await _localStorageHelper.deleteRemainingLinksFromLocalStore(
+              link: _link);
 
-        _activityLinkDeleteFromStorage.add(_link);
-
-        // if (_time.split(' ')[0] != currDate &&
-        //     ((int.parse(_timeDistribution[0]) == currHour &&
-        //             int.parse(_timeDistribution[1]) <= currMinute) ||
-        //         int.parse(_timeDistribution[0]) < currHour)) {
-        //
-        //   print('Delete Multiple Connection Media Added');
-        //
-        //   _activityLinkDeleteFromStorage.add(_link);
-        // }
+          _activityLinkDeleteFromStorage.add(_link);
+        }
       });
     }
   }

@@ -176,6 +176,7 @@ class _SelectConnectionState extends State<SelectConnection> {
 
             case MediaTypes.Sticker:
               break;
+
             case MediaTypes.Location:
               _generalMessage = GeneralMessage(
                   sendMessage: widget.extra,
