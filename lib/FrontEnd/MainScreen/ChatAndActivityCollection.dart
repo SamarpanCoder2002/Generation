@@ -19,7 +19,7 @@ import 'package:generation_official/BackendAndDatabaseManager/firebase_services/
 import 'package:generation_official/FrontEnd/Activity/activity_maker.dart';
 import 'package:generation_official/FrontEnd/Services/search_screen.dart';
 import 'package:generation_official/FrontEnd/Activity/activity_view.dart';
-import 'package:generation_official/FrontEnd/MainScreen/ChatScreen.dart';
+import 'package:generation_official/FrontEnd/Services/ChatScreen.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class ChatsAndActivityCollection extends StatefulWidget {
@@ -39,6 +39,8 @@ class _ChatsAndActivityCollectionState
       Map<String, dynamic>();
 
   final List<String> _allUserConnectionActivity = [];
+
+  String _thisAccountUserNameIs;
 
   /// For FireStore Management Purpose
   final Management _management = Management();
@@ -335,12 +337,21 @@ class _ChatsAndActivityCollectionState
         if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
           if (mounted) {
             setState(() {
-              _allUserConnectionActivity.add(userNameMap.values.first);
+              if (userNameMap.values.first == this._thisAccountUserNameIs)
+                _allUserConnectionActivity.insert(0, userNameMap.values.first);
+              else
+                _allUserConnectionActivity.add(userNameMap.values.first);
             });
           }
         }
       }
     });
+  }
+
+  void _fetchThisAccountUserName() async {
+    this._thisAccountUserNameIs =
+        await _localStorageHelper.extractImportantDataFromThatAccount(
+            userMail: FirebaseAuth.instance.currentUser.email);
   }
 
   @override
@@ -353,6 +364,7 @@ class _ChatsAndActivityCollectionState
     //_fToast.init(context); // Flutter Toast Initialized
 
     try {
+      _fetchThisAccountUserName();
       _fetchRealTimeData();
       _searchAboutExistingConnectionActivity();
     } catch (e) {
@@ -714,7 +726,6 @@ class _ChatsAndActivityCollectionState
         _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
 
     /// Extract UserName Specific Messages from temp storage
-
     if (_allLatestMessages != null && _allLatestMessages.length > 0) {
       final Map<String, String> _lastMessage = _allLatestMessages.last;
 

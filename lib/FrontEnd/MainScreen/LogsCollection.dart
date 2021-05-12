@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class ScreenLogs extends StatefulWidget {
   @override
@@ -7,6 +8,12 @@ class ScreenLogs extends StatefulWidget {
 }
 
 class _ScreenLogsState extends State<ScreenLogs> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return screenLogsList(context);
@@ -16,7 +23,7 @@ class _ScreenLogsState extends State<ScreenLogs> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: Container(
-        color: Color.fromRGBO(34, 48, 60, 1),
+        color: const Color.fromRGBO(34, 48, 60, 1),
         height: MediaQuery.of(context).size.height,
         margin: EdgeInsets.only(top: 10.0, bottom: 13.0),
         child: chatList(context),

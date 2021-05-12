@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -14,6 +14,7 @@ class _SearchState extends State<Search> {
 
   String searchArgument;
 
+  final SendNotification _sendNotification = SendNotification();
   final TextEditingController searchUser = TextEditingController();
   QuerySnapshot searchResultSnapshot;
 
@@ -153,12 +154,12 @@ class _SearchState extends State<Search> {
                 }
 
                 /// Send Notification About the opponent Person About new notification
-                await sendNotification(
-                    token: searchResultSnapshot.docs[index]['token'],
-                    title: 'New Connection Request',
-                    body:
-                        '${documentSnapShotCurrUser.get('user_name')} Send You a Connection Request',
-                    context: context);
+                await _sendNotification.sendNotification(
+                  token: searchResultSnapshot.docs[index]['token'],
+                  title: 'New Connection Request',
+                  body:
+                      '${documentSnapShotCurrUser.get('user_name')} Send You a Connection Request',
+                );
 
                 print("Updated");
               } else {
@@ -213,12 +214,12 @@ class _SearchState extends State<Search> {
                   }
 
                   /// Send Notification to Request Sender about Connection Accepted
-                  await sendNotification(
-                      token: searchResultSnapshot.docs[index]['token'],
-                      title: 'Connection Request Accepted',
-                      body:
-                          '${documentSnapShotCurrUser.get('user_name')} Accept Your Connection Request',
-                      context: context);
+                  await _sendNotification.sendNotification(
+                    token: searchResultSnapshot.docs[index]['token'],
+                    title: 'Connection Request Accepted',
+                    body:
+                        '${documentSnapShotCurrUser.get('user_name')} Accept Your Connection Request',
+                  );
                 } else {
                   print("Nothing To Do");
                 }

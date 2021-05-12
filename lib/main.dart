@@ -4,13 +4,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
-import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -35,7 +36,10 @@ void main() async {
     );
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
-
+  /// Change Navigation Bar Color
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.black54,
+  ));
 
   runApp(MaterialApp(
     title: 'Generation',

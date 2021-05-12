@@ -4,14 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation_official/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
-import 'package:generation_official/FrontEnd/MainScreen/generation_applications_section.dart';
+import 'package:generation_official/FrontEnd/MainScreen/general_applications_section.dart';
 import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
 import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
-import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
@@ -110,8 +111,9 @@ Future<void> _deleteActivitySeparately() async {
 
           /// Accurate Work
           if (_activityDateTime.split(' ')[0] != currDate &&
-              int.parse(_timeDistribution[0]) <= currHour &&
-              int.parse(_timeDistribution[1]) <= currMinute) {
+              ((int.parse(_timeDistribution[0]) == currHour &&
+                      int.parse(_timeDistribution[1]) <= currMinute) ||
+                  int.parse(_timeDistribution[0]) < currHour)) {
             print('Delete that Status');
 
             /// Delete Particular Activity
@@ -157,8 +159,8 @@ class _MainScreenState extends State<MainScreen> {
       "deleteActivity",
       initialDelay: Duration(seconds: 30),
       frequency: Duration(
-          hours:
-              1), // Minimum frequency is 15 min. For Debug that, Please change that to 1 Hour
+          minutes:
+              30), // Minimum frequency is 15 min. For Debug that, Please change that to 15 min
     );
 
     super.initState();
@@ -244,10 +246,16 @@ class _MainScreenState extends State<MainScreen> {
                       size: 25.0,
                     ),
                     onPressed: () async {
-                      print("New User Add");
-                      await ForeGroundNotificationReceiveAndShow()
-                          .showNotification(
-                              title: 'Title', body: 'Body', context: context);
+                      // print("New User Add");
+                      // await ForeGroundNotificationReceiveAndShow()
+                      //     .showNotification(
+                      //         title: 'Title', body: 'Body');
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => SelectConnection(
+                                    mediaType: MediaTypes.Text,
+                                  )));
                     },
                   ),
                 )

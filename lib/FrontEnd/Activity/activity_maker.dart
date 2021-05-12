@@ -12,6 +12,9 @@ import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart'
 activityList(
     {@required BuildContext context,
     @required List<String> allConnectionsUserName}) {
+
+
+
   return showDialog(
     context: context,
     builder: (context) => activityListOptions(context, allConnectionsUserName),
@@ -25,7 +28,7 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(50.0),
     ),
-    backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+    backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
     title: Center(
       child: Text(
         "Activity",

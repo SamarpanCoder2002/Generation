@@ -105,11 +105,18 @@ class LocalStorageHelper {
     return result[0].values.first;
   }
 
-  Future<String> extractToken(String _tableName) async {
-    Database db = await this.database;
+  Future<String> extractToken(
+      {String userMail = '', String userName = ''}) async {
+    final Database db = await this.database;
 
-    List<Map<String, Object>> result = await db.rawQuery(
-        "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$_tableName'");
+    List<Map<String, Object>> result;
+
+    if (userMail != '')
+      result = await db.rawQuery(
+          "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$userMail'");
+    else
+      result = await db.rawQuery(
+          "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
     return result[0].values.first;
   }

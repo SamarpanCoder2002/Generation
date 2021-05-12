@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation_official/FrontEnd/Services/toast_message_manage.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:photo_view/photo_view.dart';
 
 class PreviewImageScreen extends StatefulWidget {

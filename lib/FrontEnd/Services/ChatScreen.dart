@@ -15,8 +15,8 @@ import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation_official/FrontEnd/Services/notification_configuration.dart';
-import 'package:generation_official/FrontEnd/Services/toast_message_manage.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
@@ -78,6 +78,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   /// Object Initialization For FireStore and Local Database Management Respectly
   final Management _management = Management();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+  final SendNotification _sendNotification = SendNotification();
 
   /// Audio Player and Dio Downloader Initialized
   final AudioPlayer _justAudioPlayer = AudioPlayer();
@@ -118,9 +119,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     _senderMail = await _localStorageHelper.extractImportantDataFromThatAccount(
         userName: widget._userName);
 
-    _connectionToken = await _localStorageHelper.extractToken(this._senderMail);
+    _connectionToken =
+        await _localStorageHelper.extractToken(userMail: this._senderMail);
 
-    _currAccountUserName = await _localStorageHelper.extractImportantDataFromThatAccount(userMail: FirebaseAuth.instance.currentUser.email);
+    _currAccountUserName =
+        await _localStorageHelper.extractImportantDataFromThatAccount(
+            userMail: FirebaseAuth.instance.currentUser.email);
   }
 
   _extractHistoryDataFromSqLite() async {
@@ -694,6 +698,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   @override
   void initState() {
     super.initState();
+
     _essentialExtract();
 
     _hintText = 'Type Here...';
@@ -1711,13 +1716,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _chatContainer.last.values.first.toString());
 
         /// Data Store in Firestore
-        _management.addConversationMessages(this._senderMail, sendingMessages);
+        await _management.addConversationMessages(
+            this._senderMail, sendingMessages);
 
         final String _textToSend = _inputTextController.text;
 
         _inputTextController.clear();
 
-        await _messageNotification(MediaTypes.Text, textMsg: _textToSend);
+        await _sendNotification.messageNotificationClassifier(MediaTypes.Text,
+            textMsg: _textToSend,
+            connectionToken: _connectionToken,
+            currAccountUserName: _currAccountUserName);
 
         // if (mounted) {
         //   print('Here');
@@ -1840,7 +1849,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.last.values.first.toString());
 
       /// Data Store in FireStore
-      _management.addConversationMessages(this._senderMail, sendingMessages);
+      await _management.addConversationMessages(
+          this._senderMail, sendingMessages);
 
       if (mounted) {
         setState(() {
@@ -1849,7 +1859,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      await _messageNotification(MediaTypes.Voice);
+      await _sendNotification.messageNotificationClassifier(MediaTypes.Voice,
+          currAccountUserName: _currAccountUserName,
+          connectionToken: _connectionToken);
     }
   }
 
@@ -1961,7 +1973,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.last.values.first.toString());
 
       // Data Store in Firestore
-      _management.addConversationMessages(this._senderMail, _sendingMessages);
+      await _management.addConversationMessages(
+          this._senderMail, _sendingMessages);
 
       if (mounted) {
         setState(() {
@@ -1971,11 +1984,21 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       }
 
       if (mediaTypesForSend == MediaTypes.Video) {
-        await _messageNotification(MediaTypes.Video, textMsg: extraText);
+        await _sendNotification.messageNotificationClassifier(MediaTypes.Video,
+            textMsg: extraText,
+            currAccountUserName: _currAccountUserName,
+            connectionToken: _connectionToken);
       } else if (mediaTypesForSend == MediaTypes.Image) {
-        await _messageNotification(MediaTypes.Image, textMsg: extraText);
+        await _sendNotification.messageNotificationClassifier(MediaTypes.Image,
+            textMsg: extraText,
+            currAccountUserName: _currAccountUserName,
+            connectionToken: _connectionToken);
       } else if (mediaTypesForSend == MediaTypes.Document) {
-        await _messageNotification(MediaTypes.Document, textMsg: extraText);
+        await _sendNotification.messageNotificationClassifier(
+            MediaTypes.Document,
+            textMsg: extraText,
+            currAccountUserName: _currAccountUserName,
+            connectionToken: _connectionToken);
       }
     }
   }
@@ -2025,7 +2048,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.last.values.first.toString());
 
       // Data Store in Firestore
-      _management.addConversationMessages(this._senderMail, _sendingMessages);
+      await _management.addConversationMessages(
+          this._senderMail, _sendingMessages);
 
       setState(() {
         _isLoading = false;
@@ -2038,81 +2062,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
-    await _messageNotification(MediaTypes.Location,
-        textMsg: 'Click Red Pointer in Map to Open in Google Map');
-  }
-
-  Future<void> _messageNotification(MediaTypes mediaTypes,
-      {String textMsg = ''}) async {
-    print('Token is: $_connectionToken');
-
-    switch (mediaTypes) {
-      case MediaTypes.Text:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Message",
-          body: textMsg,
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Voice:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Voice",
-          body: '',
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Image:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Image",
-          body: textMsg,
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Video:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Video",
-          body: textMsg,
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Sticker:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Sticker",
-          body: '',
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Location:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Location",
-          body: textMsg,
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Document:
-        await sendNotification(
-          token: _connectionToken,
-          title: "$_currAccountUserName Send You a Document",
-          body: textMsg,
-          context: context,
-        );
-        break;
-
-      case MediaTypes.Indicator:
-        break;
-    }
+    await _sendNotification.messageNotificationClassifier(MediaTypes.Location,
+        textMsg: 'Click Red Pointer in Map to Open in Google Map',
+        currAccountUserName: _currAccountUserName,
+        connectionToken: _connectionToken);
   }
 
   void chatMicrophoneOnTapAction(int index) async {
