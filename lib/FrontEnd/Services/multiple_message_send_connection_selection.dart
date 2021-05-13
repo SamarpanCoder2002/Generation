@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
@@ -32,6 +34,8 @@ class SelectConnection extends StatefulWidget {
 class _SelectConnectionState extends State<SelectConnection> {
   bool _isLoading = false;
   bool _floatingActionButtonVisible = true;
+  int _totalSelected = 0;
+  final FToast _fToast = FToast();
 
   List<bool> _selectedTile;
 
@@ -59,6 +63,7 @@ class _SelectConnectionState extends State<SelectConnection> {
 
   @override
   void initState() {
+    _fToast.init(context);
     fetchAllUsersName();
     super.initState();
   }
@@ -86,7 +91,7 @@ class _SelectConnectionState extends State<SelectConnection> {
         shadowColor: Colors.white70,
         leading: null,
         title: Text(
-          'Connections to Send',
+          'Select Connections to Send',
           style: TextStyle(
             fontFamily: 'Lora',
             letterSpacing: 1.0,
@@ -139,7 +144,21 @@ class _SelectConnectionState extends State<SelectConnection> {
             onPressed: () {
               if (mounted) {
                 setState(() {
-                  _selectedTile[index] = !_selectedTile[index];
+                  if (_totalSelected == 10 && !_selectedTile[index]) {
+                    showToast(
+                      'Maximum Limits 10 Connections',
+                      _fToast,
+                      toastGravity: ToastGravity.CENTER,
+                      fontSize: 16.0,
+                      toastColor: Colors.lightGreenAccent,
+                      bgColor: Colors.black87,
+                    );
+                  } else {
+                    _selectedTile[index] = !_selectedTile[index];
+                    _selectedTile[index]
+                        ? _totalSelected += 1
+                        : _totalSelected -= 1;
+                  }
                 });
               }
             },
@@ -185,13 +204,12 @@ class _SelectConnectionState extends State<SelectConnection> {
   }
 
   void _sendMessage() async {
-    if(mounted){
+    if (mounted) {
       setState(() {
         _floatingActionButtonVisible = false;
         _isLoading = true;
       });
     }
-
 
     final List<String> _allConnectionsUserName = [];
 
@@ -330,7 +348,7 @@ class _SelectConnectionState extends State<SelectConnection> {
     await _generalMessage.storeInFireStore();
     await _generalMessage.storeInLocalStorage();
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         _isLoading = false;
       });
