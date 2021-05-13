@@ -9,9 +9,10 @@ import 'package:generation_official/BackendAndDatabaseManager/firebase_services/
 import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:photo_view/photo_view.dart';
 
+// ignore: must_be_immutable
 class PreviewImageScreen extends StatefulWidget {
   final File imageFile;
-  final String purpose;
+  String purpose;
   final List<String> allConnectionUserName;
 
   PreviewImageScreen(
@@ -163,6 +164,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
                     if (mounted) {
                       setState(() {
+                        widget.purpose = 'contacts';
                         _isLoading = true;
                       });
                       showToast(
@@ -173,26 +175,24 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                       );
                     }
 
-                    if (widget.purpose == 'status') {
-                      bool response =
-                          await management.mediaActivityToStorageAndFireStore(
-                              widget.imageFile,
-                              manuallyTextController.text,
-                              widget.allConnectionUserName,
-                              context);
+                    bool response =
+                        await management.mediaActivityToStorageAndFireStore(
+                            widget.imageFile,
+                            manuallyTextController.text,
+                            widget.allConnectionUserName,
+                            context);
 
-                      if (response) {
-                        if (mounted) {
-                          setState(() {
-                            fToast.removeCustomToast();
-                            _isLoading = false;
-                          });
-                        }
-                        Navigator.of(context, rootNavigator: true).pop();
+                    if (response) {
+                      if (mounted) {
+                        setState(() {
+                          fToast.removeCustomToast();
+                          _isLoading = false;
+                        });
                       }
-
-                      showToast("Activity Added", fToast);
+                      Navigator.of(context, rootNavigator: true).pop();
                     }
+
+                    showToast("Activity Added", fToast);
                   }
                 },
                 child: Icon(

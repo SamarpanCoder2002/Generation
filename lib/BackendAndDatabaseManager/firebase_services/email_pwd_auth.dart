@@ -255,6 +255,8 @@ class EmailAndPasswordAuth {
                                     .createTableForUserActivity(
                                         this._userName.text);
 
+                                await _localStorageHelper.createTableForRemainingLinks();
+
                                 print("Log-In Successful: User Name: $_email");
 
                                 Navigator.pushAndRemoveUntil(

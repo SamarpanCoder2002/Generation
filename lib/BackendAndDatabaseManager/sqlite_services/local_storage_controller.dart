@@ -209,7 +209,7 @@ class LocalStorageHelper {
 
       print('Here in Delete Particular Activity: $tableName   $activity');
 
-      int result = await db.rawDelete(
+      final int result = await db.rawDelete(
           "DELETE FROM ${tableName}_status WHERE $_colActivity = '$activity'");
 
       print('Deletion Result: $result');
@@ -376,7 +376,7 @@ class LocalStorageHelper {
       final List<Map<String, Object>> result = await db.rawQuery(
           'SELECT * FROM $_allRemainingLinksToDeleteFromFirebaseStorage');
 
-      Map<String, String> map = Map<String, String>();
+      final Map<String, String> map = Map<String, String>();
 
       result.forEach((everyResult) {
         map.addAll({
