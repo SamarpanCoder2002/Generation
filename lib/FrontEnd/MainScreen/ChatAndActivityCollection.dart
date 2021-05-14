@@ -144,6 +144,7 @@ class _ChatsAndActivityCollectionState
                           '${activityVideoPath.path}$currTime.mp4')
                       .whenComplete(() async {
                     print('Video Download Complete');
+                    print('Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
                   });
 
                   /// Insert Video  Activity Data to the local database for future use
@@ -152,7 +153,9 @@ class _ChatsAndActivityCollectionState
                     statusLinkOrString:
                         '${activityVideoPath.path}$currTime.mp4',
                     mediaTypes: MediaTypes.Video,
-                    activityTime: currTime,
+                    activityTime: everyActivity.values.first
+                        .toString()
+                        .split('++++++')[2],
                     extraText: everyActivity.values.first
                         .toString()
                         .split('++++++')[0],
@@ -178,6 +181,9 @@ class _ChatsAndActivityCollectionState
                     print('Image Download Complete');
                     // await _management.deleteFilesFromFirebaseStorage(
                     //     everyActivity.keys.first.toString());
+
+                    print('Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+
                   });
 
                   /// Add Activity Image Data to Local Storage for Future use
@@ -186,7 +192,9 @@ class _ChatsAndActivityCollectionState
                     statusLinkOrString:
                         '${activityImagePath.path}$currTime.jpg',
                     mediaTypes: MediaTypes.Image,
-                    activityTime: currTime,
+                    activityTime: everyActivity.values.first
+                        .toString()
+                        .split('++++++')[2],
                     extraText: everyActivity.values.first
                         .toString()
                         .split('++++++')[0],
@@ -200,12 +208,15 @@ class _ChatsAndActivityCollectionState
                 }
               }
             } else {
+
+              print('Activity Text Time: ${everyActivity.values.first.toString().split('+')[5]}');
+
               /// Add Text Activity Data to Local Storage for future use
               await _localStorageHelper.insertDataInUserActivityTable(
                 tableName: _connectionUserNameFromLocalDatabase,
                 statusLinkOrString: everyActivity.keys.first.toString(),
                 mediaTypes: MediaTypes.Text,
-                activityTime: DateTime.now().toString(),
+                activityTime: everyActivity.values.first.toString().split('+')[5],
                 bgInformation: everyActivity.values.first.toString(),
               );
             }

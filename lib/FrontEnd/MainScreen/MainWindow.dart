@@ -131,9 +131,13 @@ Future<void> _deleteOldTask(bool response) async {
                   tableName: everyUser.values.first,
                   activity: everyActivity['Status']);
 
-              /// Delete File From Local Storage
-              await File(everyActivity['Status'].split('+')[0])
-                  .delete(recursive: true);
+              /// Delete File From Local Storage[Exception Handling Because File Can be Deleted by user Manually]
+              try{
+                await File(everyActivity['Status'].split('+')[0])
+                    .delete(recursive: true);
+              }catch(e){
+                print('File Deleted Already Exception: ${e.toString()}');
+              }
 
               /// For This Current Account Status For Media
               if (everyActivity['Status'].contains('+') &&

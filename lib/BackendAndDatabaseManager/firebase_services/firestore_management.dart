@@ -106,11 +106,13 @@ class Management {
     //   'activity': activityCollection,
     // });
 
+    final String _currTime = DateTime.now().toString();
+
     await localStorageHelper.insertDataInUserActivityTable(
       tableName: _currAccountUserName,
       statusLinkOrString: activityText,
       mediaTypes: MediaTypes.Text,
-      activityTime: DateTime.now().toString(),
+      activityTime: _currTime,
       bgInformation:
           '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
     );
@@ -135,7 +137,7 @@ class Management {
 
           currConnection.add({
             activityText:
-                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize',
+                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime',
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -163,6 +165,7 @@ class Management {
       List<String> allConnectionUserName,
       BuildContext context,
       {String mediaType = 'image'}) async {
+
     if (allConnectionUserName.isEmpty) {
       await localStorageHelper.insertDataInUserActivityTable(
         tableName: _currAccountUserName,
@@ -173,14 +176,17 @@ class Management {
       );
       return true;
     } else {
+
       try {
         final String imageUrl = await uploadMediaToStorage(imgFile, context);
+
+        final String _currTime = DateTime.now().toString();
 
         await localStorageHelper.insertDataInUserActivityTable(
           tableName: _currAccountUserName,
           statusLinkOrString: '${imgFile.path}+$imageUrl',
           mediaTypes: MediaTypes.Image,
-          activityTime: DateTime.now().toString(),
+          activityTime: _currTime,
           extraText: manuallyText,
         );
 
@@ -201,7 +207,7 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            imageUrl: '$manuallyText++++++$mediaType',
+            imageUrl: '$manuallyText++++++$mediaType++++++$_currTime',
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
