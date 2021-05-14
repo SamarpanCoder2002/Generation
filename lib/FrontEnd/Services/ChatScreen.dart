@@ -32,11 +32,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:thumbnails/thumbnails.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:swipe_to/swipe_to.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -55,6 +56,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   bool _isMicrophonePermissionGranted = false;
   bool _isLoading = false;
   bool _showEmojiPicker = false, _isChatOpenFirstTime = true;
+  bool _autoFocus = false;
 
   /// Some Integer Value Initialized
   double _audioDownloadProgress = 0;
@@ -88,6 +90,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final ImagePicker _picker = ImagePicker();
   final FToast fToast = FToast();
 
+  double _chatBoxHeight;
+
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
 
@@ -97,6 +101,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   String _totalDuration;
   String _loadingTime;
+
+  String _replyText = '';
 
   String _hintText;
 
@@ -846,7 +852,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget mainBody(BuildContext context) {
-    double _chatBoxHeight = MediaQuery.of(context).size.height - 155;
+    _chatBoxHeight = MediaQuery.of(context).size.height - 155;
     return WillPopScope(
       onWillPop: () async {
         if (_showEmojiPicker) {
@@ -904,6 +910,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ),
             Container(
+              //color: Colors.black54,
               padding: EdgeInsets.only(bottom: 5.0),
               child: Row(
                 children: [
@@ -939,63 +946,104 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       },
                     ),
                   ),
-                  Container(
-                      width: MediaQuery.of(context).size.width * 0.65,
-                      constraints: BoxConstraints.loose(Size(
-                          MediaQuery.of(context).size.width * 0.65, 100.0)),
-                      child: Scrollbar(
-                        showTrackOnHover: true,
-                        thickness: 10.0,
-                        radius: Radius.circular(30.0),
-                        child: TextField(
-                          style: TextStyle(
-                            color: Colors.white,
+                  Column(
+                    children: [
+                      if (this._replyText != '')
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.65,
+                          padding: EdgeInsets.only(
+                            bottom: 5.0,
                           ),
-                          onTap: () {
-                            if (mounted) {
-                              setState(() {
-                                _showEmojiPicker = false;
-                                _chatBoxHeight =
-                                    MediaQuery.of(context).size.height - 155;
-                              });
-                            }
-
-                            _scrollController.jumpTo(
-                                _scrollController.position.maxScrollExtent);
-                          },
-                          onChanged: (inputValue) {
-                            if (mounted) {
-                              setState(() {
-                                if (inputValue == '') {
-                                  _iconChanger = true;
-                                } else
-                                  _iconChanger = false;
-                              });
-                            }
-                          },
-                          controller: _inputTextController,
-                          maxLines: null,
-                          // For Line Break
-                          decoration: InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20.0)),
-                              borderSide: BorderSide(
-                                  color: Colors.lightGreen, width: 2.0),
-                            ),
-                            hintText: _hintText,
-                            hintStyle: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Lora',
-                              letterSpacing: 2.0,
-                              fontStyle: FontStyle.italic,
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.lightBlue)),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _replyText,
+                                  style: TextStyle(
+                                    color: Colors.lightBlue,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 18.0,
+                                  color: Colors.red,
+                                ),
+                                onTap: () {
+                                  if (mounted) {
+                                    setState(() {
+                                      _replyText = '';
+                                    });
+                                  }
+                                  // SystemChannels.textInput.invokeMethod('TextInput.hide');
+                                  // SystemChannels.textInput.invokeMethod('TextInput.hide');
+                                },
+                              ),
+                            ],
                           ),
                         ),
-                      )),
+                      Container(
+                          width: MediaQuery.of(context).size.width * 0.65,
+                          constraints: BoxConstraints.loose(Size(
+                              MediaQuery.of(context).size.width * 0.65, 100.0)),
+                          child: Scrollbar(
+                            showTrackOnHover: true,
+                            thickness: 10.0,
+                            radius: Radius.circular(30.0),
+                            child: TextField(
+                              autofocus: _autoFocus,
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                              onTap: () {
+                                if (mounted) {
+                                  setState(() {
+                                    _showEmojiPicker = false;
+                                    _chatBoxHeight =
+                                        MediaQuery.of(context).size.height -
+                                            155;
+                                  });
+                                }
+
+                                _scrollController.jumpTo(
+                                    _scrollController.position.maxScrollExtent);
+                              },
+                              onChanged: (inputValue) {
+                                if (mounted) {
+                                  setState(() {
+                                    if (inputValue == '') {
+                                      _iconChanger = true;
+                                    } else
+                                      _iconChanger = false;
+                                  });
+                                }
+                              },
+                              controller: _inputTextController,
+                              maxLines: null,
+                              // For Line Break
+                              decoration: InputDecoration(
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20.0)),
+                                  borderSide: BorderSide(
+                                      color: Colors.lightGreen, width: 2.0),
+                                ),
+                                hintText: _hintText,
+                                hintStyle: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Lora',
+                                  letterSpacing: 2.0,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                enabledBorder: UnderlineInputBorder(
+                                    borderSide:
+                                        BorderSide(color: Colors.lightBlue)),
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
                   Expanded(
                     child: IconButton(
                       icon: _iconChanger ? _voiceIcon : _senderIcon,
@@ -1064,87 +1112,146 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Container(
-          margin: _responseValue
-              ? EdgeInsets.only(
-                  right: MediaQuery.of(context).size.width / 3, left: 5.0)
-              : EdgeInsets.only(
-                  left: MediaQuery.of(context).size.width / 3, right: 5.0),
-          alignment:
-              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              primary: _responseValue
-                  ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(102, 102, 255, 1),
-              elevation: 0.0,
-              padding: EdgeInsets.all(10.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  bottomLeft: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
+        if (_chatContainer[index].keys.first.contains('[[[@]]]'))
+          SizedBox(
+            height: 20.0,
+          ),
+        SwipeTo(
+          onRightSwipe: () {
+            if (mounted) {
+              setState(() {
+                if (_chatContainer[index].keys.first.contains('[[[@]]]'))
+                  _replyText =
+                      _chatContainer[index].keys.first.split('[[[@]]]')[1];
+                else
+                  _replyText = _chatContainer[index].keys.first;
+
+                if (_replyText.contains('\n'))
+                  _replyText = '${_replyText.split('\n')[0]}';
+
+                if (_replyText.length > 30) {
+                  print('Line Break');
+                  _replyText.split('').removeRange(25, _replyText.length);// CloOpen Range Used Here
+                  _replyText = '${_replyText.splitMapJoin('')}...';
+                }
+
+                _autoFocus = true;
+              });
+            }
+            print(_replyText);
+          },
+          child: Container(
+            margin: _responseValue
+                ? EdgeInsets.only(
+                    right: MediaQuery.of(context).size.width / 3,
+                    left: 5.0,
+                  )
+                : EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 3,
+                    right: 5.0,
+                  ),
+            alignment:
+                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+            child: Column(
+              children: [
+                if (_chatContainer[index].keys.first.contains('[[[@]]]'))
+                  Container(
+                    margin: EdgeInsets.only(bottom: 5.0,),
+                    child: Text(
+                      _chatContainer[index].keys.first.split('[[[@]]]')[0],
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                      ),
+                    ),
+                  ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: _responseValue
+                        ? Color.fromRGBO(60, 80, 100, 1)
+                        : Color.fromRGBO(102, 102, 255, 1),
+                    elevation: 0.0,
+                    padding: EdgeInsets.all(10.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: _responseValue
+                            ? Radius.circular(0.0)
+                            : Radius.circular(20.0),
+                        topRight: _responseValue
+                            ? Radius.circular(20.0)
+                            : Radius.circular(0.0),
+                        bottomLeft: Radius.circular(20.0),
+                        bottomRight: Radius.circular(20.0),
+                      ),
+                    ),
+                  ),
+                  child: AutolinkText(
+                    text: _chatContainer[index].keys.first.contains('[[[@]]]')
+                        ? _chatContainer[index].keys.first.split('[[[@]]]')[1]
+                        : _chatContainer[index].keys.first,
+                    humanize: false,
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                    ),
+                    linkStyle: TextStyle(
+                      color: Colors.amber,
+                    ),
+                    onEmailTap: (matchText) async {
+                      try {
+                        final Uri params = Uri(
+                          scheme: 'mailto',
+                          path: '$matchText',
+                        );
+
+                        await launch(params.toString());
+                      } catch (e) {
+                        _showDiaLog(titleText: "Sorry, Can't Send Email");
+                      }
+                    },
+                    onPhoneTap: (matchText) async {
+                      try {
+                        final Uri params = Uri(
+                          scheme: 'tel',
+                          path: '$matchText',
+                        );
+
+                        await launch(params.toString());
+                      } catch (e) {
+                        _showDiaLog(titleText: "Sorry, Access this number");
+                      }
+                    },
+                    onWebLinkTap: (matchText) async {
+                      try {
+                        final String _recognize =
+                            matchText.contains('https') ? 'https' : 'http';
+                        final Uri params = Uri(
+                          scheme:
+                              matchText.contains('https') ? 'https' : 'http',
+                          path: '${matchText.split(_recognize)[1]}',
+                        );
+
+                        await launch(params.toString());
+                        showToast(
+                          'Wait For launch',
+                          fToast,
+                          fontSize: 16,
+                        );
+                      } catch (e) {
+                        print(e.toString);
+                        _showDiaLog(titleText: "Sorry, Can't Open This Url");
+                      }
+                    },
+                  ),
+                  onPressed: () {},
                 ),
-              ),
+              ],
             ),
-            child: AutolinkText(
-              text: _chatContainer[index].keys.first,
-              humanize: false,
-              textStyle: TextStyle(
-                color: Colors.white,
-              ),
-              linkStyle: TextStyle(
-                color: Colors.amber,
-              ),
-              onEmailTap: (matchText) async {
-                try {
-                  final Uri params = Uri(
-                    scheme: 'mailto',
-                    path: '$matchText',
-                  );
-
-                  await launch(params.toString());
-                } catch (e) {
-                  _showDiaLog(titleText: "Sorry, Can't Send Email");
-                }
-              },
-              onPhoneTap: (matchText) async {
-                try {
-                  final Uri params = Uri(
-                    scheme: 'tel',
-                    path: '$matchText',
-                  );
-
-                  await launch(params.toString());
-                } catch (e) {
-                  _showDiaLog(titleText: "Sorry, Access this number");
-                }
-              },
-              onWebLinkTap: (matchText) async {
-                try {
-                  final String _recognize =
-                      matchText.contains('https') ? 'https' : 'http';
-                  final Uri params = Uri(
-                    scheme: matchText.contains('https') ? 'https' : 'http',
-                    path: '${matchText.split(_recognize)[1]}',
-                  );
-
-                  await launch(params.toString());
-                  showToast(
-                    'Wait For launch',
-                    fToast,
-                    fontSize: 16,
-                  );
-                } catch (e) {
-                  print(e.toString);
-                  _showDiaLog(titleText: "Sorry, Can't Open This Url");
-                }
-              },
-            ),
-            onPressed: () {},
           ),
         ),
         _conversationShowingTime(index, _responseValue),
+        if (_chatContainer[index].keys.first.contains('[[[@]]]'))
+          SizedBox(
+            height: 5.0,
+          ),
       ],
     );
   }
@@ -1692,13 +1799,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           setState(() {
             /// Add data to temporary Storage of Sending
             sendingMessages.add({
-              '${_inputTextController.text}':
+              _replyText != ''
+                      ? '$_replyText[[[@]]]${_inputTextController.text}'
+                      : '${_inputTextController.text}':
                   "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
             });
 
             /// Add Data to the UI related all chat Container
             _chatContainer.add({
-              '${_inputTextController.text}':
+              _replyText != ''
+                      ? '$_replyText[[[@]]]${_inputTextController.text}'
+                      : '${_inputTextController.text}':
                   "${DateTime.now().hour}:${DateTime.now().minute}",
             });
 
@@ -1708,6 +1819,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _mediaTypes.add(MediaTypes.Text); // Add MediaType
 
             _iconChanger = true; // IconChanger Should Change
+
+            if (_replyText != '') _replyText = '';
           });
         }
 

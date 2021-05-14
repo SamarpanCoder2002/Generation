@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -144,7 +145,8 @@ class _ChatsAndActivityCollectionState
                           '${activityVideoPath.path}$currTime.mp4')
                       .whenComplete(() async {
                     print('Video Download Complete');
-                    print('Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                    print(
+                        'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
                   });
 
                   /// Insert Video  Activity Data to the local database for future use
@@ -182,8 +184,8 @@ class _ChatsAndActivityCollectionState
                     // await _management.deleteFilesFromFirebaseStorage(
                     //     everyActivity.keys.first.toString());
 
-                    print('Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-
+                    print(
+                        'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
                   });
 
                   /// Add Activity Image Data to Local Storage for Future use
@@ -208,15 +210,16 @@ class _ChatsAndActivityCollectionState
                 }
               }
             } else {
-
-              print('Activity Text Time: ${everyActivity.values.first.toString().split('+')[5]}');
+              print(
+                  'Activity Text Time: ${everyActivity.values.first.toString().split('+')[5]}');
 
               /// Add Text Activity Data to Local Storage for future use
               await _localStorageHelper.insertDataInUserActivityTable(
                 tableName: _connectionUserNameFromLocalDatabase,
                 statusLinkOrString: everyActivity.keys.first.toString(),
                 mediaTypes: MediaTypes.Text,
-                activityTime: everyActivity.values.first.toString().split('+')[5],
+                activityTime:
+                    everyActivity.values.first.toString().split('+')[5],
                 bgInformation: everyActivity.values.first.toString(),
               );
             }
@@ -682,7 +685,7 @@ class _ChatsAndActivityCollectionState
                     return Container(
                       alignment: Alignment.center,
                       width: MediaQuery.of(context).size.width / 2 + 20,
-                      padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                      padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 5.0,),
                       child: Column(
                         children: [
                           Text(
@@ -805,19 +808,23 @@ class _ChatsAndActivityCollectionState
         } else
           _message = splitMsg[0];
 
+        if (_message.contains('[[[@]]]'))
+          _message = _message.split('[[[@]]]')[1];
+
         print('_message is: ${_message.length}');
 
-        /// If Message Only have Emoji, for that...   Otherwise gives error string is not well-formed UTF-16
-        if (!_messageRegex.hasMatch(_message)) _message = '.$_message';
+        if (_message.length > 16) {
+          _message = _message.replaceRange(16, _message.length, '...');
+        }
+
+        print(_message);
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+           Expanded(
               child: Text(
-                _message.length <= 15
-                    ? _message
-                    : '${_message.replaceRange(15, _message.length, '...')}',
+                _message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.0,

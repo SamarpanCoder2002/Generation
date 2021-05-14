@@ -33,14 +33,14 @@ class LocalStorageHelper {
       '__RemainingLinksToDelete__';
   final String _colLinks = 'New_Link';
 
-  // Create Singleton Objects(Only Created once in the whole application)
+  /// Create Singleton Objects(Only Created once in the whole application)
   static LocalStorageHelper _localStorageHelper;
   static Database _database;
 
-  // Instantiate the obj
+  /// Instantiate the obj
   LocalStorageHelper._createInstance();
 
-  // For access Singleton object
+  /// For access Singleton object
   factory LocalStorageHelper() {
     if (_localStorageHelper == null)
       _localStorageHelper = LocalStorageHelper._createInstance();
@@ -52,9 +52,9 @@ class LocalStorageHelper {
     return _database;
   }
 
-  // For make a database
+  /// For make a database
   Future<Database> initializeDatabase() async {
-    // Get the directory path to store the database
+    /// Get the directory path to store the database
 
     final Directory directory = await getExternalStorageDirectory();
     print('Directory Path: ${directory.path}');
@@ -139,7 +139,7 @@ class LocalStorageHelper {
     return result;
   }
 
-  // For make a table
+  /// For make a table
   Future<bool> createTableForUserName(String tableName) async {
     Database db = await this.database;
     try {
@@ -153,7 +153,7 @@ class LocalStorageHelper {
     }
   }
 
-  // For Make Table for Status
+  /// For Make Table for Status
   Future<bool> createTableForUserActivity(String tableName) async {
     final Database db = await this.database;
     try {
@@ -166,7 +166,7 @@ class LocalStorageHelper {
     }
   }
 
-  // Insert ActivityData to Activity Table
+  /// Insert ActivityData to Activity Table
   Future<void> insertDataInUserActivityTable(
       {@required String tableName,
       @required String statusLinkOrString,
@@ -183,11 +183,11 @@ class LocalStorageHelper {
     _activityStoreMap[_colExtraText] = extraText;
     _activityStoreMap[_colBgInformation] = bgInformation;
 
-    // Result Insert to DB
+    /// Result Insert to DB
     await db.insert('${tableName}_status', _activityStoreMap);
   }
 
-  // Extract Status from Table Name
+  /// Extract Status from Table Name
   Future<List<Map<String, dynamic>>> extractActivityForParticularUserName(
       String tableName) async {
     try {
@@ -231,7 +231,7 @@ class LocalStorageHelper {
     }
   }
 
-  // Count Total Statuses for particular Table Name
+  /// Count Total Statuses for particular Table Name
   Future<int> countTotalActivitiesForParticularUserName(
       String tableName) async {
     final Database db = await this.database;
@@ -241,7 +241,7 @@ class LocalStorageHelper {
     return countTotalStatus[0].values.first;
   }
 
-  // Count total Messages for particular Table Name
+  /// Count total Messages for particular Table Name
   Future<int> _countTotalMessagesUnderATable(String _tableName) async {
     final Database db = await this.database;
 
@@ -251,7 +251,7 @@ class LocalStorageHelper {
     return countTotalMessagesWithOneAdditionalData[0].values.first;
   }
 
-  // Insert Use Additional Data to Table
+  /// Insert Use Additional Data to Table
   Future<int> insertAdditionalData(
       String _tableName, String _about, String _email) async {
     Database db = await this.database; // DB Reference
@@ -268,24 +268,24 @@ class LocalStorageHelper {
     _helperMap[_colProfileImageUrl] = "";
     _helperMap[_colEmail] = _email;
 
-    // Result Insert to DB
+    /// Result Insert to DB
     var result = await db.insert(_tableName, _helperMap);
     return result;
   }
 
-  // Insert New Messages to Table
+  /// Insert New Messages to Table
   Future<int> insertNewMessages(String _tableName, String _newMessage,
       MediaTypes _currMediaType, int _ref, String _time) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
 
-    // Current Date
+    /// Current Date
     DateTime now = DateTime.now();
     DateFormat formatter = DateFormat('yyyy-MM-dd');
     String _dateIS = formatter.format(now);
 
-    // Insert Data to Map
+    /// Insert Data to Map
     _helperMap[_colMessages] = _newMessage;
     _helperMap[_colReferences] = _ref;
     _helperMap[_colMediaType] = _currMediaType.toString();
@@ -295,14 +295,14 @@ class LocalStorageHelper {
     _helperMap[_colProfileImageUrl] = "";
     _helperMap[_colEmail] = "";
 
-    // Result Insert to DB
+    /// Result Insert to DB
     var result = await db.insert(_tableName, _helperMap);
     print(result);
 
     return result;
   }
 
-  // Extract Message from table
+  /// Extract Message from table
   Future<List<Map<String, dynamic>>> extractMessageData(
       String _tableName) async {
     Database db = await this.database; // DB Reference
@@ -370,7 +370,7 @@ class LocalStorageHelper {
   }
 
   Future<Map<String, String>> extractRemainingLinks() async {
-    try{
+    try {
       final Database db = await this.database;
 
       final List<Map<String, Object>> result = await db.rawQuery(
@@ -385,21 +385,22 @@ class LocalStorageHelper {
       });
 
       return map;
-    }catch(e){
+    } catch (e) {
       print('Extract Links Error: ${e.toString()}');
-      return Map<String,String>();
+      return Map<String, String>();
     }
   }
 
-  Future<void> deleteRemainingLinksFromLocalStore({@required String link}) async{
-     try{
-       final Database db = await this.database;
+  Future<void> deleteRemainingLinksFromLocalStore(
+      {@required String link}) async {
+    try {
+      final Database db = await this.database;
 
-       await db.rawDelete("DELETE FROM $_allRemainingLinksToDeleteFromFirebaseStorage WHERE $_colLinks = '$link'");
-
-     }catch(e){
-       print('Remaining Links Deletion Exception: ${e.toString()}');
-     }
+      await db.rawDelete(
+          "DELETE FROM $_allRemainingLinksToDeleteFromFirebaseStorage WHERE $_colLinks = '$link'");
+    } catch (e) {
+      print('Remaining Links Deletion Exception: ${e.toString()}');
+    }
   }
 
 // // Extract Connection Name from Table
