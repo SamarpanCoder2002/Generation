@@ -397,7 +397,7 @@ class _ApplicationListState extends State<ApplicationList> {
                           builder: (_) => SelectConnection(
                                 mediaType: mediaTypes,
                                 mediaFile: file,
-                                extraText: _mediaController.text,
+                                textContent: _mediaController.text,
                                 extra: extension,
                               )));
                 },

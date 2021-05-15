@@ -39,6 +39,8 @@ import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
+import 'multiple_message_send_connection_selection.dart';
+
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
   String _userName;
@@ -1132,6 +1134,26 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             height: 20.0,
           ),
         SwipeTo(
+          iconColor: Colors.lightBlue,
+          iconOnLeftSwipe: Entypo.forward,
+          onLeftSwipe: () {
+            print('Left Swipe');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => SelectConnection(
+                          textContent: _chatContainer[index]
+                                  .keys
+                                  .first
+                                  .contains('[[[@]]]')
+                              ? _chatContainer[index]
+                                  .keys
+                                  .first
+                                  .split('[[[@]]]')[1]
+                              : _chatContainer[index].keys.first,
+                          mediaType: MediaTypes.Text,
+                        )));
+          },
           onRightSwipe: () {
             if (mounted) {
               setState(() {
@@ -1262,6 +1284,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     },
                   ),
                   onPressed: () {},
+                  onLongPress: () {
+                    print('Delete that message');
+                  },
                 ),
               ],
             ),
@@ -1281,141 +1306,156 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Container(
-          margin: _responseValue
-              ? EdgeInsets.only(
-                  right: MediaQuery.of(context).size.width / 3,
-                  left: 5.0,
-                  top: 5.0,
-                )
-              : EdgeInsets.only(
-                  left: MediaQuery.of(context).size.width / 3,
-                  right: 5.0,
-                  top: 5.0,
-                ),
-          alignment:
-              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+        SwipeTo(
+          iconOnLeftSwipe: Entypo.forward,
+          iconColor: Colors.lightBlue,
+          onLeftSwipe: () {
+            print('Voice Left Swipe');
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => SelectConnection(
+                          mediaType: MediaTypes.Voice,
+                          mediaFile: File(_chatContainer[index].keys.first),
+                        )));
+          },
           child: Container(
-            height: 70.0,
-            width: 200.0,
-            decoration: BoxDecoration(
-              color: _responseValue
-                  ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(102, 102, 255, 1),
-              borderRadius: _responseValue
-                  ? BorderRadius.only(
-                      topRight: Radius.circular(40.0),
-                      bottomLeft: Radius.circular(40.0),
-                      bottomRight: Radius.circular(40.0),
-                    )
-                  : BorderRadius.only(
-                      topLeft: Radius.circular(40.0),
-                      bottomLeft: Radius.circular(40.0),
-                      bottomRight: Radius.circular(40.0),
-                    ),
-            ),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 20.0,
-                ),
-                Stack(
-                  children: [
-                    if (_responseValue &&
-                        index == _response.length - 1 &&
-                        _audioDownloadProgress > 0.0 &&
-                        _audioDownloadProgress < 1.0)
-                      Container(
-                        margin: EdgeInsets.only(
-                          left: 1.5,
-                          top: 2.0,
-                        ),
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.black12,
-                          value: _audioDownloadProgress,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.orange),
-                        ),
+            margin: _responseValue
+                ? EdgeInsets.only(
+                    right: MediaQuery.of(context).size.width / 3,
+                    left: 5.0,
+                    top: 5.0,
+                  )
+                : EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 3,
+                    right: 5.0,
+                    top: 5.0,
+                  ),
+            alignment:
+                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+            child: Container(
+              height: 70.0,
+              width: 200.0,
+              decoration: BoxDecoration(
+                color: _responseValue
+                    ? Color.fromRGBO(60, 80, 100, 1)
+                    : Color.fromRGBO(102, 102, 255, 1),
+                borderRadius: _responseValue
+                    ? BorderRadius.only(
+                        topRight: Radius.circular(40.0),
+                        bottomLeft: Radius.circular(40.0),
+                        bottomRight: Radius.circular(40.0),
+                      )
+                    : BorderRadius.only(
+                        topLeft: Radius.circular(40.0),
+                        bottomLeft: Radius.circular(40.0),
+                        bottomRight: Radius.circular(40.0),
                       ),
-                    GestureDetector(
-                      onLongPress: () => _chatMicrophoneOnLongPressAction(),
-                      onTap: () => chatMicrophoneOnTapAction(index),
-                      child: Icon(
-                        index == _lastAudioPlayingIndex
-                            ? _iconData
-                            : Icons.play_arrow_rounded,
-                        color: Color.fromRGBO(10, 255, 30, 1),
-                        size: 35.0,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  width: 5.0,
-                ),
-                Expanded(
-                  //color: Color.fromRGBO(86, 121, 192, 1),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 20.0,
+                  ),
+                  Stack(
                     children: [
-                      Container(
-                        margin: EdgeInsets.only(
-                          top: 26.0,
+                      if (_responseValue &&
+                          index == _response.length - 1 &&
+                          _audioDownloadProgress > 0.0 &&
+                          _audioDownloadProgress < 1.0)
+                        Container(
+                          margin: EdgeInsets.only(
+                            left: 1.5,
+                            top: 2.0,
+                          ),
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.black12,
+                            value: _audioDownloadProgress,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.orange),
+                          ),
                         ),
-                        padding: EdgeInsets.only(right: 10.0),
-                        child: LinearPercentIndicator(
-                          percent: _justAudioPlayer.duration == null
-                              ? 0
-                              : _lastAudioPlayingIndex == index
-                                  ? _currAudioPlayingTime /
-                                      _justAudioPlayer.duration.inMicroseconds
-                                          .ceilToDouble()
-                                  : 0,
-                          backgroundColor: Colors.black26,
-                          progressColor:
-                              _responseValue ? Colors.lightBlue : Colors.amber,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(
-                          left: 10.0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _lastAudioPlayingIndex == index
-                                    ? _loadingTime
-                                    : '0:00',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 15.0,
-                            ),
-                            Expanded(
-                              child: Text(
-                                _lastAudioPlayingIndex == index
-                                    ? _totalDuration
-                                    : '',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
+                      GestureDetector(
+                        onLongPress: () => _chatMicrophoneOnLongPressAction(),
+                        onTap: () => chatMicrophoneOnTapAction(index),
+                        child: Icon(
+                          index == _lastAudioPlayingIndex
+                              ? _iconData
+                              : Icons.play_arrow_rounded,
+                          color: Color.fromRGBO(10, 255, 30, 1),
+                          size: 35.0,
                         ),
                       ),
                     ],
                   ),
-                )
-              ],
+                  SizedBox(
+                    width: 5.0,
+                  ),
+                  Expanded(
+                    //color: Color.fromRGBO(86, 121, 192, 1),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(
+                            top: 26.0,
+                          ),
+                          padding: EdgeInsets.only(right: 10.0),
+                          child: LinearPercentIndicator(
+                            percent: _justAudioPlayer.duration == null
+                                ? 0
+                                : _lastAudioPlayingIndex == index
+                                    ? _currAudioPlayingTime /
+                                        _justAudioPlayer.duration.inMicroseconds
+                                            .ceilToDouble()
+                                    : 0,
+                            backgroundColor: Colors.black26,
+                            progressColor: _responseValue
+                                ? Colors.lightBlue
+                                : Colors.amber,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(
+                            left: 10.0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _lastAudioPlayingIndex == index
+                                      ? _loadingTime
+                                      : '0:00',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 15.0,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  _lastAudioPlayingIndex == index
+                                      ? _totalDuration
+                                      : '',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -1426,103 +1466,126 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   Widget _mediaConversationList(
       BuildContext context, int index, bool _responseValue) {
+    print(
+        'Media Extension: ${_chatContainer[index].keys.first.split('.')[_chatContainer[index].keys.first.split('.').length - 1]}');
+
     return Column(
       children: [
-        Container(
-            height: MediaQuery.of(context).size.height * 0.3,
-            margin: _responseValue
-                ? EdgeInsets.only(
-                    right: MediaQuery.of(context).size.width / 3,
-                    left: 5.0,
-                    top: 30.0,
-                  )
-                : EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width / 3,
-                    right: 5.0,
-                    top: 15.0,
-                  ),
-            alignment:
-                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-            child: OpenContainer(
-              openColor: Color.fromRGBO(60, 80, 100, 1),
-              closedColor: _responseValue
-                  ? Color.fromRGBO(60, 80, 100, 1)
-                  : Color.fromRGBO(102, 102, 255, 1),
-              middleColor: Color.fromRGBO(60, 80, 100, 1),
-              closedElevation: 0.0,
-              closedShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.0),
-                  topLeft: Radius.circular(20.0),
-                  bottomRight:
-                      _chatContainer[index].values.first.split('+')[1] == ''
-                          ? Radius.circular(20.0)
-                          : Radius.circular(0.0),
-                  bottomLeft:
-                      _chatContainer[index].values.first.split('+')[1] == ''
-                          ? Radius.circular(20.0)
-                          : Radius.circular(0.0),
-                ),
-              ),
-              transitionDuration: Duration(
-                milliseconds: 400,
-              ),
-              transitionType: ContainerTransitionType.fadeThrough,
-              openBuilder: (context, openWidget) {
-                print('MediaTypes: ${_mediaTypes[index]}');
-                return PreviewImageScreen(
-                  imageFile: _mediaTypes[index] == MediaTypes.Image
-                      ? File(_chatContainer[index].keys.first)
-                      : File(_chatContainer[index].values.first.split('+')[2]),
-                );
-              },
-              closedBuilder: (context, closeWidget) => Stack(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    child: PhotoView(
-                      imageProvider: _mediaTypes[index] == MediaTypes.Image
-                          ? FileImage(File(_chatContainer[index].keys.first))
-                          : FileImage(File(_chatContainer[index]
-                              .values
-                              .first
-                              .split('+')[2])),
-                      loadingBuilder: (context, event) => Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorBuilder: (context, obj, stackTrace) => Center(
-                          child: Text(
-                        'Image not Found',
-                        style: TextStyle(
-                          fontSize: 23.0,
-                          color: Colors.red,
-                          fontFamily: 'Lora',
-                          letterSpacing: 1.0,
-                        ),
-                      )),
-                      enableRotation: true,
-                      minScale: 0.36,
-                    ),
-                  ),
-                  if (_mediaTypes[index] == MediaTypes.Video)
-                    Center(
-                      child: IconButton(
-                        iconSize: 100.0,
-                        icon: const Icon(
-                          Icons.play_arrow_rounded,
-                          color: Colors.white,
-                        ),
-                        onPressed: () async {
-                          final OpenResult openResult = await OpenFile.open(
-                              _chatContainer[index].keys.first);
+        SwipeTo(
+          onLeftSwipe: () {
+            print('Media Left Swipe');
 
-                          openFileResultStatus(openResult: openResult);
-                        },
+            final List<String> afterSplitting =
+                _chatContainer[index].keys.first.split('.');
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => SelectConnection(
+                          mediaType: _mediaTypes[index],
+                          textContent:
+                              _chatContainer[index].values.first.split('+')[1],
+                          mediaFile: File(_chatContainer[index].keys.first),
+                          extra: '.${afterSplitting.last}',
+                        )));
+          },
+          child: Container(
+              height: MediaQuery.of(context).size.height * 0.3,
+              margin: _responseValue
+                  ? EdgeInsets.only(
+                      right: MediaQuery.of(context).size.width / 3,
+                      left: 5.0,
+                      top: 30.0,
+                    )
+                  : EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width / 3,
+                      right: 5.0,
+                      top: 15.0,
+                    ),
+              alignment:
+                  _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+              child: OpenContainer(
+                openColor: Color.fromRGBO(60, 80, 100, 1),
+                closedColor: _responseValue
+                    ? Color.fromRGBO(60, 80, 100, 1)
+                    : Color.fromRGBO(102, 102, 255, 1),
+                middleColor: Color.fromRGBO(60, 80, 100, 1),
+                closedElevation: 0.0,
+                closedShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20.0),
+                    topLeft: Radius.circular(20.0),
+                    bottomRight:
+                        _chatContainer[index].values.first.split('+')[1] == ''
+                            ? Radius.circular(20.0)
+                            : Radius.circular(0.0),
+                    bottomLeft:
+                        _chatContainer[index].values.first.split('+')[1] == ''
+                            ? Radius.circular(20.0)
+                            : Radius.circular(0.0),
+                  ),
+                ),
+                transitionDuration: Duration(
+                  milliseconds: 400,
+                ),
+                transitionType: ContainerTransitionType.fadeThrough,
+                openBuilder: (context, openWidget) {
+                  print('MediaTypes: ${_mediaTypes[index]}');
+                  return PreviewImageScreen(
+                    imageFile: _mediaTypes[index] == MediaTypes.Image
+                        ? File(_chatContainer[index].keys.first)
+                        : File(
+                            _chatContainer[index].values.first.split('+')[2]),
+                  );
+                },
+                closedBuilder: (context, closeWidget) => Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: PhotoView(
+                        imageProvider: _mediaTypes[index] == MediaTypes.Image
+                            ? FileImage(File(_chatContainer[index].keys.first))
+                            : FileImage(File(_chatContainer[index]
+                                .values
+                                .first
+                                .split('+')[2])),
+                        loadingBuilder: (context, event) => Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorBuilder: (context, obj, stackTrace) => Center(
+                            child: Text(
+                          'Image not Found',
+                          style: TextStyle(
+                            fontSize: 23.0,
+                            color: Colors.red,
+                            fontFamily: 'Lora',
+                            letterSpacing: 1.0,
+                          ),
+                        )),
+                        enableRotation: true,
+                        minScale: 0.36,
                       ),
                     ),
-                ],
-              ),
-            )),
+                    if (_mediaTypes[index] == MediaTypes.Video)
+                      Center(
+                        child: IconButton(
+                          iconSize: 100.0,
+                          icon: const Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {
+                            final OpenResult openResult = await OpenFile.open(
+                                _chatContainer[index].keys.first);
+
+                            openFileResultStatus(openResult: openResult);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              )),
+        ),
         if (_chatContainer[index].values.first.split('+')[1] != '')
           _documentsAndMediaCommonConversationList(index, _responseValue),
         _conversationShowingTime(index, _responseValue),
@@ -1536,114 +1599,135 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     return Column(
       children: [
-        Container(
-            height: _chatContainer[index].values.first.split('+')[2] == '.pdf'
-                ? MediaQuery.of(context).size.height * 0.3
-                : 70.0,
-            margin: _responseValue
-                ? EdgeInsets.only(
-                    right: MediaQuery.of(context).size.width / 3,
-                    left: 5.0,
-                    top: 30.0,
-                  )
-                : EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width / 3,
-                    right: 5.0,
-                    top: 15.0,
-                  ),
-            alignment:
-                _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-            child: Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.rectangle,
-                color:
-                    _chatContainer[index].values.first.split('+')[2] == '.pdf'
-                        ? Colors.white
-                        : _responseValue
-                            ? Color.fromRGBO(60, 80, 100, 1)
-                            : Color.fromRGBO(102, 102, 255, 1),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20.0),
-                  topLeft: Radius.circular(20.0),
-                  bottomRight:
-                      _chatContainer[index].values.first.split('+')[1] == ''
-                          ? Radius.circular(20.0)
-                          : Radius.circular(0.0),
-                  bottomLeft:
-                      _chatContainer[index].values.first.split('+')[1] == ''
-                          ? Radius.circular(20.0)
-                          : Radius.circular(0.0),
-                ),
-              ),
-              child: _chatContainer[index].values.first.split('+')[2] == '.pdf'
-                  ? Stack(
-                      children: [
-                        Center(
-                            child: Text(
-                          'Loading Error',
-                          style: TextStyle(
-                            fontFamily: 'Lora',
-                            color: Colors.red,
-                            fontSize: 20.0,
-                            letterSpacing: 1.0,
-                          ),
-                        )),
-                        Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: PdfView(
-                            path: _chatContainer[index].keys.first,
-                          ),
-                        ),
-                        Center(
-                          child: GestureDetector(
-                            child: Icon(
-                              Icons.open_in_new_rounded,
-                              size: 40.0,
-                              color: Colors.blue,
-                            ),
-                            onTap: () async {
-                              final OpenResult openResult = await OpenFile.open(
-                                  _chatContainer[index].keys.first);
+        SwipeTo(
+          onLeftSwipe: () {
+            print('Media Left Swipe');
 
-                              openFileResultStatus(openResult: openResult);
-                            },
-                          ),
-                        ),
-                      ],
+            final List<String> afterSplitting =
+                _chatContainer[index].keys.first.split('.');
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => SelectConnection(
+                          mediaType: _mediaTypes[index],
+                          textContent:
+                              _chatContainer[index].values.first.split('+')[1],
+                          mediaFile: File(_chatContainer[index].keys.first),
+                          extra: '.${afterSplitting.last}',
+                        )));
+          },
+          child: Container(
+              height: _chatContainer[index].values.first.split('+')[2] == '.pdf'
+                  ? MediaQuery.of(context).size.height * 0.3
+                  : 70.0,
+              margin: _responseValue
+                  ? EdgeInsets.only(
+                      right: MediaQuery.of(context).size.width / 3,
+                      left: 5.0,
+                      top: 30.0,
                     )
-                  : GestureDetector(
-                      onTap: () async {
-                        final OpenResult openResult = await OpenFile.open(
-                            _chatContainer[index].keys.first);
-
-                        openFileResultStatus(openResult: openResult);
-                      },
-                      child: Container(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Icon(
-                                Entypo.documents,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Expanded(
+                  : EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width / 3,
+                      right: 5.0,
+                      top: 15.0,
+                    ),
+              alignment:
+                  _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+              child: Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color:
+                      _chatContainer[index].values.first.split('+')[2] == '.pdf'
+                          ? Colors.white
+                          : _responseValue
+                              ? Color.fromRGBO(60, 80, 100, 1)
+                              : Color.fromRGBO(102, 102, 255, 1),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20.0),
+                    topLeft: Radius.circular(20.0),
+                    bottomRight:
+                        _chatContainer[index].values.first.split('+')[1] == ''
+                            ? Radius.circular(20.0)
+                            : Radius.circular(0.0),
+                    bottomLeft:
+                        _chatContainer[index].values.first.split('+')[1] == ''
+                            ? Radius.circular(20.0)
+                            : Radius.circular(0.0),
+                  ),
+                ),
+                child: _chatContainer[index].values.first.split('+')[2] ==
+                        '.pdf'
+                    ? Stack(
+                        children: [
+                          Center(
                               child: Text(
-                                '${_chatContainer[index].values.first.split('+')[0].split(':').join('_')}${_chatContainer[index].values.first.split('+')[2]}',
-                                style: TextStyle(
-                                  fontSize: 18.0,
+                            'Loading Error',
+                            style: TextStyle(
+                              fontFamily: 'Lora',
+                              color: Colors.red,
+                              fontSize: 20.0,
+                              letterSpacing: 1.0,
+                            ),
+                          )),
+                          Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: PdfView(
+                              path: _chatContainer[index].keys.first,
+                            ),
+                          ),
+                          Center(
+                            child: GestureDetector(
+                              child: Icon(
+                                Icons.open_in_new_rounded,
+                                size: 40.0,
+                                color: Colors.blue,
+                              ),
+                              onTap: () async {
+                                final OpenResult openResult =
+                                    await OpenFile.open(
+                                        _chatContainer[index].keys.first);
+
+                                openFileResultStatus(openResult: openResult);
+                              },
+                            ),
+                          ),
+                        ],
+                      )
+                    : GestureDetector(
+                        onTap: () async {
+                          final OpenResult openResult = await OpenFile.open(
+                              _chatContainer[index].keys.first);
+
+                          openFileResultStatus(openResult: openResult);
+                        },
+                        child: Container(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Icon(
+                                  Entypo.documents,
                                   color: Colors.white,
-                                  fontFamily: 'Lora',
-                                  letterSpacing: 1.0,
                                 ),
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: Text(
+                                  '${_chatContainer[index].values.first.split('+')[0].split(':').join('_')}${_chatContainer[index].values.first.split('+')[2]}',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    color: Colors.white,
+                                    fontFamily: 'Lora',
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-            )),
+              )),
+        ),
         if (_chatContainer[index].values.first.split('+')[1] != '')
           _documentsAndMediaCommonConversationList(index, _responseValue),
         _conversationShowingTime(index, _responseValue),
@@ -1653,55 +1737,68 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   Widget _locationConversationList(int index, bool _responseValue) {
     return Column(children: [
-      Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        height: MediaQuery.of(context).size.height * 0.3,
-        margin: _responseValue
-            ? EdgeInsets.only(
-                right: MediaQuery.of(context).size.width / 3,
-                left: 5.0,
-                top: 30.0,
-              )
-            : EdgeInsets.only(
-                left: MediaQuery.of(context).size.width / 3,
-                right: 5.0,
-                top: 15.0,
+      SwipeTo(
+        onLeftSwipe: () {
+          print('Location Left Swipe');
+
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => SelectConnection(
+                        mediaType: MediaTypes.Location,
+                        extra: _chatContainer[index].keys.first,
+                      )));
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          height: MediaQuery.of(context).size.height * 0.3,
+          margin: _responseValue
+              ? EdgeInsets.only(
+                  right: MediaQuery.of(context).size.width / 3,
+                  left: 5.0,
+                  top: 30.0,
+                )
+              : EdgeInsets.only(
+                  left: MediaQuery.of(context).size.width / 3,
+                  right: 5.0,
+                  top: 15.0,
+                ),
+          alignment:
+              _responseValue ? Alignment.centerLeft : Alignment.centerRight,
+          child: Stack(
+            children: [
+              GoogleMap(
+                mapType: MapType.hybrid,
+                markers: Set.of([
+                  Marker(
+                      markerId: MarkerId('locate'),
+                      zIndex: 1.0,
+                      draggable: true,
+                      position: LatLng(
+                          double.parse(
+                              _chatContainer[index].keys.first.split('+')[0]),
+                          double.parse(
+                              _chatContainer[index].keys.first.split('+')[1])))
+                ]),
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                      double.parse(
+                          _chatContainer[index].keys.first.split('+')[0]),
+                      double.parse(
+                          _chatContainer[index].keys.first.split('+')[1])),
+                  zoom: 17.4746,
+                ),
               ),
-        alignment:
-            _responseValue ? Alignment.centerLeft : Alignment.centerRight,
-        child: Stack(
-          children: [
-            GoogleMap(
-              mapType: MapType.hybrid,
-              markers: Set.of([
-                Marker(
-                    markerId: MarkerId('locate'),
-                    zIndex: 1.0,
-                    draggable: true,
-                    position: LatLng(
-                        double.parse(
-                            _chatContainer[index].keys.first.split('+')[0]),
-                        double.parse(
-                            _chatContainer[index].keys.first.split('+')[1])))
-              ]),
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                    double.parse(
-                        _chatContainer[index].keys.first.split('+')[0]),
-                    double.parse(
-                        _chatContainer[index].keys.first.split('+')[1])),
-                zoom: 17.4746,
+              GestureDetector(
+                child: Icon(Icons.add),
+                onTap: () {
+                  print('Clicked');
+                },
               ),
-            ),
-            GestureDetector(
-              child: Icon(Icons.add),
-              onTap: () {
-                print('Clicked');
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       _conversationShowingTime(index, _responseValue),
@@ -1871,14 +1968,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             textMsg: _textToSend,
             connectionToken: _connectionToken,
             currAccountUserName: _currAccountUserName);
-
-        // if (mounted) {
-        //   print('Here');
-        //   setState(() {
-        //     _scrollController
-        //         .jumpTo(_scrollController.position.maxScrollExtent + 100);
-        //   });
-        // }
       }
     } catch (e) {
       showDialog(
