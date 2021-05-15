@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -685,7 +684,11 @@ class _ChatsAndActivityCollectionState
                     return Container(
                       alignment: Alignment.center,
                       width: MediaQuery.of(context).size.width / 2 + 20,
-                      padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 5.0,),
+                      padding: EdgeInsets.only(
+                        top: 5.0,
+                        bottom: 5.0,
+                        left: 5.0,
+                      ),
                       child: Column(
                         children: [
                           Text(
@@ -827,7 +830,7 @@ class _ChatsAndActivityCollectionState
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           Expanded(
+            Expanded(
               child: Text(
                 _message ??= 'Error',
                 textAlign: TextAlign.center,

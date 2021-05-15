@@ -90,22 +90,32 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final ImagePicker _picker = ImagePicker();
   final FToast fToast = FToast();
 
+  /// Regular Expression
+  final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
+
+  /// Chat List View Parent Height
   double _chatBoxHeight;
 
+  /// Sound Recorder and Audio Obj Initialization
   FlutterSoundRecorder _flutterSoundRecorder;
   Directory _audioDirectory;
 
+  /// Current User Some Details Containers Variables
   String _senderMail;
   String _connectionToken;
   String _currAccountUserName;
 
+  /// Audio Playing Time Related
   String _totalDuration;
   String _loadingTime;
 
+  /// For Reply a Text
   String _replyText = '';
 
+  /// Text Writing Place Hint Text
   String _hintText;
 
+  /// For Audio Player
   IconData _iconData = Icons.play_arrow_rounded;
 
   /// Chat Screen Use Frequently Changeable Send and Voice Icon
@@ -1133,8 +1143,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                 if (_replyText.contains('\n'))
                   _replyText = '${_replyText.split('\n')[0]}';
-
-                final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
                 if (_messageRegex.hasMatch(_replyText)) {
                   print('Under Regex Match');
