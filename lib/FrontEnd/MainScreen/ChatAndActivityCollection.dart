@@ -813,8 +813,13 @@ class _ChatsAndActivityCollectionState
 
         print('_message is: ${_message.length}');
 
-        if (_message.length > 16) {
-          _message = _message.replaceRange(16, _message.length, '...');
+        if (_messageRegex.hasMatch(_message)) {
+          print('Under Regex Match');
+          if (_message.length > 16) {
+            List<String> take = _message.split('').sublist(0, 16);
+
+            _message = '${take.join('')}...';
+          }
         }
 
         print(_message);
@@ -824,7 +829,7 @@ class _ChatsAndActivityCollectionState
           children: [
            Expanded(
               child: Text(
-                _message,
+                _message ??= 'Error',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.0,
@@ -964,7 +969,7 @@ class _ChatsAndActivityCollectionState
   /// Count Total Remaining Messages
   Widget _totalRemainingMessagesTake(String _remainingMessagesLength) {
     return Container(
-      margin: EdgeInsets.only(left: 25.0),
+      margin: EdgeInsets.only(left: 20.0),
       child: Text(
         '$_remainingMessagesLength',
         textAlign: TextAlign.center,

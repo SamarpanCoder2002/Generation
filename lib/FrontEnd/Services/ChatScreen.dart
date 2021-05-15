@@ -277,6 +277,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     /// MediaTypes Rectify
                     switch (_incomingInformationContainer[1]) {
                       case 'MediaTypes.Text': // If Message Type is Text
+
+                        if (everyMessage.keys.first.contains('[[[@]]]')) {
+                          _positionToScroll = 110;
+                        }
+
                         await _manageText(
                             _incomingInformationContainer, everyMessage);
                         break;
@@ -1129,10 +1134,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 if (_replyText.contains('\n'))
                   _replyText = '${_replyText.split('\n')[0]}';
 
-                if (_replyText.length > 30) {
-                  print('Line Break');
-                  _replyText.split('').removeRange(25, _replyText.length);// CloOpen Range Used Here
-                  _replyText = '${_replyText.splitMapJoin('')}...';
+                final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
+
+                if (_messageRegex.hasMatch(_replyText)) {
+                  print('Under Regex Match');
+                  if (_replyText.length > 30) {
+                    List<String> take = _replyText.split('').sublist(0, 30);
+
+                    _replyText = '${take.join('')}...';
+                  }
                 }
 
                 _autoFocus = true;
@@ -1156,7 +1166,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               children: [
                 if (_chatContainer[index].keys.first.contains('[[[@]]]'))
                   Container(
-                    margin: EdgeInsets.only(bottom: 5.0,),
+                    margin: EdgeInsets.only(
+                      bottom: 5.0,
+                    ),
                     child: Text(
                       _chatContainer[index].keys.first.split('[[[@]]]')[0],
                       style: TextStyle(
@@ -1824,8 +1836,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
 
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent + 100);
+        if (_chatContainer.last.keys.first.contains('[[[@]]]'))
+          _scrollController
+              .jumpTo(_scrollController.position.maxScrollExtent + 130);
+        else
+          _scrollController
+              .jumpTo(_scrollController.position.maxScrollExtent + 100);
 
         /// Data Store in Local Storage
         await _localStorageHelper.insertNewMessages(
