@@ -39,8 +39,7 @@ import 'package:swipe_to/swipe_to.dart';
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-
-import 'multiple_message_send_connection_selection.dart';
+import 'package:generation_official/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
@@ -1398,8 +1397,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                 ? 0
                                 : _lastAudioPlayingIndex == index
                                     ? _currAudioPlayingTime /
-                                        _justAudioPlayer
-                                            .duration.inMicroseconds
+                                        _justAudioPlayer.duration.inMicroseconds
                                             .ceilToDouble()
                                     : 0,
                             backgroundColor: Colors.black26,
@@ -1509,8 +1507,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 return PreviewImageScreen(
                   imageFile: _mediaTypes[index] == MediaTypes.Image
                       ? File(_chatContainer[index].keys.first)
-                      : File(
-                          _chatContainer[index].values.first.split('+')[2]),
+                      : File(_chatContainer[index].values.first.split('+')[2]),
                 );
               },
               closedBuilder: (context, closeWidget) => Stack(
@@ -1614,8 +1611,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           : Radius.circular(0.0),
                 ),
               ),
-              child: _chatContainer[index].values.first.split('+')[2] ==
-                      '.pdf'
+              child: _chatContainer[index].values.first.split('+')[2] == '.pdf'
                   ? Stack(
                       children: [
                         Center(
@@ -1642,16 +1638,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               color: Colors.blue,
                             ),
                             onTap: () async {
-                              final OpenResult openResult =
-                                  await OpenFile.open(
-                                      _chatContainer[index].keys.first);
+                              final OpenResult openResult = await OpenFile.open(
+                                  _chatContainer[index].keys.first);
 
                               openFileResultStatus(openResult: openResult);
                             },
                           ),
                         ),
-                        _multipleOptions(index,
-                            mediaTypes: _mediaTypes[index]),
+                        _multipleOptions(index, mediaTypes: _mediaTypes[index]),
                       ],
                     )
                   : GestureDetector(
@@ -2793,11 +2787,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   Widget _multipleOptions(int index,
       {@required MediaTypes mediaTypes, Color bgColor = Colors.black26}) {
     return Container(
-      alignment: Alignment.bottomCenter,
+      alignment: mediaTypes != MediaTypes.Location
+          ? Alignment.bottomCenter
+          : Alignment.topCenter,
       child: Container(
         width: MediaQuery.of(context).size.width * 0.7,
         height: 50.0,
-        alignment: Alignment.bottomCenter,
+        alignment: mediaTypes != MediaTypes.Location
+            ? Alignment.bottomCenter
+            : Alignment.topCenter,
         color: bgColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -2829,56 +2827,65 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                     File(_chatContainer[index].keys.first),
                                 extra: '.${afterSplitting.last}',
                               )));
-                }else if(mediaTypes == MediaTypes.Voice){
+                } else if (mediaTypes == MediaTypes.Voice) {
                   print('Voice Left Swipe');
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (_) => SelectConnection(
-                            mediaType: MediaTypes.Voice,
-                            mediaFile: File(_chatContainer[index].keys.first),
-                          )));
-                }else if(mediaTypes == MediaTypes.Text){
+                                mediaType: MediaTypes.Voice,
+                                mediaFile:
+                                    File(_chatContainer[index].keys.first),
+                              )));
+                } else if (mediaTypes == MediaTypes.Text) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (_) => SelectConnection(
-                            textContent: _chatContainer[index]
-                                .keys
-                                .first
-                                .contains('[[[@]]]')
-                                ? _chatContainer[index]
-                                .keys
-                                .first
-                                .split('[[[@]]]')[1]
-                                : _chatContainer[index].keys.first,
-                            mediaType: MediaTypes.Text,
-                          )));
-                }else if(mediaTypes == MediaTypes.Location){
+                                textContent: _chatContainer[index]
+                                        .keys
+                                        .first
+                                        .contains('[[[@]]]')
+                                    ? _chatContainer[index]
+                                        .keys
+                                        .first
+                                        .split('[[[@]]]')[1]
+                                    : _chatContainer[index].keys.first,
+                                mediaType: MediaTypes.Text,
+                              )));
+                } else if (mediaTypes == MediaTypes.Location) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (_) => SelectConnection(
-                            mediaType: MediaTypes.Location,
-                            extra: _chatContainer[index].keys.first,
-                          )));
+                                mediaType: MediaTypes.Location,
+                                extra: _chatContainer[index].keys.first,
+                              )));
                 }
               },
             ),
-            IconButton(
-              iconSize: 30,
-              icon: Icon(
-                Entypo.share,
-                color: Colors.lightBlue,
+            if (mediaTypes != MediaTypes.Location)
+              IconButton(
+                iconSize: 30,
+                icon: Icon(
+                  Entypo.share,
+                  color: Colors.lightBlue,
+                ),
+                onPressed: () async {
+                  print('Image Share Pressed');
+
+                  if (mediaTypes != MediaTypes.Text)
+                    await Share.shareFiles(
+                      [_chatContainer[index].keys.first],
+                      subject: 'Share From Generation',
+                    );
+                  else
+                    await Share.share(
+                      _chatContainer[index].keys.first,
+                      subject: 'Share From Generation',
+                    );
+                },
               ),
-              onPressed: () async {
-                print('Image Share Pressed');
-                await Share.shareFiles(
-                  [_chatContainer[index].keys.first],
-                  subject: 'Share From Generation',
-                );
-              },
-            ),
             IconButton(
               iconSize: 30,
               icon: Icon(
