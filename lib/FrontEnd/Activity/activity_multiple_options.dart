@@ -17,6 +17,8 @@ class _PollMakerState extends State<PollMaker> {
 
   FToast _fToast = FToast();
 
+  final GlobalKey<FormState> _pollFormKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     _textEditingController =
@@ -25,6 +27,14 @@ class _PollMakerState extends State<PollMaker> {
     _fToast.init(context);
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.forEach((element) {
+      element.dispose();
+    });
+    super.dispose();
   }
 
   @override
@@ -42,7 +52,7 @@ class _PollMakerState extends State<PollMaker> {
     );
   }
 
-  Widget pollingOptionsCreator(){
+  Widget pollingOptionsCreator() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -134,8 +144,14 @@ class _PollMakerState extends State<PollMaker> {
                 argument += 1;
               else if (iconData == Entypo.minus && argument > 2) {
                 argument -= 1;
-              }else{
-               showToast('Minimum 2 Options are Compulsory', _fToast, toastColor: Colors.red, fontSize: 16.0, seconds: 3,);
+              } else {
+                showToast(
+                  'Minimum 2 Options are Compulsory',
+                  _fToast,
+                  toastColor: Colors.red,
+                  fontSize: 16.0,
+                  seconds: 3,
+                );
               }
 
               _textEditingController = List.generate(
@@ -167,9 +183,9 @@ class _PollMakerState extends State<PollMaker> {
               }),
               content: Container(
                 width: double.maxFinite,
-                height: double.maxFinite,
+                height: MediaQuery.of(context).size.height / 2,
                 child: Form(
-                  // key: this._userNameKey,
+                  key: this._pollFormKey,
                   child: SizedBox(
                     width: double.maxFinite,
                     child: ListView(
@@ -180,11 +196,13 @@ class _PollMakerState extends State<PollMaker> {
                               ? answersSection(
                                   labelText: 'Enter Your Question',
                                   textEditingController:
-                                      _textEditingController[i])
+                                      _textEditingController[i],
+                                  index: i)
                               : answersSection(
                                   labelText: 'Option $i',
                                   textEditingController:
-                                      _textEditingController[i]),
+                                      _textEditingController[i],
+                                  index: i),
                         SizedBox(
                           height: 10.0,
                         ),
@@ -194,14 +212,24 @@ class _PollMakerState extends State<PollMaker> {
                             style: ElevatedButton.styleFrom(
                                 primary: Colors.green,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0),
+                                  borderRadius: BorderRadius.circular(50.0),
                                 )),
                             child: Text(
                               "Save",
                               style: TextStyle(
                                   fontSize: 18.0, color: Colors.white),
                             ),
-                            onPressed: () async {},
+                            onPressed: () async {
+                              if (this._pollFormKey.currentState.validate()) {
+                                print('Validate');
+                                _textEditingController.forEach((element) {
+                                  print(
+                                      '\n${_textEditingController.indexOf(element)}: ${element.text}');
+                                });
+
+                                Navigator.pop(context);
+                              }
+                            },
                           ),
                         )
                       ],
@@ -214,18 +242,15 @@ class _PollMakerState extends State<PollMaker> {
 
   Widget answersSection(
       {@required String labelText,
-      @required TextEditingController textEditingController}) {
+      @required TextEditingController textEditingController,
+      @required index}) {
     return TextFormField(
       controller: textEditingController,
       style: TextStyle(color: Colors.white),
       validator: (inputUserName) {
-        if (inputUserName.length < 6)
-          return "User Name At Least 6 Characters";
-        else if (inputUserName.contains(' ') || inputUserName.contains('@'))
-          return "Space and '@' Not Allowed...User '_' instead of space";
-        else if (inputUserName.contains('__'))
-          return "'__' Not Allowed...User '_' instead of '__'";
-        return null;
+        if (inputUserName.length > 0) return null;
+        if (index == 0) return 'Please Add a Question';
+        return "Empty Option Can't be Accepted";
       },
       decoration: InputDecoration(
         labelText: labelText,

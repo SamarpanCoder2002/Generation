@@ -1,8 +1,6 @@
-# Generation
+# generation_official
 
 What You Seek is Seeking You
-
-A Private Secure Messenger App
 
 ## Getting Started
 

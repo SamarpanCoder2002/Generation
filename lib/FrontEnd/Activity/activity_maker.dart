@@ -6,7 +6,7 @@ import 'package:circle_list/radial_drag_gesture_detector.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:generation_official/FrontEnd/Activity/activity_options.dart';
+import 'package:generation_official/FrontEnd/Activity/activity_multiple_options.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:generation_official/FrontEnd/Activity/status_text_container.dart';
@@ -229,6 +229,8 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                 closedColor: const Color.fromRGBO(34, 48, 60, 0.6),
                 openColor: const Color.fromRGBO(34, 48, 60, 0.6),
                 middleColor: const Color.fromRGBO(34, 48, 60, 0.6),
+                transitionType: ContainerTransitionType.fadeThrough,
+                transitionDuration: Duration(milliseconds: 500,),
                 openBuilder: (context, openWidget){
                   return PollMaker();
                 },
