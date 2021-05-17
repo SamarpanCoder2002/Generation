@@ -2,6 +2,8 @@
 
 What You Seek is Seeking You
 
+A Private Secure Messenger App
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
