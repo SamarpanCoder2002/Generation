@@ -9,3 +9,6 @@ enum MediaTypes {
   Indicator,
 }
 
+enum ActivityOptions{
+  Polling,
+}

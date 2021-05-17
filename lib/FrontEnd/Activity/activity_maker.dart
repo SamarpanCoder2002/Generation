@@ -1,20 +1,21 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:circle_list/circle_list.dart';
 import 'package:circle_list/radial_drag_gesture_detector.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation_official/FrontEnd/Activity/activity_options.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:generation_official/FrontEnd/Activity/status_text_container.dart';
 import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
 
+
 activityList(
     {@required BuildContext context,
     @required List<String> allConnectionsUserName}) {
-
-
-
   return showDialog(
     context: context,
     builder: (context) => activityListOptions(context, allConnectionsUserName),
@@ -23,6 +24,7 @@ activityList(
 
 activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
   final ImagePicker picker = ImagePicker();
+
   return AlertDialog(
     elevation: 0.3,
     shape: RoundedRectangleBorder(
@@ -110,7 +112,7 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                       imageQuality: 50,
                     );
 
-                    if(pickedFile != null){
+                    if (pickedFile != null) {
                       print(pickedFile.path);
 
                       Navigator.push(
@@ -222,22 +224,30 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                   },
                 ),
               ),
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(
-                      color: Colors.blue,
-                      width: 3,
-                    )),
-                child: GestureDetector(
-                  onTap: () async {},
-                  child: Icon(
-                    Icons.create,
-                    color: Colors.lightGreen,
-                  ),
-                ),
+              OpenContainer(
+                closedElevation: 0.0,
+                closedColor: const Color.fromRGBO(34, 48, 60, 0.6),
+                openColor: const Color.fromRGBO(34, 48, 60, 0.6),
+                middleColor: const Color.fromRGBO(34, 48, 60, 0.6),
+                openBuilder: (context, openWidget){
+                  return PollMaker();
+                },
+                closedBuilder: (context, closeWidget){
+                  return Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 3,
+                        )),
+                    child: Icon(
+                      Icons.create,
+                      color: Colors.lightGreen,
+                    ),
+                  );
+                },
               ),
             ],
           )

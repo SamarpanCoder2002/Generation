@@ -4,9 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/services.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:workmanager/workmanager.dart';
 
 import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
