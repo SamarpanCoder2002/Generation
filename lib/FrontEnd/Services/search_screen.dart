@@ -193,6 +193,9 @@ class _SearchState extends State<Search> {
 
                   if (mounted) {
                     setState(() {
+
+                      print('Request Connection Request: ${searchResultSnapshot.docs[index]['total_connections']}');
+
                       FirebaseFirestore.instance
                           .doc(
                               'generation_users/${searchResultSnapshot.docs[index].id}')
@@ -200,7 +203,10 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionRequestUser,
                         'connections': connectionsMapRequestUser,
+                        'total_connections': '${int.parse(searchResultSnapshot.docs[index]['total_connections']) + 1}',
                       });
+
+                      print('Current Connection Request: ${documentSnapShotCurrUser.get('total_connections')}');
 
                       FirebaseFirestore.instance
                           .doc(
@@ -209,6 +215,7 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionCurrUser,
                         'connections': connectionsMapCurrUser,
+                        'total_connections': '${int.parse(documentSnapShotCurrUser.get('total_connections')) + 1}',
                       });
                     });
                   }

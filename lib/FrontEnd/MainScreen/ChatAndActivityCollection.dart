@@ -209,16 +209,26 @@ class _ChatsAndActivityCollectionState
                 }
               }
             } else {
-              print(
-                  'Activity Text Time: ${everyActivity.values.first.toString().split('+')[5]}');
 
               /// Add Text Activity Data to Local Storage for future use
               await _localStorageHelper.insertDataInUserActivityTable(
                 tableName: _connectionUserNameFromLocalDatabase,
-                statusLinkOrString: everyActivity.keys.first.toString(),
-                mediaTypes: MediaTypes.Text,
+                statusLinkOrString:
+                    everyActivity.keys.first.toString().split('+')[0],
+                mediaTypes: everyActivity.keys.first.toString().split('+')[1] ==
+                        MediaTypes.Text.toString()
+                    ? MediaTypes.Text
+                    : null,
+                activitySpecialOptions:
+                    everyActivity.keys.first.toString().split('+')[1] ==
+                            ActivitySpecialOptions.Polling.toString()
+                        ? ActivitySpecialOptions.Polling
+                        : null,
                 activityTime:
-                    everyActivity.values.first.toString().split('+')[5],
+                    everyActivity.keys.first.toString().split('+')[1] ==
+                            MediaTypes.Text.toString()
+                        ? everyActivity.values.first.toString().split('+')[5]
+                        : everyActivity.values.first.toString(),
                 bgInformation: everyActivity.values.first.toString(),
               );
             }

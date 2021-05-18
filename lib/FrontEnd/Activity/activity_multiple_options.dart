@@ -253,7 +253,7 @@ class _PollMakerState extends State<PollMaker> {
                 });
               } else {
                 _pollMap.addAll({
-                  pollElement.text: '0',
+                  '${_textEditingController.indexOf(pollElement)}+${pollElement.text}': '0',
                 });
               }
 
@@ -261,10 +261,7 @@ class _PollMakerState extends State<PollMaker> {
             });
 
             print('PollMap is: $_pollMap');
-
-            String id = await _management.addPollingToFireStore(_pollMap);
-
-            if (id != null) print('Document Id: $id');
+            await _management.addPollIdInLocalAndFireStore(_pollMap);
 
             Navigator.pop(context);
           }

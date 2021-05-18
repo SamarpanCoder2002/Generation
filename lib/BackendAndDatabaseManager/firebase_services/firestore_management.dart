@@ -18,8 +18,8 @@ class Management {
 
   _userNameExtractFromLocalDatabase() async {
     _currAccountUserName =
-        await localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+    await localStorageHelper.extractImportantDataFromThatAccount(
+        userMail: FirebaseAuth.instance.currentUser.email);
   }
 
   Management({bool takeTotalUserName = true}) {
@@ -51,15 +51,15 @@ class Management {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => SignUpAuthentication()),
-            (Route<dynamic> route) => false,
+                (Route<dynamic> route) => false,
           );
         },
       ),
     );
   }
 
-  Future<void> addConversationMessages(
-      String _senderMail, List<dynamic> messageMap) async {
+  Future<void> addConversationMessages(String _senderMail,
+      List<dynamic> messageMap) async {
     await FirebaseFirestore.instance
         .doc("generation_users/$_senderMail")
         .update({
@@ -78,34 +78,10 @@ class Management {
     return streamDocumentSnapShot;
   }
 
-  Future<bool> addTextActivityToFireStore(
-      String activityText,
+  Future<bool> addTextActivityToFireStore(String activityText,
       Color selectedBGColor,
       List<String> allConnectionUserName,
       double fontSize) async {
-    // DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-    //     .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-    //     .get();
-    //
-    // Map<String, dynamic> activityCollection =
-    //     documentSnapshot.data()['activity'] as Map;
-    // List<dynamic> currConnection = activityCollection['My Activity'];
-    //
-    // if (currConnection == null) currConnection = [];
-    //
-    // currConnection.add({
-    //   activityText:
-    //       '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
-    // });
-    //
-    // activityCollection['My Activity'] = currConnection;
-    //
-    // await FirebaseFirestore.instance
-    //     .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
-    //     .update({
-    //   'activity': activityCollection,
-    // });
-
     final String _currTime = DateTime.now().toString();
 
     await localStorageHelper.insertDataInUserActivityTable(
@@ -114,30 +90,32 @@ class Management {
       mediaTypes: MediaTypes.Text,
       activityTime: _currTime,
       bgInformation:
-          '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
+      '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor
+          .blue} + ${selectedBGColor.opacity}+$fontSize',
     );
 
     if (allConnectionUserName.isNotEmpty) {
       try {
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
-              await localStorageHelper.extractImportantDataFromThatAccount(
-                  userName: connectionUserName);
+          await localStorageHelper.extractImportantDataFromThatAccount(
+              userName: connectionUserName);
 
           DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
               .get();
 
           Map<String, dynamic> activityCollection =
-              documentSnapshot.data()['activity'] as Map;
+          documentSnapshot.data()['activity'] as Map;
           List<dynamic> currConnection = activityCollection[
-              FirebaseAuth.instance.currentUser.email.toString()];
+          FirebaseAuth.instance.currentUser.email.toString()];
 
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            activityText:
-                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime',
+            '$activityText+MediaTypes.Text':
+            '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor
+                .blue}+${selectedBGColor.opacity}+$fontSize+$_currTime',
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -159,8 +137,7 @@ class Management {
       return true;
   }
 
-  Future<bool> mediaActivityToStorageAndFireStore(
-      File imgFile,
+  Future<bool> mediaActivityToStorageAndFireStore(File imgFile,
       String manuallyText,
       List<String> allConnectionUserName,
       BuildContext context,
@@ -190,17 +167,17 @@ class Management {
 
         allConnectionUserName.forEach((String connectionUserName) async {
           String _userMail =
-              await localStorageHelper.extractImportantDataFromThatAccount(
-                  userName: connectionUserName);
+          await localStorageHelper.extractImportantDataFromThatAccount(
+              userName: connectionUserName);
 
           DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
               .get();
 
           Map<String, dynamic> activityCollection =
-              documentSnapshot.data()['activity'] as Map;
+          documentSnapshot.data()['activity'] as Map;
           List<dynamic> currConnection = activityCollection[
-              FirebaseAuth.instance.currentUser.email.toString()];
+          FirebaseAuth.instance.currentUser.email.toString()];
 
           if (currConnection == null) currConnection = [];
 
@@ -223,7 +200,8 @@ class Management {
         print("Image Activity Update Error: ${e.toString()}");
         showDialog(
             context: context,
-            builder: (_) => AlertDialog(
+            builder: (_) =>
+                AlertDialog(
                   title: Text("Upload Error in Other Account"),
                   content: Text(e.toString()),
                 ));
@@ -232,16 +210,30 @@ class Management {
     }
   }
 
-  Future<String> uploadMediaToStorage(
-      File filePath, BuildContext context) async {
+  Future<String> uploadMediaToStorage(File filePath,
+      BuildContext context) async {
     try {
       String downLoadUrl;
 
       final String fileName =
-          '${FirebaseAuth.instance.currentUser.uid}${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}${DateTime.now().millisecond}';
+          '${FirebaseAuth.instance.currentUser.uid}${DateTime
+          .now()
+          .day}${DateTime
+          .now()
+          .month}${DateTime
+          .now()
+          .year}${DateTime
+          .now()
+          .hour}${DateTime
+          .now()
+          .minute}${DateTime
+          .now()
+          .second}${DateTime
+          .now()
+          .millisecond}';
 
       final Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child(fileName);
+      FirebaseStorage.instance.ref().child(fileName);
 
       final UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
 
@@ -255,7 +247,8 @@ class Management {
     } catch (e) {
       showDialog(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (_) =>
+              AlertDialog(
                 title: Text("Image Upload Error"),
                 content: Text(e.toString()),
               ));
@@ -268,8 +261,8 @@ class Management {
     try {
       final String filePath = fileName
           .replaceAll(
-              'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o/',
-              '')
+          'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o/',
+          '')
           .split('?')[0];
 
       print('Deleted File: $filePath');
@@ -278,7 +271,8 @@ class Management {
         if (specialPurpose) await Firebase.initializeApp();
       } catch (e) {
         print(
-            'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
+            'Error in Storage Element Delete Firebase Initialization: ${e
+                .toString()}');
 
         print('Firebase Already Initialized');
       }
@@ -312,6 +306,59 @@ class Management {
     } catch (e) {
       print('\n Polling Add Error: ${e.toString()}');
       return null;
+    }
+  }
+
+  Future<void> addPollIdInLocalAndFireStore(
+      Map<String, dynamic> _pollMap) async {
+    try {
+      final String id = await addPollingToFireStore(_pollMap);
+
+      if (id != null) {
+        final String _currTime = DateTime.now().toString();
+
+        await localStorageHelper.insertDataInUserActivityTable(
+          tableName: this._currAccountUserName,
+          statusLinkOrString: id,
+          activityTime: _currTime,
+          activitySpecialOptions: ActivitySpecialOptions.Polling,
+        );
+
+        final DocumentSnapshot documentSnapshot = await FirebaseFirestore
+            .instance
+            .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+            .get();
+        final Map<String, dynamic> _connectionsMap =
+        documentSnapshot.data()['connections'];
+
+        _connectionsMap
+            .forEach((connectionUserName, connectionUserMessages) async {
+          final DocumentSnapshot documentSnapshot = await FirebaseFirestore
+              .instance
+              .doc('generation_users/$connectionUserName')
+              .get();
+          final Map<String, dynamic> activityCollection = documentSnapshot.data()['activity'];
+
+          List<dynamic> currConnection = activityCollection[
+          FirebaseAuth.instance.currentUser.email.toString()];
+
+          if (currConnection == null) currConnection = [];
+
+          currConnection.add({
+            '$id+ActivitySpecialOptions.Polling': _currTime,
+          });
+
+          activityCollection[FirebaseAuth.instance.currentUser.email.toString()] = currConnection;
+
+          await FirebaseFirestore.instance
+              .doc('generation_users/$connectionUserName')
+              .update({
+            'activity': activityCollection,
+          });
+        });
+      }
+    } catch (e) {
+      print('Add Poll in Local And FireStore Error: ${e.toString()}');
     }
   }
 }

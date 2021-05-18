@@ -29,6 +29,8 @@ class LocalStorageHelper {
   final String _colAccountUserName = 'User_Name';
   final String _colAccountUserMail = 'User_Mail';
 
+  final String _colActivitySpecial = 'ActivitySpecialOptions';
+
   final String _allRemainingLinksToDeleteFromFirebaseStorage =
       '__RemainingLinksToDelete__';
   final String _colLinks = 'New_Link';
@@ -158,7 +160,7 @@ class LocalStorageHelper {
     final Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE ${tableName}_status($_colActivity TEXT, $_colTimeActivity TEXT, $_colMediaType TEXT, $_colExtraText TEXT, $_colBgInformation TEXT)");
+          "CREATE TABLE ${tableName}_status($_colActivity TEXT, $_colTimeActivity TEXT, $_colMediaType TEXT, $_colExtraText TEXT, $_colBgInformation TEXT, $_colActivitySpecial TEXT)");
       return true;
     } catch (e) {
       print("Error in Local Storage Create Table For Status: ${e.toString()}");
@@ -170,8 +172,9 @@ class LocalStorageHelper {
   Future<void> insertDataInUserActivityTable(
       {@required String tableName,
       @required String statusLinkOrString,
-      @required MediaTypes mediaTypes,
+      MediaTypes mediaTypes,
       @required String activityTime,
+      ActivitySpecialOptions activitySpecialOptions,
       String extraText = '',
       String bgInformation = ''}) async {
     final Database db = await this.database;
@@ -179,9 +182,12 @@ class LocalStorageHelper {
 
     _activityStoreMap[_colActivity] = statusLinkOrString;
     _activityStoreMap[_colTimeActivity] = activityTime;
-    _activityStoreMap[_colMediaType] = mediaTypes.toString();
+    _activityStoreMap[_colMediaType] =
+        mediaTypes == null ? '' : mediaTypes.toString();
     _activityStoreMap[_colExtraText] = extraText;
     _activityStoreMap[_colBgInformation] = bgInformation;
+    _activityStoreMap[_colActivitySpecial] =
+        activitySpecialOptions == null ? '' : activitySpecialOptions.toString();
 
     /// Result Insert to DB
     await db.insert('${tableName}_status', _activityStoreMap);
@@ -402,36 +408,4 @@ class LocalStorageHelper {
       print('Remaining Links Deletion Exception: ${e.toString()}');
     }
   }
-
-// // Extract Connection Name from Table
-// Future<List<Map<String, Object>>> extractAllTablesName() async {
-//   Database db = await this.database; // DB Reference
-//   List<Map<String, Object>> tables = await db.rawQuery(
-//       "SELECT tbl_name FROM sqlite_master WHERE tbl_name != 'android_metadata';");
-//   return tables;
-// }
-
-// Stream<List<String>> extractTables() async* {
-//   Queue<String> allData = Queue<String>();
-//
-//   List<Map<String, Object>> allTables =
-//       await LocalStorageHelper().extractAllTablesName();
-//
-//   if (allTables.isNotEmpty) {
-//     allTables.forEach((element) {
-//       allData.addFirst(element.values.toList()[0].toString());
-//     });
-//   } else
-//     print("No Data Present");
-//
-//   yield allData.toList();
-// }
-
-// Stream<List<Map<String, Object>>> findOutTables() {
-//   Stream<List<Map<String, Object>>> take = LocalStorageHelper()
-//       .extractAllTablesName()
-//       .asStream()
-//       .asBroadcastStream();
-//   return take;
-// }
 }

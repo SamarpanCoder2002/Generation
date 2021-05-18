@@ -1,14 +1,18 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
+import 'package:polls/polls.dart';
 
 class ActivityView extends StatefulWidget {
   final String takeParticularConnectionUserName;
@@ -26,6 +30,12 @@ class _ActivityViewState extends State<ActivityView>
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  String _pollingQuestion;
+  final List<Map<String, int>> _pollingOptions = [];
+
+  Map<String, dynamic> _pollMapIndependent = Map<String, dynamic>();
+  int _totalConnectionsForPoll = 0;
 
   // Important Controller for Activity View
   //VideoPlayerController _videoController;
@@ -50,7 +60,11 @@ class _ActivityViewState extends State<ActivityView>
       } else
         _loadActivity(animateToPage: false);
     } else {
-      _loadActivity(animateToPage: false);
+      if (_currUserActivityCollection[activityPosition]['Media'] ==
+          MediaTypes.Text.toString())
+        _loadActivity(animateToPage: false);
+      else
+        _loadActivity(animateToPage: false, activityType: 'polling');
     }
   }
 
@@ -85,7 +99,7 @@ class _ActivityViewState extends State<ActivityView>
 
   @override
   void initState() {
-    // If Have Some Activity of Current User
+    /// If Have Some Activity of Current User
     if (widget.takeParticularConnectionUserName != null) {
       _collectCurrUserActivity();
 
@@ -177,9 +191,17 @@ class _ActivityViewState extends State<ActivityView>
                           activityItem['ExtraActivityText'])
                       : videoActivityView(activityMediaActivityFromLocal,
                           activityItem['ExtraActivityText']);
+                } else {
+                  String _activityType = activityItem['Media'];
+
+                  if (_activityType == MediaTypes.Text.toString())
+                    return textActivityView(activityItem['Bg_Information'],
+                        activityItem['Status']); // If Current Activity is TEXT
+                  else {
+                    extractPollMap(activityItem['Status']);
+                    return pollActivityView(activityItem['Status']);
+                  }
                 }
-                return textActivityView(activityItem['Bg_Information'],
-                    activityItem['Status']); // If Current Activity is not Media
               },
             ),
             Positioned(
@@ -415,7 +437,10 @@ class _ActivityViewState extends State<ActivityView>
         _animationController.forward();
       }
     } else {
-      _animationController.duration = Duration(seconds: 5);
+      if (activityType == 'polling')
+        _animationController.duration = Duration(seconds: 10);
+      else
+        _animationController.duration = Duration(seconds: 5);
       _animationController.forward();
     }
 
@@ -487,5 +512,94 @@ class _ActivityViewState extends State<ActivityView>
       }
     } else
       _animationController.forward();
+  }
+
+  Widget pollActivityView(String _pollId) {
+    return _pollingOptions != null && _pollingQuestion != null
+        ? Container(
+            width: double.maxFinite,
+            height: double.maxFinite,
+            child: Center(
+              child: Polls.castVote(
+                question: Text(
+                  _pollingQuestion,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                children: _pollingOptions
+                    .asMap()
+                    .map((mapIndex, e) {
+                      return MapEntry(
+                        mapIndex,
+                        Polls.options(
+                            title:
+                                _pollingOptions[mapIndex].keys.first.toString(),
+                            value:
+                                _pollingOptions[mapIndex].values.first.toInt() /
+                                    _totalConnectionsForPoll),
+                      );
+                    })
+                    .values
+                    .toList(),
+                onVote: (choice) {
+                  if (mounted) {
+                    setState(() {
+                      final int _previousVal =
+                          _pollingOptions[choice - 1].values.first.toInt();
+                      _pollingOptions[choice - 1] = {
+                        _pollingOptions[choice - 1].values.first.toString():
+                            _previousVal + 1
+                      };
+                    });
+                  }
+                },
+              ),
+            ),
+          )
+        : Center(child: Text('Loading'));
+  }
+
+  void extractPollMap(String _pollId) async {
+    if (mounted) {
+      setState(() {
+        _pollingOptions.clear();
+      });
+    }
+
+    final String _connectedUserEmail =
+        await _localStorageHelper.extractImportantDataFromThatAccount(
+            userName: widget.takeParticularConnectionUserName);
+
+    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .doc('polling_collection/$_pollId')
+        .get();
+
+    final DocumentSnapshot connectedUserDocumentSnapShot =
+        await FirebaseFirestore.instance
+            .doc('generation_users/$_connectedUserEmail')
+            .get();
+
+    print(documentSnapshot.data());
+
+    if (mounted) {
+      setState(() {
+        _pollMapIndependent = documentSnapshot.data();
+
+        _pollMapIndependent.forEach((key, value) {
+          if (key == 'question')
+            _pollingQuestion = value;
+          else
+            _pollingOptions.add({
+              key.toString().split('+')[1]: int.parse(value),
+            });
+        });
+
+        _pollMapIndependent.remove('question');
+
+        this._totalConnectionsForPoll =
+            int.parse(connectedUserDocumentSnapShot.get('total_connections'));
+      });
+    }
   }
 }

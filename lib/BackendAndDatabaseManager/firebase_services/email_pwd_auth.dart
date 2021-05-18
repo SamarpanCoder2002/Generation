@@ -236,6 +236,7 @@ class EmailAndPasswordAuth {
                                   'creation_time':
                                       "${DateFormat('hh:mm a').format(DateTime.now())}",
                                   'connections': {},
+                                  'total_connections': '0',
                                   'activity': {},
                                   'token': _getToken,
                                 });
