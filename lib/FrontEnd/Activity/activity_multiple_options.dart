@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 
 // ignore: must_be_immutable
@@ -18,6 +19,8 @@ class _PollMakerState extends State<PollMaker> {
   FToast _fToast = FToast();
 
   final GlobalKey<FormState> _pollFormKey = GlobalKey<FormState>();
+
+  final Management _management = Management();
 
   @override
   void initState() {
@@ -204,33 +207,14 @@ class _PollMakerState extends State<PollMaker> {
                                       _textEditingController[i],
                                   index: i),
                         SizedBox(
-                          height: 10.0,
+                          height: 15.0,
                         ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50.0),
-                                )),
-                            child: Text(
-                              "Save",
-                              style: TextStyle(
-                                  fontSize: 18.0, color: Colors.white),
-                            ),
-                            onPressed: () async {
-                              if (this._pollFormKey.currentState.validate()) {
-                                print('Validate');
-                                _textEditingController.forEach((element) {
-                                  print(
-                                      '\n${_textEditingController.indexOf(element)}: ${element.text}');
-                                });
-
-                                Navigator.pop(context);
-                              }
-                            },
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _pollingAlertDialogButtons(buttonName: 'Cancel'),
+                            _pollingAlertDialogButtons(buttonName: 'Save'),
+                          ],
                         )
                       ],
                     ),
@@ -238,6 +222,55 @@ class _PollMakerState extends State<PollMaker> {
                 ),
               ),
             ));
+  }
+
+  Widget _pollingAlertDialogButtons({@required String buttonName}) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+          primary: buttonName == 'Save' ? Colors.green : Colors.red,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50.0),
+          )),
+      child: Text(
+        buttonName,
+        style: TextStyle(fontSize: 18.0, color: Colors.white),
+      ),
+      onPressed: () async {
+        if (buttonName != 'Save') {
+          _textEditingController.forEach((element) {
+            element.clear();
+          });
+        } else {
+          if (this._pollFormKey.currentState.validate()) {
+            print('Validate');
+
+            final Map<String, dynamic> _pollMap = Map<String, dynamic>();
+
+            _textEditingController.forEach((pollElement) {
+              if (_textEditingController.indexOf(pollElement) == 0) {
+                _pollMap.addAll({
+                  'question': pollElement.text,
+                });
+              } else {
+                _pollMap.addAll({
+                  pollElement.text: '0',
+                });
+              }
+
+              pollElement.clear();
+            });
+
+            print('PollMap is: $_pollMap');
+
+            String id = await _management.addPollingToFireStore(_pollMap);
+
+            if (id != null) print('Document Id: $id');
+
+            Navigator.pop(context);
+          }
+        }
+      },
+    );
   }
 
   Widget answersSection(

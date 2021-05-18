@@ -165,7 +165,6 @@ class Management {
       List<String> allConnectionUserName,
       BuildContext context,
       {String mediaType = 'image'}) async {
-
     if (allConnectionUserName.isEmpty) {
       await localStorageHelper.insertDataInUserActivityTable(
         tableName: _currAccountUserName,
@@ -176,7 +175,6 @@ class Management {
       );
       return true;
     } else {
-
       try {
         final String imageUrl = await uploadMediaToStorage(imgFile, context);
 
@@ -301,6 +299,19 @@ class Management {
           .delete();
     } catch (e) {
       print('Delete Particular Activity Link Error: ${e.toString()}');
+    }
+  }
+
+  Future<String> addPollingToFireStore(Map<String, dynamic> map) async {
+    try {
+      final DocumentReference documentReference = await FirebaseFirestore
+          .instance
+          .collection('polling_collection')
+          .add(map);
+      return documentReference.id.toString();
+    } catch (e) {
+      print('\n Polling Add Error: ${e.toString()}');
+      return null;
     }
   }
 }
