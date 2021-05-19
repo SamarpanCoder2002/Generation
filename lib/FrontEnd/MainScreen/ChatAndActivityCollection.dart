@@ -209,12 +209,17 @@ class _ChatsAndActivityCollectionState
                 }
               }
             } else {
+              print('Special Babe: $everyActivity');
 
               /// Add Text Activity Data to Local Storage for future use
               await _localStorageHelper.insertDataInUserActivityTable(
                 tableName: _connectionUserNameFromLocalDatabase,
-                statusLinkOrString:
-                    everyActivity.keys.first.toString().split('+')[0],
+                statusLinkOrString: everyActivity.keys.first
+                            .toString()
+                            .split('+')[1] ==
+                        ActivitySpecialOptions.Polling.toString()
+                    ? '${everyActivity.keys.first.toString().split('+')[2]}${everyActivity.keys.first.toString().split('+')[0]}[[[question]]]${everyActivity.values.first.toString()}'
+                    : everyActivity.keys.first.toString().split('+')[0],
                 mediaTypes: everyActivity.keys.first.toString().split('+')[1] ==
                         MediaTypes.Text.toString()
                     ? MediaTypes.Text
@@ -228,7 +233,7 @@ class _ChatsAndActivityCollectionState
                     everyActivity.keys.first.toString().split('+')[1] ==
                             MediaTypes.Text.toString()
                         ? everyActivity.values.first.toString().split('+')[5]
-                        : everyActivity.values.first.toString(),
+                        : everyActivity.keys.first.toString().split('+')[3],
                 bgInformation: everyActivity.values.first.toString(),
               );
             }

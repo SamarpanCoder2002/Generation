@@ -72,7 +72,7 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
 
               Navigator.pop(context);
 
-              if (response) showToast("Activity Added", fToast);
+              if (response) showToast("Activity Added", fToast, toastGravity: ToastGravity.BOTTOM,);
 
               print("Activity Response: $response");
             }

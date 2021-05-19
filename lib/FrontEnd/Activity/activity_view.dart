@@ -1,18 +1,14 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
-import 'package:polls/polls.dart';
 
 class ActivityView extends StatefulWidget {
   final String takeParticularConnectionUserName;
@@ -31,11 +27,7 @@ class _ActivityViewState extends State<ActivityView>
 
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  String _pollingQuestion;
-  final List<Map<String, int>> _pollingOptions = [];
-
-  Map<String, dynamic> _pollMapIndependent = Map<String, dynamic>();
-  int _totalConnectionsForPoll = 0;
+  bool _pollBreak = false;
 
   // Important Controller for Activity View
   //VideoPlayerController _videoController;
@@ -198,8 +190,9 @@ class _ActivityViewState extends State<ActivityView>
                     return textActivityView(activityItem['Bg_Information'],
                         activityItem['Status']); // If Current Activity is TEXT
                   else {
-                    extractPollMap(activityItem['Status']);
-                    return pollActivityView(activityItem['Status']);
+                    print('Activity Item: $activityItem');
+                    return pollActivityView(activityItem['Status'],
+                        activityItem['Bg_Information'], i);
                   }
                 }
               },
@@ -514,92 +507,38 @@ class _ActivityViewState extends State<ActivityView>
       _animationController.forward();
   }
 
-  Widget pollActivityView(String _pollId) {
-    return _pollingOptions != null && _pollingQuestion != null
-        ? Container(
-            width: double.maxFinite,
-            height: double.maxFinite,
-            child: Center(
-              child: Polls.castVote(
-                question: Text(
-                  _pollingQuestion,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                children: _pollingOptions
-                    .asMap()
-                    .map((mapIndex, e) {
-                      return MapEntry(
-                        mapIndex,
-                        Polls.options(
-                            title:
-                                _pollingOptions[mapIndex].keys.first.toString(),
-                            value:
-                                _pollingOptions[mapIndex].values.first.toInt() /
-                                    _totalConnectionsForPoll),
-                      );
-                    })
-                    .values
-                    .toList(),
-                onVote: (choice) {
-                  if (mounted) {
-                    setState(() {
-                      final int _previousVal =
-                          _pollingOptions[choice - 1].values.first.toInt();
-                      _pollingOptions[choice - 1] = {
-                        _pollingOptions[choice - 1].values.first.toString():
-                            _previousVal + 1
-                      };
-                    });
-                  }
-                },
-              ),
-            ),
-          )
-        : Center(child: Text('Loading'));
-  }
-
-  void extractPollMap(String _pollId) async {
-    if (mounted) {
-      setState(() {
-        _pollingOptions.clear();
-      });
-    }
-
-    final String _connectedUserEmail =
-        await _localStorageHelper.extractImportantDataFromThatAccount(
-            userName: widget.takeParticularConnectionUserName);
-
-    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .doc('polling_collection/$_pollId')
-        .get();
-
-    final DocumentSnapshot connectedUserDocumentSnapShot =
-        await FirebaseFirestore.instance
-            .doc('generation_users/$_connectedUserEmail')
-            .get();
-
-    print(documentSnapshot.data());
-
-    if (mounted) {
-      setState(() {
-        _pollMapIndependent = documentSnapshot.data();
-
-        _pollMapIndependent.forEach((key, value) {
-          if (key == 'question')
-            _pollingQuestion = value;
-          else
-            _pollingOptions.add({
-              key.toString().split('+')[1]: int.parse(value),
-            });
-        });
-
-        _pollMapIndependent.remove('question');
-
-        this._totalConnectionsForPoll =
-            int.parse(connectedUserDocumentSnapShot.get('total_connections'));
-      });
-    }
+  Widget pollActivityView(String _pollActivity, String _answers, int index) {
+    return Container(
+      width: double.maxFinite,
+      height: double.maxFinite,
+      child: _pollBreak
+          ? Center(
+              child: Text('Sam'),
+              // Polls.castVote(
+              //   allowCreatorVote: true,
+              //   question: Text(
+              //     _pollActivity.split('[[[question]]]')[0],
+              //     style: TextStyle(
+              //       color: Colors.white,
+              //     ),
+              //   ),
+              //   children: _answers
+              //       .split('+')
+              //       .asMap()
+              //       .map((mapIndex, e) {
+              //         return MapEntry(
+              //           mapIndex,
+              //           Polls.options(
+              //               title: _answers.split('+')[mapIndex],
+              //               value: mapIndex.toDouble() / 10.0),
+              //         );
+              //       })
+              //       .values
+              //       .toList(),
+              //   onVote: (choice) {},
+              // ),
+            )
+          : Center(),
+    );
   }
 }

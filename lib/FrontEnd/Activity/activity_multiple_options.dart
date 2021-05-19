@@ -172,18 +172,16 @@ class _PollMakerState extends State<PollMaker> {
         builder: (_) => AlertDialog(
               elevation: 5.0,
               backgroundColor: const Color.fromRGBO(34, 48, 60, 0.6),
-              title: StatefulBuilder(builder: (context, setState) {
-                return Center(
-                  child: Text(
-                    'Make Your Pole',
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      fontFamily: 'Lora',
-                      letterSpacing: 1.0,
-                    ),
+              title: Center(
+                child: Text(
+                  'Make Your Pole',
+                  style: TextStyle(
+                    color: Colors.lightBlue,
+                    fontFamily: 'Lora',
+                    letterSpacing: 1.0,
                   ),
-                );
-              }),
+                ),
+              ),
               content: Container(
                 width: double.maxFinite,
                 height: MediaQuery.of(context).size.height / 2,
@@ -249,18 +247,19 @@ class _PollMakerState extends State<PollMaker> {
             _textEditingController.forEach((pollElement) {
               if (_textEditingController.indexOf(pollElement) == 0) {
                 _pollMap.addAll({
-                  'question': pollElement.text,
+                  'question': '${pollElement.text}[[[question]]]',
                 });
               } else {
                 _pollMap.addAll({
-                  '${_textEditingController.indexOf(pollElement)}+${pollElement.text}': '0',
+                  '${_textEditingController.indexOf(pollElement)}[[[@]]]${pollElement.text}':
+                      '0',
                 });
               }
 
               pollElement.clear();
             });
 
-            print('PollMap is: $_pollMap');
+            print('PollMapBenifit is: $_pollMap');
             await _management.addPollIdInLocalAndFireStore(_pollMap);
 
             Navigator.pop(context);
@@ -280,6 +279,8 @@ class _PollMakerState extends State<PollMaker> {
       validator: (inputUserName) {
         if (inputUserName.length > 0) return null;
         if (index == 0) return 'Please Add a Question';
+        if (inputUserName.contains('[[[@]]]'))
+          return "[[[@]]] can't be Accepted";
         return "Empty Option Can't be Accepted";
       },
       decoration: InputDecoration(

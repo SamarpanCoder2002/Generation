@@ -40,7 +40,6 @@ dependencies:
   flutter_local_notifications: ^5.0.0+4
   workmanager: ^0.4.0
   share: ^2.0.1
-  polls:
 
   circle_list:
   image_picker:
