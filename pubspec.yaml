@@ -59,7 +59,7 @@ dependencies:
   google_sign_in: ^5.0.1
   cloud_firestore: ^1.0.3
   firebase_storage: ^8.0.3
-  firebase_messaging: ^9.1.3
+  firebase_messaging:
 
   dio: any
 
