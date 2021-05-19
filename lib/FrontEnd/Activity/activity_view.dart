@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation_official/FrontEnd/Activity/activity_multiple_options.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
@@ -240,7 +243,7 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   Widget textActivityView(String activityItem, String activityText) {
-    List<String> colorAndFontValues = activityItem.split('+');
+    final List<String> colorAndFontValues = activityItem.split('+');
 
     final int r = int.parse(colorAndFontValues[0]);
     final int g = int.parse(colorAndFontValues[1]);
@@ -509,36 +512,100 @@ class _ActivityViewState extends State<ActivityView>
 
   Widget pollActivityView(String _pollActivity, String _answers, int index) {
     return Container(
+      color: Color.fromRGBO(34, 48, 60, 1),
       width: double.maxFinite,
       height: double.maxFinite,
-      child: _pollBreak
-          ? Center(
-              child: Text('Sam'),
-              // Polls.castVote(
-              //   allowCreatorVote: true,
-              //   question: Text(
-              //     _pollActivity.split('[[[question]]]')[0],
-              //     style: TextStyle(
-              //       color: Colors.white,
-              //     ),
-              //   ),
-              //   children: _answers
-              //       .split('+')
-              //       .asMap()
-              //       .map((mapIndex, e) {
-              //         return MapEntry(
-              //           mapIndex,
-              //           Polls.options(
-              //               title: _answers.split('+')[mapIndex],
-              //               value: mapIndex.toDouble() / 10.0),
-              //         );
-              //       })
-              //       .values
-              //       .toList(),
-              //   onVote: (choice) {},
-              // ),
-            )
-          : Center(),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).size.height * (1.5 / 4),
+        left: 10.0,
+        right: 10.0,
+      ),
+      child: Column(
+        children: [
+          Center(
+            child: Text(
+              _pollActivity.split('[[[question]]]')[0],
+              style: TextStyle(
+                color: Colors.lightBlue,
+                fontSize: 20.0,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 10.0,
+              right: 10.0,
+            ),
+            child: Column(
+              children: [
+                for (int i = 0;
+                    i <
+                        _pollActivity
+                            .split('[[[question]]]')[2]
+                            .split('+')
+                            .length;
+                    i++)
+                  pollBack(i, _pollActivity),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget pollBack(int index, String _pollActivity) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 15.0,
+        ),
+        GestureDetector(
+          onTap: (){
+            print('Poll Pressed');
+          },
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: [
+              LinearPercentIndicator(
+                linearGradient: LinearGradient(colors: [
+                  Colors.lightBlueAccent,
+                  Colors.lightBlue,
+                  Colors.blue,
+                ]),
+                percent: 0.0,
+                animation: true,
+                animationDuration: 1000,
+                lineHeight: 40.0,
+                curve: Curves.easeOutSine,
+                center: index == 1?Icon(Icons.done_outline_rounded, color: Colors.green,):null,
+              ),
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _pollActivity
+                      .split('[[[question]]]')[2]
+                      .split('+')[index]
+                      .split('[[[@]]]')[1],
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20.0,
+                  ),
+                ),
+              ),
+              Text(
+                ((index + 2) / 10.2) * 100 == (((index + 2) / 10.2) * 100).toInt()
+                    ? '${(((index + 2) / 10.2) * 100).toInt()}%'
+                    : '${double.parse((((index + 2) / 10.2) * 100).toStringAsFixed(1))}%',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

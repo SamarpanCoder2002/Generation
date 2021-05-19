@@ -790,7 +790,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         return true;
       },
       child: Scaffold(
-        backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+        backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
         appBar: AppBar(
           brightness: Brightness.dark,
           backgroundColor: const Color.fromRGBO(25, 39, 52, 1),

@@ -34,7 +34,7 @@ dependencies:
   animations: ^2.0.0
   flutter_colorpicker: ^0.4.0
   fluttertoast: ^8.0.4
-  percent_indicator: "^2.1.7+2"
+  percent_indicator: ^3.0.1
   just_audio: ^0.7.4
   photo_view: ^0.11.1
   flutter_local_notifications: ^5.0.0+4
