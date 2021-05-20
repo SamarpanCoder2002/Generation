@@ -597,7 +597,8 @@ class _ActivityViewState extends State<ActivityView>
 
                       if (mounted) {
                         setState(() {
-                          _pollOptionsPercentageList[index] += 1;
+                          print('Before Options: $_options');
+                          _options[index] += 1;
                           _pollOptionsPercentPredict(index);
                         });
                       }
@@ -608,7 +609,7 @@ class _ActivityViewState extends State<ActivityView>
                           .doc(
                               'polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
                           .update({
-                        index.toString(): _options[index] + 1,
+                        index.toString(): _options[index],
                       });
 
                       _animationController.forward();
@@ -673,6 +674,7 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   static void _pollOptionsPercentPredict(int index) {
+    print('After Options: $_options');
     _progressPercentProduction();
   }
 
@@ -696,7 +698,7 @@ class _ActivityViewState extends State<ActivityView>
 
   static void _progressPercentProduction() {
     double sum = 0.0;
-    _pollOptionsPercentageList.forEach((everyTraffic) {
+    _options.forEach((everyTraffic) {
       sum += everyTraffic;
     });
 
@@ -704,7 +706,7 @@ class _ActivityViewState extends State<ActivityView>
 
     for (int i = 0; i < _pollOptionsPercentageList.length; i++) {
       _pollOptionsPercentageList[i] =
-          sum == 0.0 ? 0 : (1 / sum) * _pollOptionsPercentageList[i];
+          sum == 0.0 ? 0 : (1 / sum) * _options[i];
     }
   }
 }
