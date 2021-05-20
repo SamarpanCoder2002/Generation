@@ -599,7 +599,8 @@ class _ActivityViewState extends State<ActivityView>
                         setState(() {
                           print('Before Options: $_options');
                           _options[index] += 1;
-                          _pollOptionsPercentPredict(index);
+                          print('After Options: $_options');
+                          _progressPercentProduction();
                         });
                       }
 
@@ -660,7 +661,9 @@ class _ActivityViewState extends State<ActivityView>
                         ),
                       ),
                       Text(
-                        '${(_pollOptionsPercentageList[index] * 100).toStringAsFixed(1)}%',
+                        _pollActionable
+                            ? '0.0%'
+                            : '${(_pollOptionsPercentageList[index] * 100).toStringAsFixed(1)}%',
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 20.0,
@@ -671,11 +674,6 @@ class _ActivityViewState extends State<ActivityView>
                 ),
               ],
             ));
-  }
-
-  static void _pollOptionsPercentPredict(int index) {
-    print('After Options: $_options');
-    _progressPercentProduction();
   }
 
   static void _pollOptionPercentValueUpdated(String _pollActivity) async {
@@ -692,8 +690,6 @@ class _ActivityViewState extends State<ActivityView>
     }
 
     _progressPercentProduction();
-
-    print('Poll Option List: ${_pollOptionsPercentageList}');
   }
 
   static void _progressPercentProduction() {
@@ -702,11 +698,8 @@ class _ActivityViewState extends State<ActivityView>
       sum += everyTraffic;
     });
 
-    print('Sum: $sum');
-
     for (int i = 0; i < _pollOptionsPercentageList.length; i++) {
-      _pollOptionsPercentageList[i] =
-          sum == 0.0 ? 0 : (1 / sum) * _options[i];
+      _pollOptionsPercentageList[i] = sum == 0.0 ? 0 : (1 / sum) * _options[i];
     }
   }
 }
