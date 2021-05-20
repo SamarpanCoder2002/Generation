@@ -27,12 +27,12 @@ class _ActivityViewState extends State<ActivityView>
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
-  bool _pollActionable = true;
-
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
   static List<double> _pollOptionsPercentageList = [];
   static List<dynamic> _options = [];
+
+  List<dynamic> _tempList = [];
 
   int _selectedPoll = -1;
 
@@ -117,6 +117,15 @@ class _ActivityViewState extends State<ActivityView>
             setState(() {
               if (_activityCurrIndex + 1 < _currUserActivityCollection.length) {
                 _activityCurrIndex += 1;
+
+                if (_tempList.isNotEmpty) {
+                  if (mounted) {
+                    setState(() {
+                      _tempList.clear();
+                    });
+                  }
+                }
+
                 _callLoader(activityPosition: _activityCurrIndex);
               } else {
                 /// Code For Debugging Purpose
@@ -211,8 +220,6 @@ class _ActivityViewState extends State<ActivityView>
                         i++) {
                       _pollOptionsPercentageList.add(0.0);
                     }
-
-                    _pollActionable = true;
 
                     _pollOptionPercentValueUpdated(activityItem['Status']);
 
@@ -476,10 +483,26 @@ class _ActivityViewState extends State<ActivityView>
         if (details.primaryVelocity > 0) {
           if (_activityCurrIndex - 1 >= 0) {
             _activityCurrIndex -= 1;
+
+            if (_tempList.isNotEmpty) {
+              if (mounted) {
+                setState(() {
+                  _tempList.clear();
+                });
+              }
+            }
           }
         } else {
           if (_activityCurrIndex + 1 < _currUserActivityCollection.length) {
             _activityCurrIndex += 1;
+
+            if (_tempList.isNotEmpty) {
+              if (mounted) {
+                setState(() {
+                  _tempList.clear();
+                });
+              }
+            }
           } else {
             Navigator.pop(context);
           }
@@ -533,52 +556,57 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   Widget _pollActivityView(String _pollActivity, String _answers, int index) {
-    return Container(
-      color: Color.fromRGBO(34, 48, 60, 1),
-      width: double.maxFinite,
-      height: double.maxFinite,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).size.height / 2.5,
-        left: 10.0,
-        right: 10.0,
-      ),
-      child: Column(
-        children: [
-          Center(
-            child: Text(
-              _pollActivity.split('[[[question]]]')[0],
-              style: TextStyle(
-                color: Colors.lightBlue,
-                fontSize: 20.0,
+    _progressPercentProduction();
+    return StatefulBuilder(
+        builder: (context, setStateIs) => Container(
+              color: Color.fromRGBO(34, 48, 60, 1),
+              width: double.maxFinite,
+              height: double.maxFinite,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 2.5,
+                left: 10.0,
+                right: 10.0,
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 10.0,
-              right: 10.0,
-            ),
-            child: Column(
-              children: [
-                for (int i = 0;
-                    i <
-                        _pollActivity
-                            .split('[[[question]]]')[2]
-                            .split('+')
-                            .length;
-                    i++)
-                  _pollBack(i, _pollActivity),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      _pollActivity.split('[[[question]]]')[0],
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 10.0,
+                      right: 10.0,
+                    ),
+                    child: Column(
+                      children: [
+                        for (int i = 0;
+                            i <
+                                _pollActivity
+                                    .split('[[[question]]]')[2]
+                                    .split('+')
+                                    .length;
+                            i++)
+                          StatefulBuilder(
+                              builder: (context, setStateIs) =>
+                                  _pollBack(i, _pollActivity)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ));
   }
 
   Widget _pollBack(int index, String _pollActivity) {
+    _progressPercentProduction();
     return StatefulBuilder(
-        builder: (context, setState) => Column(
+        builder: (context, state) => Column(
               children: [
                 SizedBox(
                   height: 15.0,
@@ -586,11 +614,14 @@ class _ActivityViewState extends State<ActivityView>
                 GestureDetector(
                   onTap: () async {
                     print('Poll Pressed');
-                    if (_pollActionable) {
+
+                    print('_pollActionable status: $_tempList');
+
+                    if (_tempList.isEmpty) {
                       if (mounted) {
                         setState(() {
                           _selectedPoll = index;
-                          _pollActionable = false;
+                          _tempList = _options;
                         });
                       }
                       print(_pollActivity.split('[[[question]]]')[1]);
@@ -600,11 +631,14 @@ class _ActivityViewState extends State<ActivityView>
                           print('Before Options: $_options');
                           _options[index] += 1;
                           print('After Options: $_options');
+
+                          print('Recheck: $_pollOptionsPercentageList');
+
                           _progressPercentProduction();
                         });
                       }
 
-                      print('Final: $_pollOptionsPercentageList}');
+                      print('Final: $_pollOptionsPercentageList');
 
                       await FirebaseFirestore.instance
                           .doc(
@@ -616,7 +650,9 @@ class _ActivityViewState extends State<ActivityView>
                       _animationController.forward();
 
                       print('Selected Poll: $_selectedPoll    $index');
-                    } else {}
+                    } else {
+                      print('Poll Close off');
+                    }
                   },
                   child: Stack(
                     alignment: Alignment.centerRight,
@@ -627,9 +663,7 @@ class _ActivityViewState extends State<ActivityView>
                           Colors.lightBlue,
                           Colors.blue,
                         ]),
-                        percent: _pollActionable
-                            ? 0.0
-                            : _pollOptionsPercentageList[index],
+                        percent: _tempList.isEmpty ? 0.0 : _getPercent(index),
                         animation: true,
                         animationDuration: 1000,
                         lineHeight: 40.0,
@@ -661,8 +695,8 @@ class _ActivityViewState extends State<ActivityView>
                         ),
                       ),
                       Text(
-                        _pollActionable
-                            ? '0.0%'
+                        _tempList.isEmpty
+                            ? '0.0'
                             : '${(_pollOptionsPercentageList[index] * 100).toStringAsFixed(1)}%',
                         style: TextStyle(
                           color: Colors.black,
@@ -699,7 +733,14 @@ class _ActivityViewState extends State<ActivityView>
     });
 
     for (int i = 0; i < _pollOptionsPercentageList.length; i++) {
-      _pollOptionsPercentageList[i] = sum == 0.0 ? 0 : (1 / sum) * _options[i];
+      _pollOptionsPercentageList[i] =
+          sum == 0.0 ? 0.0 : (1 / sum) * _options[i];
     }
+  }
+
+  static _getPercent(int index) {
+    print('Percentage is: ${_pollOptionsPercentageList[index]}');
+
+    return _pollOptionsPercentageList[index];
   }
 }
