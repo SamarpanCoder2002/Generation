@@ -42,6 +42,9 @@ class _ChatsAndActivityCollectionState
 
   String _thisAccountUserNameIs;
 
+  /// Recent Old Activity Take to Avoid Duplicate
+  Map<String, dynamic> _oldActivity = Map<String, dynamic>();
+
   /// For FireStore Management Purpose
   final Management _management = Management();
 
@@ -127,115 +130,121 @@ class _ChatsAndActivityCollectionState
           }
 
           particularConnectionActivity.forEach((everyActivity) async {
-            if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
-              final Directory directory = await getExternalStorageDirectory();
+            if (_oldActivity != everyActivity) {
+              _oldActivity = everyActivity;
+              if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
+                final Directory directory = await getExternalStorageDirectory();
 
-              final String currTime = DateTime.now().toString();
+                final String currTime = DateTime.now().toString();
 
-              if (everyActivity.values.first.toString().split('++++++')[1] ==
-                  'video') {
-                if (storagePermissionStatus.isGranted) {
-                  final activityVideoPath =
-                      await Directory(directory.path + '/.ActivityVideos/')
-                          .create();
+                if (everyActivity.values.first.toString().split('++++++')[1] ==
+                    'video') {
+                  if (storagePermissionStatus.isGranted) {
+                    final activityVideoPath =
+                        await Directory(directory.path + '/.ActivityVideos/')
+                            .create();
 
-                  await _dio
-                      .download(everyActivity.keys.first.toString(),
-                          '${activityVideoPath.path}$currTime.mp4')
-                      .whenComplete(() async {
-                    print('Video Download Complete');
-                    print(
-                        'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                  });
+                    await _dio
+                        .download(everyActivity.keys.first.toString(),
+                            '${activityVideoPath.path}$currTime.mp4')
+                        .whenComplete(() async {
+                      print('Video Download Complete');
+                      print(
+                          'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                    });
 
-                  /// Insert Video  Activity Data to the local database for future use
-                  await _localStorageHelper.insertDataInUserActivityTable(
-                    tableName: _connectionUserNameFromLocalDatabase,
-                    statusLinkOrString:
-                        '${activityVideoPath.path}$currTime.mp4',
-                    mediaTypes: MediaTypes.Video,
-                    activityTime: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[2],
-                    extraText: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[0],
-                  );
+                    /// Insert Video  Activity Data to the local database for future use
+                    await _localStorageHelper.insertDataInUserActivityTable(
+                      tableName: _connectionUserNameFromLocalDatabase,
+                      statusLinkOrString:
+                          '${activityVideoPath.path}$currTime.mp4',
+                      mediaTypes: MediaTypes.Video,
+                      activityTime: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[2],
+                      extraText: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[0],
+                    );
 
-                  // /// Delete Record From FireStore
-                  // await _management.deleteParticularActivityLink(fileName: everyActivity, connectionMail: connectionMail);
+                    // /// Delete Record From FireStore
+                    // await _management.deleteParticularActivityLink(fileName: everyActivity, connectionMail: connectionMail);
+                  } else {
+                    print('Storage Permission Denied');
+                  }
                 } else {
-                  print('Storage Permission Denied');
+                  if (storagePermissionStatus.isGranted) {
+                    /// Create new Hidden Folder once in desired location
+                    final activityImagePath =
+                        await Directory('${directory.path}/.ActivityImages/')
+                            .create();
+
+                    /// Download Image Activity from Firebase Storage and store in local database
+                    await _dio
+                        .download(everyActivity.keys.first.toString(),
+                            '${activityImagePath.path}$currTime.jpg')
+                        .whenComplete(() async {
+                      print('Image Download Complete');
+                      // await _management.deleteFilesFromFirebaseStorage(
+                      //     everyActivity.keys.first.toString());
+
+                      print(
+                          'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                    });
+
+                    /// Add Activity Image Data to Local Storage for Future use
+                    await _localStorageHelper.insertDataInUserActivityTable(
+                      tableName: _connectionUserNameFromLocalDatabase,
+                      statusLinkOrString:
+                          '${activityImagePath.path}$currTime.jpg',
+                      mediaTypes: MediaTypes.Image,
+                      activityTime: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[2],
+                      extraText: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[0],
+                    );
+
+                    // /// Delete Record From FireStore
+                    // await _management.deleteParticularActivityLink(fileName: everyActivity.keys.first, connectionMail: connectionMail);
+                  } else {
+                    print('Permission Denied');
+                    //storagePermissionStatus = await Permission.storage.request();
+                  }
                 }
               } else {
-                if (storagePermissionStatus.isGranted) {
-                  /// Create new Hidden Folder once in desired location
-                  final activityImagePath =
-                      await Directory('${directory.path}/.ActivityImages/')
-                          .create();
+                print('Special Babe: $everyActivity');
 
-                  /// Download Image Activity from Firebase Storage and store in local database
-                  await _dio
-                      .download(everyActivity.keys.first.toString(),
-                          '${activityImagePath.path}$currTime.jpg')
-                      .whenComplete(() async {
-                    print('Image Download Complete');
-                    // await _management.deleteFilesFromFirebaseStorage(
-                    //     everyActivity.keys.first.toString());
-
-                    print(
-                        'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                  });
-
-                  /// Add Activity Image Data to Local Storage for Future use
-                  await _localStorageHelper.insertDataInUserActivityTable(
-                    tableName: _connectionUserNameFromLocalDatabase,
-                    statusLinkOrString:
-                        '${activityImagePath.path}$currTime.jpg',
-                    mediaTypes: MediaTypes.Image,
-                    activityTime: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[2],
-                    extraText: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[0],
-                  );
-
-                  // /// Delete Record From FireStore
-                  // await _management.deleteParticularActivityLink(fileName: everyActivity.keys.first, connectionMail: connectionMail);
-                } else {
-                  print('Permission Denied');
-                  //storagePermissionStatus = await Permission.storage.request();
-                }
+                /// Add Text Activity Data to Local Storage for future use
+                await _localStorageHelper.insertDataInUserActivityTable(
+                  tableName: _connectionUserNameFromLocalDatabase,
+                  statusLinkOrString: everyActivity.keys.first
+                              .toString()
+                              .split('+')[1] ==
+                          ActivitySpecialOptions.Polling.toString()
+                      ? '${everyActivity.keys.first.toString().split('+')[2]}${everyActivity.keys.first.toString().split('+')[0]}[[[question]]]${everyActivity.values.first.toString()}'
+                      : everyActivity.keys.first.toString().split('+')[0],
+                  mediaTypes:
+                      everyActivity.keys.first.toString().split('+')[1] ==
+                              MediaTypes.Text.toString()
+                          ? MediaTypes.Text
+                          : null,
+                  activitySpecialOptions:
+                      everyActivity.keys.first.toString().split('+')[1] ==
+                              ActivitySpecialOptions.Polling.toString()
+                          ? ActivitySpecialOptions.Polling
+                          : null,
+                  activityTime:
+                      everyActivity.keys.first.toString().split('+')[1] ==
+                              MediaTypes.Text.toString()
+                          ? everyActivity.values.first.toString().split('+')[5]
+                          : everyActivity.keys.first.toString().split('+')[3],
+                  bgInformation: everyActivity.values.first.toString(),
+                );
               }
             } else {
-              print('Special Babe: $everyActivity');
-
-              /// Add Text Activity Data to Local Storage for future use
-              await _localStorageHelper.insertDataInUserActivityTable(
-                tableName: _connectionUserNameFromLocalDatabase,
-                statusLinkOrString: everyActivity.keys.first
-                            .toString()
-                            .split('+')[1] ==
-                        ActivitySpecialOptions.Polling.toString()
-                    ? '${everyActivity.keys.first.toString().split('+')[2]}${everyActivity.keys.first.toString().split('+')[0]}[[[question]]]${everyActivity.values.first.toString()}'
-                    : everyActivity.keys.first.toString().split('+')[0],
-                mediaTypes: everyActivity.keys.first.toString().split('+')[1] ==
-                        MediaTypes.Text.toString()
-                    ? MediaTypes.Text
-                    : null,
-                activitySpecialOptions:
-                    everyActivity.keys.first.toString().split('+')[1] ==
-                            ActivitySpecialOptions.Polling.toString()
-                        ? ActivitySpecialOptions.Polling
-                        : null,
-                activityTime:
-                    everyActivity.keys.first.toString().split('+')[1] ==
-                            MediaTypes.Text.toString()
-                        ? everyActivity.values.first.toString().split('+')[5]
-                        : everyActivity.keys.first.toString().split('+')[3],
-                bgInformation: everyActivity.values.first.toString(),
-              );
+              print('Activity Repeat');
             }
           });
         }
@@ -681,7 +690,8 @@ class _ChatsAndActivityCollectionState
                     _localStorageHelper
                         .fetchLatestMessage(_userName)
                         .then((Map<String, String> takeLocalData) {
-                      if (takeLocalData.values.toString().split('+')[0] != '') {
+                      if (takeLocalData != null &&
+                          takeLocalData.values.toString().split('+')[0] != '') {
                         _allConnectionsLatestMessage[_userName].clear();
                         if (mounted) {
                           setState(() {

@@ -292,10 +292,10 @@ class Management {
     }
   }
 
-  Future<void> addPollIdInLocalAndFireStore(
-      Map<String, dynamic> _pollMap) async {
+  Future<void> addPollIdInLocalAndFireStore(Map<String, dynamic> _pollMap,
+      Map<String, dynamic> _pollMapPollOptions) async {
     try {
-      final String id = await addPollingToFireStore(_pollMap);
+      final String id = await addPollingToFireStore(_pollMapPollOptions);
 
       if (id != null) {
         final String _currTime = DateTime.now().toString();
@@ -326,11 +326,9 @@ class Management {
           print('PollMapTake is: $_pollMap');
 
           _pollMap.forEach((key, value) {
-
             print('key is: $key');
 
             if (key != 'question') {
-
               if (_answerCollection == '')
                 _answerCollection = key.toString();
               else
@@ -350,7 +348,8 @@ class Management {
 
           await localStorageHelper.insertDataInUserActivityTable(
             tableName: this._currAccountUserName,
-            statusLinkOrString: '${_pollMap['question'].toString()}+$id[[[question]]]$_answerCollection',
+            statusLinkOrString:
+                '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection',
             activityTime: _currTime,
             activitySpecialOptions: ActivitySpecialOptions.Polling,
           );

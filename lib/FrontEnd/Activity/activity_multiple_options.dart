@@ -143,9 +143,18 @@ class _PollMakerState extends State<PollMaker> {
         onTap: () {
           if (mounted) {
             setState(() {
-              if (iconData == Icons.add)
+              if (iconData == Icons.add) {
+                if(argument < 6)
                 argument += 1;
-              else if (iconData == Entypo.minus && argument > 2) {
+                else{
+                  showToast(
+                    'Maximum 6 Options are Supported',
+                    _fToast,
+                    fontSize: 16.0,
+                    seconds: 3,
+                  );
+                }
+              } else if (iconData == Entypo.minus && argument > 2) {
                 argument -= 1;
               } else {
                 showToast(
@@ -242,25 +251,30 @@ class _PollMakerState extends State<PollMaker> {
           if (this._pollFormKey.currentState.validate()) {
             print('Validate');
 
-            final Map<String, dynamic> _pollMap = Map<String, dynamic>();
+            final Map<String, dynamic> _pollMapGenUsers = Map<String, dynamic>();
+            final Map<String, dynamic> _pollMapPollOptions = Map<String,dynamic>();
 
             _textEditingController.forEach((pollElement) {
               if (_textEditingController.indexOf(pollElement) == 0) {
-                _pollMap.addAll({
+                _pollMapGenUsers.addAll({
                   'question': '${pollElement.text}[[[question]]]',
                 });
               } else {
-                _pollMap.addAll({
+                _pollMapGenUsers.addAll({
                   '${_textEditingController.indexOf(pollElement)}[[[@]]]${pollElement.text}':
                       '0',
+                });
+
+                _pollMapPollOptions.addAll({
+                  (_textEditingController.indexOf(pollElement)-1).toString(): 0,
                 });
               }
 
               pollElement.clear();
             });
 
-            print('PollMapBenifit is: $_pollMap');
-            await _management.addPollIdInLocalAndFireStore(_pollMap);
+            print('PollMapBenifit is: $_pollMapGenUsers');
+            await _management.addPollIdInLocalAndFireStore(_pollMapGenUsers, _pollMapPollOptions);
 
             Navigator.pop(context);
           }

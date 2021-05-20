@@ -1,11 +1,10 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation_official/FrontEnd/Activity/activity_multiple_options.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -28,9 +27,14 @@ class _ActivityViewState extends State<ActivityView>
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
 
+  bool _pollActionable = true;
+
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  bool _pollBreak = false;
+  static List<double> _pollOptionsPercentageList = [];
+  static List<dynamic> _options = [];
+
+  int _selectedPoll = -1;
 
   // Important Controller for Activity View
   //VideoPlayerController _videoController;
@@ -193,8 +197,26 @@ class _ActivityViewState extends State<ActivityView>
                     return textActivityView(activityItem['Bg_Information'],
                         activityItem['Status']); // If Current Activity is TEXT
                   else {
-                    print('Activity Item: $activityItem');
-                    return pollActivityView(activityItem['Status'],
+                    if (_pollOptionsPercentageList.isNotEmpty)
+                      _pollOptionsPercentageList.clear();
+
+                    _selectedPoll = -1;
+
+                    for (int i = 0;
+                        i <
+                            activityItem['Status']
+                                .split('[[[question]]]')[2]
+                                .split('+')
+                                .length;
+                        i++) {
+                      _pollOptionsPercentageList.add(0.0);
+                    }
+
+                    _pollActionable = true;
+
+                    _pollOptionPercentValueUpdated(activityItem['Status']);
+
+                    return _pollActivityView(activityItem['Status'],
                         activityItem['Bg_Information'], i);
                   }
                 }
@@ -510,13 +532,13 @@ class _ActivityViewState extends State<ActivityView>
       _animationController.forward();
   }
 
-  Widget pollActivityView(String _pollActivity, String _answers, int index) {
+  Widget _pollActivityView(String _pollActivity, String _answers, int index) {
     return Container(
       color: Color.fromRGBO(34, 48, 60, 1),
       width: double.maxFinite,
       height: double.maxFinite,
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).size.height * (1.5 / 4),
+        top: MediaQuery.of(context).size.height / 2.5,
         left: 10.0,
         right: 10.0,
       ),
@@ -545,7 +567,7 @@ class _ActivityViewState extends State<ActivityView>
                             .split('+')
                             .length;
                     i++)
-                  pollBack(i, _pollActivity),
+                  _pollBack(i, _pollActivity),
               ],
             ),
           ),
@@ -554,58 +576,135 @@ class _ActivityViewState extends State<ActivityView>
     );
   }
 
-  Widget pollBack(int index, String _pollActivity) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 15.0,
-        ),
-        GestureDetector(
-          onTap: (){
-            print('Poll Pressed');
-          },
-          child: Stack(
-            alignment: Alignment.centerRight,
-            children: [
-              LinearPercentIndicator(
-                linearGradient: LinearGradient(colors: [
-                  Colors.lightBlueAccent,
-                  Colors.lightBlue,
-                  Colors.blue,
-                ]),
-                percent: 0.0,
-                animation: true,
-                animationDuration: 1000,
-                lineHeight: 40.0,
-                curve: Curves.easeOutSine,
-                center: index == 1?Icon(Icons.done_outline_rounded, color: Colors.green,):null,
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  _pollActivity
-                      .split('[[[question]]]')[2]
-                      .split('+')[index]
-                      .split('[[[@]]]')[1],
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20.0,
+  Widget _pollBack(int index, String _pollActivity) {
+    return StatefulBuilder(
+        builder: (context, setState) => Column(
+              children: [
+                SizedBox(
+                  height: 15.0,
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    print('Poll Pressed');
+                    if (_pollActionable) {
+                      if (mounted) {
+                        setState(() {
+                          _selectedPoll = index;
+                          _pollActionable = false;
+                        });
+                      }
+                      print(_pollActivity.split('[[[question]]]')[1]);
+
+                      if (mounted) {
+                        setState(() {
+                          _pollOptionsPercentageList[index] += 1;
+                          _pollOptionsPercentPredict(index);
+                        });
+                      }
+
+                      print('Final: $_pollOptionsPercentageList}');
+
+                      await FirebaseFirestore.instance
+                          .doc(
+                              'polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
+                          .update({
+                        index.toString(): _options[index] + 1,
+                      });
+
+                      _animationController.forward();
+
+                      print('Selected Poll: $_selectedPoll    $index');
+                    } else {}
+                  },
+                  child: Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      LinearPercentIndicator(
+                        linearGradient: LinearGradient(colors: [
+                          Colors.lightBlueAccent,
+                          Colors.lightBlue,
+                          Colors.blue,
+                        ]),
+                        percent: _pollActionable
+                            ? 0.0
+                            : _pollOptionsPercentageList[index],
+                        animation: true,
+                        animationDuration: 1000,
+                        lineHeight: 40.0,
+                        curve: Curves.easeOutSine,
+                      ),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Text(
+                              _pollActivity
+                                  .split('[[[question]]]')[2]
+                                  .split('+')[index]
+                                  .split('[[[@]]]')[1],
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20.0,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            if (index == _selectedPoll)
+                              Icon(
+                                Icons.done_outline_rounded,
+                                color: Colors.amber,
+                              ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '${(_pollOptionsPercentageList[index] * 100).toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20.0,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Text(
-                ((index + 2) / 10.2) * 100 == (((index + 2) / 10.2) * 100).toInt()
-                    ? '${(((index + 2) / 10.2) * 100).toInt()}%'
-                    : '${double.parse((((index + 2) / 10.2) * 100).toStringAsFixed(1))}%',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+              ],
+            ));
+  }
+
+  static void _pollOptionsPercentPredict(int index) {
+    _progressPercentProduction();
+  }
+
+  static void _pollOptionPercentValueUpdated(String _pollActivity) async {
+    final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+        .doc('polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
+        .get();
+
+    print(documentSnapShot.data());
+
+    _options = documentSnapShot.data().values.toList();
+
+    for (int i = 0; i < _pollOptionsPercentageList.length; i++) {
+      _pollOptionsPercentageList[i] = _options[i].toDouble();
+    }
+
+    _progressPercentProduction();
+
+    print('Poll Option List: ${_pollOptionsPercentageList}');
+  }
+
+  static void _progressPercentProduction() {
+    double sum = 0.0;
+    _pollOptionsPercentageList.forEach((everyTraffic) {
+      sum += everyTraffic;
+    });
+
+    print('Sum: $sum');
+
+    for (int i = 0; i < _pollOptionsPercentageList.length; i++) {
+      _pollOptionsPercentageList[i] =
+          sum == 0.0 ? 0 : (1 / sum) * _pollOptionsPercentageList[i];
+    }
   }
 }
