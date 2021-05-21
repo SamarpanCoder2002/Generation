@@ -1,4 +1,4 @@
-# generation
+# Generation
 
 A new Flutter application.
 
