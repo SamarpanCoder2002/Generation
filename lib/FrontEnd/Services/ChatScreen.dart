@@ -609,7 +609,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         _newDirectory = await Directory('${directory.path}/Videos/')
             .create(); // Create New Folder about the desire location
 
-      print('New Directory: ${_newDirectory.path}');
+      print('New Directory: ${_newDirectory.path}    $everyMessage');
 
       final String currTime =
           DateTime.now().toString().split(' ').join('_'); // Current Time Take
@@ -635,21 +635,30 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             'In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
         if (_incomingInformationContainer.length < 4)
           await _management.deleteFilesFromFirebaseStorage(
-              everyMessage.keys.first.toString());
+              _incomingInformationContainer[1] != MediaTypes.Video.toString()
+                  ? everyMessage.keys.first.toString()
+                  : everyMessage.keys.first.toString().split('+')[0]);
 
         if (_incomingInformationContainer[1] == MediaTypes.Video.toString()) {
           print("Video Path: ${_newDirectory.path}$currTime.mp4'");
 
-          await _dio
-              .download(
-            everyMessage.keys.first.toString().split('+')[1],
-            '${_thumbNailDir.path}$currTime.jpg',
-          )
-              .whenComplete(() async {
-            if (_incomingInformationContainer.length < 4)
-              await _management.deleteFilesFromFirebaseStorage(
-                  everyMessage.keys.first.toString().split('+')[1]);
-          });
+          try {
+            print(
+                'Thumbnail Url is: ${everyMessage.keys.first.toString().split('+')[1]}');
+
+            await _dio
+                .download(
+              everyMessage.keys.first.toString().split('+')[1],
+              '${_thumbNailDir.path}$currTime.jpg',
+            )
+                .whenComplete(() async {
+              if (_incomingInformationContainer.length < 4)
+                await _management.deleteFilesFromFirebaseStorage(
+                    everyMessage.keys.first.toString().split('+')[1]);
+            });
+          } catch (e) {
+            print('Dio Video Thumbnail DownloadException: ${e.toString()} ');
+          }
 
           print('ThumbNail Path: $thumbNailPicturePath');
         }
@@ -3062,7 +3071,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               });
             }
 
-            try{
+            try {
               showToast(
                 'Message Deleted Successfully',
                 fToast,
@@ -3070,13 +3079,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 toastColor: Colors.amber,
                 toastGravity: ToastGravity.CENTER,
               );
-            }catch(e){
+            } catch (e) {
               print('Context Matching Unexpected Error: ${e.toString()}');
             }
           } else {
             Navigator.pop(context);
 
-            try{
+            try {
               showToast(
                 'Chat Message Delete Error',
                 fToast,
@@ -3084,10 +3093,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 fontSize: 16.0,
                 toastGravity: ToastGravity.CENTER,
               );
-            }catch(e){
+            } catch (e) {
               print('Context Matching Unexpected Error: ${e.toString()}');
             }
-
           }
         }
       },
