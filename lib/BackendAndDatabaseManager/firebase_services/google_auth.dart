@@ -6,10 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 
 class GoogleAuth {
+  /// Regular Expression
+  final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
+
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
   TextEditingController _userName = TextEditingController();
   TextEditingController _about = TextEditingController();
@@ -137,6 +140,8 @@ class GoogleAuth {
                             return "Space and '@' Not Allowed...User '_' instead of space";
                           else if (inputUserName.contains('__'))
                             return "'__' Not Allowed...User '_' instead of '__'";
+                          else if (!_messageRegex.hasMatch(inputUserName))
+                            return "Sorry,Only Emoji Not Supported";
                           return null;
                         },
                         decoration: InputDecoration(
@@ -232,7 +237,8 @@ class GoogleAuth {
                                     .createTableForUserActivity(
                                         this._userName.text);
 
-                                await _localStorageHelper.createTableForRemainingLinks();
+                                await _localStorageHelper
+                                    .createTableForRemainingLinks();
 
                                 print("Log-In Successful: User Name: $_email");
 

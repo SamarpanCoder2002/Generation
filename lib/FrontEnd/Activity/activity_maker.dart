@@ -6,11 +6,11 @@ import 'package:circle_list/radial_drag_gesture_detector.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:generation_official/FrontEnd/Activity/activity_multiple_options.dart';
+import 'package:generation/FrontEnd/Activity/activity_multiple_options.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:generation_official/FrontEnd/Activity/status_text_container.dart';
-import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation/FrontEnd/Activity/status_text_container.dart';
+import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 
 
 activityList(

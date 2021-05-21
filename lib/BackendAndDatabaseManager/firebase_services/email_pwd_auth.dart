@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/Auth_UI/log_in_UI.dart';
-import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
+import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 
 class EmailAndPasswordAuth {
   String _email, _pwd;
   BuildContext _context;
+
+  /// Regular Expression
+  final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
@@ -161,6 +164,8 @@ class EmailAndPasswordAuth {
                             return "Space and '@' Not Allowed...User '_' instead of space";
                           else if (inputUserName.contains('__'))
                             return "'__' Not Allowed...User '_' instead of '__'";
+                          else if (!_messageRegex.hasMatch(inputUserName))
+                            return "Sorry,Only Emoji Not Supported";
                           return null;
                         },
                         decoration: InputDecoration(
@@ -256,7 +261,8 @@ class EmailAndPasswordAuth {
                                     .createTableForUserActivity(
                                         this._userName.text);
 
-                                await _localStorageHelper.createTableForRemainingLinks();
+                                await _localStorageHelper
+                                    .createTableForRemainingLinks();
 
                                 print("Log-In Successful: User Name: $_email");
 

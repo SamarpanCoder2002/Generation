@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'package:generation_official/FrontEnd/MainScreen/MainWindow.dart';
-import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
-import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

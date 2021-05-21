@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
 
 class LocalStorageHelper {
   // Database Columns
@@ -221,6 +221,23 @@ class LocalStorageHelper {
       print('Deletion Result: $result');
     } catch (e) {
       print('Delete Activity From Database Error: ${e.toString()}');
+    }
+  }
+
+  /// Update Particular Activity
+  Future<void> updateTableActivity(
+      {@required String tableName,
+      @required String oldActivity,
+      @required String newAddition}) async {
+    try {
+      final Database db = await this.database;
+
+      final int _updateResult = await db.rawUpdate(
+          "UPDATE ${tableName}_status SET $_colActivity = '$oldActivity[[[question]]]$newAddition' WHERE $_colActivity = '$oldActivity'");
+
+      print('Update Result is: $_updateResult');
+    } catch (e) {
+      print('Update Table Activity Error: ${e.toString()}');
     }
   }
 

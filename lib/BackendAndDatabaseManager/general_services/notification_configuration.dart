@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-import 'package:generation_official/main.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/main.dart';
 import 'package:http/http.dart';
 
 import 'package:flutter/material.dart';
@@ -85,7 +85,7 @@ class SendNotification {
       print('Send');
 
       final String _serverKey =
-          'AAAAhYAupkM:APA91bENB9fuZLd3VKNaDLMordtXDJAggph3pp4SJRnJBQs8ZOodjS05url3ef0AILjoI2FE6qf3xImVGrfjymZX2jIBXN1QqBXLRt_VVG7wnduCtw8ntbHBTHT133_gy7weQ5eNMhk0';
+          'AAAAq0K_fTE:APA91bGZYVVXCwF26L5cqkmh1F9_b4Z4mfs2GTx66-GHI8hXpEFY4IUluTCQyXxdk_ARYLjT9z540KvMxZ4itcBMax3COu2s5FxJuv95fWJQc2tfPspUp7oWY4annwhCH58_xAHrIElI';
 
       final Response response = await post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),

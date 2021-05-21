@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 
-import 'package:generation_official/FrontEnd/Auth_UI/log_in_UI.dart';
+import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class SignUpAuthentication extends StatefulWidget {

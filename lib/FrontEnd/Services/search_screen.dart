@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
 class Search extends StatefulWidget {
   @override

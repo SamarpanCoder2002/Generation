@@ -1,6 +1,6 @@
-# generation_official
+# generation
 
-What You Seek is Seeking You
+A new Flutter application.
 
 ## Getting Started
 

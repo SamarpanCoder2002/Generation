@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 
 // ignore: must_be_immutable
 class PollMaker extends StatefulWidget {

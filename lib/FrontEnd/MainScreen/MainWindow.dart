@@ -5,15 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/Services/multiple_message_send_connection_selection.dart';
-import 'package:generation_official/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
-import 'package:generation_official/FrontEnd/MainScreen/general_applications_section.dart';
-import 'package:generation_official/FrontEnd/MainScreen/LogsCollection.dart';
-import 'package:generation_official/FrontEnd/MenuScreen/ProfileScreen.dart';
-import 'package:generation_official/FrontEnd/MenuScreen/SettingsMenu.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
+import 'package:generation/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
+import 'package:generation/FrontEnd/MainScreen/general_applications_section.dart';
+import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
+import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
+import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 

@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/Activity/animation_controller.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {
   final String takeParticularConnectionUserName;
@@ -221,7 +222,11 @@ class _ActivityViewState extends State<ActivityView>
                       _pollOptionsPercentageList.add(0.0);
                     }
 
+                    print('Activity Item Status: ${activityItem['Status']}');
+
                     _pollOptionPercentValueUpdated(activityItem['Status']);
+
+                    print('Special: $_tempList');
 
                     return _pollActivityView(activityItem['Status'],
                         activityItem['Bg_Information'], i);
@@ -563,12 +568,32 @@ class _ActivityViewState extends State<ActivityView>
               width: double.maxFinite,
               height: double.maxFinite,
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height / 2.5,
+                top: MediaQuery.of(context).size.height / 3,
                 left: 10.0,
                 right: 10.0,
               ),
               child: Column(
                 children: [
+                  Container(
+                    alignment: Alignment.topCenter,
+                    child: IconButton(
+                      icon: Icon(Icons.refresh_rounded, size: 40.0, color: Colors.green,),
+                      onPressed: (){
+                        if (_pollActivity
+                            .toString()
+                            .split('[[[question]]]')
+                            .length >=
+                            4) {
+                          if (mounted) {
+                            setState(() {
+                              _tempList.add('Completed');
+                            });
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 30.0,),
                   Center(
                     child: Text(
                       _pollActivity.split('[[[question]]]')[0],
@@ -617,12 +642,26 @@ class _ActivityViewState extends State<ActivityView>
 
                     print('_pollActionable status: $_tempList');
 
+                    if (_pollActivity
+                            .toString()
+                            .split('[[[question]]]')
+                            .length >=
+                        4) {
+                      if (mounted) {
+                        setState(() {
+                          _tempList.add('Completed');
+                        });
+                      }
+                    }
+
                     if (_tempList.isEmpty) {
                       if (mounted) {
                         setState(() {
                           _selectedPoll = index;
                           _tempList = _options;
                         });
+
+                        print('Selected Poll: $_selectedPoll    $index');
                       }
                       print(_pollActivity.split('[[[question]]]')[1]);
 
@@ -640,6 +679,11 @@ class _ActivityViewState extends State<ActivityView>
 
                       print('Final: $_pollOptionsPercentageList');
 
+                      await _localStorageHelper.updateTableActivity(
+                          tableName: widget.takeParticularConnectionUserName,
+                          oldActivity: _pollActivity,
+                          newAddition: '$index');
+
                       await FirebaseFirestore.instance
                           .doc(
                               'polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
@@ -648,8 +692,6 @@ class _ActivityViewState extends State<ActivityView>
                       });
 
                       _animationController.forward();
-
-                      print('Selected Poll: $_selectedPoll    $index');
                     } else {
                       print('Poll Close off');
                     }

@@ -15,13 +15,13 @@ import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation_official/BackendAndDatabaseManager/general_services/notification_configuration.dart';
-import 'package:generation_official/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -36,10 +36,10 @@ import 'package:thumbnails/thumbnails.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:swipe_to/swipe_to.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/Services/multiple_message_send_connection_selection.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {

@@ -8,19 +8,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation_official/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation_official/FrontEnd/Activity/activity_maker.dart';
-import 'package:generation_official/FrontEnd/Services/search_screen.dart';
-import 'package:generation_official/FrontEnd/Activity/activity_view.dart';
-import 'package:generation_official/FrontEnd/Services/ChatScreen.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/FrontEnd/Activity/activity_maker.dart';
+import 'package:generation/FrontEnd/Services/search_screen.dart';
+import 'package:generation/FrontEnd/Activity/activity_view.dart';
+import 'package:generation/FrontEnd/Services/ChatScreen.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class ChatsAndActivityCollection extends StatefulWidget {
   @override

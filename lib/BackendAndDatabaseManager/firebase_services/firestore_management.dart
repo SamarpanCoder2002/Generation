@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:generation_official/BackendAndDatabaseManager/Dataset/data_type.dart';
-import 'package:generation_official/BackendAndDatabaseManager/firebase_services/google_auth.dart';
-import 'package:generation_official/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation_official/FrontEnd/Auth_UI/sign_up_UI.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Management {
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
@@ -243,11 +243,7 @@ class Management {
   Future<void> deleteFilesFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
     try {
-      final String filePath = fileName
-          .replaceAll(
-              'https://firebasestorage.googleapis.com/v0/b/generation-official-291b6.appspot.com/o/',
-              '')
-          .split('?')[0];
+      final String filePath = fileName.split('/')[fileName.split('/').length-1].split('?')[0];
 
       print('Deleted File: $filePath');
 
@@ -259,6 +255,8 @@ class Management {
 
         print('Firebase Already Initialized');
       }
+
+      print('File Path: $filePath');
 
       await FirebaseStorage.instance.ref().child(filePath).delete();
 
@@ -349,7 +347,7 @@ class Management {
           await localStorageHelper.insertDataInUserActivityTable(
             tableName: this._currAccountUserName,
             statusLinkOrString:
-                '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection',
+                '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection[[[question]]]completed',
             activityTime: _currTime,
             activitySpecialOptions: ActivitySpecialOptions.Polling,
           );
