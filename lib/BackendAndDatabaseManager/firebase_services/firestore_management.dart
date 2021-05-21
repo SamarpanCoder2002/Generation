@@ -347,7 +347,7 @@ class Management {
           await localStorageHelper.insertDataInUserActivityTable(
             tableName: this._currAccountUserName,
             statusLinkOrString:
-                '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection[[[question]]]completed',
+                '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection[[[question]]]-1',
             activityTime: _currTime,
             activitySpecialOptions: ActivitySpecialOptions.Polling,
           );

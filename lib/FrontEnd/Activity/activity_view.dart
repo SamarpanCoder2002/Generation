@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -34,6 +35,8 @@ class _ActivityViewState extends State<ActivityView>
   static List<dynamic> _options = [];
 
   List<dynamic> _tempList = [];
+
+  FToast _fToast = FToast();
 
   int _selectedPoll = -1;
 
@@ -101,6 +104,8 @@ class _ActivityViewState extends State<ActivityView>
   void initState() {
     /// If Have Some Activity of Current User
     if (widget.takeParticularConnectionUserName != null) {
+      _fToast.init(context);
+
       _collectCurrUserActivity();
 
       SystemChrome.setEnabledSystemUIOverlays([]); // Android StatusBar Hide
@@ -577,23 +582,30 @@ class _ActivityViewState extends State<ActivityView>
                   Container(
                     alignment: Alignment.topCenter,
                     child: IconButton(
-                      icon: Icon(Icons.refresh_rounded, size: 40.0, color: Colors.green,),
-                      onPressed: (){
+                      icon: Icon(
+                        Icons.refresh_rounded,
+                        size: 40.0,
+                        color: Colors.green,
+                      ),
+                      onPressed: () {
                         if (_pollActivity
-                            .toString()
-                            .split('[[[question]]]')
-                            .length >=
+                                .toString()
+                                .split('[[[question]]]')
+                                .length >=
                             4) {
                           if (mounted) {
                             setState(() {
                               _tempList.add('Completed');
+                              _animationController.forward();
                             });
                           }
                         }
                       },
                     ),
                   ),
-                  SizedBox(height: 30.0,),
+                  SizedBox(
+                    height: 30.0,
+                  ),
                   Center(
                     child: Text(
                       _pollActivity.split('[[[question]]]')[0],
@@ -650,7 +662,23 @@ class _ActivityViewState extends State<ActivityView>
                       if (mounted) {
                         setState(() {
                           _tempList.add('Completed');
+
+                          _animationController.forward();
                         });
+                        String _errorMsg = 'Already Voted';
+
+                        if (int.parse(
+                                _pollActivity.split('[[[question]]]')[3]) ==
+                            -1)
+                          _errorMsg = "As Poll Maker, You Can't Vote Here";
+
+                        showToast(
+                          _errorMsg,
+                          _fToast,
+                          toastColor: Colors.green,
+                          fontSize: 16.0,
+                          toastGravity: ToastGravity.TOP,
+                        );
                       }
                     }
 
@@ -700,6 +728,7 @@ class _ActivityViewState extends State<ActivityView>
                     alignment: Alignment.centerRight,
                     children: [
                       LinearPercentIndicator(
+                        backgroundColor: Colors.blueGrey,
                         linearGradient: LinearGradient(colors: [
                           Colors.lightBlueAccent,
                           Colors.lightBlue,
@@ -728,10 +757,15 @@ class _ActivityViewState extends State<ActivityView>
                             SizedBox(
                               width: 10.0,
                             ),
-                            if (index == _selectedPoll)
+                            if ((index == _selectedPoll) ||
+                                (_pollActivity.split('[[[question]]]').length >=
+                                        4 &&
+                                    int.parse(_pollActivity
+                                            .split('[[[question]]]')[3]) ==
+                                        index))
                               Icon(
                                 Icons.done_outline_rounded,
-                                color: Colors.amber,
+                                color: Colors.black45,
                               ),
                           ],
                         ),
