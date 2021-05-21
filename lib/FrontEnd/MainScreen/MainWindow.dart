@@ -108,7 +108,10 @@ Future<void> _deleteOldTask(bool response) async {
             //       .add(everyActivity['Status'].split('+')[1]);
             // }
 
-            final String _activityDateTime = everyActivity['Status_Time'];
+            String _activityDateTime = everyActivity['Status_Time'];
+
+            if(_activityDateTime.contains('+'))
+              _activityDateTime = _activityDateTime.split('+')[0];
 
             print('Now 3: $_thisUserActivityCollection');
 

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -330,12 +332,44 @@ class LocalStorageHelper {
       String _tableName) async {
     Database db = await this.database; // DB Reference
 
-    List<Map<String, Object>> result = await db.rawQuery(
+    final List<Map<String, Object>> result = await db.rawQuery(
         'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType FROM $_tableName WHERE $_colReferences != -1');
 
     return result;
   }
 
+  /// Delete Particular Message
+  Future<bool> deleteChatMessage(String _tableName,
+      {@required String message,
+      @required String time,
+      @required int reference,
+      @required String mediaType}) async {
+    try {
+      final Database db = await this.database;
+
+      print('Message: $message');
+      print('Time: $time');
+      print('Reference: $reference');
+      print('MediaType: $mediaType');
+
+      final int result = await db.rawDelete(
+          "DELETE FROM $_tableName WHERE $_colMessages = '$message' AND $_colTime = '$time' AND $_colReferences = $reference AND $_colMediaType = '$mediaType'");
+
+      if (result == 0) {
+        var take = await extractMessageData(_tableName);
+        print('Messages: $take');
+        return false;
+      } else {
+        print('Delete From Chat Message Result: $result');
+        return true;
+      }
+    } catch (e) {
+      print('Delete From Chat Message Error: ${e.toString()}');
+      return false;
+    }
+  }
+
+  /// Fetch Latest Message
   Future<Map<String, String>> fetchLatestMessage(String _tableName) async {
     final Database db = await this.database;
 

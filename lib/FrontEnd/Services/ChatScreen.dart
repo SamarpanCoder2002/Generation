@@ -2892,14 +2892,106 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 Icons.delete,
                 color: Colors.red,
               ),
-              onPressed: () async {
-                print(
-                    'Delete Element with Two Options: 1. Delete for me    2. Delete For everyone');
-              },
+              onPressed: () => _deleteForMe(index),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _deleteForMe(int index) {
+    print('Delete Chat Message For Me');
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              elevation: 0.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              title: Center(
+                child: Text(
+                  'Conform to Delete for me?',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.0,
+                  ),
+                ),
+              ),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _deleteForMeCommonPart(
+                    index,
+                    buttonLabel: 'Cancel',
+                    buttonTextColor: Colors.red,
+                  ),
+                  _deleteForMeCommonPart(
+                    index,
+                    buttonLabel: 'Save',
+                    buttonTextColor: Colors.green,
+                  ),
+                ],
+              ),
+            ));
+  }
+
+  Widget _deleteForMeCommonPart(int index,
+      {@required String buttonLabel, @required Color buttonTextColor}) {
+    return TextButton(
+      child: Text(
+        buttonLabel,
+        style: TextStyle(
+          color: buttonTextColor,
+          fontSize: 16.0,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        primary: Color.fromRGBO(34, 48, 60, 0.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40.0),
+        ),
+      ),
+      onPressed: () async {
+        if (buttonLabel == 'Cancel')
+          Navigator.pop(context);
+        else {
+          final bool responseIs = await _localStorageHelper.deleteChatMessage(
+              widget._userName,
+              message: _chatContainer[index].keys.first.contains('[[[@]]]')
+                  ? _chatContainer[index].keys.first.split('[[[@]]]')[1]
+                  : _chatContainer[index].keys.first,
+              time: _chatContainer[index].values.first,
+              reference: _response[index] ? 1 : 0,
+              mediaType: _mediaTypes[index].toString());
+
+          print('Chat Delete Response: $responseIs');
+          if (responseIs) {
+            if (mounted) {
+              setState(() {
+                _chatContainer.removeAt(index);
+                _response.removeAt(index);
+                _mediaTypes.removeAt(index);
+              });
+            }
+            showToast(
+              'Message Deleted Successfully',
+              fToast,
+              fontSize: 18.0,
+              toastGravity: ToastGravity.CENTER,
+              seconds: 1,
+            );
+          } else {
+            showToast(
+              'Chat Message Delete Error',
+              fToast,
+              toastColor: Colors.red,
+              fontSize: 16.0,
+              toastGravity: ToastGravity.CENTER,
+            );
+          }
+
+          Navigator.pop(context);
+        }
+      },
     );
   }
 }

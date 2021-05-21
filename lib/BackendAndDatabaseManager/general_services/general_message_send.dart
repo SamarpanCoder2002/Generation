@@ -10,7 +10,6 @@ class GeneralMessage {
   final MediaTypes mediaType;
   final List<String> selectedUsersName;
   String extraText;
-  String _thisAccountUserName;
 
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final SendNotification _sendNotification = SendNotification();
