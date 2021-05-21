@@ -59,6 +59,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   bool _isLoading = false;
   bool _showEmojiPicker = false, _isChatOpenFirstTime = true;
   bool _autoFocus = false;
+  bool _deleteMediaFromInternalStorage = false;
 
   /// Some Integer Value Initialized
   double _audioDownloadProgress = 0;
@@ -2785,7 +2786,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget _multipleOptions(int index,
-      {@required MediaTypes mediaTypes, Color bgColor = Colors.black26}) {
+      {@required MediaTypes mediaTypes, Color bgColor = Colors.black38}) {
     return Container(
       alignment: mediaTypes != MediaTypes.Location
           ? Alignment.bottomCenter
@@ -2902,36 +2903,90 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   void _deleteForMe(int index) {
     print('Delete Chat Message For Me');
+
     showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              elevation: 0.0,
-              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
-              title: Center(
-                child: Text(
-                  'Conform to Delete for me?',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
+      context: context,
+      builder: (_) => StatefulBuilder(
+          builder: (context, set) => AlertDialog(
+                elevation: 0.0,
+                backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+                title: Center(
+                  child: Text(
+                    'Conform to Delete for me?',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
                   ),
                 ),
-              ),
-              content: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _deleteForMeCommonPart(
-                    index,
-                    buttonLabel: 'Cancel',
-                    buttonTextColor: Colors.red,
+                content: Container(
+                  height: MediaQuery.of(context).size.height / 7,
+                  width: MediaQuery.of(context).size.width,
+                  child: ListView(
+                    children: [
+                      if (this._mediaTypes[index] != MediaTypes.Text &&
+                          this._mediaTypes[index] != MediaTypes.Location)
+                        Row(
+                          children: [
+                            Checkbox(
+                                activeColor: Colors.lightBlue,
+                                value: this._deleteMediaFromInternalStorage,
+                                onChanged: (response) {
+                                  print(response);
+                                  if (mounted) {
+                                    setState(() {
+                                      this._deleteMediaFromInternalStorage =
+                                          response;
+                                      Navigator.pop(context);
+                                      _deleteForMe(index);
+                                    });
+                                  }
+                                }),
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Expanded(
+                              child: TextButton(
+                                child: Text(
+                                  'Delete Media From Storage',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (mounted) {
+                                    setState(() {
+                                      this._deleteMediaFromInternalStorage =
+                                          !this._deleteMediaFromInternalStorage;
+                                      Navigator.pop(context);
+                                      _deleteForMe(index);
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _deleteForMeCommonPart(
+                            index,
+                            buttonLabel: 'Cancel',
+                            buttonTextColor: Colors.red,
+                          ),
+                          _deleteForMeCommonPart(
+                            index,
+                            buttonLabel: 'Sure',
+                            buttonTextColor: Colors.lightGreenAccent,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  _deleteForMeCommonPart(
-                    index,
-                    buttonLabel: 'Save',
-                    buttonTextColor: Colors.green,
-                  ),
-                ],
-              ),
-            ));
+                ),
+              )),
+    );
   }
 
   Widget _deleteForMeCommonPart(int index,
@@ -2946,9 +3001,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       ),
       style: ElevatedButton.styleFrom(
         primary: Color.fromRGBO(34, 48, 60, 0.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40.0),
-        ),
       ),
       onPressed: () async {
         if (buttonLabel == 'Cancel')
@@ -2965,6 +3017,29 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
           print('Chat Delete Response: $responseIs');
           if (responseIs) {
+            if (this._mediaTypes[index] != MediaTypes.Text &&
+                this._mediaTypes[index] != MediaTypes.Location &&
+                this._deleteMediaFromInternalStorage) {
+              print(
+                  'Permission Accepted: Delete From Permission Storage Persimission Aceepted');
+
+              /// Delete MediaFiles from Internal Storage
+              try {
+                await File(_chatContainer[index].keys.first)
+                    .delete(recursive: true);
+
+                print('File Deleted From Internal Storage in Delete For Me');
+              } catch (e) {
+                print(
+                    'Delete Media From Internal Storage in Delete For Me Error: ${e.toString()}');
+              }
+            } else {
+              print(
+                  'Permission Denied: Delete From Permission Storage Permission Denied');
+            }
+
+            Navigator.pop(context);
+
             if (mounted) {
               setState(() {
                 _chatContainer.removeAt(index);
@@ -2972,6 +3047,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 _mediaTypes.removeAt(index);
               });
             }
+
             showToast(
               'Message Deleted Successfully',
               fToast,
@@ -2980,6 +3056,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               seconds: 1,
             );
           } else {
+            Navigator.pop(context);
+
             showToast(
               'Chat Message Delete Error',
               fToast,
@@ -2988,8 +3066,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               toastGravity: ToastGravity.CENTER,
             );
           }
-
-          Navigator.pop(context);
         }
       },
     );
