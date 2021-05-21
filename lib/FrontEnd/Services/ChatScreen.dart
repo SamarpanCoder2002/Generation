@@ -1085,6 +1085,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       if (mounted) {
                         setState(() {
                           _inputTextController.text += item.emoji;
+                          if (_iconChanger) _iconChanger = false;
                         });
                       }
                     },
@@ -2920,7 +2921,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   ),
                 ),
                 content: Container(
-                  height: MediaQuery.of(context).size.height / 7,
+                  height: this._mediaTypes[index] != MediaTypes.Text &&
+                          this._mediaTypes[index] != MediaTypes.Location
+                      ? MediaQuery.of(context).size.height / 7
+                      : MediaQuery.of(context).size.height / 15,
                   width: MediaQuery.of(context).size.width,
                   child: ListView(
                     children: [
@@ -2928,20 +2932,24 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           this._mediaTypes[index] != MediaTypes.Location)
                         Row(
                           children: [
-                            Checkbox(
-                                activeColor: Colors.lightBlue,
-                                value: this._deleteMediaFromInternalStorage,
-                                onChanged: (response) {
-                                  print(response);
-                                  if (mounted) {
-                                    setState(() {
-                                      this._deleteMediaFromInternalStorage =
-                                          response;
-                                      Navigator.pop(context);
-                                      _deleteForMe(index);
-                                    });
-                                  }
-                                }),
+                            Theme(
+                                data: ThemeData(
+                                  unselectedWidgetColor: Colors.green,
+                                ),
+                                child: Checkbox(
+                                    activeColor: Colors.green,
+                                    value: this._deleteMediaFromInternalStorage,
+                                    onChanged: (response) {
+                                      print(response);
+                                      if (mounted) {
+                                        setState(() {
+                                          this._deleteMediaFromInternalStorage =
+                                              response;
+                                          Navigator.pop(context);
+                                          _deleteForMe(index);
+                                        });
+                                      }
+                                    })),
                             SizedBox(
                               width: 5.0,
                             ),
@@ -3008,9 +3016,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         else {
           final bool responseIs = await _localStorageHelper.deleteChatMessage(
               widget._userName,
-              message: _chatContainer[index].keys.first.contains('[[[@]]]')
-                  ? _chatContainer[index].keys.first.split('[[[@]]]')[1]
-                  : _chatContainer[index].keys.first,
+              message: _chatContainer[index].keys.first,
               time: _chatContainer[index].values.first,
               reference: _response[index] ? 1 : 0,
               mediaType: _mediaTypes[index].toString());
@@ -3040,6 +3046,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
             Navigator.pop(context);
 
+            print('MediaTypes Index: ${_mediaTypes[index]}');
+
+            if (_mediaTypes[index] == MediaTypes.Text ||
+                _mediaTypes[index] == MediaTypes.Voice) {
+              print('Pop Second Time');
+              Navigator.pop(context);
+            }
+
             if (mounted) {
               setState(() {
                 _chatContainer.removeAt(index);
@@ -3048,23 +3062,32 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               });
             }
 
-            showToast(
-              'Message Deleted Successfully',
-              fToast,
-              fontSize: 18.0,
-              toastGravity: ToastGravity.CENTER,
-              seconds: 1,
-            );
+            try{
+              showToast(
+                'Message Deleted Successfully',
+                fToast,
+                fontSize: 16.0,
+                toastColor: Colors.amber,
+                toastGravity: ToastGravity.CENTER,
+              );
+            }catch(e){
+              print('Context Matching Unexpected Error: ${e.toString()}');
+            }
           } else {
             Navigator.pop(context);
 
-            showToast(
-              'Chat Message Delete Error',
-              fToast,
-              toastColor: Colors.red,
-              fontSize: 16.0,
-              toastGravity: ToastGravity.CENTER,
-            );
+            try{
+              showToast(
+                'Chat Message Delete Error',
+                fToast,
+                toastColor: Colors.red,
+                fontSize: 16.0,
+                toastGravity: ToastGravity.CENTER,
+              );
+            }catch(e){
+              print('Context Matching Unexpected Error: ${e.toString()}');
+            }
+
           }
         }
       },

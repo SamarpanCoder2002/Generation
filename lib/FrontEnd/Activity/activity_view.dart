@@ -661,67 +661,66 @@ class _ActivityViewState extends State<ActivityView>
                         4) {
                       if (mounted) {
                         setState(() {
-                          _tempList.add('Completed');
-
                           _animationController.forward();
                         });
-                        String _errorMsg = 'Already Voted';
+                        String _errorMsg = 'Already Voted, Please Refresh to Show Latest Data';
 
                         if (int.parse(
                                 _pollActivity.split('[[[question]]]')[3]) ==
                             -1)
-                          _errorMsg = "As Poll Maker, You Can't Vote Here";
+                          _errorMsg = "As Poll Maker, You Can't Vote Here\nPlease Refresh to Show Latest Data";
 
                         showToast(
                           _errorMsg,
                           _fToast,
-                          toastColor: Colors.green,
+                          toastColor: Colors.amber,
                           fontSize: 16.0,
                           toastGravity: ToastGravity.TOP,
+                          seconds: 3,
                         );
                       }
-                    }
-
-                    if (_tempList.isEmpty) {
-                      if (mounted) {
-                        setState(() {
-                          _selectedPoll = index;
-                          _tempList = _options;
-                        });
-
-                        print('Selected Poll: $_selectedPoll    $index');
-                      }
-                      print(_pollActivity.split('[[[question]]]')[1]);
-
-                      if (mounted) {
-                        setState(() {
-                          print('Before Options: $_options');
-                          _options[index] += 1;
-                          print('After Options: $_options');
-
-                          print('Recheck: $_pollOptionsPercentageList');
-
-                          _progressPercentProduction();
-                        });
-                      }
-
-                      print('Final: $_pollOptionsPercentageList');
-
-                      await _localStorageHelper.updateTableActivity(
-                          tableName: widget.takeParticularConnectionUserName,
-                          oldActivity: _pollActivity,
-                          newAddition: '$index');
-
-                      await FirebaseFirestore.instance
-                          .doc(
-                              'polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
-                          .update({
-                        index.toString(): _options[index],
-                      });
-
-                      _animationController.forward();
                     } else {
-                      print('Poll Close off');
+                      if (_tempList.isEmpty) {
+                        if (mounted) {
+                          setState(() {
+                            _selectedPoll = index;
+                            _tempList = _options;
+                          });
+
+                          print('Selected Poll: $_selectedPoll    $index');
+                        }
+                        print(_pollActivity.split('[[[question]]]')[1]);
+
+                        if (mounted) {
+                          setState(() {
+                            print('Before Options: $_options');
+                            _options[index] += 1;
+                            print('After Options: $_options');
+
+                            print('Recheck: $_pollOptionsPercentageList');
+
+                            _progressPercentProduction();
+                          });
+                        }
+
+                        print('Final: $_pollOptionsPercentageList');
+
+                        await _localStorageHelper.updateTableActivity(
+                            tableName: widget.takeParticularConnectionUserName,
+                            oldActivity: _pollActivity,
+                            newAddition: '$index');
+
+                        await FirebaseFirestore.instance
+                            .doc(
+                                'polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
+                            .update({
+                          index.toString(): _options[index],
+                        });
+
+                        _animationController.forward();
+                      } else {
+                        print('Poll Close off');
+                      }
                     }
                   },
                   child: Stack(
