@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -194,6 +195,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
+
     Workmanager().initialize(
         deleteOldActivity, // The top level function, aka callbackDispatcher
         isInDebugMode:

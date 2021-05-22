@@ -15,6 +15,7 @@ import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:geolocator/geolocator.dart';
@@ -603,11 +604,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       Directory _newDirectory;
 
       if (_incomingInformationContainer[1] == MediaTypes.Image.toString())
-        _newDirectory = await Directory('${directory.path}/Images/')
-            .create(); // Create New Folder about the desire location
+        _newDirectory = await Directory('${directory.path}/Images/').create(
+            recursive: true); // Create New Folder about the desire location
       else
-        _newDirectory = await Directory('${directory.path}/Videos/')
-            .create(); // Create New Folder about the desire location
+        _newDirectory = await Directory('${directory.path}/Videos/').create(
+            recursive: true); // Create New Folder about the desire location
 
       print('New Directory: ${_newDirectory.path}    $everyMessage');
 
@@ -615,10 +616,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           DateTime.now().toString().split(' ').join('_'); // Current Time Take
 
       final Directory _thumbNailDir =
-          await Directory('${directory.path}/.ThumbNails/')
-              .create(); // Create New Folder about the desire location;
+          await Directory('${directory.path}/.ThumbNails/').create(
+              recursive: true); // Create New Folder about the desire location;
 
       String thumbNailPicturePath;
+
+      String _filePathStore =
+          _incomingInformationContainer[1] == MediaTypes.Image.toString()
+              ? '${_newDirectory.path}$currTime.jpg'
+              : '${_newDirectory.path}$currTime.mp4';
+
+      print('Previous File Path: $_filePathStore');
 
       /// Download the voice from the Firebase Storage and delete from storage permanently
       await _dio
@@ -633,6 +641,34 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           .whenComplete(() async {
         print(
             'In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
+
+        /// For Save Image or Video In Gallery
+        final gallerySaverResult = await ImageGallerySaver.saveFile(
+            _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                ? '${_newDirectory.path}$currTime.jpg'
+                : '${_newDirectory.path}$currTime.mp4');
+        print(
+            'Gallery Image Path: ${gallerySaverResult['filePath']}   ${gallerySaverResult['isSuccess']}');
+
+        print(gallerySaverResult['isSuccess']);
+
+        if (gallerySaverResult['isSuccess'].toString() == 'true') {
+          _filePathStore =
+              gallerySaverResult['filePath'].toString().split('file:///')[1];
+
+          await File(_incomingInformationContainer[1] ==
+                      MediaTypes.Image.toString()
+                  ? '${_newDirectory.path}$currTime.jpg'
+                  : '${_newDirectory.path}$currTime.mp4')
+              .delete(recursive: true)
+              .whenComplete(() => print('Store in Gallery'))
+              .catchError((e) {
+            print('File Delete Error in ChatScreen: ${e.toString()}');
+          });
+
+          print('In Gallery Save');
+        }
+
         if (_incomingInformationContainer.length < 4)
           await _management.deleteFilesFromFirebaseStorage(
               _incomingInformationContainer[1] != MediaTypes.Video.toString()
@@ -664,14 +700,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
       });
 
-      print('Recorded Path: ${_newDirectory.path}$currTime');
+      print('Recorded Path: $_filePathStore');
 
       /// Store Data in local Storage
       _localStorageHelper.insertNewMessages(
           widget._userName,
-          _incomingInformationContainer[1] == MediaTypes.Image.toString()
-              ? '${_newDirectory.path}$currTime.jpg'
-              : '${_newDirectory.path}$currTime.mp4',
+          _filePathStore,
           _incomingInformationContainer[1] == MediaTypes.Image.toString()
               ? MediaTypes.Image
               : MediaTypes.Video,
@@ -688,10 +722,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
           _chatContainer.add({
             /// Take Messages in Local Container
-            _incomingInformationContainer[1] == MediaTypes.Image.toString()
-                ? '${_newDirectory.path}$currTime.jpg'
-                : '${_newDirectory.path}$currTime.mp4': _incomingInformationContainer[
-                        1] ==
+            _filePathStore: _incomingInformationContainer[1] ==
                     MediaTypes.Image.toString()
                 ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
                 : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg',
@@ -3040,7 +3071,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
               /// Delete MediaFiles from Internal Storage
               try {
-                await File(_chatContainer[index].keys.first)
+                await File(_chatContainer[index]
+                            .keys
+                            .first
+                            .toString()
+                            .contains('file:///')
+                        ? _chatContainer[index]
+                            .keys
+                            .first
+                            .toString()
+                            .split('file:///')[1]
+                        : _chatContainer[index].keys.first.toString())
                     .delete(recursive: true);
 
                 print('File Deleted From Internal Storage in Delete For Me');
