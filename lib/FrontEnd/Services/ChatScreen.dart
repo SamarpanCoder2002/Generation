@@ -1932,9 +1932,26 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             0,
             _chatContainer.last.values.first.toString());
 
+        //
+        //
+        //
+        //
+        // /// Work from Here Now
+        // var take = documentSnapShot.data()['connections'];
+        //
+        // print('Pre Testing: $take');
+        //
+        // take[FirebaseAuth.instance.currentUser.email.toString()] = sendingMessages;
+        //
+        // print('Testing: $take');
+        //
+        //
+        //
+        //
+
         /// Data Store in Firestore
         await _management.addConversationMessages(
-            this._senderMail, sendingMessages);
+            this._senderMail, sendingMessages, documentSnapShot.data()['connections']);
 
         final String _textToSend = _inputTextController.text;
 
@@ -2059,7 +2076,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       /// Data Store in FireStore
       await _management.addConversationMessages(
-          this._senderMail, sendingMessages);
+          this._senderMail, sendingMessages,documentSnapShot.data()['connections']);
 
       if (mounted) {
         setState(() {
@@ -2183,7 +2200,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       // Data Store in Firestore
       await _management.addConversationMessages(
-          this._senderMail, _sendingMessages);
+          this._senderMail, _sendingMessages,documentSnapShot.data()['connections']);
 
       if (mounted) {
         setState(() {
@@ -2258,7 +2275,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       // Data Store in Firestore
       await _management.addConversationMessages(
-          this._senderMail, _sendingMessages);
+          this._senderMail, _sendingMessages, documentSnapShot.data()['connections']);
 
       setState(() {
         _isLoading = false;

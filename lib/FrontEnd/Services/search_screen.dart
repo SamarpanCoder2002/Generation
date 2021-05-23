@@ -125,14 +125,20 @@ class _SearchState extends State<Search> {
 
               if (!connectionRequestCollectionCurrUser
                   .containsKey(searchResultSnapshot.docs[index].id)) {
-                connectionRequestCollectionCurrUser.addAll({
-                  '${searchResultSnapshot.docs[index].id}': "Request Pending",
-                });
+                // connectionRequestCollectionCurrUser.addAll({
+                //   '${searchResultSnapshot.docs[index].id}': "Request Pending",
+                // });
 
-                connectionRequestCollectionRequestUser.addAll({
-                  '${FirebaseAuth.instance.currentUser.email}':
-                      "Invitation Came",
-                });
+                connectionRequestCollectionCurrUser[
+                    searchResultSnapshot.docs[index].id] = "Request Pending";
+
+                // connectionRequestCollectionRequestUser.addAll({
+                //   '${FirebaseAuth.instance.currentUser.email}':
+                //       "Invitation Came",
+                // });
+
+                connectionRequestCollectionRequestUser[FirebaseAuth
+                    .instance.currentUser.email] = "Invitation Came";
 
                 if (mounted) {
                   setState(() {
@@ -172,29 +178,59 @@ class _SearchState extends State<Search> {
                   Map<String, dynamic> connectionsMapCurrUser =
                       documentSnapShotCurrUser.get('connections');
 
-                  connectionRequestCollectionCurrUser.addAll({
-                    '${searchResultSnapshot.docs[index].id}':
-                        "Invitation Accepted",
-                  });
+                  Map<String, dynamic> activityMapRequestUser =
+                      searchResultSnapshot.docs[index]['activity'];
+                  Map<String, dynamic> activityMapCurrUser =
+                      documentSnapShotCurrUser.get('activity');
 
-                  connectionRequestCollectionRequestUser.addAll({
-                    '${FirebaseAuth.instance.currentUser.email}':
-                        "Request Accepted",
-                  });
+                  // connectionRequestCollectionCurrUser.addAll({
+                  //   '${searchResultSnapshot.docs[index].id}':
+                  //       "Invitation Accepted",
+                  // });
+
+                  connectionRequestCollectionCurrUser[searchResultSnapshot
+                      .docs[index].id] = "Invitation Accepted";
+
+                  // connectionRequestCollectionRequestUser.addAll({
+                  //   '${FirebaseAuth.instance.currentUser.email}':
+                  //       "Request Accepted",
+                  // });
+
+                  connectionRequestCollectionRequestUser[FirebaseAuth
+                      .instance.currentUser.email] = "Request Accepted";
                   print("Add Invited User Data to SQLite");
 
-                  connectionsMapRequestUser.addAll({
-                    '${FirebaseAuth.instance.currentUser.email}': [],
-                  });
+                  // connectionsMapRequestUser.addAll({
+                  //   '${FirebaseAuth.instance.currentUser.email}': [],
+                  // });
 
-                  connectionsMapCurrUser.addAll({
-                    '${searchResultSnapshot.docs[index].id}': [],
-                  });
+                  connectionsMapRequestUser[
+                      FirebaseAuth.instance.currentUser.email] = [];
+
+                  // connectionsMapCurrUser.addAll({
+                  //   '${searchResultSnapshot.docs[index].id}': [],
+                  // });
+
+                  connectionsMapCurrUser[searchResultSnapshot.docs[index].id] =
+                      [];
+
+                  // activityMapRequestUser.addAll({
+                  //   '${FirebaseAuth.instance.currentUser.email}': [],
+                  // });
+
+                  activityMapRequestUser[
+                      FirebaseAuth.instance.currentUser.email] = [];
+
+                  // activityMapCurrUser.addAll({
+                  //   '${searchResultSnapshot.docs[index].id}': [],
+                  // });
+
+                  activityMapCurrUser[searchResultSnapshot.docs[index].id] = [];
 
                   if (mounted) {
                     setState(() {
-
-                      print('Request Connection Request: ${searchResultSnapshot.docs[index]['total_connections']}');
+                      print(
+                          'Request Connection Request: ${searchResultSnapshot.docs[index]['total_connections']}');
 
                       FirebaseFirestore.instance
                           .doc(
@@ -203,10 +239,13 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionRequestUser,
                         'connections': connectionsMapRequestUser,
-                        'total_connections': '${int.parse(searchResultSnapshot.docs[index]['total_connections']) + 1}',
+                        'total_connections':
+                            '${int.parse(searchResultSnapshot.docs[index]['total_connections']) + 1}',
+                        'activity': activityMapRequestUser,
                       });
 
-                      print('Current Connection Request: ${documentSnapShotCurrUser.get('total_connections')}');
+                      print(
+                          'Current Connection Request: ${documentSnapShotCurrUser.get('total_connections')}');
 
                       FirebaseFirestore.instance
                           .doc(
@@ -215,7 +254,9 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionCurrUser,
                         'connections': connectionsMapCurrUser,
-                        'total_connections': '${int.parse(documentSnapShotCurrUser.get('total_connections')) + 1}',
+                        'total_connections':
+                            '${int.parse(documentSnapShotCurrUser.get('total_connections')) + 1}',
+                        'activity': activityMapCurrUser,
                       });
                     });
                   }

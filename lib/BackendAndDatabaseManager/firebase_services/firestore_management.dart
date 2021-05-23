@@ -58,14 +58,17 @@ class Management {
     );
   }
 
-  Future<void> addConversationMessages(
-      String _senderMail, List<dynamic> messageMap) async {
+  Future<void> addConversationMessages(String _senderMail,
+      List<dynamic> messageMap, dynamic messageCollection) async {
+    messageCollection[FirebaseAuth.instance.currentUser.email.toString()] =
+        messageMap;
+
+    print('Message Collection is: $messageCollection');
+
     await FirebaseFirestore.instance
         .doc("generation_users/$_senderMail")
         .update({
-      'connections': {
-        '${FirebaseAuth.instance.currentUser.email}': messageMap,
-      }
+      'connections': messageCollection,
     });
   }
 
@@ -220,6 +223,8 @@ class Management {
       final Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child(fileName);
 
+      print('Firebase Storage Reference: $firebaseStorageRef');
+
       final UploadTask uploadTask = firebaseStorageRef.putFile(filePath);
 
       await uploadTask.whenComplete(() async {
@@ -243,7 +248,8 @@ class Management {
   Future<void> deleteFilesFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
     try {
-      final String filePath = fileName.split('/')[fileName.split('/').length-1].split('?')[0];
+      final String filePath =
+          fileName.split('/')[fileName.split('/').length - 1].split('?')[0];
 
       print('Deleted File: $filePath');
 
@@ -294,16 +300,42 @@ class Management {
       Map<String, dynamic> _pollMapPollOptions) async {
     try {
       final String id = await addPollingToFireStore(_pollMapPollOptions);
+      final String _currTime = DateTime.now().toString();
+
+      String _answerCollection = '';
+
+      print('PollMapTake is: $_pollMap');
+
+      _pollMap.forEach((key, value) {
+        print('key is: $key');
+
+        if (key != 'question') {
+          if (_answerCollection == '')
+            _answerCollection = key.toString();
+          else
+            _answerCollection += '+${key.toString()}';
+        }
+      });
+
+      print('Answer Collection: $_answerCollection');
+
+      await localStorageHelper.insertDataInUserActivityTable(
+        tableName: this._currAccountUserName,
+        statusLinkOrString:
+            '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection[[[question]]]-1',
+        activityTime: _currTime,
+        activitySpecialOptions: ActivitySpecialOptions.Polling,
+      );
 
       if (id != null) {
-        final String _currTime = DateTime.now().toString();
-
         final DocumentSnapshot documentSnapshot = await FirebaseFirestore
             .instance
             .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
             .get();
         final Map<String, dynamic> _connectionsMap =
-            documentSnapshot.data()['connections'];
+            documentSnapshot.data()['activity'];
+
+        print('Connection Map: $_connectionsMap');
 
         _connectionsMap
             .forEach((connectionUserName, connectionUserMessages) async {
@@ -319,23 +351,6 @@ class Management {
 
           if (currConnection == null) currConnection = [];
 
-          String _answerCollection = '';
-
-          print('PollMapTake is: $_pollMap');
-
-          _pollMap.forEach((key, value) {
-            print('key is: $key');
-
-            if (key != 'question') {
-              if (_answerCollection == '')
-                _answerCollection = key.toString();
-              else
-                _answerCollection += '+${key.toString()}';
-            }
-          });
-
-          print('Answer Collection: $_answerCollection');
-
           currConnection.add({
             '$id+ActivitySpecialOptions.Polling+${_pollMap['question'].toString()}+$_currTime':
                 _answerCollection,
@@ -344,13 +359,7 @@ class Management {
           activityCollection[FirebaseAuth.instance.currentUser.email
               .toString()] = currConnection;
 
-          await localStorageHelper.insertDataInUserActivityTable(
-            tableName: this._currAccountUserName,
-            statusLinkOrString:
-                '${_pollMap['question'].toString()}$id[[[question]]]$_answerCollection[[[question]]]-1',
-            activityTime: _currTime,
-            activitySpecialOptions: ActivitySpecialOptions.Polling,
-          );
+          print('Activity Collection: $activityCollection');
 
           await FirebaseFirestore.instance
               .doc('generation_users/$connectionUserName')

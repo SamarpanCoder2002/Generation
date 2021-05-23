@@ -111,7 +111,7 @@ Future<void> _deleteOldTask(bool response) async {
 
             String _activityDateTime = everyActivity['Status_Time'];
 
-            if(_activityDateTime.contains('+'))
+            if (_activityDateTime.contains('+'))
               _activityDateTime = _activityDateTime.split('+')[0];
 
             print('Now 3: $_thisUserActivityCollection');
@@ -136,10 +136,10 @@ Future<void> _deleteOldTask(bool response) async {
                   activity: everyActivity['Status']);
 
               /// Delete File From Local Storage[Exception Handling Because File Can be Deleted by user Manually]
-              try{
+              try {
                 await File(everyActivity['Status'].split('+')[0])
                     .delete(recursive: true);
-              }catch(e){
+              } catch (e) {
                 print('File Deleted Already Exception: ${e.toString()}');
               }
 
@@ -195,7 +195,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-
     Workmanager().initialize(
         deleteOldActivity, // The top level function, aka callbackDispatcher
         isInDebugMode:
