@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animations/animations.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -289,7 +290,6 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _manageTakeImageAsProfilePic(PickedFile _pickedFile) async {
-
     showToast(
       'Applying Changes',
       _fToast,
@@ -306,8 +306,9 @@ class _ProfileState extends State<Profile> {
     await _management.uploadNewProfilePicToFireStore(
         file: File(_pickedFile.path), context: context);
 
-    await _localStorageHelper.insertProfilePictureManuallyForThisAccount(
-        imageUrl: File(_pickedFile.path).path);
+    await _localStorageHelper.insertProfilePictureInImportant(
+        imagePath: File(_pickedFile.path).path,
+        mail: FirebaseAuth.instance.currentUser.email);
 
     if (ImportantThings.thisAccountImageUrl != '') {
       try {

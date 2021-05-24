@@ -99,13 +99,13 @@ class LocalStorageHelper {
     await db.insert(_allImportantDataStore, _accountData);
   }
 
-  Future<void> insertProfilePictureManuallyForThisAccount(
-      {@required String imageUrl}) async {
+  Future<void> insertProfilePictureInImportant(
+      {@required String imagePath, @required String mail}) async {
     try {
       final Database db = await this.database;
 
       final int result = await db.rawUpdate(
-          "UPDATE $_allImportantDataStore SET $_colProfileImageUrl = '$imageUrl' WHERE $_colAccountUserMail = '${FirebaseAuth.instance.currentUser.email}'");
+          "UPDATE $_allImportantDataStore SET $_colProfileImageUrl = '$imagePath' WHERE $_colAccountUserMail = '$mail'");
 
       result == 1
           ? print('Success: New Profile Picture Update Successful')

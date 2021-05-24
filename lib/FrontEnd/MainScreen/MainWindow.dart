@@ -5,6 +5,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:generation/BackendAndDatabaseManager/Dataset/static_important_things.dart';
@@ -247,24 +248,30 @@ class _MainScreenState extends State<MainScreen> {
                     SizedBox(
                       height: 10.0,
                     ),
-                    Center(
-                      child: CircleAvatar(
-                        backgroundImage:
-                            ImportantThings.thisAccountImageUrl == ''
-                                ? const ExactAssetImage(
-                                    "assets/logo/logo.jpg",
-                                  )
-                                : FileImage(
-                                    File(ImportantThings.thisAccountImageUrl),
-                                  ),
-                        radius: MediaQuery.of(context).orientation ==
-                                Orientation.portrait
-                            ? MediaQuery.of(context).size.height *
-                                (1.2 / 8) /
-                                2.5
-                            : MediaQuery.of(context).size.height *
-                                (2.5 / 8) /
-                                2.5,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => Profile()));
+                      },
+                      child: Center(
+                        child: CircleAvatar(
+                          backgroundImage:
+                              ImportantThings.thisAccountImageUrl == ''
+                                  ? const ExactAssetImage(
+                                      "assets/logo/logo.jpg",
+                                    )
+                                  : FileImage(
+                                      File(ImportantThings.thisAccountImageUrl),
+                                    ),
+                          radius: MediaQuery.of(context).orientation ==
+                                  Orientation.portrait
+                              ? MediaQuery.of(context).size.height *
+                                  (1.2 / 8) /
+                                  2.5
+                              : MediaQuery.of(context).size.height *
+                                  (2.5 / 8) /
+                                  2.5,
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -311,7 +318,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   child: IconButton(
                     icon: Icon(
-                      Icons.supervised_user_circle_outlined,
+                      Icons.refresh_outlined,
                       size: 25.0,
                     ),
                     onPressed: () async {
