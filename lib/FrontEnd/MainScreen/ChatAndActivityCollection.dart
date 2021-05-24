@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/static_important_things.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,6 +22,7 @@ import 'package:generation/FrontEnd/Services/search_screen.dart';
 import 'package:generation/FrontEnd/Activity/activity_view.dart';
 import 'package:generation/FrontEnd/Services/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+
 
 class ChatsAndActivityCollection extends StatefulWidget {
   @override
@@ -39,8 +41,6 @@ class _ChatsAndActivityCollectionState
       Map<String, dynamic>();
 
   final List<String> _allUserConnectionActivity = [];
-
-  String _thisAccountUserNameIs;
 
   /// Recent Old Activity Take to Avoid Duplicate
   Map<String, dynamic> _oldActivity = Map<String, dynamic>();
@@ -280,6 +280,7 @@ class _ChatsAndActivityCollectionState
                     userMail: connectionName,
                     userName: documentSnapshot['user_name'],
                     userToken: documentSnapshot['token'],
+                    profileImage: documentSnapshot['profile_pic'],
                   );
 
                   /// Insert Additional Data to user Specific SqLite Database Table
@@ -374,7 +375,7 @@ class _ChatsAndActivityCollectionState
         if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
           if (mounted) {
             setState(() {
-              if (userNameMap.values.first == this._thisAccountUserNameIs)
+              if (userNameMap.values.first == ImportantThings.thisAccountUserName)
                 _allUserConnectionActivity.insert(0, userNameMap.values.first);
               else
                 _allUserConnectionActivity.add(userNameMap.values.first);
@@ -385,12 +386,6 @@ class _ChatsAndActivityCollectionState
     });
   }
 
-  void _fetchThisAccountUserName() async {
-    this._thisAccountUserNameIs =
-        await _localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -398,10 +393,11 @@ class _ChatsAndActivityCollectionState
     SystemChrome.setEnabledSystemUIOverlays(
         SystemUiOverlay.values); // Android StatusBar Show
 
+    ImportantThings.findImageUrlAndUserName();
+
     //_fToast.init(context); // Flutter Toast Initialized
 
     try {
-      _fetchThisAccountUserName();
       _fetchRealTimeData();
       _searchAboutExistingConnectionActivity();
 
@@ -416,6 +412,12 @@ class _ChatsAndActivityCollectionState
                 content: Text(e.toString()),
               ));
     }
+  }
+
+  @override
+  void dispose() {
+    print("Chat Collection Dispose");
+    super.dispose();
   }
 
   @override
@@ -515,9 +517,13 @@ class _ChatsAndActivityCollectionState
                 },
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
-                    backgroundImage: const ExactAssetImage(
-                      "assets/logo/logo.jpg",
-                    ),
+                    backgroundImage: ImportantThings.thisAccountImageUrl == ''
+                        ? const ExactAssetImage(
+                            "assets/logo/logo.jpg",
+                          )
+                        : FileImage(
+                            File(ImportantThings.thisAccountImageUrl),
+                          ),
                     radius: MediaQuery.of(context).orientation ==
                             Orientation.portrait
                         ? MediaQuery.of(context).size.height * (1.2 / 8) / 2.5

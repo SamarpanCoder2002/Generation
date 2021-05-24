@@ -7,10 +7,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'package:generation/BackendAndDatabaseManager/Dataset/static_important_things.dart';
 import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/general_applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
@@ -212,7 +212,15 @@ class _MainScreenState extends State<MainScreen> {
               15), // Minimum frequency is 15 min. For Debug that, Please change that to 15 min
     );
 
+    ImportantThings.findImageUrlAndUserName();
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    print('Dispose in MainWindow');
+    super.dispose();
   }
 
   @override
@@ -241,9 +249,14 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Center(
                       child: CircleAvatar(
-                        backgroundImage: const ExactAssetImage(
-                          "assets/logo/logo.jpg",
-                        ),
+                        backgroundImage:
+                            ImportantThings.thisAccountImageUrl == ''
+                                ? const ExactAssetImage(
+                                    "assets/logo/logo.jpg",
+                                  )
+                                : FileImage(
+                                    File(ImportantThings.thisAccountImageUrl),
+                                  ),
                         radius: MediaQuery.of(context).orientation ==
                                 Orientation.portrait
                             ? MediaQuery.of(context).size.height *
@@ -302,16 +315,11 @@ class _MainScreenState extends State<MainScreen> {
                       size: 25.0,
                     ),
                     onPressed: () async {
-                      // print("New User Add");
-                      // await ForeGroundNotificationReceiveAndShow()
-                      //     .showNotification(
-                      //         title: 'Title', body: 'Body');
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => SelectConnection(
-                                    mediaType: MediaTypes.Text,
-                                  )));
+                      if (mounted) {
+                        setState(() {
+                          ImportantThings.findImageUrlAndUserName();
+                        });
+                      }
                     },
                   ),
                 )

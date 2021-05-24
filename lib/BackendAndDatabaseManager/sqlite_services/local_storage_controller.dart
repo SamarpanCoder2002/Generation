@@ -17,7 +17,6 @@ class LocalStorageHelper {
   final String _colDate = "Date";
   final String _colTime = "Time";
   final String _colAbout = "About";
-  final String _colProfileImageUrl = "DP_Url";
   final String _colEmail = "Email";
   final String _colToken = "Token";
 
@@ -29,6 +28,7 @@ class LocalStorageHelper {
   final String _allImportantDataStore = '__ImportantDataTable__';
   final String _colAccountUserName = 'User_Name';
   final String _colAccountUserMail = 'User_Mail';
+  final String _colProfileImageUrl = "DP_Url";
 
   final String _colActivitySpecial = 'ActivitySpecialOptions';
 
@@ -75,30 +75,49 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImageUrl TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
     }
   }
 
-  Future<void> insertDataForThisAccount(
-      {@required String userName,
-      @required String userMail,
-      @required String userToken}) async {
+  Future<void> insertDataForThisAccount({
+    @required String userName,
+    @required String userMail,
+    @required String userToken,
+    String profileImage = '',
+  }) async {
     Database db = await this.database;
     Map<String, dynamic> _accountData = Map<String, dynamic>();
 
     _accountData[_colAccountUserName] = userName;
     _accountData[_colAccountUserMail] = userMail;
     _accountData[_colToken] = userToken;
+    _accountData[_colProfileImageUrl] = profileImage;
 
     await db.insert(_allImportantDataStore, _accountData);
   }
 
+  Future<void> insertProfilePictureManuallyForThisAccount(
+      {@required String imageUrl}) async {
+    try {
+      final Database db = await this.database;
+
+      final int result = await db.rawUpdate(
+          "UPDATE $_allImportantDataStore SET $_colProfileImageUrl = '$imageUrl' WHERE $_colAccountUserMail = '${FirebaseAuth.instance.currentUser.email}'");
+
+      result == 1
+          ? print('Success: New Profile Picture Update Successful')
+          : print('Failed: New Profile Picture Update Fail');
+    } catch (e) {
+      print('Insert Profile Picture to Local Database Error: ${e.toString()}');
+    }
+  }
+
   Future<String> extractImportantDataFromThatAccount(
       {String userName = '', String userMail = ''}) async {
-    Database db = await this.database;
+    final Database db = await this.database;
 
     List<Map<String, Object>> result = [];
 
@@ -124,6 +143,22 @@ class LocalStorageHelper {
     else
       result = await db.rawQuery(
           "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
+
+    return result[0].values.first;
+  }
+
+  Future<String> extractProfileImageUrl(
+      {String userMail = '', String userName = ''}) async {
+    final Database db = await this.database;
+
+    List<Map<String, Object>> result;
+
+    if (userMail != '')
+      result = await db.rawQuery(
+          "SELECT $_colProfileImageUrl FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$userMail'");
+    else
+      result = await db.rawQuery(
+          "SELECT $_colProfileImageUrl FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
     return result[0].values.first;
   }
@@ -459,6 +494,7 @@ class LocalStorageHelper {
     }
   }
 
+  /// For Debugging Purpose Only
   Future<void> deleteTheExistingDatabase() async {
     try {
       final Directory directory = await getExternalStorageDirectory();

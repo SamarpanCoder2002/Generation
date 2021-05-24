@@ -212,8 +212,8 @@ class Management {
     }
   }
 
-  Future<String> uploadMediaToStorage(
-      File filePath, BuildContext context) async {
+  Future<String> uploadMediaToStorage(File filePath, BuildContext context,
+      {String reference}) async {
     try {
       String downLoadUrl;
 
@@ -221,7 +221,7 @@ class Management {
           '${FirebaseAuth.instance.currentUser.uid}${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}${DateTime.now().millisecond}';
 
       final Reference firebaseStorageRef =
-          FirebaseStorage.instance.ref().child(fileName);
+          FirebaseStorage.instance.ref(reference).child(fileName);
 
       print('Firebase Storage Reference: $firebaseStorageRef');
 
@@ -248,23 +248,19 @@ class Management {
   Future<void> deleteFilesFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
     try {
-      final String filePath =
-          fileName.split('/')[fileName.split('/').length - 1].split('?')[0];
-
-      print('Deleted File: $filePath');
-
       try {
         if (specialPurpose) await Firebase.initializeApp();
       } catch (e) {
         print(
             'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
-
         print('Firebase Already Initialized');
       }
 
-      print('File Path: $filePath');
+      final Reference reference =
+          FirebaseStorage.instance.ref().storage.refFromURL(fileName);
+      print('Reference is: $reference');
 
-      await FirebaseStorage.instance.ref().child(filePath).delete();
+      await reference.delete();
 
       print("File Deleted");
     } catch (e) {
@@ -370,6 +366,32 @@ class Management {
       }
     } catch (e) {
       print('Add Poll in Local And FireStore Error: ${e.toString()}');
+    }
+  }
+
+  Future<void> uploadNewProfilePicToFireStore(
+      {@required File file, @required BuildContext context}) async {
+    try {
+      final String _uploadedProfilePicUrl = await uploadMediaToStorage(
+          file, context,
+          reference: 'profilePictures/');
+
+      final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .get();
+
+      if (documentSnapshot.data()['profile_pic'].toString() != '')
+        await deleteFilesFromFirebaseStorage(
+            documentSnapshot.data()['profile_pic'].toString(),
+            specialPurpose: true);
+
+      await FirebaseFirestore.instance
+          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .update({
+        'profile_pic': _uploadedProfilePicUrl,
+      });
+    } catch (e) {
+      print('Profile Pic Upload Error: ${e.toString()}');
     }
   }
 }
