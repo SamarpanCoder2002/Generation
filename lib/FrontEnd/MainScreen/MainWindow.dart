@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -229,39 +230,46 @@ class _MainScreenState extends State<MainScreen> {
             drawer: Drawer(
               elevation: 10.0,
               child: Container(
-                color: Color.fromRGBO(34, 48, 60, 1),
+                color: const Color.fromRGBO(34, 48, 60, 1),
                 height: double.maxFinite,
                 width: double.maxFinite,
                 child: ListView(
                   shrinkWrap: true,
                   children: <Widget>[
-                    IconButton(
-                        icon: Icon(Icons.account_box_outlined),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Profile()));
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.settings),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SettingsWindow()));
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.feedback),
-                        onPressed: () {
-                          print("Exit Clicked");
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.exit_to_app),
-                        onPressed: () {
-                          print("Exit Clicked");
-                          SystemNavigator.pop();
-                        }),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Center(
+                      child: CircleAvatar(
+                        backgroundImage: const ExactAssetImage(
+                          "assets/logo/logo.jpg",
+                        ),
+                        radius: MediaQuery.of(context).orientation ==
+                                Orientation.portrait
+                            ? MediaQuery.of(context).size.height *
+                                (1.2 / 8) /
+                                2.5
+                            : MediaQuery.of(context).size.height *
+                                (2.5 / 8) /
+                                2.5,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    _menuOptions(Icons.person_outline_rounded, 'Profile'),
+                    SizedBox(
+                      height: 50.0,
+                    ),
+                    _menuOptions(Icons.settings, 'Setting'),
+                    SizedBox(
+                      height: 50.0,
+                    ),
+                    _menuOptions(Icons.support_outlined, 'Support'),
+                    SizedBox(
+                      height: 50.0,
+                    ),
+                    exitButtonCall(),
                   ],
                 ),
               ),
@@ -369,6 +377,74 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
           )),
+    );
+  }
+
+  Widget _menuOptions(IconData icon, String menuOptionIs) {
+    return OpenContainer(
+      transitionType: ContainerTransitionType.fadeThrough,
+      transitionDuration: Duration(
+        milliseconds: 500,
+      ),
+      closedElevation: 0.0,
+      openElevation: 3.0,
+      closedColor: const Color.fromRGBO(34, 48, 60, 1),
+      openColor: const Color.fromRGBO(34, 48, 60, 1),
+      middleColor: const Color.fromRGBO(34, 48, 60, 1),
+      openBuilder: (context, openWidget) {
+        if (menuOptionIs == 'Profile')
+          return Profile();
+        else if (menuOptionIs == 'Setting') return SettingsWindow();
+        return Center();
+      },
+      closedBuilder: (context, closeWidget) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: Colors.lightBlue,
+            ),
+            SizedBox(
+              width: 10.0,
+            ),
+            Text(
+              menuOptionIs,
+              style: TextStyle(
+                fontSize: 20.0,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget exitButtonCall() {
+    return GestureDetector(
+      onTap: () async {
+        await SystemNavigator.pop(animated: true);
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.exit_to_app_rounded,
+            color: Colors.lightBlue,
+          ),
+          SizedBox(
+            width: 10.0,
+          ),
+          Text(
+            'Exit',
+            style: TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
