@@ -458,4 +458,20 @@ class LocalStorageHelper {
       print('Remaining Links Deletion Exception: ${e.toString()}');
     }
   }
+
+  Future<void> deleteTheExistingDatabase() async {
+    try {
+      final Directory directory = await getExternalStorageDirectory();
+      print('Directory Path: ${directory.path}');
+
+      final Directory newDirectory =
+          await Directory(directory.path + '/.Databases/').create();
+      final String path = newDirectory.path + '/generation_local_storage.db';
+
+      // delete the database
+      await deleteDatabase(path);
+    } catch (e) {
+      print('Delete Database Exception: ${e.toString()}');
+    }
+  }
 }

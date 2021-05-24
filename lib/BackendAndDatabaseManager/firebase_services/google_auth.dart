@@ -55,15 +55,16 @@ class GoogleAuth {
 
           if (!responseData.exists) {
             print("Email Not Present");
-            await userNameChecking(context, userCredential.user.email);
           } else {
-            Navigator.pop(context);
-            Navigator.push(
-                context, MaterialPageRoute(builder: (_) => MainScreen()));
-
-            showAlertBox(
-                context, "Log-In Successful", "Enjoy this app", Colors.green);
+            await FirebaseFirestore.instance
+                .doc(
+                    'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                .delete()
+                .onError((e, stackTrace) => print(
+                    'In Google Auth Delete User Old Profile from Database Error: ${e.toString()}'));
           }
+
+          await userNameChecking(context, userCredential.user.email);
         }
       } else {
         print("Already Logged In");
@@ -220,6 +221,7 @@ class GoogleAuth {
                                   'total_connections': '0',
                                   'activity': {},
                                   'token': _getToken,
+                                  'profile_pic': '',
                                 });
 
                                 await _localStorageHelper

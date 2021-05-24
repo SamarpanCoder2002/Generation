@@ -85,14 +85,16 @@ class EmailAndPasswordAuth {
 
         if (!responseData.exists) {
           print("Email Not Present");
-          await userNameChecking();
         } else {
-          Navigator.pop(this._context);
-          Navigator.push(
-              this._context, MaterialPageRoute(builder: (_) => MainScreen()));
-
-          showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
+          await FirebaseFirestore.instance
+              .doc(
+                  'generation_users/${FirebaseAuth.instance.currentUser.email}')
+              .delete()
+              .onError((e, stackTrace) => print(
+                  'In Email-Password Auth Delete User Old Profile from Database Error: ${e.toString()}'));
         }
+
+        await userNameChecking();
       } else {
         print("Email not Verified");
         FirebaseAuth.instance.signOut();
@@ -244,6 +246,7 @@ class EmailAndPasswordAuth {
                                   'total_connections': '0',
                                   'activity': {},
                                   'token': _getToken,
+                                  'profile_pic': '',
                                 });
 
                                 await _localStorageHelper
