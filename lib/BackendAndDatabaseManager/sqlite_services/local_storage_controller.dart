@@ -103,7 +103,9 @@ class LocalStorageHelper {
   }
 
   Future<void> insertProfilePictureInImportant(
-      {@required String imagePath, @required String imageUrl, @required String mail}) async {
+      {@required String imagePath,
+      @required String imageUrl,
+      @required String mail}) async {
     try {
       final Database db = await this.database;
 

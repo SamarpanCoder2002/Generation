@@ -261,7 +261,8 @@ class _MainScreenState extends State<MainScreen> {
                                       "assets/logo/logo.jpg",
                                     )
                                   : FileImage(
-                                      File(ImportantThings.thisAccountProfileImagePath),
+                                      File(ImportantThings
+                                          .thisAccountProfileImagePath),
                                     ),
                           radius: MediaQuery.of(context).orientation ==
                                   Orientation.portrait

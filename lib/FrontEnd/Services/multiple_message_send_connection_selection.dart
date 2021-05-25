@@ -21,7 +21,7 @@ class SelectConnection extends StatefulWidget {
   File mediaFile;
 
   SelectConnection({
-    this.extra='',
+    this.extra = '',
     @required this.mediaType,
     this.textContent = '',
     this.mediaFile,
@@ -36,7 +36,6 @@ class _SelectConnectionState extends State<SelectConnection> {
   bool _floatingActionButtonVisible = true;
   int _totalSelected = 0;
   final FToast _fToast = FToast();
-
 
   List<bool> _selectedTile;
 
@@ -66,7 +65,6 @@ class _SelectConnectionState extends State<SelectConnection> {
   void initState() {
     _fToast.init(context);
     fetchAllUsersName();
-
 
     super.initState();
   }
@@ -226,8 +224,9 @@ class _SelectConnectionState extends State<SelectConnection> {
 
     switch (widget.mediaType) {
       case MediaTypes.Voice:
-        final String _voiceDownloadUrl =
-            await _management.uploadMediaToStorage(widget.mediaFile, context);
+        final String _voiceDownloadUrl = await _management.uploadMediaToStorage(
+            widget.mediaFile, context,
+            reference: 'multipleConnectionSendVoice/');
 
         _generalMessage = GeneralMessage(
           sendMessage: _voiceDownloadUrl,
@@ -246,7 +245,8 @@ class _SelectConnectionState extends State<SelectConnection> {
 
       case MediaTypes.Image:
         final String _imageDownLoadUrl = await _management.uploadMediaToStorage(
-            widget.mediaFile, this.context);
+            widget.mediaFile, this.context,
+            reference: 'MultipleConnectionImage/');
 
         _generalMessage = GeneralMessage(
             sendMessage: _imageDownLoadUrl,
@@ -267,7 +267,8 @@ class _SelectConnectionState extends State<SelectConnection> {
         String thumbNailPicturePath, thumbNailPicturePathUrl;
 
         final String _videoDownLoadUrl = await _management.uploadMediaToStorage(
-            widget.mediaFile, this.context);
+            widget.mediaFile, this.context,
+            reference: 'MultipleConnectionVideo/');
 
         final Directory directory = await getExternalStorageDirectory();
 
@@ -282,7 +283,8 @@ class _SelectConnectionState extends State<SelectConnection> {
             quality: 20);
 
         thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
-            File(thumbNailPicturePath), context);
+            File(thumbNailPicturePath), context,
+            reference: 'MultipleConnectionThumbnail/');
 
         _generalMessage = GeneralMessage(
             sendMessage: '$_videoDownLoadUrl+$thumbNailPicturePathUrl',
@@ -329,7 +331,8 @@ class _SelectConnectionState extends State<SelectConnection> {
 
       case MediaTypes.Document:
         final String _documentDownLoadUrl =
-            await _management.uploadMediaToStorage(widget.mediaFile, context);
+            await _management.uploadMediaToStorage(widget.mediaFile, context,
+                reference: 'MultipleConnectionDocument/');
 
         _generalMessage = GeneralMessage(
             sendMessage: _documentDownLoadUrl,

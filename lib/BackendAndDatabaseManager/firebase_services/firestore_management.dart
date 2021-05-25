@@ -156,7 +156,8 @@ class Management {
       return true;
     } else {
       try {
-        final String imageUrl = await uploadMediaToStorage(imgFile, context);
+        final String imageUrl = await uploadMediaToStorage(imgFile, context,
+            reference: 'ActivityMedia/');
 
         final String _currTime = DateTime.now().toString();
 
@@ -213,7 +214,7 @@ class Management {
   }
 
   Future<String> uploadMediaToStorage(File filePath, BuildContext context,
-      {String reference}) async {
+      {@required String reference}) async {
     try {
       String downLoadUrl;
 
@@ -279,7 +280,8 @@ class Management {
     }
   }
 
-  Future<String> addPollingToFireStore(Map<String, dynamic> map) async {
+  Future<String> uploadPollingOptionsToPollingStoreInFireStore(
+      Map<String, dynamic> map) async {
     try {
       final DocumentReference documentReference = await FirebaseFirestore
           .instance
@@ -295,7 +297,8 @@ class Management {
   Future<void> addPollIdInLocalAndFireStore(Map<String, dynamic> _pollMap,
       Map<String, dynamic> _pollMapPollOptions) async {
     try {
-      final String id = await addPollingToFireStore(_pollMapPollOptions);
+      final String id = await uploadPollingOptionsToPollingStoreInFireStore(
+          _pollMapPollOptions);
       final String _currTime = DateTime.now().toString();
 
       String _answerCollection = '';

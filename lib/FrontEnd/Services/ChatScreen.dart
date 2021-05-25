@@ -242,10 +242,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       /// Fetch Updated Real Time Data from FireStore
       _management.getDatabaseData().listen((event) async {
-
-        print('Data Fetching');
-
-
         if (event.data()['connections'].length < 0) {
           print("No Connections Present");
         } else {
@@ -291,9 +287,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   print(
                       'Cute: ${connectionSnapShot['profile_pic'].toString()}');
 
-                  showToast('Profile Picture Updating...Please Wait', fToast, fontSize: 16.0,);
+                  showToast(
+                    'Profile Picture Updating...Please Wait',
+                    fToast,
+                    fontSize: 16.0,
+                  );
 
-                  if(mounted){
+                  if (mounted) {
                     setState(() {
                       _isLoading = true;
                     });
@@ -332,13 +332,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               print(
                   'Exception Error : In Chat Screen Profile Pic Updation Error: ${e.toString()}');
 
-              if(_isLoading){
-                if(mounted){
+              if (_isLoading) {
+                if (mounted) {
                   setState(() {
                     _isLoading = false;
                   });
                 }
-                showToast('Profile Picture Update Error...', fToast, fontSize: 16.0,);
+                showToast(
+                  'Profile Picture Update Error...',
+                  fToast,
+                  fontSize: 16.0,
+                );
               }
             }
 
@@ -2122,8 +2126,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       print("Start");
     }
 
-    final String downloadUrl =
-        await _management.uploadMediaToStorage(File(recordedFilePath), context);
+    final String downloadUrl = await _management.uploadMediaToStorage(
+        File(recordedFilePath), context,
+        reference: 'chatVoices/');
 
     if (mounted) {
       setState(() {
@@ -2201,8 +2206,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       });
     }
 
-    final String _imageDownLoadUrl =
-        await _management.uploadMediaToStorage(_takeImageFile, context);
+    final String _imageDownLoadUrl = await _management
+        .uploadMediaToStorage(_takeImageFile, context, reference: 'chatMedia/');
 
     if (mounted) {
       setState(() {
@@ -2237,7 +2242,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           quality: 20);
 
       thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
-          File(thumbNailPicturePath), context);
+          File(thumbNailPicturePath), context,
+          reference: 'videoThumbNail/');
     }
 
     if (mounted) {
