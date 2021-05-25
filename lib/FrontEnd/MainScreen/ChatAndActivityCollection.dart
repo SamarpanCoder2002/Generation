@@ -38,6 +38,8 @@ class _ChatsAndActivityCollectionState
   final List<String> _allConnectionsUserName = [];
   final Map<String, dynamic> _allConnectionsLatestMessage =
       Map<String, dynamic>();
+  final Map<String, dynamic> _allConnectionsProfilePicLocalPath =
+      Map<String, dynamic>();
 
   final List<String> _allUserConnectionActivity = [];
 
@@ -273,28 +275,28 @@ class _ChatsAndActivityCollectionState
                 final bool response = await _localStorageHelper
                     .createTableForUserName(documentSnapshot['user_name']);
 
-                print(
-                    'Profile Picture Url: ${documentSnapshot['profile_pic']}');
-
-                /// Create new Hidden Folder once in desired location
-                final Directory profilePicDir =
-                    await Directory('${directory.path}/.ProfilePictures/')
-                        .create(recursive: true);
-
-                String profilePicPath =
-                    '${profilePicDir.path}${DateTime.now()}';
-
-                if (documentSnapshot['profile_pic'] != null &&
-                    documentSnapshot['profile_pic'] != '') {
-                  await _dio
-                      .download(documentSnapshot['profile_pic'].toString(),
-                          profilePicPath)
-                      .whenComplete(
-                          () => print('Profile Picture Download Complete'));
-                }else
-                  profilePicPath = '';
-
                 if (response) {
+                  print(
+                      'Profile Picture Url: ${documentSnapshot['profile_pic']}');
+
+                  /// Create new Hidden Folder once in desired location
+                  final Directory profilePicDir =
+                      await Directory('${directory.path}/.ProfilePictures/')
+                          .create(recursive: true);
+
+                  String profilePicPath =
+                      '${profilePicDir.path}${DateTime.now()}';
+
+                  if (documentSnapshot['profile_pic'] != null &&
+                      documentSnapshot['profile_pic'] != '') {
+                    await _dio
+                        .download(documentSnapshot['profile_pic'].toString(),
+                            profilePicPath)
+                        .whenComplete(
+                            () => print('Profile Picture Download Complete'));
+                  } else
+                    profilePicPath = '';
+
                   /// Data Store for General Reference
                   await _localStorageHelper.insertDataForThisAccount(
                     userMail: connectionName,
@@ -318,12 +320,25 @@ class _ChatsAndActivityCollectionState
                       documentSnapshot['user_name']);
                 }
 
+                final String _profileImageLocalPath =
+                    await _localStorageHelper.extractProfileImageUrl(
+                        userName: documentSnapshot['user_name']);
+
                 /// Insert New Connected user name at the front of local container
                 if (mounted) {
                   setState(() {
                     _allConnectionsUserName.insert(
                         0, documentSnapshot['user_name']);
+
+                    _allConnectionsProfilePicLocalPath[
+                            documentSnapshot['user_name']] =
+                        _profileImageLocalPath == null
+                            ? ''
+                            : _profileImageLocalPath;
                   });
+
+                  print(
+                      'Profile Image Map: $_allConnectionsProfilePicLocalPath');
                 }
               } else {
                 print("Already Connection Added");
@@ -365,8 +380,6 @@ class _ChatsAndActivityCollectionState
                     try {
                       _allConnectionsLatestMessage[everyUserName] =
                           _lastMessage;
-
-
                     } catch (e) {
                       print('Last Message Insert Error: ${e.toString()}');
                       _allConnectionsLatestMessage.addAll({
@@ -430,7 +443,6 @@ class _ChatsAndActivityCollectionState
       /// For Unique User Name[Because SomeTimes Duplicate UserName showing after opening the app]
       _allConnectionsUserName.toSet().toList();
       _allUserConnectionActivity.toSet().toList();
-
     } catch (e) {
       showDialog(
           context: context,
@@ -686,14 +698,27 @@ class _ChatsAndActivityCollectionState
                     transitionDuration: Duration(milliseconds: 500),
                     transitionType: ContainerTransitionType.fadeThrough,
                     openBuilder: (_, __) {
-                      return PreviewImageScreen(
-                          imageFile: File('assets/logo/logo.jpg'));
+                      return this._allConnectionsProfilePicLocalPath[
+                                  _userName] !=
+                              ''
+                          ? PreviewImageScreen(
+                              imageFile: File(
+                                  this._allConnectionsProfilePicLocalPath[
+                                      _userName]))
+                          : Center(
+                              child: Text('Error'),
+                            );
                     },
                     closedBuilder: (_, __) {
                       return CircleAvatar(
                         radius: 30.0,
-                        backgroundImage:
-                            ExactAssetImage('assets/logo/logo.jpg'),
+                        backgroundImage: this
+                                        ._allConnectionsProfilePicLocalPath[
+                                    _userName] ==
+                                ''
+                            ? ExactAssetImage('assets/logo/logo.jpg')
+                            : FileImage(File(this
+                                ._allConnectionsProfilePicLocalPath[_userName]), scale: 0.5,),
                       );
                     },
                   ),
