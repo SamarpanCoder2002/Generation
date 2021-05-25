@@ -28,7 +28,8 @@ class LocalStorageHelper {
   final String _allImportantDataStore = '__ImportantDataTable__';
   final String _colAccountUserName = 'User_Name';
   final String _colAccountUserMail = 'User_Mail';
-  final String _colProfileImageUrl = "DP_Url";
+  final String _colProfileImagePath = "DP_Path";
+  final String _colProfileImageUrl = 'DP_Url';
 
   final String _colActivitySpecial = 'ActivitySpecialOptions';
 
@@ -75,7 +76,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImageUrl TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -86,7 +87,8 @@ class LocalStorageHelper {
     @required String userName,
     @required String userMail,
     @required String userToken,
-    String profileImage = '',
+    String profileImagePath = '',
+    String profileImageUrl = '',
   }) async {
     Database db = await this.database;
     Map<String, dynamic> _accountData = Map<String, dynamic>();
@@ -94,7 +96,8 @@ class LocalStorageHelper {
     _accountData[_colAccountUserName] = userName;
     _accountData[_colAccountUserMail] = userMail;
     _accountData[_colToken] = userToken;
-    _accountData[_colProfileImageUrl] = profileImage;
+    _accountData[_colProfileImagePath] = profileImagePath;
+    _accountData[_colProfileImageUrl] = profileImageUrl;
 
     await db.insert(_allImportantDataStore, _accountData);
   }
@@ -105,7 +108,7 @@ class LocalStorageHelper {
       final Database db = await this.database;
 
       final int result = await db.rawUpdate(
-          "UPDATE $_allImportantDataStore SET $_colProfileImageUrl = '$imagePath' WHERE $_colAccountUserMail = '$mail'");
+          "UPDATE $_allImportantDataStore SET $_colProfileImagePath = '$imagePath' WHERE $_colAccountUserMail = '$mail'");
 
       result == 1
           ? print('Success: New Profile Picture Update Successful')
@@ -155,10 +158,10 @@ class LocalStorageHelper {
 
     if (userMail != '')
       result = await db.rawQuery(
-          "SELECT $_colProfileImageUrl FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$userMail'");
+          "SELECT $_colProfileImagePath FROM $_allImportantDataStore WHERE $_colAccountUserMail = '$userMail'");
     else
       result = await db.rawQuery(
-          "SELECT $_colProfileImageUrl FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
+          "SELECT $_colProfileImagePath FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
     return result[0].values.first;
   }
@@ -182,7 +185,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT, $_colAbout TEXT, $_colProfileImageUrl TEXT, $_colEmail TEXT)");
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT, $_colAbout TEXT, $_colProfileImagePath TEXT, $_colEmail TEXT)");
       return true;
     } catch (e) {
       print(
@@ -324,7 +327,7 @@ class LocalStorageHelper {
     _helperMap[_colDate] = "";
     _helperMap[_colTime] = "";
     _helperMap[_colAbout] = _about;
-    _helperMap[_colProfileImageUrl] = "";
+    _helperMap[_colProfileImagePath] = "";
     _helperMap[_colEmail] = _email;
 
     /// Result Insert to DB
@@ -351,7 +354,7 @@ class LocalStorageHelper {
     _helperMap[_colDate] = _dateIS;
     _helperMap[_colTime] = _time;
     _helperMap[_colAbout] = "";
-    _helperMap[_colProfileImageUrl] = "";
+    _helperMap[_colProfileImagePath] = "";
     _helperMap[_colEmail] = "";
 
     /// Result Insert to DB
@@ -411,12 +414,8 @@ class LocalStorageHelper {
 
     if (totalMessages == 1) return null;
 
-    final List<Map<String, Object>> result =
-        await db.transaction<List<Map<String, Object>>>((txn) {
-      print('txn: $txn');
-      return txn.rawQuery(
-          "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
-    });
+    final List<Map<String, Object>> result = await db.rawQuery(
+        "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
 
     final String _time = result[0][_colTime].toString().split('+')[0];
 

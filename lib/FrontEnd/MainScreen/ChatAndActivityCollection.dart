@@ -23,7 +23,6 @@ import 'package:generation/FrontEnd/Activity/activity_view.dart';
 import 'package:generation/FrontEnd/Services/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
-
 class ChatsAndActivityCollection extends StatefulWidget {
   @override
   _ChatsAndActivityCollectionState createState() =>
@@ -69,6 +68,8 @@ class _ChatsAndActivityCollectionState
     /// Storage Request
     final PermissionStatus storagePermissionStatus =
         await Permission.storage.request();
+
+    final Directory directory = await getExternalStorageDirectory();
 
     /// Listen to the realTime Data Fetch
     _management.getDatabaseData().listen((event) async {
@@ -133,8 +134,6 @@ class _ChatsAndActivityCollectionState
             if (_oldActivity != everyActivity) {
               _oldActivity = everyActivity;
               if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
-                final Directory directory = await getExternalStorageDirectory();
-
                 final String currTime = DateTime.now().toString();
 
                 if (everyActivity.values.first.toString().split('++++++')[1] ==
@@ -274,13 +273,37 @@ class _ChatsAndActivityCollectionState
                 final bool response = await _localStorageHelper
                     .createTableForUserName(documentSnapshot['user_name']);
 
+                print(
+                    'Profile Picture Url: ${documentSnapshot['profile_pic']}');
+
+                /// Create new Hidden Folder once in desired location
+                final Directory profilePicDir =
+                    await Directory('${directory.path}/.ProfilePictures/')
+                        .create(recursive: true);
+
+                String profilePicPath =
+                    '${profilePicDir.path}${DateTime.now()}';
+
+                if (documentSnapshot['profile_pic'] != null &&
+                    documentSnapshot['profile_pic'] != '') {
+                  await _dio
+                      .download(documentSnapshot['profile_pic'].toString(),
+                          profilePicPath)
+                      .whenComplete(
+                          () => print('Profile Picture Download Complete'));
+                }else
+                  profilePicPath = '';
+
                 if (response) {
                   /// Data Store for General Reference
                   await _localStorageHelper.insertDataForThisAccount(
                     userMail: connectionName,
                     userName: documentSnapshot['user_name'],
                     userToken: documentSnapshot['token'],
-                    profileImage: documentSnapshot['profile_pic'],
+                    profileImagePath: profilePicPath,
+                    profileImageUrl: documentSnapshot['profile_pic'] == null
+                        ? ''
+                        : documentSnapshot['profile_pic'].toString(),
                   );
 
                   /// Insert Additional Data to user Specific SqLite Database Table
@@ -342,6 +365,8 @@ class _ChatsAndActivityCollectionState
                     try {
                       _allConnectionsLatestMessage[everyUserName] =
                           _lastMessage;
+
+
                     } catch (e) {
                       print('Last Message Insert Error: ${e.toString()}');
                       _allConnectionsLatestMessage.addAll({
@@ -375,7 +400,8 @@ class _ChatsAndActivityCollectionState
         if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
           if (mounted) {
             setState(() {
-              if (userNameMap.values.first == ImportantThings.thisAccountUserName)
+              if (userNameMap.values.first ==
+                  ImportantThings.thisAccountUserName)
                 _allUserConnectionActivity.insert(0, userNameMap.values.first);
               else
                 _allUserConnectionActivity.add(userNameMap.values.first);
@@ -404,6 +430,7 @@ class _ChatsAndActivityCollectionState
       /// For Unique User Name[Because SomeTimes Duplicate UserName showing after opening the app]
       _allConnectionsUserName.toSet().toList();
       _allUserConnectionActivity.toSet().toList();
+
     } catch (e) {
       showDialog(
           context: context,

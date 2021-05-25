@@ -68,7 +68,7 @@ class _ProfileState extends State<Profile> {
   Widget firstPortion(BuildContext context) {
     return Container(
       //color: Colors.yellow,
-      height: 110,
+      height: 130,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
