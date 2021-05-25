@@ -956,6 +956,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   ),
                   onTap: () {
                     print("Pic Pressed");
+                    widget._connectionProfileImageLocalPath == ''
+                        ? Center(
+                            child: Text(
+                              'No Profile Picture',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 20.0,
+                              ),
+                            ),
+                          )
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => PreviewImageScreen(
+                                    imageFile: File(widget
+                                        ._connectionProfileImageLocalPath))));
                   },
                 ),
               ),
