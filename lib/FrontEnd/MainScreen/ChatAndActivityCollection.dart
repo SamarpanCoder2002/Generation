@@ -275,53 +275,58 @@ class _ChatsAndActivityCollectionState
                 final bool response = await _localStorageHelper
                     .createTableForUserName(documentSnapshot['user_name']);
 
-                if (response) {
+                try {
+                  if (response) {
+                    print(
+                        'Profile Picture Url: ${documentSnapshot['profile_pic']}');
+
+                    /// Create new Hidden Folder once in desired location
+                    final Directory profilePicDir =
+                        await Directory('${directory.path}/.ProfilePictures/')
+                            .create(recursive: true);
+
+                    String profilePicPath =
+                        '${profilePicDir.path}${DateTime.now()}';
+
+                    if (documentSnapshot['profile_pic'] != null &&
+                        documentSnapshot['profile_pic'] != '') {
+                      await _dio
+                          .download(documentSnapshot['profile_pic'].toString(),
+                              profilePicPath)
+                          .whenComplete(
+                              () => print('Profile Picture Download Complete'));
+                    } else
+                      profilePicPath = '';
+
+                    /// Data Store for General Reference
+                    await _localStorageHelper.insertDataForThisAccount(
+                      userMail: connectionName,
+                      userName: documentSnapshot['user_name'],
+                      userToken: documentSnapshot['token'],
+                      profileImagePath: profilePicPath,
+                      profileImageUrl: documentSnapshot['profile_pic'] == null
+                          ? ''
+                          : documentSnapshot['profile_pic'].toString(),
+                    );
+
+                    /// Insert Additional Data to user Specific SqLite Database Table
+                    await _localStorageHelper.insertAdditionalData(
+                      documentSnapshot['user_name'],
+                      documentSnapshot['about'],
+                      documentSnapshot.id,
+                    );
+
+                    /// Make a new table to this new connected user Activity
+                    await _localStorageHelper.createTableForUserActivity(
+                        documentSnapshot['user_name']);
+                  }
+                } catch (e) {
                   print(
-                      'Profile Picture Url: ${documentSnapshot['profile_pic']}');
-
-                  /// Create new Hidden Folder once in desired location
-                  final Directory profilePicDir =
-                      await Directory('${directory.path}/.ProfilePictures/')
-                          .create(recursive: true);
-
-                  String profilePicPath =
-                      '${profilePicDir.path}${DateTime.now()}';
-
-                  if (documentSnapshot['profile_pic'] != null &&
-                      documentSnapshot['profile_pic'] != '') {
-                    await _dio
-                        .download(documentSnapshot['profile_pic'].toString(),
-                            profilePicPath)
-                        .whenComplete(
-                            () => print('Profile Picture Download Complete'));
-                  } else
-                    profilePicPath = '';
-
-                  /// Data Store for General Reference
-                  await _localStorageHelper.insertDataForThisAccount(
-                    userMail: connectionName,
-                    userName: documentSnapshot['user_name'],
-                    userToken: documentSnapshot['token'],
-                    profileImagePath: profilePicPath,
-                    profileImageUrl: documentSnapshot['profile_pic'] == null
-                        ? ''
-                        : documentSnapshot['profile_pic'].toString(),
-                  );
-
-                  /// Insert Additional Data to user Specific SqLite Database Table
-                  await _localStorageHelper.insertAdditionalData(
-                    documentSnapshot['user_name'],
-                    documentSnapshot['about'],
-                    documentSnapshot.id,
-                  );
-
-                  /// Make a new table to this new connected user Activity
-                  await _localStorageHelper.createTableForUserActivity(
-                      documentSnapshot['user_name']);
+                      'Error New Connected Connection Data Entry Error: ${e.toString()}');
                 }
 
                 final String _profileImageLocalPath =
-                    await _localStorageHelper.extractProfileImageUrl(
+                    await _localStorageHelper.extractProfileImageLocalPath(
                         userName: documentSnapshot['user_name']);
 
                 /// Insert New Connected user name at the front of local container
@@ -336,9 +341,6 @@ class _ChatsAndActivityCollectionState
                             ? ''
                             : _profileImageLocalPath;
                   });
-
-                  print(
-                      'Profile Image Map: $_allConnectionsProfilePicLocalPath');
                 }
               } else {
                 print("Already Connection Added");
@@ -556,12 +558,14 @@ class _ChatsAndActivityCollectionState
                 },
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
-                    backgroundImage: ImportantThings.thisAccountImageUrl == ''
+                    backgroundImage: ImportantThings
+                                .thisAccountProfileImagePath ==
+                            ''
                         ? const ExactAssetImage(
                             "assets/logo/logo.jpg",
                           )
                         : FileImage(
-                            File(ImportantThings.thisAccountImageUrl),
+                            File(ImportantThings.thisAccountProfileImagePath),
                           ),
                     radius: MediaQuery.of(context).orientation ==
                             Orientation.portrait
@@ -717,8 +721,11 @@ class _ChatsAndActivityCollectionState
                                     _userName] ==
                                 ''
                             ? ExactAssetImage('assets/logo/logo.jpg')
-                            : FileImage(File(this
-                                ._allConnectionsProfilePicLocalPath[_userName]), scale: 0.5,),
+                            : FileImage(
+                                File(this._allConnectionsProfilePicLocalPath[
+                                    _userName]),
+                                scale: 0.5,
+                              ),
                       );
                     },
                   ),
@@ -759,9 +766,29 @@ class _ChatsAndActivityCollectionState
                         }
                       }
                     });
+
+                    _localStorageHelper
+                        .extractProfileImageLocalPath(userName: _userName)
+                        .then((String profileImageLocalPath) {
+                      if (this._allConnectionsProfilePicLocalPath[_userName] !=
+                          profileImageLocalPath) {
+                        if (mounted) {
+                          setState(() {
+                            this._allConnectionsProfilePicLocalPath[_userName] =
+                                profileImageLocalPath;
+                          });
+                        }
+                      }
+                    });
                   },
                   openBuilder: (context, openWidget) {
-                    return ChatScreenSetUp(_userName);
+                    return ChatScreenSetUp(
+                        _userName,
+                        this._allConnectionsProfilePicLocalPath[_userName] ==
+                                null
+                            ? ''
+                            : this
+                                ._allConnectionsProfilePicLocalPath[_userName]);
                   },
                   closedBuilder: (context, closeWidget) {
                     return Container(

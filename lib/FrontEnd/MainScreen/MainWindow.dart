@@ -256,12 +256,12 @@ class _MainScreenState extends State<MainScreen> {
                       child: Center(
                         child: CircleAvatar(
                           backgroundImage:
-                              ImportantThings.thisAccountImageUrl == ''
+                              ImportantThings.thisAccountProfileImagePath == ''
                                   ? const ExactAssetImage(
                                       "assets/logo/logo.jpg",
                                     )
                                   : FileImage(
-                                      File(ImportantThings.thisAccountImageUrl),
+                                      File(ImportantThings.thisAccountProfileImagePath),
                                     ),
                           radius: MediaQuery.of(context).orientation ==
                                   Orientation.portrait

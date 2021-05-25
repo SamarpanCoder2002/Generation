@@ -44,9 +44,10 @@ import 'package:generation/FrontEnd/Services/multiple_message_send_connection_se
 
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
-  String _userName;
+  final String _userName;
+  String _connectionProfileImageLocalPath;
 
-  ChatScreenSetUp(this._userName);
+  ChatScreenSetUp(this._userName, this._connectionProfileImageLocalPath);
 
   @override
   _ChatScreenSetUpState createState() => _ChatScreenSetUpState();
@@ -240,12 +241,107 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       double _positionToScroll = 100;
 
       /// Fetch Updated Real Time Data from FireStore
-      _management.getDatabaseData().listen((event) {
+      _management.getDatabaseData().listen((event) async {
+
+        print('Data Fetching');
+
+
         if (event.data()['connections'].length < 0) {
           print("No Connections Present");
         } else {
           /// Checking If Sender Mail Present or Not
           if (event.data()['connections'].containsKey(this._senderMail)) {
+            try {
+              /// For Profile Pic Updation Purpose
+              final String _profilePicUrl = await _localStorageHelper
+                  .extractProfilePicUrl(userName: widget._userName);
+              final String _connectionMail =
+                  await _localStorageHelper.extractImportantDataFromThatAccount(
+                      userName: widget._userName);
+
+              final DocumentSnapshot connectionSnapShot =
+                  await FirebaseFirestore.instance
+                      .doc('generation_users/$_connectionMail')
+                      .get();
+
+              /// Profile Picture Updation Check
+              if (connectionSnapShot.data()['profile_pic'] != _profilePicUrl) {
+                final Directory directory = await getExternalStorageDirectory();
+
+                /// Create new Hidden Folder once in desired location
+                final Directory profilePicDir =
+                    await Directory('${directory.path}/.ProfilePictures/')
+                        .create(recursive: true);
+
+                String profilePicPath =
+                    '${profilePicDir.path}${DateTime.now()}';
+
+                /// If Updated ProfilePic not null and Empty String
+                if (connectionSnapShot.data()['profile_pic'].toString() !=
+                        null &&
+                    connectionSnapShot.data()['profile_pic'].toString() != '') {
+                  print('Path: ${widget._connectionProfileImageLocalPath}');
+
+                  if (widget._connectionProfileImageLocalPath != '')
+                    await File(widget._connectionProfileImageLocalPath)
+                        .delete(recursive: true)
+                        .whenComplete(() => print(
+                            'Old Profile Image of Connection Deletion Complete'));
+
+                  print(
+                      'Cute: ${connectionSnapShot['profile_pic'].toString()}');
+
+                  showToast('Profile Picture Updating...Please Wait', fToast, fontSize: 16.0,);
+
+                  if(mounted){
+                    setState(() {
+                      _isLoading = true;
+                    });
+                  }
+
+                  await _dio
+                      .download(connectionSnapShot['profile_pic'].toString(),
+                          profilePicPath)
+                      .whenComplete(() {
+                    print('Profile Picture Download Complete');
+
+                    if (mounted) {
+                      setState(() {
+                        widget._connectionProfileImageLocalPath =
+                            profilePicPath;
+
+                        _isLoading = false;
+                      });
+                    }
+                  });
+                } else
+                  profilePicPath = '';
+
+                /// Update Local And Remote Profile Image Path
+                await _localStorageHelper.insertProfilePictureInImportant(
+                    imagePath: profilePicPath,
+                    imageUrl: connectionSnapShot
+                                .data()['profile_pic']
+                                .toString() !=
+                            null
+                        ? connectionSnapShot.data()['profile_pic'].toString()
+                        : '',
+                    mail: _connectionMail);
+              }
+            } catch (e) {
+              print(
+                  'Exception Error : In Chat Screen Profile Pic Updation Error: ${e.toString()}');
+
+              if(_isLoading){
+                if(mounted){
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+                showToast('Profile Picture Update Error...', fToast, fontSize: 16.0,);
+              }
+            }
+
             /// Take Corresponding messages of that Contact
             List<dynamic> messages = [];
             messages = event.data()['connections'][this._senderMail];
@@ -846,9 +942,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 child: GestureDetector(
                   child: CircleAvatar(
                     radius: 23.0,
-                    backgroundImage: ExactAssetImage(
-                      "assets/logo/logo.jpg",
-                    ),
+                    backgroundImage:
+                        widget._connectionProfileImageLocalPath == ''
+                            ? ExactAssetImage(
+                                "assets/logo/logo.jpg",
+                              )
+                            : FileImage(
+                                File(widget._connectionProfileImageLocalPath)),
                   ),
                   onTap: () {
                     print("Pic Pressed");
@@ -1950,8 +2050,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         //
 
         /// Data Store in Firestore
-        await _management.addConversationMessages(
-            this._senderMail, sendingMessages, documentSnapShot.data()['connections']);
+        await _management.addConversationMessages(this._senderMail,
+            sendingMessages, documentSnapShot.data()['connections']);
 
         final String _textToSend = _inputTextController.text;
 
@@ -2075,8 +2175,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.last.values.first.toString());
 
       /// Data Store in FireStore
-      await _management.addConversationMessages(
-          this._senderMail, sendingMessages,documentSnapShot.data()['connections']);
+      await _management.addConversationMessages(this._senderMail,
+          sendingMessages, documentSnapShot.data()['connections']);
 
       if (mounted) {
         setState(() {
@@ -2199,8 +2299,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.last.values.first.toString());
 
       // Data Store in Firestore
-      await _management.addConversationMessages(
-          this._senderMail, _sendingMessages,documentSnapShot.data()['connections']);
+      await _management.addConversationMessages(this._senderMail,
+          _sendingMessages, documentSnapShot.data()['connections']);
 
       if (mounted) {
         setState(() {
@@ -2274,8 +2374,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _chatContainer.last.values.first.toString());
 
       // Data Store in Firestore
-      await _management.addConversationMessages(
-          this._senderMail, _sendingMessages, documentSnapShot.data()['connections']);
+      await _management.addConversationMessages(this._senderMail,
+          _sendingMessages, documentSnapShot.data()['connections']);
 
       setState(() {
         _isLoading = false;

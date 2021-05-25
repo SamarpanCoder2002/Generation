@@ -370,14 +370,16 @@ class Management {
   }
 
   Future<void> uploadNewProfilePicToFireStore(
-      {@required File file, @required BuildContext context}) async {
+      {@required File file,
+      @required BuildContext context,
+      @required String userMail}) async {
     try {
       final String _uploadedProfilePicUrl = await uploadMediaToStorage(
           file, context,
           reference: 'profilePictures/');
 
       final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .doc('generation_users/$userMail')
           .get();
 
       if (documentSnapshot.data()['profile_pic'].toString() != '')
@@ -385,8 +387,13 @@ class Management {
             documentSnapshot.data()['profile_pic'].toString(),
             specialPurpose: true);
 
+      await localStorageHelper.insertProfilePictureInImportant(
+          imagePath: file.path,
+          imageUrl: _uploadedProfilePicUrl,
+          mail: FirebaseAuth.instance.currentUser.email);
+
       await FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .doc('generation_users/$userMail')
           .update({
         'profile_pic': _uploadedProfilePicUrl,
       });

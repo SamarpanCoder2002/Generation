@@ -103,12 +103,12 @@ class LocalStorageHelper {
   }
 
   Future<void> insertProfilePictureInImportant(
-      {@required String imagePath, @required String mail}) async {
+      {@required String imagePath, @required String imageUrl, @required String mail}) async {
     try {
       final Database db = await this.database;
 
       final int result = await db.rawUpdate(
-          "UPDATE $_allImportantDataStore SET $_colProfileImagePath = '$imagePath' WHERE $_colAccountUserMail = '$mail'");
+          "UPDATE $_allImportantDataStore SET $_colProfileImagePath = '$imagePath', $_colProfileImageUrl = '$imageUrl' WHERE $_colAccountUserMail = '$mail'");
 
       result == 1
           ? print('Success: New Profile Picture Update Successful')
@@ -150,7 +150,7 @@ class LocalStorageHelper {
     return result[0].values.first;
   }
 
-  Future<String> extractProfileImageUrl(
+  Future<String> extractProfileImageLocalPath(
       {String userMail = '', String userName = ''}) async {
     final Database db = await this.database;
 
@@ -164,6 +164,16 @@ class LocalStorageHelper {
           "SELECT $_colProfileImagePath FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
     return result[0].values.first;
+  }
+
+  Future<String> extractProfilePicUrl({@required String userName}) async {
+    final Database db = await this.database;
+
+    final List<Map<String, Object>> result = await db.rawQuery(
+        "SELECT $_colProfileImageUrl FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
+
+    if (result != null) return result[0].values.first;
+    return '';
   }
 
   Future<List<Map<String, Object>>> extractAllUsersName(

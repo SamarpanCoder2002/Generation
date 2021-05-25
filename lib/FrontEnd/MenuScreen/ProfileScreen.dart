@@ -90,17 +90,20 @@ class _ProfileState extends State<Profile> {
                   transitionType: ContainerTransitionType.fadeThrough,
                   openBuilder: (context, openWidget) {
                     return PreviewImageScreen(
-                      imageFile: File(ImportantThings.thisAccountImageUrl),
+                      imageFile:
+                          File(ImportantThings.thisAccountProfileImagePath),
                     );
                   },
                   closedBuilder: (context, closeWidget) {
                     return CircleAvatar(
-                      backgroundImage: ImportantThings.thisAccountImageUrl == ''
+                      backgroundImage: ImportantThings
+                                  .thisAccountProfileImagePath ==
+                              ''
                           ? const ExactAssetImage(
                               "assets/logo/logo.jpg",
                             )
                           : FileImage(
-                              File(ImportantThings.thisAccountImageUrl),
+                              File(ImportantThings.thisAccountProfileImagePath),
                             ),
                       radius: MediaQuery.of(context).orientation ==
                               Orientation.portrait
@@ -304,15 +307,13 @@ class _ProfileState extends State<Profile> {
     }
 
     await _management.uploadNewProfilePicToFireStore(
-        file: File(_pickedFile.path), context: context);
+        file: File(_pickedFile.path),
+        context: context,
+        userMail: FirebaseAuth.instance.currentUser.email);
 
-    await _localStorageHelper.insertProfilePictureInImportant(
-        imagePath: File(_pickedFile.path).path,
-        mail: FirebaseAuth.instance.currentUser.email);
-
-    if (ImportantThings.thisAccountImageUrl != '') {
+    if (ImportantThings.thisAccountProfileImagePath != '') {
       try {
-        await File(ImportantThings.thisAccountImageUrl)
+        await File(ImportantThings.thisAccountProfileImagePath)
             .delete(recursive: true)
             .whenComplete(() => print('Old Profile Image Deleted'));
       } catch (e) {
@@ -323,7 +324,8 @@ class _ProfileState extends State<Profile> {
 
     if (mounted) {
       setState(() {
-        ImportantThings.thisAccountImageUrl = File(_pickedFile.path).path;
+        ImportantThings.thisAccountProfileImagePath =
+            File(_pickedFile.path).path;
         _isLoading = false;
       });
     }
