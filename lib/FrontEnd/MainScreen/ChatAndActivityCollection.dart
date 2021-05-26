@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/static_important_things.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -22,6 +21,8 @@ import 'package:generation/FrontEnd/Services/search_screen.dart';
 import 'package:generation/FrontEnd/Activity/activity_view.dart';
 import 'package:generation/FrontEnd/Services/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/connection_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/this_account_important_data.dart';
 
 class ChatsAndActivityCollection extends StatefulWidget {
   @override
@@ -37,8 +38,6 @@ class _ChatsAndActivityCollectionState
   /// Initialize Some Containers to Store data in Future
   final List<String> _allConnectionsUserName = [];
   final Map<String, dynamic> _allConnectionsLatestMessage =
-      Map<String, dynamic>();
-  final Map<String, dynamic> _allConnectionsProfilePicLocalPath =
       Map<String, dynamic>();
 
   final List<String> _allUserConnectionActivity = [];
@@ -61,6 +60,11 @@ class _ChatsAndActivityCollectionState
   final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
   void _fetchRealTimeData() async {
+    await ProfileImageManagement.userProfileNameAndImageExtractor();
+
+    print(
+        'Now it: ${ProfileImageManagement.allConnectionsProfilePicLocalPath}');
+
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -87,7 +91,7 @@ class _ChatsAndActivityCollectionState
       if (!_allUserConnectionActivity.contains(_thisAccountUserName)) {
         if (mounted) {
           setState(() {
-            _allUserConnectionActivity.add(_thisAccountUserName);
+            _allUserConnectionActivity.insert(0, _thisAccountUserName);
           });
         }
       }
@@ -131,6 +135,8 @@ class _ChatsAndActivityCollectionState
               });
             });
           }
+
+          particularConnectionActivity.toSet().toList();// For Avoid Duplicate Inclusion of Activity
 
           particularConnectionActivity.forEach((everyActivity) async {
             if (_oldActivity != everyActivity) {
@@ -303,17 +309,11 @@ class _ChatsAndActivityCollectionState
                       userMail: connectionName,
                       userName: documentSnapshot['user_name'],
                       userToken: documentSnapshot['token'],
+                      userAbout: documentSnapshot['about'],
                       profileImagePath: profilePicPath,
                       profileImageUrl: documentSnapshot['profile_pic'] == null
                           ? ''
                           : documentSnapshot['profile_pic'].toString(),
-                    );
-
-                    /// Insert Additional Data to user Specific SqLite Database Table
-                    await _localStorageHelper.insertAdditionalData(
-                      documentSnapshot['user_name'],
-                      documentSnapshot['about'],
-                      documentSnapshot.id,
                     );
 
                     /// Make a new table to this new connected user Activity
@@ -325,21 +325,11 @@ class _ChatsAndActivityCollectionState
                       'Error New Connected Connection Data Entry Error: ${e.toString()}');
                 }
 
-                final String _profileImageLocalPath =
-                    await _localStorageHelper.extractProfileImageLocalPath(
-                        userName: documentSnapshot['user_name']);
-
                 /// Insert New Connected user name at the front of local container
                 if (mounted) {
                   setState(() {
                     _allConnectionsUserName.insert(
                         0, documentSnapshot['user_name']);
-
-                    _allConnectionsProfilePicLocalPath[
-                            documentSnapshot['user_name']] =
-                        _profileImageLocalPath == null
-                            ? ''
-                            : _profileImageLocalPath;
                   });
                 }
               } else {
@@ -367,7 +357,8 @@ class _ChatsAndActivityCollectionState
                       await _localStorageHelper
                           .fetchLatestMessage(everyUserName);
 
-                  _lastMessage.add(takeLocalData);
+                  if (takeLocalData != null && takeLocalData.isNotEmpty)
+                    _lastMessage.add(takeLocalData);
                 } else {
                   _allRemainingMessages.forEach((everyMessage) {
                     _lastMessage.add({
@@ -379,14 +370,9 @@ class _ChatsAndActivityCollectionState
 
                 if (mounted) {
                   setState(() {
-                    try {
+                    if (_lastMessage != null && _lastMessage.isNotEmpty) {
                       _allConnectionsLatestMessage[everyUserName] =
                           _lastMessage;
-                    } catch (e) {
-                      print('Last Message Insert Error: ${e.toString()}');
-                      _allConnectionsLatestMessage.addAll({
-                        everyUserName: _lastMessage,
-                      });
                     }
                   });
                 }
@@ -547,6 +533,7 @@ class _ChatsAndActivityCollectionState
                 openColor: const Color.fromRGBO(34, 48, 60, 1),
                 middleColor: const Color.fromRGBO(34, 48, 60, 1),
                 closedElevation: 0.0,
+                closedShape: CircleBorder(),
                 transitionDuration: Duration(
                   milliseconds: 500,
                 ),
@@ -558,15 +545,8 @@ class _ChatsAndActivityCollectionState
                 },
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
-                    backgroundImage: ImportantThings
-                                .thisAccountProfileImagePath ==
-                            ''
-                        ? const ExactAssetImage(
-                            "assets/logo/logo.jpg",
-                          )
-                        : FileImage(
-                            File(ImportantThings.thisAccountProfileImagePath),
-                          ),
+                    backgroundImage:
+                        getProperImageProviderForConnectionActivity(index),
                     radius: MediaQuery.of(context).orientation ==
                             Orientation.portrait
                         ? MediaQuery.of(context).size.height * (1.2 / 8) / 2.5
@@ -697,35 +677,35 @@ class _ChatsAndActivityCollectionState
                     closedColor: const Color.fromRGBO(31, 51, 71, 1),
                     openColor: const Color.fromRGBO(31, 51, 71, 1),
                     middleColor: const Color.fromRGBO(31, 51, 71, 1),
+                    closedShape: CircleBorder(),
                     closedElevation: 0.0,
-                    openElevation: 0.0,
                     transitionDuration: Duration(milliseconds: 500),
                     transitionType: ContainerTransitionType.fadeThrough,
                     openBuilder: (_, __) {
-                      return this._allConnectionsProfilePicLocalPath[
+                      return ProfileImageManagement
+                                      .allConnectionsProfilePicLocalPath[
                                   _userName] !=
                               ''
                           ? PreviewImageScreen(
-                              imageFile: File(
-                                  this._allConnectionsProfilePicLocalPath[
-                                      _userName]))
+                              imageFile: File(ProfileImageManagement
+                                      .allConnectionsProfilePicLocalPath[
+                                  _userName]))
                           : Center(
-                              child: Text('Error'),
+                              child: Text(
+                                'Error',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 20.0,
+                                ),
+                              ),
                             );
                     },
                     closedBuilder: (_, __) {
                       return CircleAvatar(
                         radius: 30.0,
-                        backgroundImage: this
-                                        ._allConnectionsProfilePicLocalPath[
-                                    _userName] ==
-                                ''
-                            ? ExactAssetImage('assets/logo/logo.jpg')
-                            : FileImage(
-                                File(this._allConnectionsProfilePicLocalPath[
-                                    _userName]),
-                                scale: 0.5,
-                              ),
+                        backgroundImage:
+                            getProperImageProviderForConnectionsCollection(
+                                _userName),
                       );
                     },
                   ),
@@ -751,11 +731,12 @@ class _ChatsAndActivityCollectionState
                       }
                     }
 
-                    // Irrespectively make changes when a chat just Close
+                    /// Irrespectively make changes when a chat just Close
                     _localStorageHelper
                         .fetchLatestMessage(_userName)
                         .then((Map<String, String> takeLocalData) {
                       if (takeLocalData != null &&
+                          takeLocalData.isNotEmpty &&
                           takeLocalData.values.toString().split('+')[0] != '') {
                         _allConnectionsLatestMessage[_userName].clear();
                         if (mounted) {
@@ -770,12 +751,17 @@ class _ChatsAndActivityCollectionState
                     _localStorageHelper
                         .extractProfileImageLocalPath(userName: _userName)
                         .then((String profileImageLocalPath) {
-                      if (this._allConnectionsProfilePicLocalPath[_userName] !=
+                      print(
+                          'All Closed: ${ProfileImageManagement.allConnectionsProfilePicLocalPath[_userName]}');
+
+                      if (ProfileImageManagement
+                              .allConnectionsProfilePicLocalPath[_userName] !=
                           profileImageLocalPath) {
                         if (mounted) {
                           setState(() {
-                            this._allConnectionsProfilePicLocalPath[_userName] =
-                                profileImageLocalPath;
+                            ProfileImageManagement
+                                    .allConnectionsProfilePicLocalPath[
+                                _userName] = profileImageLocalPath;
                           });
                         }
                       }
@@ -784,11 +770,13 @@ class _ChatsAndActivityCollectionState
                   openBuilder: (context, openWidget) {
                     return ChatScreenSetUp(
                         _userName,
-                        this._allConnectionsProfilePicLocalPath[_userName] ==
+                        ProfileImageManagement
+                                        .allConnectionsProfilePicLocalPath[
+                                    _userName] ==
                                 null
                             ? ''
-                            : this
-                                ._allConnectionsProfilePicLocalPath[_userName]);
+                            : ProfileImageManagement
+                                .allConnectionsProfilePicLocalPath[_userName]);
                   },
                   closedBuilder: (context, closeWidget) {
                     return Container(
@@ -813,6 +801,7 @@ class _ChatsAndActivityCollectionState
                           ),
                           // For Extract latest Conversation Message
                           _latestDataForConnectionExtractPerfectly(_userName)
+                          //Text('Samarpan'),
                         ],
                       ),
                     );
@@ -831,6 +820,8 @@ class _ChatsAndActivityCollectionState
                         // For Extract latest Conversation Time
                         _latestDataForConnectionExtractPerfectly(_userName,
                             purpose: 'lastConnectionTime'),
+
+                        //Text('12:00'),
                         SizedBox(
                           height: 10.0,
                         ),
@@ -853,57 +844,64 @@ class _ChatsAndActivityCollectionState
   /// Latest Message Extract
   Widget _latestDataForConnectionExtractPerfectly(String _userName,
       {String purpose = 'lastMessage'}) {
-    final List<Map<String, String>> _allLatestMessages =
-        _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
+    if (_allConnectionsLatestMessage[_userName] != null &&
+        _allConnectionsLatestMessage[_userName].isNotEmpty) {
+      final List<Map<String, String>> _allLatestMessages =
+          _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
 
-    /// Extract UserName Specific Messages from temp storage
-    if (_allLatestMessages != null && _allLatestMessages.length > 0) {
-      final Map<String, String> _lastMessage = _allLatestMessages.last;
+      /// Extract UserName Specific Messages from temp storage
+      if (_allLatestMessages != null && _allLatestMessages.length > 0) {
+        final Map<String, String> _lastMessage = _allLatestMessages.last;
+
+        /// For Extract Last Conversation Time
+        if (purpose == 'lastConnectionTime') {
+          return _latestConversationTime(_lastMessage);
+        }
+
+        /// For Extract Last Conversation Message
+        if (_lastMessage != null) {
+          String _mediaType = _lastMessage.values.last.toString().split('+')[1];
+          String _remainingMessagesLength = '';
+
+          /// If Last Message Not From Local Database
+          if (_lastMessage.values.last.toString().split('+').length != 3 ||
+              _lastMessage.values.last.toString().split('+')[2] != 'localDb')
+            _remainingMessagesLength = _allLatestMessages.length.toString();
+
+          /// After Filtering Extract Latest Message and Return Message Widget
+          return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
+              _mediaType, _remainingMessagesLength);
+        }
+
+        /// If there is no last message
+        return Text(
+          'No Messages',
+          style: TextStyle(color: Colors.red),
+        );
+      }
+
+      /// For Extract Last Connection Time
+      if (purpose == 'lastConnectionTime')
+        return Container(
+            child: Text(
+          '',
+          style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+        ));
+
+      /// For Null Control
+      return Text('No Messages', style: TextStyle(color: Colors.red));
+    } else {
+      /// For Empty Data
 
       /// For Extract Last Conversation Time
-      if (purpose == 'lastConnectionTime') {
-        return _latestConversationTime(_lastMessage);
-      }
-
-      /// For Extract Last Conversation Message
-      if (_lastMessage != null) {
-        String _mediaType = _lastMessage.values.last.toString().split('+')[1];
-        String _remainingMessagesLength = '';
-
-        /// If Last Message Not From Local Database
-        if (_lastMessage.values.last.toString().split('+').length != 3 ||
-            _lastMessage.values.last.toString().split('+')[2] != 'localDb')
-          _remainingMessagesLength = _allLatestMessages.length.toString();
-
-        /// After Filtering Extract Latest Message and Return Message Widget
-        return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
-            _mediaType, _remainingMessagesLength);
-      }
-
-      /// If there is no last message
-      return Text(
-        'No Messages',
-        style: TextStyle(color: Colors.red),
-      );
+      if (purpose == 'lastConnectionTime') return Text('');
+      return Text('No Messages', style: TextStyle(color: Colors.red));
     }
-
-    /// For Extract Last Connection Time
-    if (purpose == 'lastConnectionTime')
-      return Container(
-          child: Text(
-        '',
-        style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
-      ));
-
-    /// For Null Control
-    return Text('No Messages', style: TextStyle(color: Colors.red));
   }
 
   /// Message Type Extract
   Widget _latestMessageTypeExtract(String _message, String _mediaTypesToString,
       String _remainingMessagesLength) {
-    //ForeGroundNotificationReceiveAndShow().showNotification(title: _message, body: _mediaTypesToString);
-
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
         bool _blankMsgIndicator = false;
@@ -923,8 +921,6 @@ class _ChatsAndActivityCollectionState
 
         if (_message.contains('[[[@]]]'))
           _message = _message.split('[[[@]]]')[1];
-
-        print('_message is: ${_message.length}');
 
         if (_messageRegex.hasMatch(_message)) {
           print('Under Regex Match');
@@ -1096,25 +1092,67 @@ class _ChatsAndActivityCollectionState
 
   /// Extract last Conversation Message
   Widget _latestConversationTime(Map<String, String> _lastMessage) {
-    String _willReturnTime = '';
-    if (_lastMessage != null &&
-        _lastMessage.values.last.toString().split('+')[0].toString() != '') {
-      _willReturnTime =
-          _lastMessage.values.last.toString().split('+')[0].toString();
+    if (_lastMessage.isNotEmpty) {
+      print('Last Message: $_lastMessage');
+      String _willReturnTime = '';
+      if (_lastMessage != null &&
+          _lastMessage.values.last.toString().split('+')[0].toString() != '') {
+        _willReturnTime =
+            _lastMessage.values.last.toString().split('+')[0].toString();
 
-      if (int.parse(_willReturnTime.split(':')[0]) < 10)
-        _willReturnTime = _willReturnTime.replaceRange(0,
-            _willReturnTime.indexOf(':'), '0${_willReturnTime.split(':')[0]}');
-      if (int.parse(_willReturnTime.split(':')[1]) < 10)
-        _willReturnTime = _willReturnTime.replaceRange(
-            _willReturnTime.indexOf(':') + 1,
-            _willReturnTime.length,
-            '0${_willReturnTime.split(':')[1]}');
-    }
-    return Container(
-        child: Text(
-      _willReturnTime,
-      style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
-    ));
+        if (int.parse(_willReturnTime.split(':')[0]) < 10)
+          _willReturnTime = _willReturnTime.replaceRange(
+              0,
+              _willReturnTime.indexOf(':'),
+              '0${_willReturnTime.split(':')[0]}');
+        if (int.parse(_willReturnTime.split(':')[1]) < 10)
+          _willReturnTime = _willReturnTime.replaceRange(
+              _willReturnTime.indexOf(':') + 1,
+              _willReturnTime.length,
+              '0${_willReturnTime.split(':')[1]}');
+      }
+      return Container(
+          child: Text(
+        _willReturnTime,
+        style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+      ));
+    } else
+      return Text(
+        '',
+        style: TextStyle(
+          color: Colors.red,
+        ),
+      );
+  }
+
+  ImageProvider getProperImageProviderForConnectionActivity(int index) {
+    return ((index == 0 && ImportantThings.thisAccountProfileImagePath == '') ||
+            (index > 0 &&
+                ProfileImageManagement.allConnectionsProfilePicLocalPath[
+                        this._allUserConnectionActivity[index]] ==
+                    ''))
+        ? const ExactAssetImage('assets/logo/logo.jpg')
+        : FileImage(
+            File(index == 0
+                ? ImportantThings.thisAccountProfileImagePath
+                : ProfileImageManagement.allConnectionsProfilePicLocalPath[
+                    this._allUserConnectionActivity[index]]),
+            scale: 0.5,
+          );
+  }
+
+  ImageProvider getProperImageProviderForConnectionsCollection(
+      String userName) {
+    return ProfileImageManagement.allConnectionsProfilePicLocalPath[userName] ==
+                null ||
+            ProfileImageManagement
+                    .allConnectionsProfilePicLocalPath[userName] ==
+                ''
+        ? const ExactAssetImage('assets/logo/logo.jpg')
+        : FileImage(
+            File(ProfileImageManagement
+                .allConnectionsProfilePicLocalPath[userName]),
+            scale: 0.5,
+          );
   }
 }

@@ -76,7 +76,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -87,6 +87,7 @@ class LocalStorageHelper {
     @required String userName,
     @required String userMail,
     @required String userToken,
+    @required String userAbout,
     String profileImagePath = '',
     String profileImageUrl = '',
   }) async {
@@ -98,6 +99,7 @@ class LocalStorageHelper {
     _accountData[_colToken] = userToken;
     _accountData[_colProfileImagePath] = profileImagePath;
     _accountData[_colProfileImageUrl] = profileImageUrl;
+    _accountData[_colAbout] = userAbout;
 
     await db.insert(_allImportantDataStore, _accountData);
   }
@@ -134,6 +136,23 @@ class LocalStorageHelper {
           "SELECT $_colAccountUserMail FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
     return result[0].values.first;
+  }
+
+  Future<Map<String, String>>
+      extractUserNameAndProfilePicFromImportant() async {
+    final Database db = await this.database;
+
+    final List<Map<String, Object>> result = await db.rawQuery(
+        'SELECT $_colAccountUserName,$_colProfileImagePath FROM $_allImportantDataStore');
+
+    final Map<String, String> tempMap = Map<String, String>();
+
+    result.forEach((userData) {
+      tempMap[userData[_colAccountUserName]] =
+          userData[_colProfileImagePath].toString();
+    });
+
+    return tempMap;
   }
 
   Future<String> extractToken(
@@ -197,7 +216,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT, $_colAbout TEXT, $_colProfileImagePath TEXT, $_colEmail TEXT)");
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT)");
       return true;
     } catch (e) {
       print(
@@ -325,28 +344,6 @@ class LocalStorageHelper {
     return countTotalMessagesWithOneAdditionalData[0].values.first;
   }
 
-  /// Insert Use Additional Data to Table
-  Future<int> insertAdditionalData(
-      String _tableName, String _about, String _email) async {
-    Database db = await this.database; // DB Reference
-    Map<String, dynamic> _helperMap =
-        Map<String, dynamic>(); // Map to insert data
-
-    // Insert Data to Map
-    _helperMap[_colMessages] = "";
-    _helperMap[_colReferences] = -1;
-    _helperMap[_colMediaType] = "";
-    _helperMap[_colDate] = "";
-    _helperMap[_colTime] = "";
-    _helperMap[_colAbout] = _about;
-    _helperMap[_colProfileImagePath] = "";
-    _helperMap[_colEmail] = _email;
-
-    /// Result Insert to DB
-    var result = await db.insert(_tableName, _helperMap);
-    return result;
-  }
-
   /// Insert New Messages to Table
   Future<int> insertNewMessages(String _tableName, String _newMessage,
       MediaTypes _currMediaType, int _ref, String _time) async {
@@ -365,9 +362,6 @@ class LocalStorageHelper {
     _helperMap[_colMediaType] = _currMediaType.toString();
     _helperMap[_colDate] = _dateIS;
     _helperMap[_colTime] = _time;
-    _helperMap[_colAbout] = "";
-    _helperMap[_colProfileImagePath] = "";
-    _helperMap[_colEmail] = "";
 
     /// Result Insert to DB
     var result = await db.insert(_tableName, _helperMap);
@@ -379,10 +373,10 @@ class LocalStorageHelper {
   /// Extract Message from table
   Future<List<Map<String, dynamic>>> extractMessageData(
       String _tableName) async {
-    Database db = await this.database; // DB Reference
+    final Database db = await this.database; // DB Reference
 
     final List<Map<String, Object>> result = await db.rawQuery(
-        'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType FROM $_tableName WHERE $_colReferences != -1');
+        'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType FROM $_tableName');
 
     return result;
   }
@@ -424,18 +418,21 @@ class LocalStorageHelper {
 
     final int totalMessages = await _countTotalMessagesUnderATable(_tableName);
 
-    if (totalMessages == 1) return null;
+    if (totalMessages == 0) return null;
 
     final List<Map<String, Object>> result = await db.rawQuery(
         "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
 
-    final String _time = result[0][_colTime].toString().split('+')[0];
-
+    print('Result is: $result');
     final Map<String, String> map = Map<String, String>();
 
-    map.addAll({
-      result[0][_colMessages]: '$_time+${result[0][_colMediaType]}+localDb',
-    });
+    if (result != null && result.length > 0) {
+      final String _time = result[0][_colTime].toString().split('+')[0];
+
+      map.addAll({
+        result[0][_colMessages]: '$_time+${result[0][_colMediaType]}+localDb',
+      });
+    }
 
     print('Map is: $map');
 

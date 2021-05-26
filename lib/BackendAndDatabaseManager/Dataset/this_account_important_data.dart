@@ -5,7 +5,7 @@ class ImportantThings {
   static String thisAccountProfileImagePath = '';
   static String thisAccountUserName = '';
 
-  static findImageUrlAndUserName() async {
+  static void findImageUrlAndUserName() async {
     thisAccountProfileImagePath = await LocalStorageHelper()
         .extractProfileImageLocalPath(
             userMail: FirebaseAuth.instance.currentUser.email);

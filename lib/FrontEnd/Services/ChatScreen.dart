@@ -16,13 +16,10 @@ import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
-import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -37,6 +34,9 @@ import 'package:thumbnails/thumbnails.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:swipe_to/swipe_to.dart';
 
+import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -161,6 +161,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         for (Map<String, dynamic> message in messagesGet) {
           /// Change Every Message Value to List
           List<dynamic> messageContainer = message.values.toList();
+
+          print('Message Container: $messageContainer');
 
           /// If there is no opponent's person messages
           if (messageContainer.isEmpty) {
@@ -288,7 +290,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       'Cute: ${connectionSnapShot['profile_pic'].toString()}');
 
                   showToast(
-                    'Profile Picture Updating...Please Wait',
+                    'Profile Picture Updating...\nPlease Wait',
                     fToast,
                     fontSize: 16.0,
                   );
@@ -870,6 +872,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void initState() {
     super.initState();
 
+    print('UserName: ${widget._userName}');
+    print('Profile Image: ${widget._connectionProfileImageLocalPath}');
+
     _essentialExtract();
 
     _hintText = 'Type Here...';
@@ -1065,6 +1070,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   controller: _scrollController,
                   itemCount: _chatContainer.length,
                   itemBuilder: (context, position) {
+                    print('MediaTypes Agian: $_mediaTypes');
+                    print('Chat Container Again: $_chatContainer');
+
                     if (_mediaTypes[position] == MediaTypes.Indicator) {
                       return newMessageIndicator(context);
                     } else if (_mediaTypes[position] == MediaTypes.Text)

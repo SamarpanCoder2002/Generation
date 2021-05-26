@@ -258,6 +258,7 @@ class EmailAndPasswordAuth {
                                       FirebaseAuth.instance.currentUser.email,
                                   userName: this._userName.text,
                                   userToken: _getToken,
+                                  userAbout: this._about.text,
                                 );
 
                                 await _localStorageHelper

@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'package:generation/BackendAndDatabaseManager/Dataset/static_important_things.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -323,6 +324,7 @@ class _MainScreenState extends State<MainScreen> {
                       size: 25.0,
                     ),
                     onPressed: () async {
+                      print('Clicked');
                       if (mounted) {
                         setState(() {
                           ImportantThings.findImageUrlAndUserName();
@@ -407,6 +409,14 @@ class _MainScreenState extends State<MainScreen> {
       closedColor: const Color.fromRGBO(34, 48, 60, 1),
       openColor: const Color.fromRGBO(34, 48, 60, 1),
       middleColor: const Color.fromRGBO(34, 48, 60, 1),
+      onClosed: (value){
+        print('Profile Page Closed');
+        if (mounted) {
+          setState(() {
+            ImportantThings.findImageUrlAndUserName();
+          });
+        }
+      },
       openBuilder: (context, openWidget) {
         if (menuOptionIs == 'Profile')
           return Profile();

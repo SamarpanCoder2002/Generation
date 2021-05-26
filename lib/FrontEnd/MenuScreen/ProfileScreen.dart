@@ -5,13 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-import 'package:generation/BackendAndDatabaseManager/Dataset/static_important_things.dart';
+import 'package:generation/BackendAndDatabaseManager/Dataset/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
-import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 
 class Profile extends StatefulWidget {
@@ -20,7 +19,6 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final Management _management = Management();
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -293,41 +291,59 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _manageTakeImageAsProfilePic(PickedFile _pickedFile) async {
-    showToast(
-      'Applying Changes',
-      _fToast,
-      seconds: 8,
-      fontSize: 18.0,
-    );
+    try {
+      showToast(
+        'Applying Changes',
+        _fToast,
+        seconds: 8,
+        fontSize: 18.0,
+      );
 
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-
-    await _management.uploadNewProfilePicToFireStore(
-        file: File(_pickedFile.path),
-        context: context,
-        userMail: FirebaseAuth.instance.currentUser.email);
-
-    if (ImportantThings.thisAccountProfileImagePath != '') {
-      try {
-        await File(ImportantThings.thisAccountProfileImagePath)
-            .delete(recursive: true)
-            .whenComplete(() => print('Old Profile Image Deleted'));
-      } catch (e) {
-        print(
-            'Exception: Delete Old Profile Picture Exception: ${e.toString()}');
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
       }
-    }
 
-    if (mounted) {
-      setState(() {
-        ImportantThings.thisAccountProfileImagePath =
-            File(_pickedFile.path).path;
-        _isLoading = false;
-      });
+      await _management.uploadNewProfilePicToFireStore(
+          file: File(_pickedFile.path),
+          context: context,
+          userMail: FirebaseAuth.instance.currentUser.email);
+
+      if (ImportantThings.thisAccountProfileImagePath != '') {
+        try {
+          await File(ImportantThings.thisAccountProfileImagePath)
+              .delete(recursive: true)
+              .whenComplete(() => print('Old Profile Image Deleted'));
+        } catch (e) {
+          print(
+              'Exception: Delete Old Profile Picture Exception: ${e.toString()}');
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          ImportantThings.thisAccountProfileImagePath =
+              File(_pickedFile.path).path;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                elevation: 5.0,
+                backgroundColor: const Color.fromRGBO(34, 48, 60, 0.6),
+                title: Text(
+                  'An Error Occured',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 18.0,
+                  ),
+                ),
+                content: Text(
+                    'Please Close the Profile Screen and\nRe-Open To Continue', style: TextStyle(color: Colors.white,),),
+              ));
     }
   }
 }

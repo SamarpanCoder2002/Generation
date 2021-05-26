@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:photo_view/photo_view.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
-import 'package:photo_view/photo_view.dart';
 
 // ignore: must_be_immutable
 class PreviewImageScreen extends StatefulWidget {
@@ -168,10 +168,11 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                         _isLoading = true;
                       });
                       showToast(
-                        "Image Uploading....\nPlease Wait",
+                        "Image Uploading...\nPlease Wait",
                         fToast,
-                        toastColor: Colors.red,
+                        toastColor: Colors.orange,
                         toastGravity: ToastGravity.TOP,
+                        fontSize: 16.0,
                       );
                     }
 
