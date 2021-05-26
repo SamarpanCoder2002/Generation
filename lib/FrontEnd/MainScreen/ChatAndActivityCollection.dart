@@ -14,15 +14,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/FrontEnd/Activity/activity_maker.dart';
 import 'package:generation/FrontEnd/Services/search_screen.dart';
 import 'package:generation/FrontEnd/Activity/activity_view.dart';
 import 'package:generation/FrontEnd/Services/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/connection_important_data.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/this_account_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 
 class ChatsAndActivityCollection extends StatefulWidget {
   @override

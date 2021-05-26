@@ -9,7 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-import 'package:generation/BackendAndDatabaseManager/Dataset/this_account_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';

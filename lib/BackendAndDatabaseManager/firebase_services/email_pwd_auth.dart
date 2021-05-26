@@ -268,6 +268,9 @@ class EmailAndPasswordAuth {
                                 await _localStorageHelper
                                     .createTableForRemainingLinks();
 
+                                await _localStorageHelper.createTableForNotificationGlobalConfig();
+                                await _localStorageHelper.insertDataForNotificationGlobalConfig();
+
                                 print("Log-In Successful: User Name: $_email");
 
                                 Navigator.pushAndRemoveUntil(

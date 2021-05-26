@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
 
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/general_message_send.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';

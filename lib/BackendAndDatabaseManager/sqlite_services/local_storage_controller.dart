@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 
 class LocalStorageHelper {
   // Database Columns
@@ -36,6 +36,10 @@ class LocalStorageHelper {
   final String _allRemainingLinksToDeleteFromFirebaseStorage =
       '__RemainingLinksToDelete__';
   final String _colLinks = 'New_Link';
+
+  final String _notificationGlobalConfig = '__Controller_Configuration__';
+  final String _colBgNotify = '__BGNotify__';
+  final String _colFGNotify = '__FGNotify__';
 
   /// Create Singleton Objects(Only Created once in the whole application)
   static LocalStorageHelper _localStorageHelper;
@@ -516,6 +520,67 @@ class LocalStorageHelper {
       await deleteDatabase(path);
     } catch (e) {
       print('Delete Database Exception: ${e.toString()}');
+    }
+  }
+
+  Future<void> createTableForNotificationGlobalConfig() async {
+    final Database db = await this.database;
+
+    try {
+      await db.execute(
+          'CREATE TABLE $_notificationGlobalConfig($_colBgNotify INTEGER, $_colFGNotify INTEGER)');
+    } catch (e) {
+      print('Notification Table Make Error: ${e.toString()}');
+    }
+  }
+
+  Future<void> insertDataForNotificationGlobalConfig() async {
+    final Database db = await this.database;
+
+    try {
+      Map<String, Object> map = Map<String, Object>();
+
+      map[_colBgNotify] = 1;
+      map[_colFGNotify] = 1;
+
+      await db.insert(_notificationGlobalConfig, map);
+    } catch (e) {
+      print('Notification Global Config Data Insertion Error: ${e.toString()}');
+    }
+  }
+
+  Future<void> updateDataForNotificationGlobalConfig(
+      {bool bgNotify = false, @required bool updatedNotifyCondition}) async {
+    final Database db = await this.database;
+
+    try {
+      final String _argumentNotify = bgNotify ? _colBgNotify : _colFGNotify;
+
+      await db.rawUpdate(
+          'UPDATE $_notificationGlobalConfig SET $_argumentNotify = ${updatedNotifyCondition ? 1 : 0}');
+    } catch (e) {
+      print(
+          'Exception: Update in Notification Global Config Error: ${e.toString()}');
+    }
+  }
+
+  Future<bool> extractDataForNotificationConfigTable(
+      {bool bgNotify = false}) async {
+    try {
+      final Database db = await this.database;
+
+      final String _argument = bgNotify ? _colBgNotify : _colFGNotify;
+
+      final List<Map<String, Object>> result = await db
+          .rawQuery('SELECT $_argument FROM $_notificationGlobalConfig');
+
+      print('Notification Extract Result: $result');
+
+      return result[0].values.first.toString() == '1'?true:false;
+    } catch (e) {
+      print(
+          'Error: Extract Data From Notification Table Error: ${e.toString()}');
+      return true;
     }
   }
 }

@@ -37,7 +37,7 @@ import 'package:swipe_to/swipe_to.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
@@ -948,20 +948,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 width: 10.0,
               ),
               Expanded(
-                child: GestureDetector(
-                  child: CircleAvatar(
-                    radius: 23.0,
-                    backgroundImage:
-                        widget._connectionProfileImageLocalPath == ''
-                            ? ExactAssetImage(
-                                "assets/logo/logo.jpg",
-                              )
-                            : FileImage(
-                                File(widget._connectionProfileImageLocalPath)),
-                  ),
-                  onTap: () {
-                    print("Pic Pressed");
-                    widget._connectionProfileImageLocalPath == ''
+                child: OpenContainer(
+                  closedColor: const Color.fromRGBO(25, 39, 52, 1),
+                  middleColor: const Color.fromRGBO(25, 39, 52, 1),
+                  openColor: const Color.fromRGBO(25, 39, 52, 1),
+                  closedShape: CircleBorder(),
+                  closedElevation: 0.0,
+                  transitionType: ContainerTransitionType.fadeThrough,
+                  transitionDuration: Duration(milliseconds: 500),
+                  openBuilder: (_, __) {
+                    return widget._connectionProfileImageLocalPath == ''
                         ? Center(
                             child: Text(
                               'No Profile Picture',
@@ -971,12 +967,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               ),
                             ),
                           )
-                        : Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => PreviewImageScreen(
-                                    imageFile: File(widget
-                                        ._connectionProfileImageLocalPath))));
+                        : PreviewImageScreen(
+                            imageFile:
+                                File(widget._connectionProfileImageLocalPath));
+                  },
+                  closedBuilder: (_, __) {
+                    return CircleAvatar(
+                      radius: 23.0,
+                      backgroundImage: widget
+                                  ._connectionProfileImageLocalPath ==
+                              ''
+                          ? ExactAssetImage(
+                              "assets/logo/logo.jpg",
+                            )
+                          : FileImage(
+                              File(widget._connectionProfileImageLocalPath)),
+                    );
                   },
                 ),
               ),
@@ -1070,9 +1076,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   controller: _scrollController,
                   itemCount: _chatContainer.length,
                   itemBuilder: (context, position) {
-                    print('MediaTypes Agian: $_mediaTypes');
-                    print('Chat Container Again: $_chatContainer');
-
                     if (_mediaTypes[position] == MediaTypes.Indicator) {
                       return newMessageIndicator(context);
                     } else if (_mediaTypes[position] == MediaTypes.Text)

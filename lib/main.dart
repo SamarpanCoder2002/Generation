@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
@@ -16,6 +17,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
   /// Initialize Notification Settings
   await notificationInitialize();
 
@@ -23,14 +26,20 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(backgroundMsgAction);
 
   /// For Foreground Message Handling
-  FirebaseMessaging.onMessage.listen((messageEvent) {
+  FirebaseMessaging.onMessage.listen((messageEvent) async {
     print(
         'Message Data is: ${messageEvent.notification.title}      ${messageEvent.notification.body}');
 
-    _receiveAndShowNotificationInitialization(
-      title: messageEvent.notification.title,
-      body: messageEvent.notification.body,
-    );
+    final bool _fgNotifyStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable();
+
+    print('Foreground Notification Status: $_fgNotifyStatus');
+
+    if (_fgNotifyStatus)
+      _receiveAndShowNotificationInitialization(
+        title: messageEvent.notification.title,
+        body: messageEvent.notification.body,
+      );
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
   // /// Change Navigation Bar Color
@@ -77,6 +86,17 @@ Future<void> notificationInitialize() async {
 Future<void> backgroundMsgAction(RemoteMessage message) async {
   print(
       'Background Message Data: ${message.notification.body}   ${message.notification.title}');
+
+  final bool _bgNotifyStatus = await LocalStorageHelper()
+      .extractDataForNotificationConfigTable(bgNotify: true);
+
+  print('Background Notification Status: $_bgNotifyStatus');
+
+  if (_bgNotifyStatus)
+    _receiveAndShowNotificationInitialization(
+      title: message.notification.title,
+      body: message.notification.body,
+    );
 }
 
 /// Decide to Switch to widget based of current Scenario

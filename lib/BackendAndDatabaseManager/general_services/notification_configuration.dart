@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/main.dart';
 import 'package:http/http.dart';
 

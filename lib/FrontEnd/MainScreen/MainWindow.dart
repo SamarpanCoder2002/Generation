@@ -6,18 +6,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'package:generation/BackendAndDatabaseManager/Dataset/this_account_important_data.dart';
-import 'package:generation/BackendAndDatabaseManager/Dataset/data_type.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/general_applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
-import 'package:generation/FrontEnd/MenuScreen/ProfileScreen.dart';
-import 'package:generation/FrontEnd/MenuScreen/SettingsMenu.dart';
+import 'package:generation/FrontEnd/MenuScreen/profile_screen.dart';
+import 'package:generation/FrontEnd/MenuScreen/settings_menu.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
