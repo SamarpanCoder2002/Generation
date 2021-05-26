@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -11,6 +12,7 @@ void showToast(String errorMsg, FToast errToast, {Color toastColor = Colors.gree
     ),
     child: Text(
       errorMsg,
+      textAlign: TextAlign.center,
       style: TextStyle(
         color: toastColor,
         fontSize: fontSize,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
@@ -295,7 +296,7 @@ class _ProfileState extends State<Profile> {
       showToast(
         'Applying Changes',
         _fToast,
-        seconds: 8,
+        seconds: 5,
         fontSize: 18.0,
       );
 
@@ -325,6 +326,7 @@ class _ProfileState extends State<Profile> {
         setState(() {
           ImportantThings.thisAccountProfileImagePath =
               File(_pickedFile.path).path;
+
           _isLoading = false;
         });
       }
@@ -342,7 +344,11 @@ class _ProfileState extends State<Profile> {
                   ),
                 ),
                 content: Text(
-                    'Please Close the Profile Screen and\nRe-Open To Continue', style: TextStyle(color: Colors.white,),),
+                  'Please Close the Profile Screen and\nRe-Open To Continue',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
               ));
     }
   }

@@ -136,7 +136,9 @@ class _ChatsAndActivityCollectionState
             });
           }
 
-          particularConnectionActivity.toSet().toList();// For Avoid Duplicate Inclusion of Activity
+          particularConnectionActivity
+              .toSet()
+              .toList(); // For Avoid Duplicate Inclusion of Activity
 
           particularConnectionActivity.forEach((everyActivity) async {
             if (_oldActivity != everyActivity) {
@@ -738,9 +740,19 @@ class _ChatsAndActivityCollectionState
                       if (takeLocalData != null &&
                           takeLocalData.isNotEmpty &&
                           takeLocalData.values.toString().split('+')[0] != '') {
-                        _allConnectionsLatestMessage[_userName].clear();
+                        //print('After Chat Closed: $takeLocalData');
+
+                        if (_allConnectionsLatestMessage[_userName] != null && _allConnectionsLatestMessage[_userName].isNotEmpty)
+                          _allConnectionsLatestMessage[_userName].clear();
+                        else {
+                          final List<Map<String,String>> tempList = [];
+                          _allConnectionsLatestMessage[_userName] = tempList;
+                        }
                         if (mounted) {
                           setState(() {
+
+                            print('Before Add Data On Closed: ${_allConnectionsLatestMessage[_userName]}');
+
                             _allConnectionsLatestMessage[_userName]
                                 .add(takeLocalData);
                           });
