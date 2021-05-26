@@ -321,6 +321,24 @@ class _ChatsAndActivityCollectionState
                     /// Make a new table to this new connected user Activity
                     await _localStorageHelper.createTableForUserActivity(
                         documentSnapshot['user_name']);
+
+                    await ProfileImageManagement
+                        .userProfileNameAndImageExtractor();
+
+                    if (ProfileImageManagement
+                                .allConnectionsProfilePicLocalPath[
+                            documentSnapshot['user_name']] !=
+                        profilePicPath) {
+
+                      print('New Connection Profile Pic Not Matched');
+                      if (mounted) {
+                        setState(() {
+                          ProfileImageManagement
+                                  .allConnectionsProfilePicLocalPath[
+                              documentSnapshot['user_name']] = profilePicPath;
+                        });
+                      }
+                    }
                   }
                 } catch (e) {
                   print(
@@ -742,16 +760,17 @@ class _ChatsAndActivityCollectionState
                           takeLocalData.values.toString().split('+')[0] != '') {
                         //print('After Chat Closed: $takeLocalData');
 
-                        if (_allConnectionsLatestMessage[_userName] != null && _allConnectionsLatestMessage[_userName].isNotEmpty)
+                        if (_allConnectionsLatestMessage[_userName] != null &&
+                            _allConnectionsLatestMessage[_userName].isNotEmpty)
                           _allConnectionsLatestMessage[_userName].clear();
                         else {
-                          final List<Map<String,String>> tempList = [];
+                          final List<Map<String, String>> tempList = [];
                           _allConnectionsLatestMessage[_userName] = tempList;
                         }
                         if (mounted) {
                           setState(() {
-
-                            print('Before Add Data On Closed: ${_allConnectionsLatestMessage[_userName]}');
+                            print(
+                                'Before Add Data On Closed: ${_allConnectionsLatestMessage[_userName]}');
 
                             _allConnectionsLatestMessage[_userName]
                                 .add(takeLocalData);
