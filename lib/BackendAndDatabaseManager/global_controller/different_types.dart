@@ -12,3 +12,10 @@ enum MediaTypes {
 enum ActivitySpecialOptions{
   Polling,
 }
+
+enum NConfigTypes{
+  BgNotification,
+  FGNotification,
+  RemoveBirthNotification,
+  RemoveAnonymousNotification,
+}

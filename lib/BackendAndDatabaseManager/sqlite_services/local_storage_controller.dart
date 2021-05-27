@@ -17,7 +17,6 @@ class LocalStorageHelper {
   final String _colDate = "Date";
   final String _colTime = "Time";
   final String _colAbout = "About";
-  final String _colEmail = "Email";
   final String _colToken = "Token";
 
   final String _colActivity = 'Status';
@@ -40,6 +39,9 @@ class LocalStorageHelper {
   final String _notificationGlobalConfig = '__Controller_Configuration__';
   final String _colBgNotify = '__BGNotify__';
   final String _colFGNotify = '__FGNotify__';
+  final String _colRemoveBirthNotification = '__RemoveBirthNotification__';
+  final String _colAnonymousRemoveNotification =
+      '__RemoveAnonymousNotification__';
 
   /// Create Singleton Objects(Only Created once in the whole application)
   static LocalStorageHelper _localStorageHelper;
@@ -528,7 +530,7 @@ class LocalStorageHelper {
 
     try {
       await db.execute(
-          'CREATE TABLE $_notificationGlobalConfig($_colBgNotify INTEGER, $_colFGNotify INTEGER)');
+          'CREATE TABLE $_notificationGlobalConfig($_colBgNotify INTEGER, $_colFGNotify INTEGER, $_colRemoveBirthNotification INTEGER, $_colAnonymousRemoveNotification INTEGER)');
     } catch (e) {
       print('Notification Table Make Error: ${e.toString()}');
     }
@@ -538,10 +540,12 @@ class LocalStorageHelper {
     final Database db = await this.database;
 
     try {
-      Map<String, Object> map = Map<String, Object>();
+      final Map<String, Object> map = Map<String, Object>();
 
       map[_colBgNotify] = 1;
       map[_colFGNotify] = 1;
+      map[_colRemoveBirthNotification] = 0;
+      map[_colAnonymousRemoveNotification] = 0;
 
       await db.insert(_notificationGlobalConfig, map);
     } catch (e) {
@@ -550,11 +554,12 @@ class LocalStorageHelper {
   }
 
   Future<void> updateDataForNotificationGlobalConfig(
-      {bool bgNotify = false, @required bool updatedNotifyCondition}) async {
+      {@required NConfigTypes nConfigTypes,
+      @required bool updatedNotifyCondition}) async {
     final Database db = await this.database;
 
     try {
-      final String _argumentNotify = bgNotify ? _colBgNotify : _colFGNotify;
+      final String _argumentNotify = _findBestMatch(nConfigTypes);
 
       await db.rawUpdate(
           'UPDATE $_notificationGlobalConfig SET $_argumentNotify = ${updatedNotifyCondition ? 1 : 0}');
@@ -564,19 +569,38 @@ class LocalStorageHelper {
     }
   }
 
+  String _findBestMatch(NConfigTypes nConfigTypes) {
+    switch (nConfigTypes) {
+      case NConfigTypes.BgNotification:
+        return _colBgNotify;
+        break;
+      case NConfigTypes.FGNotification:
+        return _colFGNotify;
+        break;
+      case NConfigTypes.RemoveBirthNotification:
+        return _colRemoveBirthNotification;
+        break;
+      case NConfigTypes.RemoveAnonymousNotification:
+        return _colAnonymousRemoveNotification;
+        break;
+    }
+
+    return 'Exception';
+  }
+
   Future<bool> extractDataForNotificationConfigTable(
-      {bool bgNotify = false}) async {
+      {@required NConfigTypes nConfigTypes}) async {
     try {
       final Database db = await this.database;
 
-      final String _argument = bgNotify ? _colBgNotify : _colFGNotify;
+      final String _argument = _findBestMatch(nConfigTypes);
 
       final List<Map<String, Object>> result = await db
           .rawQuery('SELECT $_argument FROM $_notificationGlobalConfig');
 
       print('Notification Extract Result: $result');
 
-      return result[0].values.first.toString() == '1'?true:false;
+      return result[0].values.first.toString() == '1' ? true : false;
     } catch (e) {
       print(
           'Error: Extract Data From Notification Table Error: ${e.toString()}');

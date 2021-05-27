@@ -193,7 +193,21 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+  final NativeCallback _nativeCallback = NativeCallback();
+
   int _currIndex = 0;
+
+  void _removeBirthNotificationChecking() async {
+    final bool _removeBNStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.RemoveBirthNotification);
+
+    print('Remove Birth Notification Status: $_removeBNStatus');
+
+    /// Notification Remove from Notification Tray if Permission Granted
+    if (_removeBNStatus) await _nativeCallback.callForCancelNotifications();
+  }
 
   @override
   void initState() {
@@ -214,6 +228,7 @@ class _MainScreenState extends State<MainScreen> {
     );
 
     ImportantThings.findImageUrlAndUserName();
+    _removeBirthNotificationChecking();
 
     super.initState();
   }
@@ -230,12 +245,12 @@ class _MainScreenState extends State<MainScreen> {
       length: 3,
       child: WillPopScope(
           onWillPop: () async {
-            if (_currIndex > 0) return false;
-            else{
+            if (_currIndex > 0)
+              return false;
+            else {
               print('Tata');
               return true;
             }
-
           },
           child: Scaffold(
             key: _scaffoldKey,
@@ -327,16 +342,9 @@ class _MainScreenState extends State<MainScreen> {
                       size: 25.0,
                     ),
                     onPressed: () async {
-                      print('Clicked');
+                      print('Clicked Refresh in MainWindow');
 
-                      final bool _bgNotifyStatus = await LocalStorageHelper()
-                          .extractDataForNotificationConfigTable(bgNotify: true);
-
-                      print('Background Notification Status: $_bgNotifyStatus');
-
-                      /// Low Priority Notification Remove from Notification Tray
-                      final NativeCallback _nativeCallback = NativeCallback();
-                      await _nativeCallback.callForCancelNotifications();
+                      _removeAnonymousNotificationChecking();
 
                       if (mounted) {
                         setState(() {
@@ -485,5 +493,16 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     );
+  }
+
+  void _removeAnonymousNotificationChecking() async {
+    final bool _removeAStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
+
+    print('Remove Birth Notification Status: $_removeAStatus');
+
+    /// Notification Remove from Notification Tray if Permission Granted
+    if (_removeAStatus) await _nativeCallback.callForCancelNotifications();
   }
 }

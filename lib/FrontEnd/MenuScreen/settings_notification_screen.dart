@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class SettingsNotificationConfiguration extends StatefulWidget {
@@ -18,17 +19,29 @@ class _SettingsNotificationConfigurationState
 
   bool _bgStatus = true;
   bool _fgStatus = true;
+  bool _removeBirthStatus = false;
+  bool _removeAnonymousStatus = false;
 
   void extractNotifyInformation() async {
-    final bool _bgTempStatus = await _localStorageHelper
-        .extractDataForNotificationConfigTable(bgNotify: true);
+    final bool _bgTempStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.BgNotification);
     final bool _fgTempStatus =
-        await _localStorageHelper.extractDataForNotificationConfigTable();
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.FGNotification);
+    final bool _removeBirthTempStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.RemoveBirthNotification);
+    final bool _anonymousTempStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
 
     if (mounted) {
       setState(() {
-        _bgStatus = _bgTempStatus;
-        _fgStatus = _fgTempStatus;
+        this._bgStatus = _bgTempStatus;
+        this._fgStatus = _fgTempStatus;
+        this._removeBirthStatus = _removeBirthTempStatus;
+        this._removeAnonymousStatus = _anonymousTempStatus;
       });
     }
   }
@@ -44,12 +57,30 @@ class _SettingsNotificationConfigurationState
     return Scaffold(
       backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
       appBar: AppBar(
+        actions: [
+          GestureDetector(
+            child: Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(
+                  right: 15.0,
+                ),
+                child: Text(
+                  'Beta',
+                  style: TextStyle(
+                    color: Colors.amber,
+                  ),
+                )),
+            onTap: () {
+              print('Notification Configuration Beta Description');
+            },
+          ),
+        ],
         brightness: Brightness.dark,
         backgroundColor: Color.fromRGBO(25, 39, 52, 1),
         elevation: 10.0,
         shadowColor: Colors.white70,
         title: Text(
-          'Notification Configuration',
+          'Notification Settings',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18.0,
@@ -58,21 +89,44 @@ class _SettingsNotificationConfigurationState
           ),
         ),
       ),
-      body: Column(
+      body: ListView(
+        shrinkWrap: true,
         children: [
           SizedBox(
             height: 30.0,
           ),
           _notificationOptions(
             mainText: 'BackGround Notification Annotation',
-            status: _bgStatus,
+            status: this._bgStatus,
             fontSize: 14.0,
           ),
           SizedBox(
-            height: 25.0,
+            height: 30.0,
           ),
           _notificationOptions(
-              mainText: 'Online Notification', status: _fgStatus)
+              mainText: 'Online Notification', status: this._fgStatus),
+          SizedBox(
+            height: 30.0,
+          ),
+          SizedBox(
+            height: 5.0,
+            child: Divider(
+              color: Colors.white12,
+              thickness: 2.0,
+            ),
+          ),
+          SizedBox(
+            height: 30.0,
+          ),
+          _notificationOptions(
+              mainText: 'Remove Birth Notification',
+              status: this._removeBirthStatus),
+          SizedBox(
+            height: 30.0,
+          ),
+          _notificationOptions(
+              mainText: 'Remove Anonymous Notification',
+              status: this._removeAnonymousStatus),
         ],
       ),
     );
@@ -85,7 +139,6 @@ class _SettingsNotificationConfigurationState
   }) {
     return Container(
       height: 50,
-      //color: Colors.redAccent,
       alignment: Alignment.center,
       padding: EdgeInsets.only(
         right: 15.0,
@@ -93,62 +146,66 @@ class _SettingsNotificationConfigurationState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 5.0,
-                      right: 20.0,
+          Expanded(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 5.0,
+                      ),
+                      child: GestureDetector(
+                        child: Icon(
+                          Icons.description_outlined,
+                          color: Colors.lightBlue,
+                        ),
+                      ),
                     ),
-                    child: Icon(
-                      status
-                          ? Icons.notifications_active_outlined
-                          : Icons.notifications_off_outlined,
+                    Expanded(
+                      child: Text(
+                        mainText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: fontSize,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: 5.0,
+                    left: 40.0,
+                  ),
+                  child: Text(
+                    '${status ? 'Activated' : 'Deactivated'}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       color: status ? Colors.green : Colors.redAccent,
                     ),
                   ),
-                  Text(
-                    mainText,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: fontSize,
-                    ),
-                  ),
-                ],
-              ),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: 5.0,
-                    left: 50.0,
-                  ),
-                  child: Text(
-                    'Status: ${status ? 'Activated' : 'Deactivated'}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white54,
-                    ),
-                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           TextButton(
             style: TextButton.styleFrom(
               elevation: 0.0,
-              backgroundColor: status ? Colors.red : Colors.green,
+              //backgroundColor: status ? Colors.red : Colors.green,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(40.0),
+                side: BorderSide(
+                  color: status ? Colors.red : Colors.green,
+                ),
               ),
             ),
             child: Text(
               status ? 'Deactivate' : 'Activate',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: status ? Colors.red : Colors.green,
               ),
             ),
             onPressed: () async {
@@ -156,22 +213,48 @@ class _SettingsNotificationConfigurationState
                 print('Background Button');
 
                 await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                    updatedNotifyCondition: !_bgStatus, bgNotify: true);
+                    updatedNotifyCondition: !_bgStatus,
+                    nConfigTypes: NConfigTypes.BgNotification);
 
                 if (mounted) {
                   setState(() {
                     _bgStatus = !_bgStatus;
                   });
                 }
-              } else {
+              } else if (mainText.split(' ')[0] == 'Online') {
                 print('Online Button');
 
                 await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                    updatedNotifyCondition: !_fgStatus);
+                    updatedNotifyCondition: !_fgStatus,
+                    nConfigTypes: NConfigTypes.FGNotification);
 
                 if (mounted) {
                   setState(() {
                     _fgStatus = !_fgStatus;
+                  });
+                }
+              } else if (mainText.split(' ')[1] == 'Birth') {
+                print('Remove Birth Notification');
+
+                await _localStorageHelper.updateDataForNotificationGlobalConfig(
+                    updatedNotifyCondition: !this._removeBirthStatus,
+                    nConfigTypes: NConfigTypes.RemoveBirthNotification);
+
+                if (mounted) {
+                  setState(() {
+                    this._removeBirthStatus = !this._removeBirthStatus;
+                  });
+                }
+              } else {
+                print('Remove Anonymous Notification');
+
+                await _localStorageHelper.updateDataForNotificationGlobalConfig(
+                    updatedNotifyCondition: !this._removeAnonymousStatus,
+                    nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
+
+                if (mounted) {
+                  setState(() {
+                    this._removeAnonymousStatus = !this._removeAnonymousStatus;
                   });
                 }
               }
