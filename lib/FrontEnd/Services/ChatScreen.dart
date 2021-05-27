@@ -306,18 +306,25 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           profilePicPath)
                       .whenComplete(() {
                     print('Profile Picture Download Complete');
-
-                    if (mounted) {
-                      setState(() {
-                        widget._connectionProfileImageLocalPath =
-                            profilePicPath;
-
-                        _isLoading = false;
-                      });
-                    }
                   });
-                } else
+                } else {
+                  if (connectionSnapShot.data()['profile_pic'].toString() ==
+                          '' &&
+                      widget._connectionProfileImageLocalPath != '')
+                    await File(widget._connectionProfileImageLocalPath)
+                        .delete(recursive: true)
+                        .whenComplete(() => print(
+                            'Old Profile Image of Connection Deletion Complete'));
+
                   profilePicPath = '';
+                }
+
+                if (mounted) {
+                  setState(() {
+                    widget._connectionProfileImageLocalPath = profilePicPath;
+                    if (_isLoading) _isLoading = false;
+                  });
+                }
 
                 /// Update Local And Remote Profile Image Path
                 await _localStorageHelper.insertProfilePictureInImportant(

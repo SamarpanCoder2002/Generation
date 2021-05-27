@@ -64,7 +64,10 @@ class _SettingsNotificationConfigurationState
             height: 30.0,
           ),
           _notificationOptions(
-              mainText: 'BackGround Notification', status: _bgStatus),
+            mainText: 'BackGround Notification Annotation',
+            status: _bgStatus,
+            fontSize: 14.0,
+          ),
           SizedBox(
             height: 25.0,
           ),
@@ -75,8 +78,11 @@ class _SettingsNotificationConfigurationState
     );
   }
 
-  Widget _notificationOptions(
-      {@required String mainText, @required bool status}) {
+  Widget _notificationOptions({
+    @required String mainText,
+    @required bool status,
+    double fontSize = 16.0,
+  }) {
     return Container(
       height: 50,
       //color: Colors.redAccent,
@@ -108,7 +114,7 @@ class _SettingsNotificationConfigurationState
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 16.0,
+                      fontSize: fontSize,
                     ),
                   ),
                 ],

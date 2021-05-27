@@ -42,10 +42,8 @@ dependencies:
   share: ^2.0.1
   image_gallery_saver: ^1.6.9
 
-
   circle_list:
   image_picker:
-  flutter_switch:
   flutter_sound: ^8.1.1
   path_provider:
   permission_handler:

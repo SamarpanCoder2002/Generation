@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
@@ -231,7 +231,11 @@ class _MainScreenState extends State<MainScreen> {
       child: WillPopScope(
           onWillPop: () async {
             if (_currIndex > 0) return false;
-            return true;
+            else{
+              print('Tata');
+              return true;
+            }
+
           },
           child: Scaffold(
             key: _scaffoldKey,
@@ -324,6 +328,16 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     onPressed: () async {
                       print('Clicked');
+
+                      final bool _bgNotifyStatus = await LocalStorageHelper()
+                          .extractDataForNotificationConfigTable(bgNotify: true);
+
+                      print('Background Notification Status: $_bgNotifyStatus');
+
+                      /// Low Priority Notification Remove from Notification Tray
+                      final NativeCallback _nativeCallback = NativeCallback();
+                      await _nativeCallback.callForCancelNotifications();
+
                       if (mounted) {
                         setState(() {
                           ImportantThings.findImageUrlAndUserName();
@@ -408,7 +422,7 @@ class _MainScreenState extends State<MainScreen> {
       closedColor: const Color.fromRGBO(34, 48, 60, 1),
       openColor: const Color.fromRGBO(34, 48, 60, 1),
       middleColor: const Color.fromRGBO(34, 48, 60, 1),
-      onClosed: (value){
+      onClosed: (value) {
         print('Profile Page Closed');
         if (mounted) {
           setState(() {

@@ -84,6 +84,8 @@ Future<void> notificationInitialize() async {
 
 /// Background Message Show for Debugging
 Future<void> backgroundMsgAction(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
   print(
       'Background Message Data: ${message.notification.body}   ${message.notification.title}');
 
