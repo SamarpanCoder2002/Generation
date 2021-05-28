@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
@@ -51,7 +52,8 @@ class _SelectConnectionState extends State<SelectConnection> {
       setState(() {
         userNameList.forEach((userNameMap) {
           allConnectionsUserNameAndProfilePicture.add({
-            userNameMap.values.first: 'assets/logo/logo.jpg',
+            userNameMap.values.first: ProfileImageManagement
+                .allConnectionsProfilePicLocalPath[userNameMap.values.first],
           });
         });
 
@@ -172,10 +174,10 @@ class _SelectConnectionState extends State<SelectConnection> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: ExactAssetImage(
+                    backgroundImage: FileImage(File(
                         allConnectionsUserNameAndProfilePicture[index]
                             .values
-                            .first),
+                            .first)),
                   ),
                 ),
                 Expanded(
