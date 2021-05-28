@@ -41,6 +41,7 @@ dependencies:
   workmanager: ^0.4.0
   share: ^2.0.1
   image_gallery_saver: ^1.6.9
+  mobile_number: ^1.0.4
 
   circle_list:
   image_picker:

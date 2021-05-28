@@ -22,6 +22,7 @@ enum NConfigTypes{
 
 enum ExtraImportant{
   ChatWallpaper,
+  MobileNumber,
   BGNStatus,
   FGNStatus,
 }

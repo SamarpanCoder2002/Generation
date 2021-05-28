@@ -30,6 +30,7 @@ class LocalStorageHelper {
   final String _colProfileImagePath = 'DP_Path';
   final String _colProfileImageUrl = 'DP_Url';
   final String _colChatWallPaper = 'Chat_WallPaper';
+  final String _colMobileNumber = 'User_Mobile_Number';
   final String _colParticularBGNStatus = 'ParticularBGNStatus';
   final String _colParticularFGNStatus = 'ParticularFGNStatus';
 
@@ -85,7 +86,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT, $_colChatWallPaper TEXT, $_colParticularBGNStatus TEXT, $_colParticularFGNStatus TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT, $_colChatWallPaper TEXT, $_colParticularBGNStatus TEXT, $_colParticularFGNStatus TEXT, $_colMobileNumber TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -110,6 +111,7 @@ class LocalStorageHelper {
     _accountData[_colProfileImageUrl] = profileImageUrl;
     _accountData[_colAbout] = userAbout;
     _accountData[_colChatWallPaper] = '';
+    _accountData[_colMobileNumber] = '';
     _accountData[_colParticularBGNStatus] = "1";
     _accountData[_colParticularFGNStatus] = "1";
 
@@ -135,8 +137,8 @@ class LocalStorageHelper {
   }
 
   Future<void> updateImportantTableExtraData(
-      {String userName,
-      String userMail,
+      {String userName = '',
+      String userMail = '',
       bool allUpdate = false,
       @required ExtraImportant extraImportant,
       @required String updatedVal}) async {
@@ -225,6 +227,9 @@ class LocalStorageHelper {
         break;
       case ExtraImportant.FGNStatus:
         return this._colParticularFGNStatus;
+        break;
+      case ExtraImportant.MobileNumber:
+        return this._colMobileNumber;
         break;
     }
 
