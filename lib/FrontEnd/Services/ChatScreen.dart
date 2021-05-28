@@ -1695,6 +1695,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   Container(
                     alignment: Alignment.center,
                     child: PhotoView(
+
                       imageProvider: _mediaTypes[index] == MediaTypes.Image
                           ? FileImage(File(_chatContainer[index].keys.first))
                           : FileImage(File(_chatContainer[index]
@@ -1715,7 +1716,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         ),
                       )),
                       enableRotation: true,
-                      minScale: 0.36,
+                      minScale: PhotoViewComputedScale.covered,
                     ),
                   ),
                   _multipleOptions(index, mediaTypes: _mediaTypes[index]),

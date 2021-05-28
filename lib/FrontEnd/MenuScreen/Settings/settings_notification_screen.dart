@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -35,6 +34,7 @@ class _SettingsNotificationConfigurationState
     final bool _anonymousTempStatus =
         await _localStorageHelper.extractDataForNotificationConfigTable(
             nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
+
 
     if (mounted) {
       setState(() {
@@ -245,7 +245,7 @@ class _SettingsNotificationConfigurationState
                     this._removeBirthStatus = !this._removeBirthStatus;
                   });
                 }
-              } else {
+              } else if (mainText.split(' ')[1] == 'Anonymous') {
                 print('Remove Anonymous Notification');
 
                 await _localStorageHelper.updateDataForNotificationGlobalConfig(

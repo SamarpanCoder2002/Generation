@@ -2,7 +2,8 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/FrontEnd/MenuScreen/settings_notification_screen.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/chatWallPaperMaker.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/settings_notification_screen.dart';
 
 class SettingsWindow extends StatefulWidget {
   @override
@@ -45,7 +46,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
           everySettingsItem(
               mainText: 'Chat Wallpaper',
               icon: Icons.wallpaper_outlined,
-              smallDescription: 'Change Chat Wallpaper'),
+              smallDescription: 'Change Chat Common Wallpaper'),
           SizedBox(
             height: 15.0,
           ),
@@ -106,6 +107,9 @@ class _SettingsWindowState extends State<SettingsWindow> {
         switch (mainText) {
           case 'Notification':
             return SettingsNotificationConfiguration();
+            break;
+          case 'Chat Wallpaper':
+            return ChatWallPaperMaker();
             break;
         }
         return Center();

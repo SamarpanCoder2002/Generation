@@ -19,3 +19,9 @@ enum NConfigTypes{
   RemoveBirthNotification,
   RemoveAnonymousNotification,
 }
+
+enum ExtraImportant{
+  ChatWallpaper,
+  BGNStatus,
+  FGNStatus,
+}

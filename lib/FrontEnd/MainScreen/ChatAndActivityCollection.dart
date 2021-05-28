@@ -329,7 +329,6 @@ class _ChatsAndActivityCollectionState
                                 .allConnectionsProfilePicLocalPath[
                             documentSnapshot['user_name']] !=
                         profilePicPath) {
-
                       print('New Connection Profile Pic Not Matched');
                       if (mounted) {
                         setState(() {

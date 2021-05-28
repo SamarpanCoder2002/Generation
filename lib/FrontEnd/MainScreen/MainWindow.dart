@@ -16,7 +16,7 @@ import 'package:generation/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/general_applications_section.dart';
 import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
 import 'package:generation/FrontEnd/MenuScreen/profile_screen.dart';
-import 'package:generation/FrontEnd/MenuScreen/settings_menu.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/settings_menu.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
@@ -344,13 +344,13 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () async {
                       print('Clicked Refresh in MainWindow');
 
-                      _removeAnonymousNotificationChecking();
-
                       if (mounted) {
                         setState(() {
                           ImportantThings.findImageUrlAndUserName();
                         });
                       }
+
+                      _removeAnonymousNotificationChecking();
                     },
                   ),
                 )

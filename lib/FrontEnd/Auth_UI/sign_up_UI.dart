@@ -251,7 +251,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                       ),
                       Center(
                         child: Text(
-                          "OR Connect With",
+                          "Or Continue With",
                           style: TextStyle(
                             fontSize: 18.0,
                             letterSpacing: 1.0,

@@ -27,8 +27,11 @@ class LocalStorageHelper {
   final String _allImportantDataStore = '__ImportantDataTable__';
   final String _colAccountUserName = 'User_Name';
   final String _colAccountUserMail = 'User_Mail';
-  final String _colProfileImagePath = "DP_Path";
+  final String _colProfileImagePath = 'DP_Path';
   final String _colProfileImageUrl = 'DP_Url';
+  final String _colChatWallPaper = 'Chat_WallPaper';
+  final String _colParticularBGNStatus = 'ParticularBGNStatus';
+  final String _colParticularFGNStatus = 'ParticularFGNStatus';
 
   final String _colActivitySpecial = 'ActivitySpecialOptions';
 
@@ -82,7 +85,7 @@ class LocalStorageHelper {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT, $_colChatWallPaper TEXT, $_colParticularBGNStatus TEXT, $_colParticularFGNStatus TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -106,6 +109,9 @@ class LocalStorageHelper {
     _accountData[_colProfileImagePath] = profileImagePath;
     _accountData[_colProfileImageUrl] = profileImageUrl;
     _accountData[_colAbout] = userAbout;
+    _accountData[_colChatWallPaper] = '';
+    _accountData[_colParticularBGNStatus] = "1";
+    _accountData[_colParticularFGNStatus] = "1";
 
     await db.insert(_allImportantDataStore, _accountData);
   }
@@ -126,6 +132,81 @@ class LocalStorageHelper {
     } catch (e) {
       print('Insert Profile Picture to Local Database Error: ${e.toString()}');
     }
+  }
+
+  Future<void> updateImportantTableExtraData(
+      {String userName,
+      String userMail,
+      bool allUpdate = false,
+      @required ExtraImportant extraImportant,
+      @required String updatedVal}) async {
+    try {
+      final Database db = await this.database;
+
+      if (!allUpdate && userName == '')
+        userName =
+            await extractImportantDataFromThatAccount(userMail: userMail);
+
+      final String _query =
+          identifyExtraImportantData(extraImportant: extraImportant);
+
+      int result;
+
+      if (allUpdate)
+        result = await db.rawUpdate(
+            "UPDATE $_allImportantDataStore SET $_query = '$updatedVal'");
+      else
+        result = await db.rawUpdate(
+            "UPDATE $_allImportantDataStore SET $_query = '$updatedVal' WHERE $_colAccountUserName = '$userName'");
+
+      print(
+          'Update Important Data Store Result : ${result == 1 ? true : false}');
+    } catch (e) {
+      print('Update Important Table Extra Data Error: ${e.toString()}');
+    }
+  }
+
+  Future<dynamic> extractImportantTableData(
+      {String userName = '',
+      String userMail = '',
+      @required ExtraImportant extraImportant}) async {
+    try {
+      final Database db = await this.database;
+
+      if (userName == '')
+        userName =
+            await extractImportantDataFromThatAccount(userMail: userMail);
+
+      final String _query =
+          identifyExtraImportantData(extraImportant: extraImportant);
+
+      final List<Map<String, Object>> result = await db.rawQuery(
+          "SELECT $_query FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
+
+      final String take = result[0][_query];
+
+      if (take == '1' || take == '0') return take == '1' ? true : false;
+
+      return take;
+    } catch (e) {
+      print('Extract Important Table Data: ${e.toString()}');
+    }
+  }
+
+  String identifyExtraImportantData({@required ExtraImportant extraImportant}) {
+    switch (extraImportant) {
+      case ExtraImportant.ChatWallpaper:
+        return this._colChatWallPaper;
+        break;
+      case ExtraImportant.BGNStatus:
+        return this._colParticularBGNStatus;
+        break;
+      case ExtraImportant.FGNStatus:
+        return this._colParticularFGNStatus;
+        break;
+    }
+
+    return 'Exception';
   }
 
   Future<String> extractImportantDataFromThatAccount(
@@ -572,16 +653,16 @@ class LocalStorageHelper {
   String _findBestMatch(NConfigTypes nConfigTypes) {
     switch (nConfigTypes) {
       case NConfigTypes.BgNotification:
-        return _colBgNotify;
+        return this._colBgNotify;
         break;
       case NConfigTypes.FGNotification:
-        return _colFGNotify;
+        return this._colFGNotify;
         break;
       case NConfigTypes.RemoveBirthNotification:
-        return _colRemoveBirthNotification;
+        return this._colRemoveBirthNotification;
         break;
       case NConfigTypes.RemoveAnonymousNotification:
-        return _colAnonymousRemoveNotification;
+        return this._colAnonymousRemoveNotification;
         break;
     }
 

@@ -247,6 +247,7 @@ class EmailAndPasswordAuth {
                                   'activity': {},
                                   'token': _getToken,
                                   'profile_pic': '',
+                                  'phone_number': '',
                                 });
 
                                 await _localStorageHelper

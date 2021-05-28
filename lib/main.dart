@@ -4,11 +4,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
-import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
@@ -32,7 +32,8 @@ void main() async {
         'Message Data is: ${messageEvent.notification.title}      ${messageEvent.notification.body}');
 
     final bool _fgNotifyStatus =
-        await _localStorageHelper.extractDataForNotificationConfigTable(nConfigTypes: NConfigTypes.FGNotification);
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.FGNotification);
 
     print('Foreground Notification Status: $_fgNotifyStatus');
 
@@ -41,6 +42,7 @@ void main() async {
         title: messageEvent.notification.title,
         body: messageEvent.notification.body,
       );
+
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
   // /// Change Navigation Bar Color
@@ -91,7 +93,8 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
       'Background Message Data: ${message.notification.body}   ${message.notification.title}');
 
   final bool _bgNotifyStatus = await LocalStorageHelper()
-      .extractDataForNotificationConfigTable(nConfigTypes: NConfigTypes.BgNotification);
+      .extractDataForNotificationConfigTable(
+          nConfigTypes: NConfigTypes.BgNotification);
 
   print('Background Notification Status: $_bgNotifyStatus');
 
