@@ -160,7 +160,7 @@ class LocalStorageHelper {
             "UPDATE $_allImportantDataStore SET $_query = '$updatedVal' WHERE $_colAccountUserName = '$userName'");
 
       print(
-          'Update Important Data Store Result : ${result == 1 ? true : false}');
+          'Update Important Data Store Result : ${result > 0 ? true : false}');
     } catch (e) {
       print('Update Important Table Extra Data Error: ${e.toString()}');
     }
@@ -190,6 +190,28 @@ class LocalStorageHelper {
       return take;
     } catch (e) {
       print('Extract Important Table Data: ${e.toString()}');
+    }
+  }
+
+  /// Actually Doing Update as for delete, entire row will be rejected from table
+  Future<void> deleteParticularUpdatedImportantData(
+      {@required ExtraImportant extraImportant,
+      @required String shouldBeDeleted}) async {
+    try {
+      final Database db = await this.database;
+
+      final String query =
+          identifyExtraImportantData(extraImportant: extraImportant);
+
+      final int result = await db.rawUpdate(
+          "UPDATE $_allImportantDataStore SET $query = '' WHERE $query = '$shouldBeDeleted'");
+
+      print(result > 0
+          ? 'Particular Important Data Deletion Successful'
+          : 'Error: Particular Data Deletion Failed');
+    } catch (e) {
+      print(
+          'Error: Delete Particular Updated Important Data Error: ${e.toString()}');
     }
   }
 

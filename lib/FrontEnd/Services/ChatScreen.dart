@@ -67,6 +67,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   double _audioDownloadProgress = 0;
   double _currAudioPlayingTime;
   int _lastAudioPlayingIndex;
+  double _bottomRowDownPadding = 7.0;
 
   /// For Control the Scrolling
   final ScrollController _scrollController = ScrollController(
@@ -100,6 +101,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   /// Chat List View Parent Height
   double _chatBoxHeight;
+  double _bottomRowHeight = 80.0;
 
   /// Sound Recorder and Audio Obj Initialization
   FlutterSoundRecorder _flutterSoundRecorder;
@@ -109,6 +111,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   String _senderMail;
   String _connectionToken;
   String _currAccountUserName;
+
+  /// For This Chat Specific Feature
+  String _thisChatWallPaper = '';
 
   /// Audio Playing Time Related
   String _totalDuration;
@@ -875,6 +880,24 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         .create(); // This directory will create Once in whole Application
   }
 
+  Future<void> _chatWallPaperManager() async {
+    final String _takeWallPaperPath =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.ChatWallpaper,
+            userName: widget._userName);
+
+    if(await File(_takeWallPaperPath).exists()) {
+      if (mounted) {
+        setState(() {
+          this._thisChatWallPaper =
+              _takeWallPaperPath == null ? '' : _takeWallPaperPath;
+        });
+      }
+    }
+
+    print('Image Path is: ${this._thisChatWallPaper}');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -902,6 +925,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     if (_isChatOpenFirstTime) {
       _extractHistoryDataFromSqLite();
+      _chatWallPaperManager();
     }
 
     if (mounted) {
@@ -1048,14 +1072,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget mainBody(BuildContext context) {
-    _chatBoxHeight = MediaQuery.of(context).size.height - 155;
+    _chatBoxHeight = MediaQuery.of(context).size.height - 150;
     return WillPopScope(
       onWillPop: () async {
         if (_showEmojiPicker) {
           if (mounted) {
             setState(() {
               _showEmojiPicker = false;
-              _chatBoxHeight = MediaQuery.of(context).size.height - 155;
+              _chatBoxHeight = MediaQuery.of(context).size.height - 150;
             });
           }
           return false;
@@ -1066,8 +1090,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.only(
-          top: 20.0,
+        // padding: EdgeInsets.only(
+        //   top: 10.0,
+        // ),
+        decoration: BoxDecoration(
+          image: this._thisChatWallPaper != ''
+              ? DecorationImage(
+                  image: FileImage(File(this._thisChatWallPaper)),
+                  fit: BoxFit.cover,
+                )
+              : null,
         ),
         child: ListView(
           shrinkWrap: true,
@@ -1106,148 +1138,173 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ),
             Container(
-              //color: Colors.black54,
-              padding: EdgeInsets.only(bottom: 5.0),
-              child: Row(
+              padding: EdgeInsets.only(
+                bottom: 3.0,
+                top: 3.0,
+              ),
+              height: _bottomRowHeight,
+              decoration: BoxDecoration(
+                color: _thisChatWallPaper != '' ? Colors.black26 : null,
+                borderRadius: BorderRadius.only(
+                  topLeft:
+                      Radius.circular(_thisChatWallPaper != '' ? 40.0 : 0.0),
+                  topRight:
+                      Radius.circular(_thisChatWallPaper != '' ? 40.0 : 0.0),
+                ),
+              ),
+              child: ListView(
+                shrinkWrap: true,
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: GestureDetector(
-                      child: const Icon(
-                        Icons.emoji_emotions_rounded,
-                        color: Colors.orangeAccent,
-                      ),
-                      onTap: () {
-                        /// Close the keyboard
-                        SystemChannels.textInput.invokeMethod('TextInput.hide');
-
-                        if (mounted) {
-                          setState(() {
-                            _chatBoxHeight -= 50;
-                            _showEmojiPicker = true;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 5.0, right: 10.0),
-                    child: GestureDetector(
-                      child: const Icon(
-                        Entypo.link,
-                        color: Colors.lightBlue,
-                      ),
-                      onTap: () async {
-                        _showChoices();
-                      },
-                    ),
-                  ),
-                  Column(
+                  Row(
                     children: [
-                      if (this._replyText != '')
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.65,
-                          padding: EdgeInsets.only(
-                            bottom: 5.0,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _replyText,
-                                  style: TextStyle(
-                                    color: Colors.lightBlue,
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  size: 18.0,
-                                  color: Colors.red,
-                                ),
-                                onTap: () {
-                                  if (mounted) {
-                                    setState(() {
-                                      _replyText = '';
-                                    });
-                                  }
-                                  // SystemChannels.textInput.invokeMethod('TextInput.hide');
-                                  // SystemChannels.textInput.invokeMethod('TextInput.hide');
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
                       Container(
-                          width: MediaQuery.of(context).size.width * 0.65,
-                          constraints: BoxConstraints.loose(Size(
-                              MediaQuery.of(context).size.width * 0.65, 100.0)),
-                          child: Scrollbar(
-                            showTrackOnHover: true,
-                            thickness: 10.0,
-                            radius: Radius.circular(30.0),
-                            child: TextField(
-                              autofocus: _autoFocus,
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                              onTap: () {
-                                if (mounted) {
-                                  setState(() {
-                                    _showEmojiPicker = false;
-                                    _chatBoxHeight =
-                                        MediaQuery.of(context).size.height -
-                                            155;
-                                  });
-                                }
+                        margin: EdgeInsets.only(left: 10.0, right: 10.0),
+                        child: GestureDetector(
+                          child: const Icon(
+                            Icons.emoji_emotions_rounded,
+                            color: Colors.orangeAccent,
+                          ),
+                          onTap: () {
+                            /// Close the keyboard
+                            SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-                                _scrollController.jumpTo(
-                                    _scrollController.position.maxScrollExtent);
-                              },
-                              onChanged: (inputValue) {
-                                if (mounted) {
-                                  setState(() {
-                                    if (inputValue == '') {
-                                      _iconChanger = true;
-                                    } else
-                                      _iconChanger = false;
-                                  });
-                                }
-                              },
-                              controller: _inputTextController,
-                              maxLines: null,
-                              // For Line Break
-                              decoration: InputDecoration(
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20.0)),
-                                  borderSide: BorderSide(
-                                      color: Colors.lightGreen, width: 2.0),
-                                ),
-                                hintText: _hintText,
-                                hintStyle: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Lora',
-                                  letterSpacing: 2.0,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                enabledBorder: UnderlineInputBorder(
-                                    borderSide:
-                                        BorderSide(color: Colors.lightBlue)),
+                            if (mounted) {
+                              setState(() {
+                                _chatBoxHeight -= 50;
+                                _showEmojiPicker = true;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 5.0, right: 10.0),
+                        child: GestureDetector(
+                          child: const Icon(
+                            Entypo.link,
+                            color: Colors.lightBlue,
+                          ),
+                          onTap: () async {
+                            _showChoices();
+                          },
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          if (this._replyText != '')
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.65,
+                              padding: EdgeInsets.only(
+                                bottom: 5.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      _replyText,
+                                      style: TextStyle(
+                                        color: this._thisChatWallPaper != ''?Colors.yellow:Colors.lightBlue,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      size: 18.0,
+                                      color: Colors.red,
+                                    ),
+                                    onTap: () {
+                                      if (mounted) {
+                                        setState(() {
+                                          _replyText = '';
+                                          this._bottomRowHeight = 80.0;
+                                        });
+                                      }
+                                      // SystemChannels.textInput.invokeMethod('TextInput.hide');
+                                      // SystemChannels.textInput.invokeMethod('TextInput.hide');
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
-                          )),
+                          Container(
+                              width: MediaQuery.of(context).size.width * 0.65,
+                              constraints: BoxConstraints.loose(Size(
+                                  MediaQuery.of(context).size.width * 0.65, 74.0)),
+                              padding: EdgeInsets.only(
+                                top: _bottomRowDownPadding,
+                              ),
+                              child: Scrollbar(
+                                showTrackOnHover: true,
+                                thickness: 10.0,
+                                radius: Radius.circular(30.0),
+                                child: TextField(
+                                  autofocus: _autoFocus,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  onTap: () {
+                                    if (mounted) {
+                                      setState(() {
+                                        _showEmojiPicker = false;
+                                        // if (_bottomRowDownPadding == 7.0)
+                                        //   _bottomRowDownPadding -= 7.0;
+                                        _chatBoxHeight =
+                                            MediaQuery.of(context).size.height -
+                                                150;
+                                      });
+                                    }
+
+                                    _scrollController.jumpTo(
+                                        _scrollController.position.maxScrollExtent);
+                                  },
+                                  onChanged: (inputValue) {
+                                    if (mounted) {
+                                      setState(() {
+                                        if (inputValue == '') {
+                                          _iconChanger = true;
+                                        } else
+                                          _iconChanger = false;
+                                      });
+                                    }
+                                  },
+                                  controller: _inputTextController,
+                                  maxLines: null,
+                                  // For Line Break
+                                  decoration: InputDecoration(
+                                    focusedBorder: UnderlineInputBorder(
+                                      // borderRadius:
+                                      //     BorderRadius.all(Radius.circular(20.0)),
+                                      borderSide: BorderSide(
+                                        color: Colors.lightGreen,
+                                        width: 2.0,
+                                      ),
+                                    ),
+                                    hintText: _hintText,
+                                    hintStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Lora',
+                                      letterSpacing: 2.0,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide:
+                                            BorderSide(color: Colors.lightBlue)),
+                                  ),
+                                ),
+                              )),
+                        ],
+                      ),
+                      Expanded(
+                        child: IconButton(
+                          icon: _iconChanger ? _voiceIcon : _senderIcon,
+                          onPressed: _iconChanger ? _voiceController : _textSend,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 2.0,
+                      ),
                     ],
-                  ),
-                  Expanded(
-                    child: IconButton(
-                      icon: _iconChanger ? _voiceIcon : _senderIcon,
-                      onPressed: _iconChanger ? _voiceController : _textSend,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 2.0,
                   ),
                 ],
               ),
@@ -1337,6 +1394,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   }
                 }
 
+                _bottomRowHeight = 90;
                 _autoFocus = true;
               });
             }
@@ -1364,7 +1422,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     child: Text(
                       _chatContainer[index].keys.first.split('[[[@]]]')[0],
                       style: TextStyle(
-                        color: Colors.lightBlue,
+                        color: this._thisChatWallPaper != ''?Colors.yellow:Colors.lightBlue,
                       ),
                     ),
                   ),
@@ -1695,7 +1753,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   Container(
                     alignment: Alignment.center,
                     child: PhotoView(
-
                       imageProvider: _mediaTypes[index] == MediaTypes.Image
                           ? FileImage(File(_chatContainer[index].keys.first))
                           : FileImage(File(_chatContainer[index]
@@ -2052,7 +2109,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
             _iconChanger = true; // IconChanger Should Change
 
-            if (_replyText != '') _replyText = '';
+            if (_replyText != '') {
+              _replyText = '';
+
+              this._bottomRowHeight = 80.0;
+            }
           });
         }
 

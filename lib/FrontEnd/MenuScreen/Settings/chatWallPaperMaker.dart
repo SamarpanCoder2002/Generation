@@ -23,6 +23,7 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
   /// String For Store Image Path
   String _chatWallPaperPath = ''; // For New Selected Image
   String _oldWallPaperPath = ''; // For Old Selected Image
+  String _appBarPickUpImagePreview = 'Select Wallpaper';
 
   /// Make Objects of some important class
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
@@ -44,7 +45,8 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
 
     if (mounted) {
       setState(() {
-        this._chatWallPaperPath = wallpaperTempPath;
+        this._chatWallPaperPath =
+            wallpaperTempPath == null ? '' : wallpaperTempPath;
         if (this._chatWallPaperPath != '') {
           this._wallPaperAlreadyExist = true;
           this._oldWallPaperPath = this._chatWallPaperPath;
@@ -70,14 +72,25 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
         elevation: 10.0,
         shadowColor: Colors.white70,
         actions: [
+          if (this._chatWallPaperPath != '' &&
+              this._chatWallPaperPath == this._oldWallPaperPath)
+            GestureDetector(
+              child: Icon(
+                Icons.delete_outlined,
+                color: Colors.red,
+              ),
+              onTap: _sureDeleteCurrChatCommonWallPaper,
+            ),
           Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.only(right: 10.0),
+            padding: EdgeInsets.only(left: 10.0, right: 10.0),
             child: this._chatWallPaperPath == '' ? null : _wallpaperConfig(),
           ),
         ],
         title: Text(
-          this._wallPaperAlreadyExist ?'Chat Screen':'Preview',
+          this._wallPaperAlreadyExist
+              ? 'Chat Screen'
+              : this._appBarPickUpImagePreview,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20.0,
@@ -95,9 +108,10 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
                   : 0),
           child: this._chatWallPaperPath != ''
               ? Stack(
-                children: [
-                  PhotoView(
+                  children: [
+                    PhotoView(
                       minScale: PhotoViewComputedScale.covered,
+                      maxScale: PhotoViewComputedScale.covered,
                       imageProvider: FileImage(
                         File(this._chatWallPaperPath),
                       ),
@@ -115,11 +129,11 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
                         ),
                       )),
                     ),
-                  _messageModel(false),
-                  _messageModel(true),
-                  _bottomContainer(),
-                ],
-              )
+                    _messageModel(false),
+                    _messageModel(true),
+                    _bottomContainer(),
+                  ],
+                )
               : GestureDetector(
                   onTap: () async {
                     await _selectPictureFromStorage();
@@ -152,18 +166,30 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
     );
   }
 
-  Widget _bottomContainer(){
+  Widget _bottomContainer() {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 60.0,
-      color: Colors.black26,
+      height: 70.0,
       margin: EdgeInsets.only(top: MediaQuery.of(context).size.height - 140),
       padding: EdgeInsets.only(bottom: 10.0),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Icon(Icons.emoji_emotions_rounded, color: Colors.amber,size: 30.0,),
-          Icon(Entypo.link, color: Colors.lightBlue, size: 25.0,),
+          Icon(
+            Icons.emoji_emotions_rounded,
+            color: Colors.amber,
+            size: 30.0,
+          ),
+          Icon(
+            Entypo.link,
+            color: Colors.lightBlue,
+            size: 25.0,
+          ),
           Container(
             width: MediaQuery.of(context).size.width * 0.6,
             child: TextField(
@@ -188,9 +214,7 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
                 color: Colors.green,
                 size: 30.0,
               ),
-              onPressed: () async {
-
-              },
+              onPressed: () async {},
             ),
           ),
         ],
@@ -198,16 +222,33 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
     );
   }
 
-  Widget _messageModel(bool response){
+  Widget _messageModel(bool response) {
     return Container(
-      alignment: response?Alignment.topRight:Alignment.topLeft,
-      margin: EdgeInsets.only(right: response?5.0:MediaQuery.of(context).size.width / 3, left: response? MediaQuery.of(context).size.width / 3:5.0, top: response?60.0:10.0,),
+      alignment: response ? Alignment.topRight : Alignment.topLeft,
+      margin: EdgeInsets.only(
+        right: response ? 5.0 : MediaQuery.of(context).size.width / 3,
+        left: response ? MediaQuery.of(context).size.width / 3 : 5.0,
+        top: response ? 60.0 : 10.0,
+      ),
       height: 40.0,
       decoration: BoxDecoration(
-        color: response?const Color.fromRGBO(102, 102, 255, 1):const Color.fromRGBO(60, 80, 100, 1),
-        borderRadius: BorderRadius.only(topRight: response?Radius.circular(0.0):Radius.circular(40.0), bottomLeft: Radius.circular(40.0), bottomRight: Radius.circular(40.0), topLeft: response?Radius.circular(40.0):Radius.circular(0.0)),
+        color: response
+            ? const Color.fromRGBO(102, 102, 255, 1)
+            : const Color.fromRGBO(60, 80, 100, 1),
+        borderRadius: BorderRadius.only(
+            topRight: response ? Radius.circular(0.0) : Radius.circular(40.0),
+            bottomLeft: Radius.circular(40.0),
+            bottomRight: Radius.circular(40.0),
+            topLeft: response ? Radius.circular(40.0) : Radius.circular(0.0)),
       ),
-      child: Center(child: Text(response?'Your Message':'Incoming Message', style: TextStyle(color: Colors.white, fontSize: 16.0,),)),
+      child: Center(
+          child: Text(
+        response ? 'Your Message' : 'Incoming Message',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16.0,
+        ),
+      )),
     );
   }
 
@@ -288,8 +329,83 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
       if (mounted) {
         setState(() {
           this._chatWallPaperPath = File(pickedFile.path).path;
+          if (this._appBarPickUpImagePreview == 'Select Wallpaper')
+            this._appBarPickUpImagePreview = 'Chat Preview';
+          print('After Added File: ${this._chatWallPaperPath}');
         });
       }
     }
+  }
+
+  void _sureDeleteCurrChatCommonWallPaper() {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              backgroundColor: const Color.fromRGBO(34, 48, 60, 0.6),
+              elevation: 0.5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              title: Text(
+                'Sure To Delete Common WallPaper',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 16.0,
+                ),
+              ),
+              content: Container(
+                height: 30,
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _deleteDecisionButtons(false),
+                    _deleteDecisionButtons(true),
+                  ],
+                ),
+              ),
+            ));
+  }
+
+  _deleteDecisionButtons(bool decision) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: decision ? Colors.green : Colors.red,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
+      ),
+      child: Text(
+        decision ? 'Sure' : 'Cancel',
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+      onPressed: () async {
+        try {
+          await File(this._chatWallPaperPath)
+              .delete(recursive: true)
+              .whenComplete(() async {
+            await _localStorageHelper
+                .deleteParticularUpdatedImportantData(
+                    extraImportant: ExtraImportant.ChatWallpaper,
+                    shouldBeDeleted: this._chatWallPaperPath)
+                .whenComplete(() {
+              print('Old Chat Wallpaper Deleted');
+              print('Old Image Path Already Deleted From Local Sqlite Table');
+              if (mounted) {
+                setState(() {
+                  this._chatWallPaperPath = this._oldWallPaperPath = '';
+                });
+              }
+            });
+          });
+        } catch (e) {
+          print('Error: Old Chat Wallpaper Delete Error: ${e.toString()}');
+        }
+
+        Navigator.pop(context);
+      },
+    );
   }
 }
