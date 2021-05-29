@@ -2,8 +2,9 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chatWallPaperMaker.dart';
-import 'package:generation/FrontEnd/MenuScreen/Settings/chat_history_maker.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/chat_history_maker_and_media_view.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/settings_notification_screen.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/phone_call_config.dart';
 
@@ -117,7 +118,10 @@ class _SettingsWindowState extends State<SettingsWindow> {
             return PhoneNumberConfig();
             break;
           case 'Chat History':
-            return ChatHistoryMaker();
+            return ChatHistoryMakerAndMediaViewer(historyOrMediaChoice: HistoryOrMediaChoice.History);
+            break;
+          case 'Storage':
+            return ChatHistoryMakerAndMediaViewer(historyOrMediaChoice: HistoryOrMediaChoice.Media);
             break;
         }
         return Center();

@@ -553,18 +553,31 @@ class LocalStorageHelper {
     return map;
   }
 
-  Future<List<Map<String,Object>>> fetchAllHistoryData(String _tableName) async{
+  Future<List<Map<String, Object>>> fetchAllHistoryData(
+      String _tableName) async {
+    try {
+      final Database db = await this.database;
+
+      final List<Map<String, Object>> result = await db.rawQuery(
+          'SELECT $_colMessages, $_colReferences, $_colMediaType, $_colTime, $_colDate FROM $_tableName');
+
+      return result;
+    } catch (e) {
+      print('Fetch all History Data Error: ${e.toString()}');
+      return [];
+    }
+  }
+
+  Future<void> extractParticularChatMediaByRequirement({@required String tableName, @required MediaTypes mediaType}) async{
     try{
       final Database db = await this.database;
 
-      final List<Map<String,Object>> result = await db.rawQuery('SELECT $_colMessages, $_colReferences, $_colMediaType, $_colTime, $_colDate FROM $_tableName');
+      final List<Map<String,Object>> result = await db.rawQuery("SELECT $_colMessages FROM $tableName WHERE $_colMediaType= '$mediaType'");
 
-      //print(result);
+      print(result);
 
-      return result;
     }catch(e){
-      print('Fetch all History Data Error: ${e.toString()}');
-      return [];
+      print('Error: Extract Particular Chat All Media Error: ${e.toString()}');
     }
   }
 

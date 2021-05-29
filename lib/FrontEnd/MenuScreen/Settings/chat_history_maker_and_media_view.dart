@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/connection_media_view.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share/share.dart';
@@ -14,14 +15,18 @@ import 'package:generation/BackendAndDatabaseManager/global_controller/different
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 
-class ChatHistoryMaker extends StatefulWidget {
-  const ChatHistoryMaker({Key key}) : super(key: key);
+class ChatHistoryMakerAndMediaViewer extends StatefulWidget {
+  final HistoryOrMediaChoice historyOrMediaChoice;
+
+  ChatHistoryMakerAndMediaViewer({@required this.historyOrMediaChoice});
 
   @override
-  _ChatHistoryMakerState createState() => _ChatHistoryMakerState();
+  _ChatHistoryMakerAndMediaViewerState createState() =>
+      _ChatHistoryMakerAndMediaViewerState();
 }
 
-class _ChatHistoryMakerState extends State<ChatHistoryMaker> {
+class _ChatHistoryMakerAndMediaViewerState
+    extends State<ChatHistoryMakerAndMediaViewer> {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final FToast _fToast = FToast();
 
@@ -98,73 +103,19 @@ class _ChatHistoryMakerState extends State<ChatHistoryMaker> {
             onPressed: () async {
               print('Chat Tile Pressed');
 
-              final String selectedUserName = this
-                  ._allConnectionUserNameAndProfilePic
-                  .entries
-                  .toList()[index]
-                  .key
-                  .toString();
-
-              final List<Map<String, Object>> extractedHistoryData =
-                  await _localStorageHelper
-                      .fetchAllHistoryData(selectedUserName);
-
-              if (extractedHistoryData.isNotEmpty) {
-                if (mounted) {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                }
-
-                Directory directory = await getExternalStorageDirectory();
-
-                directory =
-                    await Directory('${directory.path}/.chatExtractedHistory')
-                        .create(recursive: true);
-
-                final File _chatHistoryFile = File(
-                    '${directory.path}/<ChatHistory>$selectedUserName${DateTime.now()}.txt');
-
-                print(_chatHistoryFile.path);
-
-                String _historyMaker = '';
-
-                extractedHistoryData.forEach((everyChatData) {
-                  String _extractedThatMessage =
-                      everyChatData['Messages'].toString();
-
-                  String _extractedThatTime = everyChatData['Time'];
-
-                  if (everyChatData['Media'] == MediaTypes.Text.toString() &&
-                      everyChatData['Messages'].toString().contains('[[[@]]]'))
-                    _extractedThatMessage = everyChatData['Messages']
-                        .toString()
-                        .split('[[[@]]]')[1];
-                  else if (everyChatData['Media'] ==
-                          MediaTypes.Text.toString() &&
-                      _extractedThatMessage.contains('\n'))
-                    _extractedThatMessage =
-                        _extractedThatMessage.split('\n').join(' ');
-
-                  if (_extractedThatTime.contains('+'))
-                    _extractedThatTime = _extractedThatTime.split('+')[0];
-
-                  _historyMaker +=
-                      "${everyChatData['Reference'] == 1 ? selectedUserName : 'You'}: ${everyChatData['Media'] != MediaTypes.Text.toString() ? '<Non-Text-File>' : _extractedThatMessage}\nDate: ${everyChatData['Date']}   Time: $_extractedThatTime\n\n";
-                });
-
-                await _chatHistoryFile.writeAsString(_historyMaker);
-
-                print('\n\n\n${await _chatHistoryFile.readAsString()}');
-
-                if (mounted) {
-                  setState(() {
-                    _isLoading = false;
-                  });
-                }
-
-                _differentSharingOptions(_chatHistoryFile);
-              }
+              if (widget.historyOrMediaChoice == HistoryOrMediaChoice.History)
+                _historyMakerAndProceed(index);
+              else
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ParticularConnectionMediaView(
+                            selectedConnectionUserName: this
+                                ._allConnectionUserNameAndProfilePic
+                                .entries
+                                .toList()[index]
+                                .key
+                                .toString())));
             },
             child: Row(
               children: [
@@ -223,8 +174,11 @@ class _ChatHistoryMakerState extends State<ChatHistoryMaker> {
   }
 
   void _differentSharingOptions(File file) {
-
-    showToast('Chat History Extracted Successfully', _fToast, fontSize: 16.0,);
+    showToast(
+      'Chat History Extracted Successfully',
+      _fToast,
+      fontSize: 16.0,
+    );
 
     showDialog(
         context: context,
@@ -280,7 +234,7 @@ class _ChatHistoryMakerState extends State<ChatHistoryMaker> {
           fontSize: 14.0,
         ),
       ),
-      onPressed: () async{
+      onPressed: () async {
         Navigator.pop(context);
 
         if (firstOption)
@@ -297,8 +251,71 @@ class _ChatHistoryMakerState extends State<ChatHistoryMaker> {
             [chatHistoryFile.path],
             subject: 'Share From Generation',
           );
-
       },
     );
+  }
+
+  void _historyMakerAndProceed(int index) async {
+    final String selectedUserName = this
+        ._allConnectionUserNameAndProfilePic
+        .entries
+        .toList()[index]
+        .key
+        .toString();
+
+    final List<Map<String, Object>> extractedHistoryData =
+        await _localStorageHelper.fetchAllHistoryData(selectedUserName);
+
+    if (extractedHistoryData.isNotEmpty) {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
+      Directory directory = await getExternalStorageDirectory();
+
+      directory = await Directory('${directory.path}/.chatExtractedHistory')
+          .create(recursive: true);
+
+      final File _chatHistoryFile = File(
+          '${directory.path}/<ChatHistory>$selectedUserName${DateTime.now()}.txt');
+
+      print(_chatHistoryFile.path);
+
+      String _historyMaker = '';
+
+      extractedHistoryData.forEach((everyChatData) {
+        String _extractedThatMessage = everyChatData['Messages'].toString();
+
+        String _extractedThatTime = everyChatData['Time'];
+
+        if (everyChatData['Media'] == MediaTypes.Text.toString() &&
+            everyChatData['Messages'].toString().contains('[[[@]]]'))
+          _extractedThatMessage =
+              everyChatData['Messages'].toString().split('[[[@]]]')[1];
+        else if (everyChatData['Media'] == MediaTypes.Text.toString() &&
+            _extractedThatMessage.contains('\n'))
+          _extractedThatMessage = _extractedThatMessage.split('\n').join(' ');
+
+        if (_extractedThatTime.contains('+'))
+          _extractedThatTime = _extractedThatTime.split('+')[0];
+
+        _historyMaker +=
+            "${everyChatData['Reference'] == 1 ? selectedUserName : 'You'}: ${everyChatData['Media'] != MediaTypes.Text.toString() ? '<Non-Text-File>' : _extractedThatMessage}\nDate: ${everyChatData['Date']}   Time: $_extractedThatTime\n\n";
+      });
+
+      await _chatHistoryFile.writeAsString(_historyMaker);
+
+      print('\n\n\n${await _chatHistoryFile.readAsString()}');
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      _differentSharingOptions(_chatHistoryFile);
+    }
   }
 }

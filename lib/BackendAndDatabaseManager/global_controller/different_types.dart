@@ -26,3 +26,8 @@ enum ExtraImportant{
   BGNStatus,
   FGNStatus,
 }
+
+enum HistoryOrMediaChoice{
+  History,
+  Media,
+}
