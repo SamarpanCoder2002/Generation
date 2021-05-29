@@ -886,7 +886,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             extraImportant: ExtraImportant.ChatWallpaper,
             userName: widget._userName);
 
-    if(await File(_takeWallPaperPath).exists()) {
+    if (await File(_takeWallPaperPath).exists()) {
       if (mounted) {
         setState(() {
           this._thisChatWallPaper =
@@ -1166,7 +1166,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           ),
                           onTap: () {
                             /// Close the keyboard
-                            SystemChannels.textInput.invokeMethod('TextInput.hide');
+                            SystemChannels.textInput
+                                .invokeMethod('TextInput.hide');
 
                             if (mounted) {
                               setState(() {
@@ -1203,7 +1204,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                     child: Text(
                                       _replyText,
                                       style: TextStyle(
-                                        color: this._thisChatWallPaper != ''?Colors.yellow:Colors.lightBlue,
+                                        color: this._thisChatWallPaper != ''
+                                            ? Colors.yellow
+                                            : Colors.lightBlue,
                                       ),
                                     ),
                                   ),
@@ -1230,7 +1233,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           Container(
                               width: MediaQuery.of(context).size.width * 0.65,
                               constraints: BoxConstraints.loose(Size(
-                                  MediaQuery.of(context).size.width * 0.65, 74.0)),
+                                  MediaQuery.of(context).size.width * 0.65,
+                                  74.0)),
                               padding: EdgeInsets.only(
                                 top: _bottomRowDownPadding,
                               ),
@@ -1255,8 +1259,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                       });
                                     }
 
-                                    _scrollController.jumpTo(
-                                        _scrollController.position.maxScrollExtent);
+                                    _scrollController.jumpTo(_scrollController
+                                        .position.maxScrollExtent);
                                   },
                                   onChanged: (inputValue) {
                                     if (mounted) {
@@ -1288,8 +1292,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                       fontStyle: FontStyle.italic,
                                     ),
                                     enabledBorder: UnderlineInputBorder(
-                                        borderSide:
-                                            BorderSide(color: Colors.lightBlue)),
+                                        borderSide: BorderSide(
+                                            color: Colors.lightBlue)),
                                   ),
                                 ),
                               )),
@@ -1298,7 +1302,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       Expanded(
                         child: IconButton(
                           icon: _iconChanger ? _voiceIcon : _senderIcon,
-                          onPressed: _iconChanger ? _voiceController : _textSend,
+                          onPressed:
+                              _iconChanger ? _voiceController : _textSend,
                         ),
                       ),
                       SizedBox(
@@ -1422,7 +1427,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     child: Text(
                       _chatContainer[index].keys.first.split('[[[@]]]')[0],
                       style: TextStyle(
-                        color: this._thisChatWallPaper != ''?Colors.yellow:Colors.lightBlue,
+                        color: this._thisChatWallPaper != ''
+                            ? Colors.yellow
+                            : Colors.lightBlue,
                       ),
                     ),
                   ),
@@ -1810,7 +1817,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     return Column(
       children: [
         Container(
-            height: _chatContainer[index].values.first.split('+')[2] == '.pdf'
+            height: _chatContainer[index]
+                    .values
+                    .first
+                    .split('+')[2]
+                    .contains('.pdf')
                 ? MediaQuery.of(context).size.height * 0.3
                 : 70.0,
             margin: _responseValue
@@ -1830,12 +1841,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
-                color:
-                    _chatContainer[index].values.first.split('+')[2] == '.pdf'
-                        ? Colors.white
-                        : _responseValue
-                            ? Color.fromRGBO(60, 80, 100, 1)
-                            : Color.fromRGBO(102, 102, 255, 1),
+                color: _chatContainer[index]
+                        .values
+                        .first
+                        .split('+')[2]
+                        .contains('.pdf')
+                    ? Colors.white
+                    : _responseValue
+                        ? Color.fromRGBO(60, 80, 100, 1)
+                        : Color.fromRGBO(102, 102, 255, 1),
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20.0),
                   topLeft: Radius.circular(20.0),
@@ -1849,7 +1863,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           : Radius.circular(0.0),
                 ),
               ),
-              child: _chatContainer[index].values.first.split('+')[2] == '.pdf'
+              child: _chatContainer[index]
+                      .values
+                      .first
+                      .split('+')[2]
+                      .contains('.pdf')
                   ? Stack(
                       children: [
                         Center(
@@ -1893,20 +1911,57 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                         openFileResultStatus(openResult: openResult);
                       },
+                      onLongPress: (){
+                        print('Delete that message');
+                        showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              elevation: 0.3,
+                              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
+                              title: _multipleOptions(index,
+                                  bgColor: Color.fromRGBO(34, 48, 60, 0.0),
+                                  mediaTypes: _mediaTypes[index]),
+                            ));
+                      },
                       child: Container(
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Expanded(
-                              child: Icon(
-                                Entypo.documents,
-                                color: Colors.white,
-                              ),
+                            SizedBox(
+                              width: 20.0,
+                            ),
+                            Icon(
+                              Entypo.documents,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 20.0,
                             ),
                             Expanded(
                               child: Text(
-                                '${_chatContainer[index].values.first.split('+')[0].split(':').join('_')}${_chatContainer[index].values.first.split('+')[2]}',
+                                _chatContainer[index]
+                                            .values
+                                            .first
+                                            .split('+')[2]
+                                            .length >=
+                                        17
+                                    ? _chatContainer[index]
+                                        .values
+                                        .first
+                                        .split('+')[2]
+                                        .replaceRange(
+                                            17,
+                                            _chatContainer[index]
+                                                .values
+                                                .first
+                                                .split('+')[2]
+                                                .length,
+                                            '...')
+                                    : _chatContainer[index]
+                                        .values
+                                        .first
+                                        .split('+')[2],
                                 style: TextStyle(
-                                  fontSize: 18.0,
                                   color: Colors.white,
                                   fontFamily: 'Lora',
                                   letterSpacing: 1.0,
@@ -2374,13 +2429,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           // Add data to temporary Storage of Sending
           _sendingMessages.add({
             _imageDownLoadUrl:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+$extension',
+                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}',
           });
 
           // Add Data to the UI related all Chat Container
           _chatContainer.add({
             _takeImageFile.path:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$extension',
+                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+${_takeImageFile.path.split('/').last}',
           });
         }
 
@@ -3073,7 +3128,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     mediaTypes == MediaTypes.Document) {
                   print('Image Forward Pressed');
                   final List<String> afterSplitting =
-                      _chatContainer[index].keys.first.split('.');
+                      _chatContainer[index].keys.first.split('/');
 
                   Navigator.push(
                       context,

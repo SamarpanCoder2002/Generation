@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chatWallPaperMaker.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/chat_history_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/settings_notification_screen.dart';
-import 'package:generation/FrontEnd/Services/phone_call_config.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/phone_call_config.dart';
 
 class SettingsWindow extends StatefulWidget {
   @override
@@ -52,10 +53,9 @@ class _SettingsWindowState extends State<SettingsWindow> {
             height: 15.0,
           ),
           everySettingsItem(
-            mainText: 'Generation Direct Calling Setting',
-            icon: Icons.call,
-            smallDescription:
-                'Add Phone Number to Receive Call'),
+              mainText: 'Generation Direct Calling Setting',
+              icon: Icons.call,
+              smallDescription: 'Add Phone Number to Receive Call'),
           SizedBox(
             height: 15.0,
           ),
@@ -115,6 +115,9 @@ class _SettingsWindowState extends State<SettingsWindow> {
             break;
           case 'Generation Direct Calling Setting':
             return PhoneNumberConfig();
+            break;
+          case 'Chat History':
+            return ChatHistoryMaker();
             break;
         }
         return Center();

@@ -148,25 +148,31 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
                 ),
               ),
               content: Container(
-                height: 70,
+                height: 90,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     for (int i = 0; i < simCards.length; i++)
                       TextButton(
                         child: Text(
-                          simCards[0].number.startsWith('+')
-                              ? simCards[0].number
-                              : '+${simCards[0].number}',
+                          simCards[i].number.startsWith('+')
+                              ? simCards[i].number
+                              : '+${simCards[i].number}',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 16.0,
                           ),
                         ),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40.0),
+                            side: BorderSide(color: Colors.green,),
+                          )
+                        ),
                         onPressed: () => _proceedWithSelectedNum(
-                            simCards[0].number.startsWith('+')
-                                ? simCards[0].number
-                                : '+${simCards[0].number}'),
+                            simCards[i].number.startsWith('+')
+                                ? simCards[i].number
+                                : '+${simCards[i].number}'),
                       ),
                   ],
                 ),

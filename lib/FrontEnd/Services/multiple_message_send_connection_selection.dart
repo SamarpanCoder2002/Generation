@@ -44,6 +44,8 @@ class _SelectConnectionState extends State<SelectConnection> {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final Management _management = Management();
 
+  final String _noProfileImagePath = 'assets/logo/logo.jpg';
+
   void fetchAllUsersName() async {
     final List<Map<String, Object>> userNameList =
         await _localStorageHelper.extractAllUsersName();
@@ -174,10 +176,16 @@ class _SelectConnectionState extends State<SelectConnection> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: FileImage(File(
-                        allConnectionsUserNameAndProfilePicture[index]
-                            .values
-                            .first)),
+                    backgroundImage: this
+                                .allConnectionsUserNameAndProfilePicture[index]
+                                .values
+                                .first !=
+                            ''
+                        ? FileImage(File(
+                            allConnectionsUserNameAndProfilePicture[index]
+                                .values
+                                .first))
+                        : ExactAssetImage(this._noProfileImagePath),
                   ),
                 ),
                 Expanded(

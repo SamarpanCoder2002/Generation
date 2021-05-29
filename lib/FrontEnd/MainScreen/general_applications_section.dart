@@ -229,7 +229,7 @@ class _ApplicationListState extends State<ApplicationList> {
           if (_allowedExtensions.contains(file.extension))
             _extraTextManagement(
               MediaTypes.Document,
-              extension: '.${file.extension}',
+              extension: '.${file.path.split('/').last}',
               file: File(file.path),
             );
           else {
