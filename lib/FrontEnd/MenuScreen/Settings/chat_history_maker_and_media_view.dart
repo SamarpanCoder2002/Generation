@@ -105,7 +105,9 @@ class _ChatHistoryMakerAndMediaViewerState
 
               if (widget.historyOrMediaChoice == HistoryOrMediaChoice.History)
                 _historyMakerAndProceed(index);
-              else
+              else {
+                showToast('Media Files Extracting', _fToast, seconds: 3);
+
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -116,6 +118,7 @@ class _ChatHistoryMakerAndMediaViewerState
                                 .toList()[index]
                                 .key
                                 .toString())));
+              }
             },
             child: Row(
               children: [

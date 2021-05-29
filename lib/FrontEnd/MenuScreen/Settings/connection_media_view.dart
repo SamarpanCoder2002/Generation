@@ -18,13 +18,13 @@ class _ParticularConnectionMediaViewState
     extends State<ParticularConnectionMediaView> {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  List<String> _allImages = [];
-  List<String> _allVideos = [];
-  List<String> _allAudios = [];
-  List<String> _allDocs = [];
+  List<Map<String,String>> _allImages = [];
+  List<Map<String,String>> _allVideos = [];
+  List<Map<String,String>> _allAudios = [];
+  List<Map<String,String>> _allDocs = [];
 
   void _extractImportantMediaTypes() async {
-    final List<String> takeTempImages =
+    final takeTempImages =
         await _localStorageHelper.extractParticularChatMediaByRequirement(
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Image);
@@ -35,7 +35,7 @@ class _ParticularConnectionMediaViewState
       });
     }
 
-    final List<String> takeTempVideos =
+    final takeTempVideos =
         await _localStorageHelper.extractParticularChatMediaByRequirement(
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Video);
@@ -46,7 +46,7 @@ class _ParticularConnectionMediaViewState
       });
     }
 
-    final List<String> takeTempAudios =
+    final takeTempAudios =
         await _localStorageHelper.extractParticularChatMediaByRequirement(
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Voice);
@@ -57,7 +57,7 @@ class _ParticularConnectionMediaViewState
       });
     }
 
-     final List<String> takeTempDocs =
+     final takeTempDocs =
         await _localStorageHelper.extractParticularChatMediaByRequirement(
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Document);

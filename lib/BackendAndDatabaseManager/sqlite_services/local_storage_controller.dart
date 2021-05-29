@@ -568,7 +568,7 @@ class LocalStorageHelper {
     }
   }
 
-  Future<List<String>> extractParticularChatMediaByRequirement(
+  Future<List<Map<String, String>>> extractParticularChatMediaByRequirement(
       {@required String tableName, @required MediaTypes mediaType}) async {
     try {
       final Database db = await this.database;
@@ -576,10 +576,14 @@ class LocalStorageHelper {
       final List<Map<String, Object>> result = await db.rawQuery(
           "SELECT $_colMessages FROM $tableName WHERE $_colMediaType= '$mediaType'");
 
-      final List<String> _container = [];
+      final List<Map<String, String>> _container = [];
 
-      result.reversed.toList().forEach((element) {
-        _container.add(element.values.first.toString());
+      result.reversed.toList().forEach((element) async {
+        int _fileSize = await File(element.values.first.toString()).length();
+        _container.add({
+          element.values.first.toString():
+              '${formatBytes(_fileSize.toDouble())}',
+        });
       });
 
       return _container;
@@ -587,6 +591,19 @@ class LocalStorageHelper {
       print('Error: Extract Particular Chat All Media Error: ${e.toString()}');
       return [];
     }
+  }
+
+  String formatBytes(double bytes) {
+    double kb = bytes / 1000;
+
+    if (kb >= 1024.00) {
+      double mb = bytes / (1000 * 1024);
+      if (mb >= 1024.00)
+        return '${(bytes / (1000 * 1024 * 1024)).toStringAsFixed(1)}gb';
+      else
+        return '${mb.toStringAsFixed(1)}mb';
+    } else
+      return '${kb.toStringAsFixed(1)}kb';
   }
 
   Future<void> createTableForRemainingLinks() async {

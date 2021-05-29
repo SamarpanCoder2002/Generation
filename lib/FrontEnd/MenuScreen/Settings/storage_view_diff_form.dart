@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:photo_view/photo_view.dart';
+
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
-import 'package:photo_view/photo_view.dart';
 
 class StorageMediaCommonView extends StatefulWidget {
   final MediaTypes mediaTypes;
-  final List<String> mediaSources;
+  final List<Map<String, String>> mediaSources;
 
   StorageMediaCommonView(
       {@required this.mediaTypes, @required this.mediaSources});
@@ -19,8 +20,6 @@ class StorageMediaCommonView extends StatefulWidget {
 }
 
 class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,12 +52,13 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
     return Container(
       child: OpenContainer(
         openBuilder: (_, __) => PreviewImageScreen(
-          imageFile: File(widget.mediaSources[index]),
+          imageFile: File(widget.mediaSources[index].keys.first.toString()),
         ),
         closedBuilder: (_, __) => Stack(
           children: [
             PhotoView(
-              imageProvider: FileImage(File(widget.mediaSources[index])),
+              imageProvider: FileImage(
+                  File(widget.mediaSources[index].keys.first.toString())),
               loadingBuilder: (context, event) => Center(
                 child: CircularProgressIndicator(),
               ),
@@ -66,7 +66,7 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
                   child: Text(
                 'Image not Found',
                 style: TextStyle(
-                  fontSize: 23.0,
+                  fontSize: 18.0,
                   color: Colors.red,
                   fontFamily: 'Lora',
                   letterSpacing: 1.0,
@@ -75,7 +75,22 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
               enableRotation: true,
               minScale: PhotoViewComputedScale.covered,
             ),
-
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                width: double.maxFinite,
+                alignment: Alignment.bottomRight,
+                color: Colors.black26,
+                height: 20.0,
+                child: Text(
+                  widget.mediaSources[index].values.first.toString(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
