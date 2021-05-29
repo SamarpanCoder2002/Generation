@@ -106,18 +106,34 @@ class _ChatHistoryMakerAndMediaViewerState
               if (widget.historyOrMediaChoice == HistoryOrMediaChoice.History)
                 _historyMakerAndProceed(index);
               else {
-                showToast('Media Files Extracting', _fToast, seconds: 3);
+                try {
+                  showToast(
+                    'Media Files Extracting',
+                    _fToast,
+                    seconds: 3,
+                    toastColor: Colors.amber,
+                  );
+                } catch (e) {
+                  print('Error: Toast Error: ${e.toString()}');
+                }
 
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (_) => ParticularConnectionMediaView(
-                            selectedConnectionUserName: this
-                                ._allConnectionUserNameAndProfilePic
-                                .entries
-                                .toList()[index]
-                                .key
-                                .toString())));
+                              selectedConnectionUserName: this
+                                  ._allConnectionUserNameAndProfilePic
+                                  .entries
+                                  .toList()[index]
+                                  .key
+                                  .toString(),
+                              profileImagePath: this
+                                  ._allConnectionUserNameAndProfilePic
+                                  .entries
+                                  .toList()[index]
+                                  .value
+                                  .toString(),
+                            )));
               }
             },
             child: Row(

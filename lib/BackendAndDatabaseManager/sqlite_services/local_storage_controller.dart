@@ -573,15 +573,23 @@ class LocalStorageHelper {
     try {
       final Database db = await this.database;
 
-      final List<Map<String, Object>> result = await db.rawQuery(
-          "SELECT $_colMessages FROM $tableName WHERE $_colMediaType= '$mediaType'");
+      List<Map<String, Object>> result;
+
+      if (mediaType != MediaTypes.Video)
+        result = await db.rawQuery(
+            "SELECT $_colMessages FROM $tableName WHERE $_colMediaType= '$mediaType'");
+      else
+        result = await db.rawQuery(
+            "SELECT $_colMessages, $_colTime FROM $tableName WHERE $_colMediaType= '$mediaType'");
 
       final List<Map<String, String>> _container = [];
 
       result.reversed.toList().forEach((element) async {
         int _fileSize = await File(element.values.first.toString()).length();
         _container.add({
-          element.values.first.toString():
+          mediaType != MediaTypes.Video
+                  ? element[_colMessages].toString()
+                  : '${element[_colMessages].toString()}+${element[_colTime].toString().split('+')[2]}':
               '${formatBytes(_fileSize.toDouble())}',
         });
       });
@@ -599,11 +607,11 @@ class LocalStorageHelper {
     if (kb >= 1024.00) {
       double mb = bytes / (1000 * 1024);
       if (mb >= 1024.00)
-        return '${(bytes / (1000 * 1024 * 1024)).toStringAsFixed(1)}gb';
+        return '${(bytes / (1000 * 1024 * 1024)).toStringAsFixed(1)} gb';
       else
-        return '${mb.toStringAsFixed(1)}mb';
+        return '${mb.toStringAsFixed(1)} mb';
     } else
-      return '${kb.toStringAsFixed(1)}kb';
+      return '${kb.toStringAsFixed(1)} kb';
   }
 
   Future<void> createTableForRemainingLinks() async {

@@ -1,13 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation/FrontEnd/MenuScreen/Settings/storage_view_diff_form.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/storage_diff_media_view.dart';
 
 class ParticularConnectionMediaView extends StatefulWidget {
   final String selectedConnectionUserName;
+  final String profileImagePath;
 
-  ParticularConnectionMediaView({@required this.selectedConnectionUserName});
+  ParticularConnectionMediaView(
+      {@required this.selectedConnectionUserName,
+      @required this.profileImagePath});
 
   @override
   _ParticularConnectionMediaViewState createState() =>
@@ -18,10 +24,10 @@ class _ParticularConnectionMediaViewState
     extends State<ParticularConnectionMediaView> {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  List<Map<String,String>> _allImages = [];
-  List<Map<String,String>> _allVideos = [];
-  List<Map<String,String>> _allAudios = [];
-  List<Map<String,String>> _allDocs = [];
+  List<Map<String, String>> _allImages = [];
+  List<Map<String, String>> _allVideos = [];
+  List<Map<String, String>> _allAudios = [];
+  List<Map<String, String>> _allDocs = [];
 
   void _extractImportantMediaTypes() async {
     final takeTempImages =
@@ -29,7 +35,7 @@ class _ParticularConnectionMediaViewState
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Image);
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         this._allImages = takeTempImages;
       });
@@ -40,7 +46,7 @@ class _ParticularConnectionMediaViewState
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Video);
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         this._allVideos = takeTempVideos;
       });
@@ -51,18 +57,18 @@ class _ParticularConnectionMediaViewState
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Voice);
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         this._allAudios = takeTempAudios;
       });
     }
 
-     final takeTempDocs =
+    final takeTempDocs =
         await _localStorageHelper.extractParticularChatMediaByRequirement(
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Document);
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         this._allDocs = takeTempDocs;
       });
@@ -86,15 +92,46 @@ class _ParticularConnectionMediaViewState
           backgroundColor: Color.fromRGBO(25, 39, 52, 1),
           elevation: 10.0,
           shadowColor: Colors.white70,
-          title: Text(
-            'Media Files',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.0,
+          actions: [
+            GestureDetector(
+              child: Padding(
+                padding: EdgeInsets.only(right: 15.0,),
+                child: Icon(Icons.share, color: Colors.lightBlue,),
+              ),
             ),
+            GestureDetector(
+              child: Padding(
+                padding: EdgeInsets.only(right: 15.0,),
+                child: Icon(Icons.delete_outline, color: Colors.red,),
+              ),
+            ),
+          ],
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.only(right: 20.0, top: 5.0,),
+                child: CircleAvatar(
+                  radius: 23.0,
+                  backgroundImage: widget.profileImagePath == ''
+                      ? ExactAssetImage(
+                          "assets/logo/logo.jpg",
+                        )
+                      : FileImage(File(widget.profileImagePath)),
+                ),
+              ),
+              Text(
+                widget.selectedConnectionUserName.length <= 12
+                    ? widget.selectedConnectionUserName
+                    : '${widget.selectedConnectionUserName.replaceRange(12, widget.selectedConnectionUserName.length, '...')}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),
+              ),
+            ],
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(30.0),
           ),
           bottom: TabBar(
             indicatorPadding: EdgeInsets.only(left: 20.0, right: 20.0),
@@ -102,6 +139,7 @@ class _ParticularConnectionMediaViewState
             unselectedLabelColor: Colors.white60,
             indicator: UnderlineTabIndicator(
               borderSide: BorderSide(width: 2.0, color: Colors.lightBlue),
+              insets: EdgeInsets.symmetric(horizontal: 5.0,)
             ),
             automaticIndicatorColorAdjustment: true,
             labelStyle: TextStyle(
@@ -120,7 +158,7 @@ class _ParticularConnectionMediaViewState
             tabs: [
               Tab(
                 child: Text(
-                  "Images",
+                  "Image",
                   style: TextStyle(
                     fontSize: 18.0,
                   ),
@@ -128,7 +166,7 @@ class _ParticularConnectionMediaViewState
               ),
               Tab(
                 child: Text(
-                  "Videos",
+                  "Video",
                   style: TextStyle(
                     fontSize: 18.0,
                   ),
