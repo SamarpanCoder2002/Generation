@@ -568,16 +568,24 @@ class LocalStorageHelper {
     }
   }
 
-  Future<void> extractParticularChatMediaByRequirement({@required String tableName, @required MediaTypes mediaType}) async{
-    try{
+  Future<List<String>> extractParticularChatMediaByRequirement(
+      {@required String tableName, @required MediaTypes mediaType}) async {
+    try {
       final Database db = await this.database;
 
-      final List<Map<String,Object>> result = await db.rawQuery("SELECT $_colMessages FROM $tableName WHERE $_colMediaType= '$mediaType'");
+      final List<Map<String, Object>> result = await db.rawQuery(
+          "SELECT $_colMessages FROM $tableName WHERE $_colMediaType= '$mediaType'");
 
-      print(result);
+      final List<String> _container = [];
 
-    }catch(e){
+      result.reversed.toList().forEach((element) {
+        _container.add(element.values.first.toString());
+      });
+
+      return _container;
+    } catch (e) {
       print('Error: Extract Particular Chat All Media Error: ${e.toString()}');
+      return [];
     }
   }
 

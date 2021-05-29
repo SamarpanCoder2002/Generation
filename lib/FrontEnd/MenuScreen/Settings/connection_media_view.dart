@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/storage_view_diff_form.dart';
 
 class ParticularConnectionMediaView extends StatefulWidget {
   final String selectedConnectionUserName;
@@ -17,15 +18,60 @@ class _ParticularConnectionMediaViewState
     extends State<ParticularConnectionMediaView> {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  void findIt() async {
-    await _localStorageHelper.extractParticularChatMediaByRequirement(
-        tableName: widget.selectedConnectionUserName,
-        mediaType: MediaTypes.Image);
+  List<String> _allImages = [];
+  List<String> _allVideos = [];
+  List<String> _allAudios = [];
+  List<String> _allDocs = [];
+
+  void _extractImportantMediaTypes() async {
+    final List<String> takeTempImages =
+        await _localStorageHelper.extractParticularChatMediaByRequirement(
+            tableName: widget.selectedConnectionUserName,
+            mediaType: MediaTypes.Image);
+
+    if(mounted){
+      setState(() {
+        this._allImages = takeTempImages;
+      });
+    }
+
+    final List<String> takeTempVideos =
+        await _localStorageHelper.extractParticularChatMediaByRequirement(
+            tableName: widget.selectedConnectionUserName,
+            mediaType: MediaTypes.Video);
+
+    if(mounted){
+      setState(() {
+        this._allVideos = takeTempVideos;
+      });
+    }
+
+    final List<String> takeTempAudios =
+        await _localStorageHelper.extractParticularChatMediaByRequirement(
+            tableName: widget.selectedConnectionUserName,
+            mediaType: MediaTypes.Voice);
+
+    if(mounted){
+      setState(() {
+        this._allAudios = takeTempAudios;
+      });
+    }
+
+     final List<String> takeTempDocs =
+        await _localStorageHelper.extractParticularChatMediaByRequirement(
+            tableName: widget.selectedConnectionUserName,
+            mediaType: MediaTypes.Document);
+
+    if(mounted){
+      setState(() {
+        this._allDocs = takeTempDocs;
+      });
+    }
   }
 
   @override
   void initState() {
-    findIt();
+    _extractImportantMediaTypes();
     super.initState();
   }
 
@@ -106,6 +152,18 @@ class _ParticularConnectionMediaViewState
               ),
             ],
           ),
+        ),
+        body: TabBarView(
+          children: [
+            StorageMediaCommonView(
+                mediaTypes: MediaTypes.Image, mediaSources: this._allImages),
+            StorageMediaCommonView(
+                mediaTypes: MediaTypes.Video, mediaSources: this._allVideos),
+            StorageMediaCommonView(
+                mediaTypes: MediaTypes.Voice, mediaSources: this._allAudios),
+            StorageMediaCommonView(
+                mediaTypes: MediaTypes.Document, mediaSources: this._allDocs),
+          ],
         ),
       ),
     );
