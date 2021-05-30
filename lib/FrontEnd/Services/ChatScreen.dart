@@ -1911,17 +1911,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                         openFileResultStatus(openResult: openResult);
                       },
-                      onLongPress: (){
+                      onLongPress: () {
                         print('Delete that message');
                         showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
-                              elevation: 0.3,
-                              backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
-                              title: _multipleOptions(index,
-                                  bgColor: Color.fromRGBO(34, 48, 60, 0.0),
-                                  mediaTypes: _mediaTypes[index]),
-                            ));
+                                  elevation: 0.3,
+                                  backgroundColor:
+                                      Color.fromRGBO(34, 48, 60, 0.5),
+                                  title: _multipleOptions(index,
+                                      bgColor: Color.fromRGBO(34, 48, 60, 0.0),
+                                      mediaTypes: _mediaTypes[index]),
+                                ));
                       },
                       child: Container(
                         child: Row(

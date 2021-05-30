@@ -643,6 +643,17 @@ class LocalStorageHelper {
     }
   }
 
+  /// For Debugging purpose
+  Future<void> showAll() async {
+    final Database db = await this.database;
+
+    final List<Map<String, Object>> result = await db.rawQuery(
+        'SELECT * from $_allRemainingLinksToDeleteFromFirebaseStorage');
+
+    print('Storage Result is: $result');
+  }
+
+  /// Remaining Links extract to delete
   Future<Map<String, String>> extractRemainingLinks() async {
     try {
       final Database db = await this.database;

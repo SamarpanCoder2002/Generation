@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -26,17 +27,13 @@ void deleteOldActivity() async {
     switch (taskName) {
       case "deleteActivity":
         print('Delete Activity Executing');
-        await _deleteOldTask(true);
+        await _deleteOldTask();
         await Future.delayed(
-          Duration(seconds: 10),
-        );
-        await _deleteOldTask(false);
-        await Future.delayed(
-          Duration(seconds: 7),
+          Duration(seconds: 15),
         );
         await _deleteFromStorage();
         await Future.delayed(
-          Duration(seconds: 13),
+          Duration(seconds: 15),
         );
         print('All After Delete Activity');
         break;
@@ -51,138 +48,154 @@ Future<void> _deleteFromStorage() async {
   if (_activityLinkDeleteFromStorage.isNotEmpty) {
     final Management _management = Management(takeTotalUserName: false);
 
+    print('Activity Links to delete: $_activityLinkDeleteFromStorage');
+
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      print('Error: Firebase initialization Exception');
+    }
+
     _activityLinkDeleteFromStorage.forEach((storageElementToDelete) async {
       if (storageElementToDelete.contains('https')) {
-        await _management.deleteFilesFromFirebaseStorage(storageElementToDelete,
-            specialPurpose: true);
+        _management
+            .deleteFilesFromFirebaseStorage(storageElementToDelete)
+            .then((value) {
+          print('$storageElementToDelete Deleted From Firebase Storage');
+
+          final bool response =
+              _activityLinkDeleteFromStorage.remove(storageElementToDelete);
+          print('$storageElementToDelete Delete Status: $response');
+        });
       }
     });
-
-    _activityLinkDeleteFromStorage.clear();
   }
 }
 
 /// Delete Activity Path From Local Database
-Future<void> _deleteOldTask(bool response) async {
+Future<void> _deleteOldTask() async {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  if (response) {
-    print('Here Delete Activity');
+  print('Here Delete Activity');
 
-    final List<Map<String, dynamic>> _connectionUserName =
-        await _localStorageHelper.extractAllUsersName(thisAccountAllowed: true);
+  final List<Map<String, dynamic>> _connectionUserName =
+      await _localStorageHelper.extractAllUsersName(thisAccountAllowed: true);
 
-    print('Delete Activity Executing 2: $_connectionUserName');
+  print('Delete Activity Executing 2: $_connectionUserName');
 
-    _connectionUserName.forEach((everyUser) async {
-      final List<Map<String, dynamic>> _thisUserActivityCollection =
-          await _localStorageHelper
-              .extractActivityForParticularUserName(everyUser.values.first);
+  _connectionUserName.forEach((everyUser) async {
+    final List<Map<String, dynamic>> _thisUserActivityCollection =
+        await _localStorageHelper
+            .extractActivityForParticularUserName(everyUser.values.first);
 
-      print('Now 1: $_thisUserActivityCollection');
+    print('Now 1: $_thisUserActivityCollection');
 
-      if (_thisUserActivityCollection != null) {
-        if (_thisUserActivityCollection.length == 0) {
-          print('User Has No Activity');
-        } else {
-          print('Now 2: $_thisUserActivityCollection');
+    if (_thisUserActivityCollection != null) {
+      if (_thisUserActivityCollection.length == 0) {
+        print('User Has No Activity');
+      } else {
+        print('Now 2: $_thisUserActivityCollection');
 
-          _thisUserActivityCollection
-              .forEach((Map<String, dynamic> everyActivity) async {
-            print('Activity: ${everyActivity['Status']}');
+        _thisUserActivityCollection
+            .forEach((Map<String, dynamic> everyActivity) async {
+          print('Activity: ${everyActivity['Status']}');
 
-            // /// Backup Plan
-            // print('Delete that Status');
-            //
-            // /// Delete Particular Activity
-            // await _localStorageHelper.deleteParticularActivity(
-            //     tableName: everyUser.values.first,
-            //     activity: everyActivity['Status']);
-            //
-            // await File(everyActivity['Status'].split('+')[0])
-            //     .delete(recursive: true);
-            //
-            // /// For This Current Account Status For Media
-            // if (everyActivity['Status'].contains('+') &&
-            //     (everyActivity['Media'] == MediaTypes.Image.toString() ||
-            //         everyActivity['Media'] == MediaTypes.Video.toString())) {
-            //   /// Store in Local Container about Media Store in Firebase Storage
-            //   _activityLinkDeleteFromStorage
-            //       .add(everyActivity['Status'].split('+')[1]);
-            // }
+          // /// Backup Plan
+          // print('Delete that Status');
+          //
+          // /// Delete Particular Activity
+          // await _localStorageHelper.deleteParticularActivity(
+          //     tableName: everyUser.values.first,
+          //     activity: everyActivity['Status']);
+          //
+          // await File(everyActivity['Status'].split('+')[0])
+          //     .delete(recursive: true);
+          //
+          // /// For This Current Account Status For Media
+          // if (everyActivity['Status'].contains('+') &&
+          //     (everyActivity['Media'] == MediaTypes.Image.toString() ||
+          //         everyActivity['Media'] == MediaTypes.Video.toString())) {
+          //   /// Store in Local Container about Media Store in Firebase Storage
+          //   _activityLinkDeleteFromStorage
+          //       .add(everyActivity['Status'].split('+')[1]);
+          // }
 
-            String _activityDateTime = everyActivity['Status_Time'];
+          String _activityDateTime = everyActivity['Status_Time'];
 
-            if (_activityDateTime.contains('+'))
-              _activityDateTime = _activityDateTime.split('+')[0];
+          if (_activityDateTime.contains('+'))
+            _activityDateTime = _activityDateTime.split('+')[0];
 
-            print('Now 3: $_thisUserActivityCollection');
+          print('Now 3: $_thisUserActivityCollection');
 
-            final String currDate = DateTime.now().toString().split(' ')[0];
-            final int currHour = DateTime.now().hour;
-            final int currMinute = DateTime.now().minute;
+          final String currDate = DateTime.now().toString().split(' ')[0];
+          final int currHour = DateTime.now().hour;
+          final int currMinute = DateTime.now().minute;
 
-            final List<String> _timeDistribution =
-                _activityDateTime.split(' ')[1].split(':');
+          final List<String> _timeDistribution =
+              _activityDateTime.split(' ')[1].split(':');
 
-            /// Accurate Work
-            if (_activityDateTime.split(' ')[0] != currDate &&
-                ((int.parse(_timeDistribution[0]) == currHour &&
-                        int.parse(_timeDistribution[1]) <= currMinute) ||
-                    int.parse(_timeDistribution[0]) < currHour)) {
-              print('Delete that Status');
+          /// Accurate Work
+          if (_activityDateTime.split(' ')[0] != currDate &&
+              ((int.parse(_timeDistribution[0]) == currHour &&
+                      int.parse(_timeDistribution[1]) <= currMinute) ||
+                  int.parse(_timeDistribution[0]) < currHour)) {
+            print('Delete that Status');
 
-              /// Delete Particular Activity
-              await _localStorageHelper.deleteParticularActivity(
-                  tableName: everyUser.values.first,
-                  activity: everyActivity['Status']);
+            /// Delete Particular Activity
+            await _localStorageHelper.deleteParticularActivity(
+                tableName: everyUser.values.first,
+                activity: everyActivity['Status']);
 
-              /// Delete File From Local Storage[Exception Handling Because File Can be Deleted by user Manually]
-              try {
-                await File(everyActivity['Status'].split('+')[0])
-                    .delete(recursive: true);
-              } catch (e) {
-                print('File Deleted Already Exception: ${e.toString()}');
-              }
-
-              /// For This Current Account Status For Media
-              if (everyActivity['Status'].contains('+') &&
-                  (everyActivity['Media'] == MediaTypes.Image.toString() ||
-                      everyActivity['Media'] == MediaTypes.Video.toString())) {
-                /// Store in Local Container about Media Store in Firebase Storage
-                _activityLinkDeleteFromStorage
-                    .add(everyActivity['Status'].split('+')[1]);
-              }
+            /// Delete File From Local Storage[Exception Handling Because File Can be Deleted by user Manually]
+            try {
+              await File(everyActivity['Status'].split('+')[0])
+                  .delete(recursive: true);
+            } catch (e) {
+              print('File Deleted Already Exception: ${e.toString()}');
             }
-          });
-        }
+
+            /// For This Current Account Status For Media
+            if (everyActivity['Status'].contains('+') &&
+                (everyActivity['Media'] == MediaTypes.Image.toString() ||
+                    everyActivity['Media'] == MediaTypes.Video.toString())) {
+              /// Store in Local Container about Media Store in Firebase Storage
+              _activityLinkDeleteFromStorage
+                  .add(everyActivity['Status'].split('+')[1]);
+            }
+          }
+        });
+      }
+    }
+  });
+
+  final Map<String, String> _linksMap =
+      await _localStorageHelper.extractRemainingLinks();
+
+  final String currDate = DateTime.now().toString().split(' ')[0];
+  final int currHour = DateTime.now().hour;
+  final int currMinute = DateTime.now().minute;
+
+  if (_linksMap != null && _linksMap.length > 0) {
+    _linksMap.forEach((_link, _time) async {
+      /// Activate this section For Debugging purpose
+      // print('Delete Multiple Connection Media Added');
+      // await _localStorageHelper.deleteRemainingLinksFromLocalStore(link: _link);
+      // _activityLinkDeleteFromStorage.add(_link);
+
+      final List<String> _timeDistribution = _time.split(' ')[1].split(':');
+
+      if (_time.split(' ')[0] != currDate &&
+          ((int.parse(_timeDistribution[0]) == currHour &&
+                  int.parse(_timeDistribution[1]) <= currMinute) ||
+              int.parse(_timeDistribution[0]) < currHour)) {
+        print('Delete Multiple Connection Media Added');
+
+        await _localStorageHelper.deleteRemainingLinksFromLocalStore(
+            link: _link);
+
+        _activityLinkDeleteFromStorage.add(_link);
       }
     });
-  } else {
-    final Map<String, String> _linksMap =
-        await _localStorageHelper.extractRemainingLinks();
-
-    final String currDate = DateTime.now().toString().split(' ')[0];
-    final int currHour = DateTime.now().hour;
-    final int currMinute = DateTime.now().minute;
-
-    if (_linksMap != null && _linksMap.length > 0) {
-      _linksMap.forEach((_link, _time) async {
-        final List<String> _timeDistribution = _time.split(' ')[1].split(':');
-
-        if (_time.split(' ')[0] != currDate &&
-            ((int.parse(_timeDistribution[0]) == currHour &&
-                    int.parse(_timeDistribution[1]) <= currMinute) ||
-                int.parse(_timeDistribution[0]) < currHour)) {
-          print('Delete Multiple Connection Media Added');
-
-          await _localStorageHelper.deleteRemainingLinksFromLocalStore(
-              link: _link);
-
-          _activityLinkDeleteFromStorage.add(_link);
-        }
-      });
-    }
   }
 }
 
@@ -343,6 +356,8 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     onPressed: () async {
                       print('Clicked Refresh in MainWindow');
+
+                      await _localStorageHelper.showAll();
 
                       if (mounted) {
                         setState(() {

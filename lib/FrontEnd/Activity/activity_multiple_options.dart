@@ -144,9 +144,9 @@ class _PollMakerState extends State<PollMaker> {
           if (mounted) {
             setState(() {
               if (iconData == Icons.add) {
-                if(argument < 6)
-                argument += 1;
-                else{
+                if (argument < 6)
+                  argument += 1;
+                else {
                   showToast(
                     'Maximum 6 Options are Supported',
                     _fToast,
@@ -251,8 +251,10 @@ class _PollMakerState extends State<PollMaker> {
           if (this._pollFormKey.currentState.validate()) {
             print('Validate');
 
-            final Map<String, dynamic> _pollMapGenUsers = Map<String, dynamic>();
-            final Map<String, dynamic> _pollMapPollOptions = Map<String,dynamic>();
+            final Map<String, dynamic> _pollMapGenUsers =
+                Map<String, dynamic>();
+            final Map<String, dynamic> _pollMapPollOptions =
+                Map<String, dynamic>();
 
             _textEditingController.forEach((pollElement) {
               if (_textEditingController.indexOf(pollElement) == 0) {
@@ -266,7 +268,8 @@ class _PollMakerState extends State<PollMaker> {
                 });
 
                 _pollMapPollOptions.addAll({
-                  (_textEditingController.indexOf(pollElement)-1).toString(): 0,
+                  (_textEditingController.indexOf(pollElement) - 1).toString():
+                      0,
                 });
               }
 
@@ -274,7 +277,8 @@ class _PollMakerState extends State<PollMaker> {
             });
 
             print('PollMapBenifit is: $_pollMapGenUsers');
-            await _management.addPollIdInLocalAndFireStore(_pollMapGenUsers, _pollMapPollOptions);
+            await _management.addPollIdInLocalAndFireStore(
+                _pollMapGenUsers, _pollMapPollOptions);
 
             Navigator.pop(context);
           }

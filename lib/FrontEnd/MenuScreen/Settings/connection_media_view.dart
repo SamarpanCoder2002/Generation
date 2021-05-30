@@ -95,21 +95,34 @@ class _ParticularConnectionMediaViewState
           actions: [
             GestureDetector(
               child: Padding(
-                padding: EdgeInsets.only(right: 15.0,),
-                child: Icon(Icons.share, color: Colors.lightBlue,),
+                padding: EdgeInsets.only(
+                  right: 15.0,
+                ),
+                child: Icon(
+                  Icons.share,
+                  color: Colors.lightBlue,
+                ),
               ),
             ),
             GestureDetector(
               child: Padding(
-                padding: EdgeInsets.only(right: 15.0,),
-                child: Icon(Icons.delete_outline, color: Colors.red,),
+                padding: EdgeInsets.only(
+                  right: 15.0,
+                ),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: Colors.red,
+                ),
               ),
             ),
           ],
           title: Row(
             children: [
               Container(
-                padding: EdgeInsets.only(right: 20.0, top: 5.0,),
+                padding: EdgeInsets.only(
+                  right: 20.0,
+                  top: 5.0,
+                ),
                 child: CircleAvatar(
                   radius: 23.0,
                   backgroundImage: widget.profileImagePath == ''
@@ -138,9 +151,10 @@ class _ParticularConnectionMediaViewState
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white60,
             indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(width: 2.0, color: Colors.lightBlue),
-              insets: EdgeInsets.symmetric(horizontal: 5.0,)
-            ),
+                borderSide: BorderSide(width: 2.0, color: Colors.lightBlue),
+                insets: EdgeInsets.symmetric(
+                  horizontal: 5.0,
+                )),
             automaticIndicatorColorAdjustment: true,
             labelStyle: TextStyle(
               fontFamily: 'Lora',

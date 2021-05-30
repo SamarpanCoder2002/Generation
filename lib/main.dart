@@ -42,7 +42,6 @@ void main() async {
         title: messageEvent.notification.title,
         body: messageEvent.notification.body,
       );
-
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
   // /// Change Navigation Bar Color

@@ -66,7 +66,8 @@ class GeneralMessage {
       });
 
       /// Data Store in FireStore
-      await _management.addConversationMessages(_userMail, sendingMessages, documentSnapShot.data()['connections']);
+      await _management.addConversationMessages(
+          _userMail, sendingMessages, documentSnapShot.data()['connections']);
 
       /// For Send Notification to Connected User
       if (mediaType == MediaTypes.Text)
