@@ -250,7 +250,7 @@ class Management {
       {bool specialPurpose = false}) async {
     try {
       try {
-        if (specialPurpose) await Firebase.initializeApp();
+        if (specialPurpose && Firebase.apps.length == 0) await Firebase.initializeApp();
       } catch (e) {
         print(
             'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');

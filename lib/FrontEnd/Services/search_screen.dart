@@ -102,8 +102,16 @@ class _SearchState extends State<Search> {
               ],
             ),
           ),
-          IconButton(
-            icon: requestIconController(index),
+          TextButton(
+            child: requestIconController(index),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
+              side: BorderSide(
+                color: _selectColor(index),
+              ),
+            ),
             onPressed: () async {
               if (mounted) {
                 setState(() {
@@ -125,17 +133,8 @@ class _SearchState extends State<Search> {
 
               if (!connectionRequestCollectionCurrUser
                   .containsKey(searchResultSnapshot.docs[index].id)) {
-                // connectionRequestCollectionCurrUser.addAll({
-                //   '${searchResultSnapshot.docs[index].id}': "Request Pending",
-                // });
-
                 connectionRequestCollectionCurrUser[
                     searchResultSnapshot.docs[index].id] = "Request Pending";
-
-                // connectionRequestCollectionRequestUser.addAll({
-                //   '${FirebaseAuth.instance.currentUser.email}':
-                //       "Invitation Came",
-                // });
 
                 connectionRequestCollectionRequestUser[FirebaseAuth
                     .instance.currentUser.email] = "Invitation Came";
@@ -183,47 +182,21 @@ class _SearchState extends State<Search> {
                   Map<String, dynamic> activityMapCurrUser =
                       documentSnapShotCurrUser.get('activity');
 
-                  // connectionRequestCollectionCurrUser.addAll({
-                  //   '${searchResultSnapshot.docs[index].id}':
-                  //       "Invitation Accepted",
-                  // });
-
                   connectionRequestCollectionCurrUser[searchResultSnapshot
                       .docs[index].id] = "Invitation Accepted";
-
-                  // connectionRequestCollectionRequestUser.addAll({
-                  //   '${FirebaseAuth.instance.currentUser.email}':
-                  //       "Request Accepted",
-                  // });
 
                   connectionRequestCollectionRequestUser[FirebaseAuth
                       .instance.currentUser.email] = "Request Accepted";
                   print("Add Invited User Data to SQLite");
 
-                  // connectionsMapRequestUser.addAll({
-                  //   '${FirebaseAuth.instance.currentUser.email}': [],
-                  // });
-
                   connectionsMapRequestUser[
                       FirebaseAuth.instance.currentUser.email] = [];
-
-                  // connectionsMapCurrUser.addAll({
-                  //   '${searchResultSnapshot.docs[index].id}': [],
-                  // });
 
                   connectionsMapCurrUser[searchResultSnapshot.docs[index].id] =
                       [];
 
-                  // activityMapRequestUser.addAll({
-                  //   '${FirebaseAuth.instance.currentUser.email}': [],
-                  // });
-
                   activityMapRequestUser[
                       FirebaseAuth.instance.currentUser.email] = [];
-
-                  // activityMapCurrUser.addAll({
-                  //   '${searchResultSnapshot.docs[index].id}': [],
-                  // });
 
                   activityMapCurrUser[searchResultSnapshot.docs[index].id] = [];
 
@@ -293,7 +266,6 @@ class _SearchState extends State<Search> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     searchArgument = "user_name";
   }
@@ -431,10 +403,11 @@ class _SearchState extends State<Search> {
   Widget requestIconController(int index) {
     if (!searchResultSnapshot.docs[index]['connection_request']
         .containsKey('${FirebaseAuth.instance.currentUser.email}')) {
-      return Icon(
-        Icons.person_add_alt,
-        size: 30.0,
-        color: Colors.lightBlue,
+      return Text(
+        'Connect',
+        style: TextStyle(
+          color: Colors.lightBlue,
+        ),
       );
     }
 
@@ -442,30 +415,52 @@ class _SearchState extends State<Search> {
         .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
 
     if (oppositeConnectionStatus == 'Invitation Came') {
-      return Icon(
-        Icons.pending_actions_rounded,
-        size: 30.0,
-        color: Colors.amber,
+      return Text(
+        'Pending',
+        style: TextStyle(
+          color: Colors.amber,
+        ),
       );
     } else if (oppositeConnectionStatus == 'Request Pending') {
       print("Here Also");
-      return Icon(
-        Icons.done_outline_rounded,
-        size: 30.0,
-        color: Colors.amber,
+      return Text(
+        'Accept',
+        style: TextStyle(
+          color: Colors.green,
+        ),
       );
     } else if (oppositeConnectionStatus == 'Invitation Accepted') {
       print("Here Present");
-      return Icon(
-        Icons.done_all_outlined,
-        size: 30.0,
-        color: Colors.green,
+      return Text(
+        'Connected',
+        style: TextStyle(
+          color: Colors.green,
+        ),
       );
     }
-    return Icon(
-      Icons.done_all_outlined,
-      size: 30.0,
-      color: Colors.green,
+    return Text(
+      'Connected',
+      style: TextStyle(
+        color: Colors.green,
+      ),
     );
+  }
+
+  Color _selectColor(index) {
+    if (!searchResultSnapshot.docs[index]['connection_request']
+        .containsKey('${FirebaseAuth.instance.currentUser.email}'))
+      return Colors.lightBlue;
+
+    String oppositeConnectionStatus = searchResultSnapshot.docs[index]
+        .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
+
+    if (oppositeConnectionStatus == 'Invitation Came')
+      return Colors.amber;
+    else if (oppositeConnectionStatus == 'Request Pending')
+      return Colors.green;
+    else if (oppositeConnectionStatus == 'Invitation Accepted')
+      return Colors.green;
+
+    return Colors.green;
   }
 }

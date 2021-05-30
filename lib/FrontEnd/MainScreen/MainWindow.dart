@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
+import 'package:generation/FrontEnd/MenuScreen/support_menu.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
@@ -177,7 +178,7 @@ Future<void> _deleteOldTask() async {
 
   if (_linksMap != null && _linksMap.length > 0) {
     _linksMap.forEach((_link, _time) async {
-      /// Activate this section For Debugging purpose
+      // /// Activate this section For Debugging purpose
       // print('Delete Multiple Connection Media Added');
       // await _localStorageHelper.deleteRemainingLinksFromLocalStore(link: _link);
       // _activityLinkDeleteFromStorage.add(_link);
@@ -456,7 +457,9 @@ class _MainScreenState extends State<MainScreen> {
       openBuilder: (context, openWidget) {
         if (menuOptionIs == 'Profile')
           return Profile();
-        else if (menuOptionIs == 'Setting') return SettingsWindow();
+        else if (menuOptionIs == 'Setting')
+          return SettingsWindow();
+        else if (menuOptionIs == 'Support') return SupportMenuMaker();
         return Center();
       },
       closedBuilder: (context, closeWidget) {
