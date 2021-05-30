@@ -156,19 +156,9 @@ class _ProblemMakerState extends State<ProblemMaker> {
                   ),
                   onPressed: () async {
                     if (_globalKey.currentState.validate()) {
-                      final Uri params = Uri(
-                        scheme: 'mailto',
-                        path: 'generationofficialteam@gmail.com',
-                        query:
-                            'subject=Generation Problem: ${this._problemTitleController.text} &body=${this._problemDescriptionController.text}', //add subject and body here
+                      await _sendMail(
+                        subject: 'Problem',
                       );
-
-                      final String url = params.toString();
-                      try {
-                        await launch(url);
-                      } catch (e) {
-                        print('Mail Sending Error: ${e.toString()}');
-                      }
                     }
                   },
                 ),
@@ -178,5 +168,23 @@ class _ProblemMakerState extends State<ProblemMaker> {
         ),
       ),
     );
+  }
+
+  Future<void> _sendMail({@required String subject}) async {
+    Navigator.pop(context);
+
+    final Uri params = Uri(
+      scheme: 'mailto',
+      path: 'generationofficialteam@gmail.com',
+      query:
+          'subject=$subject: ${this._problemTitleController.text} &body=${this._problemDescriptionController.text}', //add subject and body here
+    );
+
+    final String url = params.toString();
+    try {
+      await launch(url);
+    } catch (e) {
+      print('Mail Sending Error: ${e.toString()}');
+    }
   }
 }
