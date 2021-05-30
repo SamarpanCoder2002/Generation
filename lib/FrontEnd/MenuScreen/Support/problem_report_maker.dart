@@ -3,14 +3,17 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-class ProblemMaker extends StatefulWidget {
-  const ProblemMaker({Key key}) : super(key: key);
+class SupportInputTaker extends StatefulWidget {
+  final String subject;
+  final String appbarTitle;
+
+  SupportInputTaker({@required this.subject,@required this.appbarTitle});
 
   @override
-  _ProblemMakerState createState() => _ProblemMakerState();
+  _SupportInputTakerState createState() => _SupportInputTakerState();
 }
 
-class _ProblemMakerState extends State<ProblemMaker> {
+class _SupportInputTakerState extends State<SupportInputTaker> {
   final GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
 
   final TextEditingController _problemTitleController = TextEditingController();
@@ -41,7 +44,7 @@ class _ProblemMakerState extends State<ProblemMaker> {
         elevation: 10.0,
         shadowColor: Colors.white70,
         title: Text(
-          'Describe Your Problem',
+          widget.appbarTitle,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20.0,
@@ -72,15 +75,11 @@ class _ProblemMakerState extends State<ProblemMaker> {
                     return null;
                   },
                   decoration: InputDecoration(
-                      labelText: 'Problem Title',
+                      labelText: '${widget.subject} Title',
                       labelStyle: TextStyle(
                         color: Colors.white70,
                         fontFamily: 'Lora',
                         letterSpacing: 1.0,
-                      ),
-                      suffixIcon: Icon(
-                        Icons.report_problem_outlined,
-                        color: Colors.red,
                       ),
                       enabledBorder: UnderlineInputBorder(
                         borderSide: BorderSide(
@@ -111,11 +110,7 @@ class _ProblemMakerState extends State<ProblemMaker> {
                     return null;
                   },
                   decoration: InputDecoration(
-                      suffixIcon: Icon(
-                        Icons.description_outlined,
-                        color: Colors.green,
-                      ),
-                      labelText: 'Problem Description',
+                      labelText: '${widget.subject} Description',
                       labelStyle: TextStyle(
                         color: Colors.white70,
                         fontFamily: 'Lora',
@@ -156,9 +151,7 @@ class _ProblemMakerState extends State<ProblemMaker> {
                   ),
                   onPressed: () async {
                     if (_globalKey.currentState.validate()) {
-                      await _sendMail(
-                        subject: 'Problem',
-                      );
+                      await _sendMail();
                     }
                   },
                 ),
@@ -170,14 +163,14 @@ class _ProblemMakerState extends State<ProblemMaker> {
     );
   }
 
-  Future<void> _sendMail({@required String subject}) async {
+  Future<void> _sendMail() async {
     Navigator.pop(context);
 
     final Uri params = Uri(
       scheme: 'mailto',
       path: 'generationofficialteam@gmail.com',
       query:
-          'subject=$subject: ${this._problemTitleController.text} &body=${this._problemDescriptionController.text}', //add subject and body here
+          'subject=${widget.subject}: ${this._problemTitleController.text} &body=${this._problemDescriptionController.text}', //add subject and body here
     );
 
     final String url = params.toString();

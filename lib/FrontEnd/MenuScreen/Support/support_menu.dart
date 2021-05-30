@@ -77,11 +77,17 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
       openColor: const Color.fromRGBO(34, 48, 60, 1),
       closedElevation: 0.0,
       transitionType: ContainerTransitionType.fadeThrough,
-      transitionDuration: Duration(milliseconds: 500,),
+      transitionDuration: Duration(
+        milliseconds: 500,
+      ),
       openBuilder: (_, __) {
         print(title);
-        if(title == 'Report a Problem')
-          return ProblemMaker();
+        if (title == 'Report a Problem')
+          return SupportInputTaker(subject: 'Problem', appbarTitle: 'Describe Your Problem',);
+        else if (title == 'Request a Feature')
+          return SupportInputTaker(subject: 'Feature', appbarTitle: 'Describe the Feature',);
+        else if (title == 'Send Feedback')
+          return SupportInputTaker(subject: 'Feedback', appbarTitle: 'Write Your Feedback',);
         return Center();
       },
       closedBuilder: (_, __) {
