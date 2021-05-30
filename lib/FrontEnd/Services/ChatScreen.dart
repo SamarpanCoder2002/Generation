@@ -306,12 +306,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     });
                   }
 
-                  await _dio
-                      .download(connectionSnapShot['profile_pic'].toString(),
-                          profilePicPath)
-                      .whenComplete(() {
-                    print('Profile Picture Download Complete');
-                  });
+                  try {
+                    await _dio
+                        .download(connectionSnapShot['profile_pic'].toString(),
+                            profilePicPath)
+                        .whenComplete(() {
+                      print('Profile Picture Download Complete');
+                    });
+                  } catch (e) {
+                    print('Profile Pic Download Error: ${e.toString()}');
+                  }
                 } else {
                   if (connectionSnapShot.data()['profile_pic'].toString() ==
                           '' &&
@@ -524,68 +528,76 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   Future<void> _manageVoice(
       List<String> _incomingInformationContainer, everyMessage) async {
-    final PermissionStatus storagePermissionStatus =
-        await Permission.storage.request();
+    try {
+      final PermissionStatus storagePermissionStatus =
+          await Permission.storage.request();
 
-    /// Take User Permission To Take Voice
-
-    if (storagePermissionStatus.isGranted) {
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
-      }
-
-      final Directory directory = await getExternalStorageDirectory();
-      print('Directory Path: ${directory.path}');
-
-      final recordingStorage = await Directory(directory.path + '/Recordings/')
-          .create(); // Create New Folder about the desire location
-
-      final String currTime = DateTime.now().toString(); // Current Time Take
-
-      if (mounted) {
-        setState(() {
-          _mediaTypes.add(MediaTypes.Voice); // add New Media Type
-
-          _chatContainer.add({
-            // Take Messages in Local Container
-            '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}':
-                '${_incomingInformationContainer[0]}',
+      /// Take User Permission To Take Voice
+      if (storagePermissionStatus.isGranted) {
+        if (mounted) {
+          setState(() {
+            _isLoading = true;
           });
+        }
 
-          _response.add(true); // Chat Position Status Added
-        });
+        final Directory directory = await getExternalStorageDirectory();
+        print('Directory Path: ${directory.path}');
+
+        final recordingStorage =
+            await Directory(directory.path + '/Recordings/')
+                .create(); // Create New Folder about the desire location
+
+        final String currTime = DateTime.now().toString(); // Current Time Take
+
+        if (mounted) {
+          setState(() {
+            _mediaTypes.add(MediaTypes.Voice); // add New Media Type
+
+            _chatContainer.add({
+              // Take Messages in Local Container
+              '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}':
+                  '${_incomingInformationContainer[0]}',
+            });
+
+            _response.add(true); // Chat Position Status Added
+          });
+        }
+
+        try {
+          /// Download the voice from the Firebase Storage and delete from storage permanently
+          await _dio
+              .download(everyMessage.keys.first.toString(),
+                  '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
+                  onReceiveProgress: _downLoadOnReceiveProgress)
+              .whenComplete(() async {
+            print('After Download: $_incomingInformationContainer');
+            if (_incomingInformationContainer.length < 4)
+              await _management.deleteFilesFromFirebaseStorage(
+                  everyMessage.keys.first.toString());
+          });
+        } catch (e) {
+          print('Dio Audio Download Error: ${e.toString()}');
+        }
+
+        print(
+            'Recorded Path: ${recordingStorage.path}$currTime${_incomingInformationContainer[2]}');
+
+        /// Store Data in local Storage
+        _localStorageHelper.insertNewMessages(
+            widget._userName,
+            '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
+            MediaTypes.Voice,
+            1,
+            _incomingInformationContainer[0]);
       }
+    } catch (e) {
+      print('Voice Download Error: ${e.toString()}');
+    }
 
-      /// Download the voice from the Firebase Storage and delete from storage permanently
-      await _dio
-          .download(everyMessage.keys.first.toString(),
-              '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
-              onReceiveProgress: _downLoadOnReceiveProgress)
-          .whenComplete(() async {
-        print('After Download: $_incomingInformationContainer');
-        if (_incomingInformationContainer.length < 4)
-          await _management.deleteFilesFromFirebaseStorage(
-              everyMessage.keys.first.toString());
+    if (_isLoading) if (mounted) {
+      setState(() {
+        _isLoading = false;
       });
-
-      print(
-          'Recorded Path: ${recordingStorage.path}$currTime${_incomingInformationContainer[2]}');
-
-      /// Store Data in local Storage
-      _localStorageHelper.insertNewMessages(
-          widget._userName,
-          '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
-          MediaTypes.Voice,
-          1,
-          _incomingInformationContainer[0]);
-
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
@@ -639,60 +651,68 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     final PermissionStatus storagePermissionStatus = await Permission.storage
         .request(); // Take User Permission To Take Voice
 
-    if (storagePermissionStatus.isGranted) {
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
-      }
-
-      final Directory directory = await getExternalStorageDirectory();
-      print('Directory Path: ${directory.path}');
-
-      final Directory _newDirectory =
-          await Directory('${directory.path}/Documents/')
-              .create(); // Create New Folder about the desire location;
-
-      final String currTime =
-          DateTime.now().toString().split(' ').join('_'); // Current Time Take
-
-      await _dio
-          .download(everyMessage.keys.first.toString(),
-              '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}')
-          .whenComplete(() async {
-        print(
-            'In When Complete: ${everyMessage.keys.first.toString()}   $_incomingInformationContainer');
-        if (_incomingInformationContainer.length < 5)
-          await _management.deleteFilesFromFirebaseStorage(
-              everyMessage.keys.first.toString());
-      });
-
-      await _localStorageHelper.insertNewMessages(
-          widget._userName,
-          '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}',
-          MediaTypes.Document,
-          1,
-          '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}');
-
-      if (mounted) {
-        setState(() {
-          _mediaTypes.add(MediaTypes.Document); // add New Media Type
-
-          _chatContainer.add({
-            // Take Messages in Local Container
-            '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}':
-                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}',
+    try {
+      if (storagePermissionStatus.isGranted) {
+        if (mounted) {
+          setState(() {
+            _isLoading = true;
           });
+        }
 
-          _response.add(true); // Chat Position Status Added
-        });
-      }
+        final Directory directory = await getExternalStorageDirectory();
+        print('Directory Path: ${directory.path}');
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        final Directory _newDirectory =
+            await Directory('${directory.path}/Documents/')
+                .create(); // Create New Folder about the desire location;
+
+        final String currTime =
+            DateTime.now().toString().split(' ').join('_'); // Current Time Take
+
+        try {
+          await _dio
+              .download(everyMessage.keys.first.toString(),
+                  '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}')
+              .whenComplete(() async {
+            print(
+                'In When Complete: ${everyMessage.keys.first.toString()}   $_incomingInformationContainer');
+            if (_incomingInformationContainer.length < 5)
+              await _management.deleteFilesFromFirebaseStorage(
+                  everyMessage.keys.first.toString());
+          });
+        } catch (e) {
+          print('Dio Document Download Error: ${e.toString()}');
+        }
+
+        await _localStorageHelper.insertNewMessages(
+            widget._userName,
+            '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}',
+            MediaTypes.Document,
+            1,
+            '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}');
+
+        if (mounted) {
+          setState(() {
+            _mediaTypes.add(MediaTypes.Document); // add New Media Type
+
+            _chatContainer.add({
+              // Take Messages in Local Container
+              '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}':
+                  '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}',
+            });
+
+            _response.add(true); // Chat Position Status Added
+          });
+        }
       }
+    } catch (e) {
+      print('Document Download Error: ${e.toString()}');
+    }
+
+    if (_isLoading) if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -705,151 +725,169 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     final PermissionStatus storagePermissionStatus = await Permission.storage
         .request(); // Take User Permission To Take Voice
 
-    if (storagePermissionStatus.isGranted) {
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
-      }
+    try {
+      if (storagePermissionStatus.isGranted) {
+        if (mounted) {
+          setState(() {
+            _isLoading = true;
+          });
+        }
 
-      final Directory directory = await getExternalStorageDirectory();
-      print('Directory Path: ${directory.path}');
+        final Directory directory = await getExternalStorageDirectory();
+        print('Directory Path: ${directory.path}');
 
-      Directory _newDirectory;
+        Directory _newDirectory;
 
-      if (_incomingInformationContainer[1] == MediaTypes.Image.toString())
-        _newDirectory = await Directory('${directory.path}/Images/').create(
-            recursive: true); // Create New Folder about the desire location
-      else
-        _newDirectory = await Directory('${directory.path}/Videos/').create(
-            recursive: true); // Create New Folder about the desire location
+        if (_incomingInformationContainer[1] == MediaTypes.Image.toString())
+          _newDirectory = await Directory('${directory.path}/Images/').create(
+              recursive: true); // Create New Folder about the desire location
+        else
+          _newDirectory = await Directory('${directory.path}/Videos/').create(
+              recursive: true); // Create New Folder about the desire location
 
-      print('New Directory: ${_newDirectory.path}    $everyMessage');
+        print('New Directory: ${_newDirectory.path}    $everyMessage');
 
-      final String currTime =
-          DateTime.now().toString().split(' ').join('_'); // Current Time Take
+        final String currTime =
+            DateTime.now().toString().split(' ').join('_'); // Current Time Take
 
-      final Directory _thumbNailDir =
-          await Directory('${directory.path}/.ThumbNails/').create(
-              recursive: true); // Create New Folder about the desire location;
+        final Directory _thumbNailDir =
+            await Directory('${directory.path}/.ThumbNails/').create(
+                recursive:
+                    true); // Create New Folder about the desire location;
 
-      String thumbNailPicturePath;
+        String thumbNailPicturePath;
 
-      String _filePathStore =
-          _incomingInformationContainer[1] == MediaTypes.Image.toString()
-              ? '${_newDirectory.path}$currTime.jpg'
-              : '${_newDirectory.path}$currTime.mp4';
-
-      print('Previous File Path: $_filePathStore');
-
-      /// Download the voice from the Firebase Storage and delete from storage permanently
-      await _dio
-          .download(
-        _incomingInformationContainer[1] == MediaTypes.Video.toString()
-            ? everyMessage.keys.first.toString().split('+')[0]
-            : everyMessage.keys.first.toString(),
-        _incomingInformationContainer[1] == MediaTypes.Image.toString()
-            ? '${_newDirectory.path}$currTime.jpg'
-            : '${_newDirectory.path}$currTime.mp4',
-      )
-          .whenComplete(() async {
-        print(
-            'In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
-
-        /// For Save Image or Video In Gallery
-        final gallerySaverResult = await ImageGallerySaver.saveFile(
+        String _filePathStore =
             _incomingInformationContainer[1] == MediaTypes.Image.toString()
                 ? '${_newDirectory.path}$currTime.jpg'
-                : '${_newDirectory.path}$currTime.mp4');
-        print(
-            'Gallery Image Path: ${gallerySaverResult['filePath']}   ${gallerySaverResult['isSuccess']}');
+                : '${_newDirectory.path}$currTime.mp4';
 
-        print(gallerySaverResult['isSuccess']);
+        print('Previous File Path: $_filePathStore');
 
-        if (gallerySaverResult['isSuccess'].toString() == 'true') {
-          _filePathStore =
-              gallerySaverResult['filePath'].toString().split('file:///')[1];
-
-          await File(_incomingInformationContainer[1] ==
-                      MediaTypes.Image.toString()
-                  ? '${_newDirectory.path}$currTime.jpg'
-                  : '${_newDirectory.path}$currTime.mp4')
-              .delete(recursive: true)
-              .whenComplete(() => print('Store in Gallery'))
-              .catchError((e) {
-            print('File Delete Error in ChatScreen: ${e.toString()}');
-          });
-
-          print('In Gallery Save');
-        }
-
-        if (_incomingInformationContainer.length < 4)
-          await _management.deleteFilesFromFirebaseStorage(
-              _incomingInformationContainer[1] != MediaTypes.Video.toString()
-                  ? everyMessage.keys.first.toString()
-                  : everyMessage.keys.first.toString().split('+')[0]);
-
-        if (_incomingInformationContainer[1] == MediaTypes.Video.toString()) {
-          print("Video Path: ${_newDirectory.path}$currTime.mp4'");
-
-          try {
+        try {
+          /// Download the voice from the Firebase Storage and delete from storage permanently
+          await _dio
+              .download(
+            _incomingInformationContainer[1] == MediaTypes.Video.toString()
+                ? everyMessage.keys.first.toString().split('+')[0]
+                : everyMessage.keys.first.toString(),
+            _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                ? '${_newDirectory.path}$currTime.jpg'
+                : '${_newDirectory.path}$currTime.mp4',
+          )
+              .whenComplete(() async {
             print(
-                'Thumbnail Url is: ${everyMessage.keys.first.toString().split('+')[1]}');
+                'In When Complete: ${everyMessage.keys.first.toString()}:   ${_incomingInformationContainer.length}');
 
-            await _dio
-                .download(
-              everyMessage.keys.first.toString().split('+')[1],
-              '${_thumbNailDir.path}$currTime.jpg',
-            )
-                .whenComplete(() async {
-              if (_incomingInformationContainer.length < 4)
-                await _management.deleteFilesFromFirebaseStorage(
-                    everyMessage.keys.first.toString().split('+')[1]);
-            });
-          } catch (e) {
-            print('Dio Video Thumbnail DownloadException: ${e.toString()} ');
-          }
+            /// For Save Image or Video In Gallery
+            final gallerySaverResult = await ImageGallerySaver.saveFile(
+                _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                    ? '${_newDirectory.path}$currTime.jpg'
+                    : '${_newDirectory.path}$currTime.mp4');
+            print(
+                'Gallery Image Path: ${gallerySaverResult['filePath']}   ${gallerySaverResult['isSuccess']}');
 
-          print('ThumbNail Path: $thumbNailPicturePath');
-        }
-      });
+            print(gallerySaverResult['isSuccess']);
 
-      print('Recorded Path: $_filePathStore');
+            if (gallerySaverResult['isSuccess'].toString() == 'true') {
+              _filePathStore = gallerySaverResult['filePath']
+                  .toString()
+                  .split('file:///')[1];
 
-      /// Store Data in local Storage
-      _localStorageHelper.insertNewMessages(
-          widget._userName,
-          _filePathStore,
-          _incomingInformationContainer[1] == MediaTypes.Image.toString()
-              ? MediaTypes.Image
-              : MediaTypes.Video,
-          1,
-          _incomingInformationContainer[1] == MediaTypes.Image.toString()
-              ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
-              : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg');
+              await File(_incomingInformationContainer[1] ==
+                          MediaTypes.Image.toString()
+                      ? '${_newDirectory.path}$currTime.jpg'
+                      : '${_newDirectory.path}$currTime.mp4')
+                  .delete(recursive: true)
+                  .whenComplete(() => print('Store in Gallery'))
+                  .catchError((e) {
+                print('File Delete Error in ChatScreen: ${e.toString()}');
+              });
 
-      if (mounted) {
-        setState(() {
-          _incomingInformationContainer[1] == MediaTypes.Image.toString()
-              ? _mediaTypes.add(MediaTypes.Image)
-              : _mediaTypes.add(MediaTypes.Video); // add New Media Type
+              print('In Gallery Save');
+            }
 
-          _chatContainer.add({
-            /// Take Messages in Local Container
-            _filePathStore: _incomingInformationContainer[1] ==
-                    MediaTypes.Image.toString()
-                ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
-                : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg',
+            if (_incomingInformationContainer.length < 4)
+              await _management.deleteFilesFromFirebaseStorage(
+                  _incomingInformationContainer[1] !=
+                          MediaTypes.Video.toString()
+                      ? everyMessage.keys.first.toString()
+                      : everyMessage.keys.first.toString().split('+')[0]);
+
+            if (_incomingInformationContainer[1] ==
+                MediaTypes.Video.toString()) {
+              print("Video Path: ${_newDirectory.path}$currTime.mp4'");
+
+              try {
+                print(
+                    'Thumbnail Url is: ${everyMessage.keys.first.toString().split('+')[1]}');
+
+                await _dio
+                    .download(
+                  everyMessage.keys.first.toString().split('+')[1],
+                  '${_thumbNailDir.path}$currTime.jpg',
+                )
+                    .whenComplete(() async {
+                  if (_incomingInformationContainer.length < 4)
+                    await _management.deleteFilesFromFirebaseStorage(
+                        everyMessage.keys.first.toString().split('+')[1]);
+                });
+              } catch (e) {
+                print(
+                    'Dio Video Thumbnail DownloadException: ${e.toString()} ');
+              }
+
+              print('ThumbNail Path: $thumbNailPicturePath');
+            }
           });
-          _response.add(true); // Chat Position Status Added
-        });
-      }
+        } catch (e) {
+          print('Dio Video Download Error: ${e.toString}');
+        }
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        print('Recorded Path: $_filePathStore');
+
+        /// Store Data in local Storage
+        _localStorageHelper.insertNewMessages(
+            widget._userName,
+            _filePathStore,
+            _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                ? MediaTypes.Image
+                : MediaTypes.Video,
+            1,
+            _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
+                : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg');
+
+        if (mounted) {
+          setState(() {
+            _incomingInformationContainer[1] == MediaTypes.Image.toString()
+                ? _mediaTypes.add(MediaTypes.Image)
+                : _mediaTypes.add(MediaTypes.Video); // add New Media Type
+
+            _chatContainer.add({
+              /// Take Messages in Local Container
+              _filePathStore: _incomingInformationContainer[1] ==
+                      MediaTypes.Image.toString()
+                  ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
+                  : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg',
+            });
+            _response.add(true); // Chat Position Status Added
+          });
+        }
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
+    } catch (e) {
+      print('Media Download Error: ${e.toString()}');
+    }
+    if (_isLoading) if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -1545,15 +1583,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         GestureDetector(
           onLongPress: () async {
             print('Voice Long Press');
-            showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                      elevation: 0.3,
-                      backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
-                      title: _multipleOptions(index,
-                          bgColor: Color.fromRGBO(34, 48, 60, 0.0),
-                          mediaTypes: _mediaTypes[index]),
-                    ));
+            if (await File(_chatContainer[index].keys.first).exists())
+              showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                        elevation: 0.3,
+                        backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
+                        title: _multipleOptions(index,
+                            bgColor: Color.fromRGBO(34, 48, 60, 0.0),
+                            mediaTypes: _mediaTypes[index]),
+                      ));
           },
           child: Container(
             margin: _responseValue
@@ -1783,7 +1822,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       minScale: PhotoViewComputedScale.covered,
                     ),
                   ),
-                  _multipleOptions(index, mediaTypes: _mediaTypes[index]),
+                  if (File(_chatContainer[index].keys.first).existsSync())
+                    _multipleOptions(index, mediaTypes: _mediaTypes[index]),
                   if (_mediaTypes[index] == MediaTypes.Video)
                     Center(
                       child: IconButton(
@@ -1901,7 +1941,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             },
                           ),
                         ),
-                        _multipleOptions(index, mediaTypes: _mediaTypes[index]),
+                        if (File(_chatContainer[index].keys.first).existsSync())
+                          _multipleOptions(index,
+                              mediaTypes: _mediaTypes[index]),
                       ],
                     )
                   : GestureDetector(
@@ -1911,18 +1953,21 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                         openFileResultStatus(openResult: openResult);
                       },
-                      onLongPress: () {
+                      onLongPress: () async {
                         print('Delete that message');
-                        showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                                  elevation: 0.3,
-                                  backgroundColor:
-                                      Color.fromRGBO(34, 48, 60, 0.5),
-                                  title: _multipleOptions(index,
-                                      bgColor: Color.fromRGBO(34, 48, 60, 0.0),
-                                      mediaTypes: _mediaTypes[index]),
-                                ));
+                        if (await File(_chatContainer[index].keys.first)
+                            .exists())
+                          showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                    elevation: 0.3,
+                                    backgroundColor:
+                                        Color.fromRGBO(34, 48, 60, 0.5),
+                                    title: _multipleOptions(index,
+                                        bgColor:
+                                            Color.fromRGBO(34, 48, 60, 0.0),
+                                        mediaTypes: _mediaTypes[index]),
+                                  ));
                       },
                       child: Container(
                         child: Row(
@@ -2553,43 +2598,29 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   void chatMicrophoneOnTapAction(int index) async {
-    _justAudioPlayer.positionStream.listen((event) {
-      if (mounted) {
-        setState(() {
-          _currAudioPlayingTime = event.inMicroseconds.ceilToDouble();
-          _loadingTime = '${event.inMinutes} : ${event.inSeconds}';
-        });
-      }
-    });
-
-    _justAudioPlayer.playerStateStream.listen((event) {
-      if (event.processingState == ProcessingState.completed) {
-        _justAudioPlayer.stop();
+    try {
+      _justAudioPlayer.positionStream.listen((event) {
         if (mounted) {
           setState(() {
-            _loadingTime = '0:00';
-            _iconData = Icons.play_arrow_rounded;
+            _currAudioPlayingTime = event.inMicroseconds.ceilToDouble();
+            _loadingTime = '${event.inMinutes} : ${event.inSeconds}';
           });
         }
-      }
-    });
+      });
 
-    if (_lastAudioPlayingIndex != index) {
-      await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
+      _justAudioPlayer.playerStateStream.listen((event) {
+        if (event.processingState == ProcessingState.completed) {
+          _justAudioPlayer.stop();
+          if (mounted) {
+            setState(() {
+              _loadingTime = '0:00';
+              _iconData = Icons.play_arrow_rounded;
+            });
+          }
+        }
+      });
 
-      if (mounted) {
-        setState(() {
-          _lastAudioPlayingIndex = index;
-          _totalDuration =
-              '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
-          _iconData = Icons.pause;
-        });
-      }
-
-      await _justAudioPlayer.play();
-    } else {
-      print(_justAudioPlayer.processingState);
-      if (_justAudioPlayer.processingState == ProcessingState.idle) {
+      if (_lastAudioPlayingIndex != index) {
         await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
 
         if (mounted) {
@@ -2602,24 +2633,45 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
 
         await _justAudioPlayer.play();
-      } else if (_justAudioPlayer.playing) {
-        if (mounted) {
-          setState(() {
-            _iconData = Icons.play_arrow_rounded;
-          });
-        }
+      } else {
+        print(_justAudioPlayer.processingState);
+        if (_justAudioPlayer.processingState == ProcessingState.idle) {
+          await _justAudioPlayer.setFilePath(_chatContainer[index].keys.first);
 
-        await _justAudioPlayer.pause();
-      } else if (_justAudioPlayer.processingState == ProcessingState.ready) {
-        if (mounted) {
-          setState(() {
-            _iconData = Icons.pause;
-          });
-        }
+          if (mounted) {
+            setState(() {
+              _lastAudioPlayingIndex = index;
+              _totalDuration =
+                  '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+              _iconData = Icons.pause;
+            });
+          }
 
-        await _justAudioPlayer.play();
-      } else if (_justAudioPlayer.processingState ==
-          ProcessingState.completed) {}
+          await _justAudioPlayer.play();
+        } else if (_justAudioPlayer.playing) {
+          if (mounted) {
+            setState(() {
+              _iconData = Icons.play_arrow_rounded;
+            });
+          }
+
+          await _justAudioPlayer.pause();
+        } else if (_justAudioPlayer.processingState == ProcessingState.ready) {
+          if (mounted) {
+            setState(() {
+              _iconData = Icons.pause;
+            });
+          }
+
+          await _justAudioPlayer.play();
+        } else if (_justAudioPlayer.processingState ==
+            ProcessingState.completed) {}
+      }
+    } catch (e) {
+      print('Audio Playing Error');
+      _showDiaLog(
+          titleText: 'Audio Playing Error',
+          contentText: 'May be Audio File Not Found');
     }
   }
 
@@ -3031,20 +3083,27 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   child: Text(
                 titleText,
                 style: TextStyle(
-                  fontFamily: 'Lora',
                   color: Colors.red,
-                  letterSpacing: 1.0,
-                  fontSize: 16.0,
+                  fontSize: 18.0,
                 ),
               )),
               content: contentText == ''
                   ? null
-                  : Text(
-                      contentText,
-                      style: TextStyle(
-                        fontFamily: 'Lora',
-                        color: Colors.white,
-                        letterSpacing: 1.0,
+                  : SizedBox(
+                      height: 40,
+                      width: MediaQuery.of(context).size.width,
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          Center(
+                            child: Text(
+                              contentText,
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
             ));

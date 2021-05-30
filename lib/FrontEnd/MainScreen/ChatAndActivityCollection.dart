@@ -188,18 +188,23 @@ class _ChatsAndActivityCollectionState
                         await Directory('${directory.path}/.ActivityImages/')
                             .create();
 
-                    /// Download Image Activity from Firebase Storage and store in local database
-                    await _dio
-                        .download(everyActivity.keys.first.toString(),
-                            '${activityImagePath.path}$currTime.jpg')
-                        .whenComplete(() async {
-                      print('Image Download Complete');
-                      // await _management.deleteFilesFromFirebaseStorage(
-                      //     everyActivity.keys.first.toString());
+                    try {
+                      /// Download Image Activity from Firebase Storage and store in local database
+                      await _dio
+                          .download(everyActivity.keys.first.toString(),
+                          '${activityImagePath.path}$currTime.jpg')
+                          .whenComplete(() async {
+                        print('Image Download Complete');
+                        // await _management.deleteFilesFromFirebaseStorage(
+                        //     everyActivity.keys.first.toString());
 
-                      print(
-                          'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                    });
+                        print(
+                            'Activity Image Time: ${everyActivity.values.first
+                                .toString().split('++++++')[2]}');
+                      });
+                    }catch(e){
+                      print('Activity Image Download Error: ${e.toString()}');
+                    }
 
                     /// Add Activity Image Data to Local Storage for Future use
                     await _localStorageHelper.insertDataInUserActivityTable(
