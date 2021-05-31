@@ -19,7 +19,7 @@ import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore
 import 'package:generation/FrontEnd/Activity/activity_maker.dart';
 import 'package:generation/FrontEnd/Services/search_screen.dart';
 import 'package:generation/FrontEnd/Activity/activity_view.dart';
-import 'package:generation/FrontEnd/Services/ChatScreen.dart';
+import 'package:generation/FrontEnd/Services/ChatManagement/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';

@@ -42,6 +42,8 @@ import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 
+import 'connection_profile_view.dart';
+
 // ignore: must_be_immutable
 class ChatScreenSetUp extends StatefulWidget {
   final String _userName;
@@ -1065,27 +1067,46 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ],
           ),
-          title: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              elevation: 0.0,
-              primary: const Color.fromRGBO(25, 39, 52, 1),
-              onSurface: Theme.of(context).primaryColor,
-            ),
-            child: Text(
-              widget._userName.length <= 10
-                  ? widget._userName
-                  : '${widget._userName.replaceRange(10, widget._userName.length, '...')}',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20.0,
-                fontFamily: 'Lora',
-                letterSpacing: 1.0,
+          title: OpenContainer(
+            closedColor: const Color.fromRGBO(25, 39, 52, 1),
+            middleColor: const Color.fromRGBO(25, 39, 52, 1),
+            openColor: const Color.fromRGBO(25, 39, 52, 1),
+            closedElevation: 0.0,
+            transitionType: ContainerTransitionType.fadeThrough,
+            transitionDuration: Duration(milliseconds: 700),
+            openBuilder: (_, __) {
+              return ConnectionProfileView(
+                profileImagePath: widget._connectionProfileImageLocalPath,
+                userName: widget._userName,
+              );
+            },
+            closedBuilder: (_, __) => SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Text(
+                widget._userName.length <= 12
+                    ? widget._userName
+                    : '${widget._userName.replaceRange(12, widget._userName.length, '...')}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                  fontFamily: 'Lora',
+                  letterSpacing: 1.0,
+                ),
               ),
             ),
-            onPressed: () {
-              print("Name Clicked");
-            },
           ),
+          // onPressed: () {
+          //   print("Name Clicked");
+          //   Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //           builder: (_) => ConnectionProfileView(
+          //                 profileImagePath:
+          //                     widget._connectionProfileImageLocalPath,
+          //                 userName: widget._userName,
+          //               )));
+          // },
+          //),
           actions: [
             IconButton(
               icon: Icon(

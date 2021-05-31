@@ -85,9 +85,9 @@ class _ProfileState extends State<Profile> {
             SizedBox(
               height: 50.0,
             ),
-            otherInformation(context, 'About', this._userAbout),
-            otherInformation(context, 'Join Date', this._userAccCreationDate),
-            otherInformation(context, 'Join Time', this._userAccCreationTime),
+            otherInformation('About', this._userAbout),
+            otherInformation('Join Date', this._userAccCreationDate),
+            otherInformation('Join Time', this._userAccCreationTime),
             _logOutButton(context),
           ],
         ),
@@ -224,8 +224,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget otherInformation(
-      BuildContext context, String leftText, String rightText) {
+  Widget otherInformation(String leftText, String rightText) {
     return Container(
       height: 60.0,
       margin: EdgeInsets.only(bottom: 30.0),
