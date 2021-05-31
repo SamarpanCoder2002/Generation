@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -11,17 +13,35 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   Icon _iconSample = Icon(Icons.filter_list_rounded);
+  final List<String> _allConnectedUserName = [];
 
   String searchArgument;
 
   final SendNotification _sendNotification = SendNotification();
   final TextEditingController searchUser = TextEditingController();
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
   QuerySnapshot searchResultSnapshot;
 
   bool isLoading = false;
   bool haveUserSearched = false;
 
+  void _getAllConnectionsFromLocalStorage() async {
+    final List<Map<String, Object>> _connectedUsersCollection =
+        await _localStorageHelper.extractAllUsersName();
+
+    _connectedUsersCollection.forEach((element) {
+      if (mounted) {
+        setState(() {
+          this._allConnectedUserName.add(element.values.first.toString());
+        });
+      }
+    });
+  }
+
   initiateSearch() async {
+    _getAllConnectionsFromLocalStorage();
+
     if (searchUser.text.isNotEmpty) {
       if (mounted) {
         setState(() {
@@ -234,6 +254,26 @@ class _SearchState extends State<Search> {
                     });
                   }
 
+                  /// If Same user Already Present, update their account info
+                  if (this._allConnectedUserName.contains(
+                      searchResultSnapshot.docs[index]['user_name'])) {
+                    final QueryDocumentSnapshot queryDocSs =
+                        searchResultSnapshot.docs[index];
+
+                    print('Before Updating');
+
+                    await _localStorageHelper.insertOrUpdateDataForThisAccount(
+                        userName: queryDocSs['user_name'],
+                        userMail: queryDocSs.id,
+                        userToken: queryDocSs['token'],
+                        userAbout: queryDocSs['about'],
+                        userAccCreationDate: queryDocSs['creation_date'],
+                        userAccCreationTime: queryDocSs['creation_time'],
+                        purpose: 'update');
+
+                    print('After Updating');
+                  }
+
                   /// Send Notification to Request Sender about Connection Accepted
                   await _sendNotification.sendNotification(
                     token: searchResultSnapshot.docs[index]['token'],
@@ -411,8 +451,11 @@ class _SearchState extends State<Search> {
       );
     }
 
-    String oppositeConnectionStatus = searchResultSnapshot.docs[index]
+    final String oppositeConnectionStatus = searchResultSnapshot.docs[index]
         .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
+
+    final String otherUserName =
+        searchResultSnapshot.docs[index].data()['user_name'];
 
     if (oppositeConnectionStatus == 'Invitation Came') {
       return Text(
@@ -429,7 +472,9 @@ class _SearchState extends State<Search> {
           color: Colors.green,
         ),
       );
-    } else if (oppositeConnectionStatus == 'Invitation Accepted') {
+    } else if ((oppositeConnectionStatus == 'Invitation Accepted' ||
+            oppositeConnectionStatus == 'Request Accepted') &&
+        this._allConnectedUserName.contains(otherUserName)) {
       print("Here Present");
       return Text(
         'Connected',
@@ -439,9 +484,9 @@ class _SearchState extends State<Search> {
       );
     }
     return Text(
-      'Connected',
+      'Connect',
       style: TextStyle(
-        color: Colors.green,
+        color: Colors.lightBlue,
       ),
     );
   }
@@ -454,13 +499,17 @@ class _SearchState extends State<Search> {
     String oppositeConnectionStatus = searchResultSnapshot.docs[index]
         .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
 
+    final String otherUserName =
+        searchResultSnapshot.docs[index].data()['user_name'];
+
     if (oppositeConnectionStatus == 'Invitation Came')
       return Colors.amber;
     else if (oppositeConnectionStatus == 'Request Pending')
       return Colors.green;
-    else if (oppositeConnectionStatus == 'Invitation Accepted')
-      return Colors.green;
+    else if ((oppositeConnectionStatus == 'Invitation Accepted' ||
+            oppositeConnectionStatus == 'Request Accepted') &&
+        this._allConnectedUserName.contains(otherUserName)) return Colors.green;
 
-    return Colors.green;
+    return Colors.lightBlue;
   }
 }

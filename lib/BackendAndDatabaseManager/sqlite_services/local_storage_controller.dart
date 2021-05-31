@@ -33,6 +33,8 @@ class LocalStorageHelper {
   final String _colMobileNumber = 'User_Mobile_Number';
   final String _colParticularBGNStatus = 'ParticularBGNStatus';
   final String _colParticularFGNStatus = 'ParticularFGNStatus';
+  final String _colCreationDate = 'Creation_Date';
+  final String _colCreationTime = 'Creation_Time';
 
   final String _colActivitySpecial = 'ActivitySpecialOptions';
 
@@ -82,40 +84,60 @@ class LocalStorageHelper {
     return getDatabase;
   }
 
+  /// For Current user and connections general data to store
+  /// General Data Plays a Huge role for managing interaction with connections
+
   Future<void> createTableForStorePrimaryData() async {
     Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT, $_colChatWallPaper TEXT, $_colParticularBGNStatus TEXT, $_colParticularFGNStatus TEXT, $_colMobileNumber TEXT)");
+          "CREATE TABLE $_allImportantDataStore($_colAccountUserName TEXT PRIMARY KEY, $_colAccountUserMail TEXT, $_colToken TEXT, $_colProfileImagePath TEXT, $_colProfileImageUrl TEXT, $_colAbout TEXT, $_colChatWallPaper TEXT, $_colParticularBGNStatus TEXT, $_colParticularFGNStatus TEXT, $_colMobileNumber TEXT, $_colCreationDate TEXT, $_colCreationTime TEXT)");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
     }
   }
 
-  Future<void> insertDataForThisAccount({
+  Future<void> insertOrUpdateDataForThisAccount({
     @required String userName,
     @required String userMail,
     @required String userToken,
     @required String userAbout,
+    @required String userAccCreationDate,
+    @required String userAccCreationTime,
     String profileImagePath = '',
     String profileImageUrl = '',
+    String purpose = 'insert',
   }) async {
-    Database db = await this.database;
-    Map<String, dynamic> _accountData = Map<String, dynamic>();
+    try {
+      final Database db = await this.database;
 
-    _accountData[_colAccountUserName] = userName;
-    _accountData[_colAccountUserMail] = userMail;
-    _accountData[_colToken] = userToken;
-    _accountData[_colProfileImagePath] = profileImagePath;
-    _accountData[_colProfileImageUrl] = profileImageUrl;
-    _accountData[_colAbout] = userAbout;
-    _accountData[_colChatWallPaper] = '';
-    _accountData[_colMobileNumber] = '';
-    _accountData[_colParticularBGNStatus] = "1";
-    _accountData[_colParticularFGNStatus] = "1";
+      if (purpose != 'insert') {
+        final int updateResult = await db.rawUpdate(
+            "UPDATE $_allImportantDataStore SET $_colToken = '$userToken', $_colAbout = '$userAbout', $_colAccountUserMail = '$userMail', $_colCreationDate = '$userAccCreationDate', $_colCreationTime = '$userAccCreationTime' WHERE $_colAccountUserName = '$userName'");
 
-    await db.insert(_allImportantDataStore, _accountData);
+        print('Update Result is: $updateResult');
+      } else {
+        final Map<String, dynamic> _accountData = Map<String, dynamic>();
+
+        _accountData[_colAccountUserName] = userName;
+        _accountData[_colAccountUserMail] = userMail;
+        _accountData[_colToken] = userToken;
+        _accountData[_colProfileImagePath] = profileImagePath;
+        _accountData[_colProfileImageUrl] = profileImageUrl;
+        _accountData[_colAbout] = userAbout;
+        _accountData[_colChatWallPaper] = '';
+        _accountData[_colMobileNumber] = '';
+        _accountData[_colParticularBGNStatus] = "1";
+        _accountData[_colParticularFGNStatus] = "1";
+        _accountData[_colCreationDate] = userAccCreationDate;
+        _accountData[_colCreationTime] = userAccCreationTime;
+
+        await db.insert(_allImportantDataStore, _accountData);
+      }
+    } catch (e) {
+      print('Error in Insert or Update This Account Data: ${e.toString()}');
+    }
   }
 
   Future<void> insertProfilePictureInImportant(
@@ -231,6 +253,12 @@ class LocalStorageHelper {
       case ExtraImportant.MobileNumber:
         return this._colMobileNumber;
         break;
+      case ExtraImportant.CreationDate:
+        return this._colCreationDate;
+        break;
+      case ExtraImportant.CreationTime:
+        return this._colCreationTime;
+        break;
     }
 
     return 'Exception';
@@ -325,19 +353,9 @@ class LocalStorageHelper {
     return result;
   }
 
-  /// For make a table
-  Future<bool> createTableForUserName(String tableName) async {
-    Database db = await this.database;
-    try {
-      await db.execute(
-          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT)");
-      return true;
-    } catch (e) {
-      print(
-          "Error in Local Storage Create Table For User Name: ${e.toString()}");
-      return false;
-    }
-  }
+  /// Make Tables for user Activity
+  /// These for user Activity Data Manipulation
+  /// For User Data Customization use the following functions
 
   /// For Make Table for Status
   Future<bool> createTableForUserActivity(String tableName) async {
@@ -446,6 +464,24 @@ class LocalStorageHelper {
         await db.rawQuery('SELECT COUNT(*) FROM ${tableName}_status');
 
     return countTotalStatus[0].values.first;
+  }
+
+  /// All Chat Messages Manipulation will done here
+  /// Message Store and customization following by the following functions
+  /// Table Name same as User Name
+
+  /// For make a table
+  Future<bool> createTableForUserName(String tableName) async {
+    Database db = await this.database;
+    try {
+      await db.execute(
+          "CREATE TABLE $tableName($_colMessages TEXT, $_colReferences INTEGER, $_colMediaType TEXT, $_colDate TEXT, $_colTime TEXT)");
+      return true;
+    } catch (e) {
+      print(
+          "Error in Local Storage Create Table For User Name: ${e.toString()}");
+      return false;
+    }
   }
 
   /// Count total Messages for particular Table Name
@@ -590,7 +626,7 @@ class LocalStorageHelper {
           mediaType != MediaTypes.Video
                   ? element[_colMessages].toString()
                   : '${element[_colMessages].toString()}+${element[_colTime].toString().split('+')[2]}':
-              '${formatBytes(_fileSize.toDouble())}',
+              '${_formatBytes(_fileSize.toDouble())}',
         });
       });
 
@@ -601,7 +637,8 @@ class LocalStorageHelper {
     }
   }
 
-  String formatBytes(double bytes) {
+  /// Convert bytes of kb, mb, gb
+  String _formatBytes(double bytes) {
     double kb = bytes / 1000;
 
     if (kb >= 1024.00) {
@@ -614,6 +651,8 @@ class LocalStorageHelper {
       return '${kb.toStringAsFixed(1)} kb';
   }
 
+  /// For Multiple Connection Media Send, store links in the following containing table
+  /// for 24 hrs after send message.... These links will delete after 24hrs
   Future<void> createTableForRemainingLinks() async {
     final Database db = await this.database;
 
@@ -705,6 +744,9 @@ class LocalStorageHelper {
     }
   }
 
+  /// For Notification Controlling Data Store
+  /// All Notification Settings Will store here
+  /// For Future Use
   Future<void> createTableForNotificationGlobalConfig() async {
     final Database db = await this.database;
 

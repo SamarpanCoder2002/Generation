@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
-import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 
 class SignUpAuthentication extends StatefulWidget {
   @override
@@ -47,10 +47,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: ModalProgressHUD(
         inAsyncCall: _progressPermission,
-        color: Color.fromRGBO(0, 0, 0, 0.1),
-        progressIndicator: CircularProgressIndicator(
-          backgroundColor: Colors.black87,
-        ),
+        color: const Color.fromRGBO(0, 0, 0, 1),
         child: Container(
           height: MediaQuery.of(context).size.height,
           child: Center(

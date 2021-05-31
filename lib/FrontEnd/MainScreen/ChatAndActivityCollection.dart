@@ -75,6 +75,14 @@ class _ChatsAndActivityCollectionState
     final PermissionStatus storagePermissionStatus =
         await Permission.storage.request();
 
+    await Permission.microphone.request();
+
+    if (storagePermissionStatus.isDenied)
+      _showDiaLog(
+          titleText: 'Storage Permission Denied',
+          contentText:
+              "If any connection send you a media file, You can't receive that.\n\nPlease Go the Phone Settings and\nGo to Apps -> Generation ->\nPermission -> Allow Access for Storage");
+
     final Directory directory = await getExternalStorageDirectory();
 
     /// Listen to the realTime Data Fetch
@@ -175,9 +183,6 @@ class _ChatsAndActivityCollectionState
                           .toString()
                           .split('++++++')[0],
                     );
-
-                    // /// Delete Record From FireStore
-                    // await _management.deleteParticularActivityLink(fileName: everyActivity, connectionMail: connectionMail);
                   } else {
                     print('Storage Permission Denied');
                   }
@@ -192,17 +197,14 @@ class _ChatsAndActivityCollectionState
                       /// Download Image Activity from Firebase Storage and store in local database
                       await _dio
                           .download(everyActivity.keys.first.toString(),
-                          '${activityImagePath.path}$currTime.jpg')
+                              '${activityImagePath.path}$currTime.jpg')
                           .whenComplete(() async {
                         print('Image Download Complete');
-                        // await _management.deleteFilesFromFirebaseStorage(
-                        //     everyActivity.keys.first.toString());
 
                         print(
-                            'Activity Image Time: ${everyActivity.values.first
-                                .toString().split('++++++')[2]}');
+                            'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
                       });
-                    }catch(e){
+                    } catch (e) {
                       print('Activity Image Download Error: ${e.toString()}');
                     }
 
@@ -219,12 +221,8 @@ class _ChatsAndActivityCollectionState
                           .toString()
                           .split('++++++')[0],
                     );
-
-                    // /// Delete Record From FireStore
-                    // await _management.deleteParticularActivityLink(fileName: everyActivity.keys.first, connectionMail: connectionMail);
                   } else {
                     print('Permission Denied');
-                    //storagePermissionStatus = await Permission.storage.request();
                   }
                 }
               } else {
@@ -312,7 +310,7 @@ class _ChatsAndActivityCollectionState
                       profilePicPath = '';
 
                     /// Data Store for General Reference
-                    await _localStorageHelper.insertDataForThisAccount(
+                    await _localStorageHelper.insertOrUpdateDataForThisAccount(
                       userMail: connectionName,
                       userName: documentSnapshot['user_name'],
                       userToken: documentSnapshot['token'],
@@ -321,6 +319,8 @@ class _ChatsAndActivityCollectionState
                       profileImageUrl: documentSnapshot['profile_pic'] == null
                           ? ''
                           : documentSnapshot['profile_pic'].toString(),
+                      userAccCreationDate: documentSnapshot['creation_date'],
+                      userAccCreationTime: documentSnapshot['creation_time'],
                     );
 
                     /// Make a new table to this new connected user Activity
@@ -490,6 +490,14 @@ class _ChatsAndActivityCollectionState
             milliseconds: 500,
           ),
           transitionType: ContainerTransitionType.fadeThrough,
+          onClosed: (val) {
+            if (mounted) {
+              setState(() {
+                this._allConnectionsUserName.toSet().toList();
+                this._allUserConnectionActivity.toSet().toList();
+              });
+            }
+          },
           openBuilder: (_, __) {
             return Search();
           },
@@ -743,17 +751,17 @@ class _ChatsAndActivityCollectionState
                   transitionDuration: Duration(milliseconds: 50),
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) {
-                    // For Set the Latest Close chat index at beginning
-                    if (_allConnectionsUserName.length > 1) {
-                      if (mounted) {
-                        setState(() {
-                          String _latestUserName =
-                              _allConnectionsUserName.removeAt(
-                                  _allConnectionsUserName.indexOf(_userName));
-                          _allConnectionsUserName.insert(0, _latestUserName);
-                        });
-                      }
-                    }
+                    // // For Set the Latest Close chat index at beginning
+                    // if (_allConnectionsUserName.length > 1) {
+                    //   if (mounted) {
+                    //     setState(() {
+                    //       String _latestUserName =
+                    //           _allConnectionsUserName.removeAt(
+                    //               _allConnectionsUserName.indexOf(_userName));
+                    //       _allConnectionsUserName.insert(0, _latestUserName);
+                    //     });
+                    //   }
+                    // }
 
                     /// Irrespectively make changes when a chat just Close
                     _localStorageHelper
@@ -1189,5 +1197,43 @@ class _ChatsAndActivityCollectionState
                 .allConnectionsProfilePicLocalPath[userName]),
             scale: 0.5,
           );
+  }
+
+  void _showDiaLog({@required String titleText, String contentText = ''}) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              title: Center(
+                  child: Text(
+                titleText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18.0,
+                ),
+              )),
+              content: contentText == ''
+                  ? null
+                  : SizedBox(
+                      height: 150,
+                      width: MediaQuery.of(context).size.width,
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          Center(
+                            child: Text(
+                              contentText,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ));
   }
 }

@@ -9,25 +9,27 @@ enum MediaTypes {
   Indicator,
 }
 
-enum ActivitySpecialOptions{
+enum ActivitySpecialOptions {
   Polling,
 }
 
-enum NConfigTypes{
+enum NConfigTypes {
   BgNotification,
   FGNotification,
   RemoveBirthNotification,
   RemoveAnonymousNotification,
 }
 
-enum ExtraImportant{
+enum ExtraImportant {
   ChatWallpaper,
   MobileNumber,
   BGNStatus,
   FGNStatus,
+  CreationDate,
+  CreationTime,
 }
 
-enum HistoryOrMediaChoice{
+enum HistoryOrMediaChoice {
   History,
   Media,
 }

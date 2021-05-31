@@ -2,9 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+
 import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class LogInAuthentication extends StatefulWidget {
   @override
@@ -43,11 +44,8 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: ModalProgressHUD(
-        color: Color.fromRGBO(0, 0, 0, 0.1),
         inAsyncCall: _progressPermission,
-        progressIndicator: CircularProgressIndicator(
-          backgroundColor: Colors.black87,
-        ),
+        color: const Color.fromRGBO(0, 0, 0, 1),
         child: Container(
           height: MediaQuery.of(context).size.height,
           child: Center(

@@ -3,11 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 
 class EmailAndPasswordAuth {
   String _email, _pwd;
@@ -21,6 +23,8 @@ class EmailAndPasswordAuth {
 
   TextEditingController _userName = TextEditingController();
   TextEditingController _about = TextEditingController();
+
+  final FToast _fToast = FToast();
 
   EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
     //Close the keyboard
@@ -94,7 +98,7 @@ class EmailAndPasswordAuth {
                   'In Email-Password Auth Delete User Old Profile from Database Error: ${e.toString()}'));
         }
 
-        await userNameChecking();
+        await userNameChecking(_context);
       } else {
         print("Email not Verified");
         FirebaseAuth.instance.signOut();
@@ -123,20 +127,24 @@ class EmailAndPasswordAuth {
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: _titleColor,
+                  fontSize: 18.0,
                 ),
               ),
               content: Text(
                 _content,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.lightBlue,
+                  fontSize: 16.0,
                 ),
               ),
             ));
   }
 
-  Future<void> userNameChecking() async {
+  Future<void> userNameChecking(BuildContext context) async {
     showDialog(
         context: this._context,
         builder: (_) => AlertDialog(
@@ -217,6 +225,20 @@ class EmailAndPasswordAuth {
                             if (_userNameKey.currentState.validate()) {
                               print("ok");
 
+                              /// Hide Keyboard
+                              SystemChannels.textInput
+                                  .invokeMethod('TextInput.hide');
+
+                              /// Flutter Toast Initialization and show
+                              _fToast.init(context);
+                              showToast(
+                                'Wait, We Creating Your Account',
+                                _fToast,
+                                fontSize: 18.0,
+                                toastColor: Colors.amber,
+                                toastGravity: ToastGravity.TOP,
+                              );
+
                               QuerySnapshot querySnapShotForUserNameChecking =
                                   await FirebaseFirestore.instance
                                       .collection('generation_users')
@@ -231,6 +253,12 @@ class EmailAndPasswordAuth {
                                 final String _getToken =
                                     await FirebaseMessaging.instance.getToken();
 
+                                final String currDate = DateFormat('dd-MM-yyyy')
+                                    .format(DateTime.now());
+
+                                final String currTime =
+                                    "${DateFormat('hh:mm a').format(DateTime.now())}";
+
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
                                     .doc(_email)
@@ -238,10 +266,8 @@ class EmailAndPasswordAuth {
                                   'user_name': this._userName.text,
                                   'about': this._about.text,
                                   'connection_request': {},
-                                  'creation_date': DateFormat('dd-MM-yyyy')
-                                      .format(DateTime.now()),
-                                  'creation_time':
-                                      "${DateFormat('hh:mm a').format(DateTime.now())}",
+                                  'creation_date': currDate,
+                                  'creation_time': currTime,
                                   'connections': {},
                                   'total_connections': '0',
                                   'activity': {},
@@ -254,12 +280,14 @@ class EmailAndPasswordAuth {
                                     .createTableForStorePrimaryData();
 
                                 await _localStorageHelper
-                                    .insertDataForThisAccount(
+                                    .insertOrUpdateDataForThisAccount(
                                   userMail:
                                       FirebaseAuth.instance.currentUser.email,
                                   userName: this._userName.text,
                                   userToken: _getToken,
                                   userAbout: this._about.text,
+                                  userAccCreationDate: currDate,
+                                  userAccCreationTime: currTime,
                                 );
 
                                 await _localStorageHelper
@@ -269,8 +297,10 @@ class EmailAndPasswordAuth {
                                 await _localStorageHelper
                                     .createTableForRemainingLinks();
 
-                                await _localStorageHelper.createTableForNotificationGlobalConfig();
-                                await _localStorageHelper.insertDataForNotificationGlobalConfig();
+                                await _localStorageHelper
+                                    .createTableForNotificationGlobalConfig();
+                                await _localStorageHelper
+                                    .insertDataForNotificationGlobalConfig();
 
                                 print("Log-In Successful: User Name: $_email");
 
@@ -284,7 +314,7 @@ class EmailAndPasswordAuth {
                                     "Enjoy this app", Colors.green);
                               } else {
                                 showAlertBox("User Name Already Exist",
-                                    "Try Another User Name", Colors.yellow);
+                                    "Try Another User Name", Colors.amber);
                               }
                             } else {
                               print("Not Validate");

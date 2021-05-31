@@ -904,7 +904,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         /// Make Directory One Time
         await _makeDirectoryOnce();
       } else
-        print("Permission Denied");
+        _showDiaLog(
+            titleText: 'Sorry, Microphone Permission Already Denied',
+            contentText:
+                'Please go to the phone settings and\nGo to the Apps -> Generation ->\nPermission -> Allow Microphone to access this app');
     } catch (e) {
       print("Record Permission Status Error: ${e.toString()}");
       _permissionSetForRecording();
@@ -981,10 +984,15 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     _permissionSetForRecording();
   }
 
+  void disposeMicrophoneController() async {
+    if (await Permission.microphone.isGranted)
+      _flutterSoundRecorder.closeAudioSession();
+  }
+
   @override
   void dispose() {
     _justAudioPlayer.dispose();
-    _flutterSoundRecorder.closeAudioSession();
+    disposeMicrophoneController();
     _inputTextController.dispose();
     super.dispose();
   }
@@ -2278,37 +2286,37 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void _voiceController() async {
     if (!_isMicrophonePermissionGranted || _flutterSoundRecorder == null) {
       _permissionSetForRecording();
-    }
-
-    /// For Recording Action
-    if (_flutterSoundRecorder.isStopped) {
-      if (mounted) {
-        setState(() {
-          _hintText = 'Recording....';
-        });
-      }
-
-      final PermissionStatus recordingPermissionStatus =
-          await Permission.microphone.request();
-
-      if (recordingPermissionStatus.isGranted) {
-        _flutterSoundRecorder
-            .startRecorder(
-              toFile: '${_audioDirectory.path}${DateTime.now()}.mp3',
-            )
-            .then((value) => print("Recording"));
-      }
     } else {
-      // For recording stop after action
-      if (mounted) {
-        setState(() {
-          _hintText = 'Type Here...';
-        });
-      }
-      final String recordedFilePath =
-          await _flutterSoundRecorder.stopRecorder();
+      /// For Recording Action
+      if (_flutterSoundRecorder.isStopped) {
+        if (mounted) {
+          setState(() {
+            _hintText = 'Recording....';
+          });
+        }
 
-      _voiceSend(recordedFilePath);
+        final PermissionStatus recordingPermissionStatus =
+            await Permission.microphone.request();
+
+        if (recordingPermissionStatus.isGranted) {
+          _flutterSoundRecorder
+              .startRecorder(
+                toFile: '${_audioDirectory.path}${DateTime.now()}.mp3',
+              )
+              .then((value) => print("Recording"));
+        }
+      } else {
+        // For recording stop after action
+        if (mounted) {
+          setState(() {
+            _hintText = 'Type Here...';
+          });
+        }
+        final String recordedFilePath =
+            await _flutterSoundRecorder.stopRecorder();
+
+        _voiceSend(recordedFilePath);
+      }
     }
   }
 
@@ -3082,6 +3090,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               title: Center(
                   child: Text(
                 titleText,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 18.0,
@@ -3090,7 +3099,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               content: contentText == ''
                   ? null
                   : SizedBox(
-                      height: 40,
+                      height: 100,
                       width: MediaQuery.of(context).size.width,
                       child: ListView(
                         shrinkWrap: true,

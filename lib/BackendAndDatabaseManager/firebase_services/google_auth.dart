@@ -3,22 +3,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 
 class GoogleAuth {
   /// Regular Expression
   final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
-  TextEditingController _userName = TextEditingController();
-  TextEditingController _about = TextEditingController();
-
+  final TextEditingController _userName = TextEditingController();
+  final TextEditingController _about = TextEditingController();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  final FToast _fToast = FToast();
 
   Future<void> logIn(BuildContext context) async {
     try {
@@ -100,12 +104,18 @@ class GoogleAuth {
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               title: Text(
                 _title,
-                style: TextStyle(color: _titleColor),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _titleColor,
+                  fontSize: 18.0,
+                ),
               ),
               content: Text(
                 _content,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.lightBlue,
+                  fontSize: 16.0,
                 ),
               ),
             ));
@@ -131,6 +141,7 @@ class GoogleAuth {
                     shrinkWrap: true,
                     children: <Widget>[
                       TextFormField(
+                        autofocus: true,
                         controller: _userName,
                         style: TextStyle(color: Colors.white),
                         validator: (inputUserName) {
@@ -177,22 +188,39 @@ class GoogleAuth {
                       ),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.green,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              )),
+                            borderRadius: BorderRadius.circular(40.0),
+                            side: BorderSide(
+                              color: Colors.green,
+                            ),
+                          )),
                           child: Text(
                             "Save",
                             style:
-                                TextStyle(fontSize: 18.0, color: Colors.white),
+                                TextStyle(fontSize: 18.0, color: Colors.green),
                           ),
                           onPressed: () async {
                             if (_userNameKey.currentState.validate()) {
                               print("ok");
 
-                              QuerySnapshot querySnapShotForUserNameChecking =
+                              /// Hide Keyboard
+                              SystemChannels.textInput
+                                  .invokeMethod('TextInput.hide');
+
+                              /// Flutter Toast Initialization and show
+                              _fToast.init(context);
+                              showToast(
+                                'Wait, We Creating Your Account',
+                                _fToast,
+                                fontSize: 18.0,
+                                toastColor: Colors.amber,
+                                toastGravity: ToastGravity.TOP,
+                              );
+
+                              final QuerySnapshot
+                                  querySnapShotForUserNameChecking =
                                   await FirebaseFirestore.instance
                                       .collection('generation_users')
                                       .where('user_name',
@@ -206,6 +234,12 @@ class GoogleAuth {
                                 final String _getToken =
                                     await FirebaseMessaging.instance.getToken();
 
+                                final String currDate = DateFormat('dd-MM-yyyy')
+                                    .format(DateTime.now());
+
+                                final String currTime =
+                                    "${DateFormat('hh:mm a').format(DateTime.now())}";
+
                                 FirebaseFirestore.instance
                                     .collection("generation_users")
                                     .doc(_email)
@@ -213,10 +247,8 @@ class GoogleAuth {
                                   'user_name': this._userName.text,
                                   'about': this._about.text,
                                   'connection_request': {},
-                                  'creation_date': DateFormat('dd-MM-yyyy')
-                                      .format(DateTime.now()),
-                                  'creation_time':
-                                      "${DateFormat('hh:mm a').format(DateTime.now())}",
+                                  'creation_date': currDate,
+                                  'creation_time': currTime,
                                   'connections': {},
                                   'total_connections': '0',
                                   'activity': {},
@@ -229,12 +261,14 @@ class GoogleAuth {
                                     .createTableForStorePrimaryData();
 
                                 await _localStorageHelper
-                                    .insertDataForThisAccount(
+                                    .insertOrUpdateDataForThisAccount(
                                   userMail:
                                       FirebaseAuth.instance.currentUser.email,
                                   userName: this._userName.text,
                                   userToken: _getToken,
                                   userAbout: this._about.text,
+                                  userAccCreationDate: currDate,
+                                  userAccCreationTime: currTime,
                                 );
 
                                 await _localStorageHelper
@@ -244,8 +278,10 @@ class GoogleAuth {
                                 await _localStorageHelper
                                     .createTableForRemainingLinks();
 
-                                await _localStorageHelper.createTableForNotificationGlobalConfig();
-                                await _localStorageHelper.insertDataForNotificationGlobalConfig();
+                                await _localStorageHelper
+                                    .createTableForNotificationGlobalConfig();
+                                await _localStorageHelper
+                                    .insertDataForNotificationGlobalConfig();
 
                                 print("Log-In Successful: User Name: $_email");
 
@@ -259,14 +295,14 @@ class GoogleAuth {
                                     "Enjoy this app", Colors.green);
                               } else {
                                 showAlertBox(context, "User Name Already Exist",
-                                    "Try Another User Name", Colors.yellow);
+                                    "Try Another User Name", Colors.amber);
                               }
                             } else {
                               print("Not Validate");
                             }
                           },
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
