@@ -190,10 +190,11 @@ class LocalStorageHelper {
     }
   }
 
-  Future<dynamic> extractImportantTableData(
-      {String userName = '',
-      String userMail = '',
-      @required ExtraImportant extraImportant}) async {
+  Future<dynamic> extractImportantTableData({
+    String userName = '',
+    String userMail = '',
+    @required ExtraImportant extraImportant,
+  }) async {
     try {
       final Database db = await this.database;
 
@@ -258,6 +259,9 @@ class LocalStorageHelper {
         break;
       case ExtraImportant.CreationTime:
         return this._colCreationTime;
+        break;
+      case ExtraImportant.About:
+        return this._colAbout;
         break;
     }
 
@@ -727,7 +731,6 @@ class LocalStorageHelper {
     }
   }
 
-  /// For Debugging Purpose Only
   Future<void> deleteTheExistingDatabase() async {
     try {
       final Directory directory = await getExternalStorageDirectory();
@@ -739,6 +742,8 @@ class LocalStorageHelper {
 
       // delete the database
       await deleteDatabase(path);
+
+      print('After Delete Database');
     } catch (e) {
       print('Delete Database Exception: ${e.toString()}');
     }

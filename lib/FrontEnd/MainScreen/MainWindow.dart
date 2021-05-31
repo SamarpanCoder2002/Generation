@@ -313,15 +313,15 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     _menuOptions(Icons.person_outline_rounded, 'Profile'),
                     SizedBox(
-                      height: 50.0,
+                      height: 10.0,
                     ),
                     _menuOptions(Icons.settings, 'Setting'),
                     SizedBox(
-                      height: 50.0,
+                      height: 10.0,
                     ),
                     _menuOptions(Icons.support_outlined, 'Support'),
                     SizedBox(
-                      height: 50.0,
+                      height: 30.0,
                     ),
                     exitButtonCall(),
                   ],
@@ -463,24 +463,28 @@ class _MainScreenState extends State<MainScreen> {
         return Center();
       },
       closedBuilder: (context, closeWidget) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: Colors.lightBlue,
-            ),
-            SizedBox(
-              width: 10.0,
-            ),
-            Text(
-              menuOptionIs,
-              style: TextStyle(
-                fontSize: 20.0,
-                color: Colors.white,
+        return Container(
+          height: 60.0,
+          //color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: Colors.lightBlue,
               ),
-            ),
-          ],
+              SizedBox(
+                width: 10.0,
+              ),
+              Text(
+                menuOptionIs,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -27,6 +27,7 @@ enum ExtraImportant {
   FGNStatus,
   CreationDate,
   CreationTime,
+  About,
 }
 
 enum HistoryOrMediaChoice {

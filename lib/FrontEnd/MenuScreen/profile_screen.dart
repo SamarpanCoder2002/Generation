@@ -6,6 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/firebase_services/delete_my_account_service.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
@@ -20,17 +23,50 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  String _userAbout = '', _userAccCreationDate = '', _userAccCreationTime = '';
+
+  final FToast _fToast = FToast();
+
   final Management _management = Management();
   final ImagePicker _imagePicker = ImagePicker();
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
   bool _isLoading = false;
 
-  FToast _fToast = FToast();
+  void _getOtherProfileInformation() async {
+    final String userTempAbout =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.About,
+            userMail: FirebaseAuth.instance.currentUser.email);
+
+    final String userTempAccCreationDate =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.CreationDate,
+            userMail: FirebaseAuth.instance.currentUser.email);
+
+    final String userTempAccCreationTime =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.CreationTime,
+            userMail: FirebaseAuth.instance.currentUser.email);
+
+    if (mounted) {
+      setState(() {
+        this._userAbout = userTempAbout;
+        this._userAccCreationDate = userTempAccCreationDate;
+        this._userAccCreationTime = userTempAccCreationTime;
+      });
+
+      print(this._userAbout);
+      print(this._userAccCreationDate);
+      print(this._userAccCreationTime);
+    }
+  }
 
   @override
   void initState() {
     _fToast.init(context);
     ImportantThings.findImageUrlAndUserName();
+    _getOtherProfileInformation();
     super.initState();
   }
 
@@ -49,15 +85,10 @@ class _ProfileState extends State<Profile> {
             SizedBox(
               height: 50.0,
             ),
-            otherInformation(context, "Public Name", "Samarpan",
-                Icon(Icons.arrow_right_alt_rounded)),
-            otherInformation(
-                context, "Total Contacts", "20", Icon(Icons.done_rounded)),
-            otherInformation(
-                context, "Total Status", "100", Icon(Icons.done_rounded)),
-            otherInformation(
-                context, "Total Logs", "50", Icon(Icons.done_rounded)),
-            Management().logOutButton(context),
+            otherInformation(context, 'About', this._userAbout),
+            otherInformation(context, 'Join Date', this._userAccCreationDate),
+            otherInformation(context, 'Join Time', this._userAccCreationTime),
+            _logOutButton(context),
           ],
         ),
       ),
@@ -82,9 +113,10 @@ class _ProfileState extends State<Profile> {
                   closedColor: const Color.fromRGBO(34, 48, 60, 1),
                   openColor: const Color.fromRGBO(34, 48, 60, 1),
                   middleColor: const Color.fromRGBO(34, 48, 60, 1),
+                  closedShape: CircleBorder(),
                   closedElevation: 0.0,
                   transitionDuration: Duration(
-                    milliseconds: 800,
+                    milliseconds: 500,
                   ),
                   transitionType: ContainerTransitionType.fadeThrough,
                   openBuilder: (context, openWidget) {
@@ -172,75 +204,18 @@ class _ProfileState extends State<Profile> {
               ],
             ),
           ),
-          SizedBox(
-            width: 10.0,
-          ),
           Expanded(
             child: Container(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  Center(
-                    child: Text(
-                      ImportantThings.thisAccountUserName,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontFamily: 'Lora',
-                        fontStyle: FontStyle.italic,
-                        color: Colors.white,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: 10.0,
-                      ),
-                      Expanded(
-                        child: Container(
-                          //color: Colors.yellow,
-                          child: Center(
-                            child: Text(
-                              "Last Active\n12:00",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Lora',
-                                fontSize: 16.0,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 40.0,
-                      ),
-                      Expanded(
-                        child: Container(
-                          //color: Colors.green,
-                          child: Center(
-                            child: Text(
-                              "Time Spend\n 12:00:00",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Lora',
-                                fontSize: 16.0,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              alignment: Alignment.center,
+              child: Text(
+                ImportantThings.thisAccountUserName,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontFamily: 'Lora',
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white,
+                  letterSpacing: 1.0,
+                ),
               ),
             ),
           ),
@@ -249,8 +224,8 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Widget otherInformation(BuildContext context, String leftText,
-      String rightText, Widget iconData) {
+  Widget otherInformation(
+      BuildContext context, String leftText, String rightText) {
     return Container(
       height: 60.0,
       margin: EdgeInsets.only(bottom: 30.0),
@@ -259,30 +234,34 @@ class _ProfileState extends State<Profile> {
         children: [
           Expanded(
             child: Container(
-              padding: EdgeInsets.only(left: 20.0),
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(left: 10.0),
               child: Text(
                 leftText,
                 style: TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 18.0,
                   fontFamily: 'Lora',
                   fontStyle: FontStyle.italic,
-                  color: Colors.white70,
+                  color: Colors.lightBlue,
+                  letterSpacing: 1.0,
                 ),
               ),
             ),
           ),
-          SizedBox(
-            width: 60.0,
-          ),
-          Container(
-            margin: EdgeInsets.only(right: 10.0),
-            child: Text(
-              rightText,
-              style: TextStyle(
-                fontSize: 20.0,
-                fontFamily: 'Lora',
-                fontStyle: FontStyle.italic,
-                color: Colors.white70,
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(right: 10.0),
+              alignment: Alignment.centerRight,
+              child: Text(
+                rightText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontFamily: 'Lora',
+                  fontStyle: FontStyle.italic,
+                  color: Colors.green,
+                  letterSpacing: 1.0,
+                ),
               ),
             ),
           ),
@@ -351,5 +330,130 @@ class _ProfileState extends State<Profile> {
                 ),
               ));
     }
+  }
+
+  Widget _logOutButton(BuildContext context) {
+    return Center(
+      child: TextButton(
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40.0),
+            side: BorderSide(
+              color: Colors.red,
+            ),
+          ),
+        ),
+        child: Container(
+          width: MediaQuery.of(context).size.width / 2,
+          alignment: Alignment.center,
+          child: Row(
+            children: [
+              Icon(
+                Icons.delete_outline,
+                color: Colors.red,
+              ),
+              Expanded(
+                child: Text(
+                  'Delete My Account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        onPressed: () async {
+          await _deleteConformation();
+        },
+      ),
+    );
+  }
+
+  Future<void> _deleteConformation() async {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              backgroundColor: const Color.fromRGBO(34, 48, 60, 0.6),
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
+              title: Center(
+                child: Text(
+                  'Sure to Delete Your Account?',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 18.0,
+                  ),
+                ),
+              ),
+              content: Container(
+                height: 200.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Center(
+                      child: Text(
+                        'If You delete this account, your entire\ndata will lost forever...\n\nDo You Want to Continue?',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        TextButton(
+                          child: Text(
+                            'Cancel',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.green,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40.0),
+                            side: BorderSide(color: Colors.green),
+                          )),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        TextButton(
+                          child: Text(
+                            'Sure',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40.0),
+                            side: BorderSide(color: Colors.red),
+                          )),
+                          onPressed: () async{
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                            }
+                            print("Deletion Event");
+
+                            await deleteMyGenerationAccount();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ));
   }
 }

@@ -26,38 +26,6 @@ class Management {
     if (takeTotalUserName) _userNameExtractFromLocalDatabase();
   }
 
-  Widget logOutButton(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(40.0),
-          ),
-          primary: Colors.redAccent,
-        ),
-        child: Text(
-          "Log-Out",
-          style: TextStyle(
-            fontSize: 25.0,
-          ),
-        ),
-        onPressed: () async {
-          print("Log-Out Event");
-          bool response = await GoogleAuth().logOut();
-          if (!response) {
-            FirebaseAuth.instance.signOut();
-          }
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => SignUpAuthentication()),
-            (Route<dynamic> route) => false,
-          );
-        },
-      ),
-    );
-  }
-
   Future<void> addConversationMessages(String _senderMail,
       List<dynamic> messageMap, dynamic messageCollection) async {
     messageCollection[FirebaseAuth.instance.currentUser.email.toString()] =
@@ -250,7 +218,8 @@ class Management {
       {bool specialPurpose = false}) async {
     try {
       try {
-        if (specialPurpose && Firebase.apps.length == 0) await Firebase.initializeApp();
+        if (specialPurpose && Firebase.apps.length == 0)
+          await Firebase.initializeApp();
       } catch (e) {
         print(
             'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');

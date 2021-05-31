@@ -79,7 +79,7 @@ class GoogleAuth {
       showAlertBox(
           context,
           "Log In Error",
-          "Log-in not Completed or\nEmail Already Present With Other Credentials",
+          "Log-in not Completed or\nEmail Already Present With Other Credentials\n\nIf You are trying after Delete My Account,\nplease close the app even from background\nand try to log-in again",
           Colors.redAccent);
     }
   }
