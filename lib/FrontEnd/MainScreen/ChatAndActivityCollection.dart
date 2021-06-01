@@ -39,6 +39,8 @@ class _ChatsAndActivityCollectionState
   final List<String> _allConnectionsUserName = [];
   final Map<String, dynamic> _allConnectionsLatestMessage =
       Map<String, dynamic>();
+  final Map<String, bool> _allConnectionChatNotificationStatus =
+      Map<String, bool>();
 
   final List<String> _allUserConnectionActivity = [];
 
@@ -358,6 +360,9 @@ class _ChatsAndActivityCollectionState
                   setState(() {
                     _allConnectionsUserName.insert(
                         0, documentSnapshot['user_name']);
+
+                    this._allConnectionChatNotificationStatus[
+                        documentSnapshot['user_name']] = true;
                   });
                 }
               } else {
@@ -449,8 +454,6 @@ class _ChatsAndActivityCollectionState
         SystemUiOverlay.values); // Android StatusBar Show
 
     ImportantThings.findImageUrlAndUserName();
-
-    //_fToast.init(context); // Flutter Toast Initialized
 
     try {
       _fetchRealTimeData();
@@ -754,7 +757,7 @@ class _ChatsAndActivityCollectionState
                   openElevation: 0.0,
                   transitionDuration: Duration(milliseconds: 50),
                   transitionType: ContainerTransitionType.fadeThrough,
-                  onClosed: (value) {
+                  onClosed: (value) async {
                     // // For Set the Latest Close chat index at beginning
                     // if (_allConnectionsUserName.length > 1) {
                     //   if (mounted) {
@@ -813,6 +816,8 @@ class _ChatsAndActivityCollectionState
                         }
                       }
                     });
+
+                    await _chatNotificationStatusCheckAndUpdate(_userName);
                   },
                   openBuilder: (context, openWidget) {
                     return ChatScreenSetUp(
@@ -873,10 +878,16 @@ class _ChatsAndActivityCollectionState
                           height: 10.0,
                         ),
                         Container(
-                          child: const Icon(
-                            Icons.notification_important_outlined,
-                            color: Colors.green,
-                          ),
+                          child: this._allConnectionChatNotificationStatus[
+                                  _userName]
+                              ? const Icon(
+                                  Icons.notification_important_outlined,
+                                  color: Colors.green,
+                                )
+                              : const Icon(
+                                  Icons.notifications_off_outlined,
+                                  color: Colors.red,
+                                ),
                         ),
                       ],
                     ),
@@ -1239,5 +1250,45 @@ class _ChatsAndActivityCollectionState
                       ),
                     ),
             ));
+  }
+
+  Future<void> _chatNotificationStatusCheckAndUpdate(String userName) async {
+    bool _previousStatus = this._allConnectionChatNotificationStatus[userName];
+
+    final bool _bgNGlobalStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.BgNotification);
+    final bool _fgNGlobalStatus =
+        await _localStorageHelper.extractDataForNotificationConfigTable(
+            nConfigTypes: NConfigTypes.FGNotification);
+
+    print(_bgNGlobalStatus);
+    print(_fgNGlobalStatus);
+
+    if (!_bgNGlobalStatus && !_fgNGlobalStatus) {
+      _previousStatus = false;
+    } else {
+      final bool _bgConnectionSpecificNStatus =
+          await _localStorageHelper.extractImportantTableData(
+              extraImportant: ExtraImportant.BGNStatus, userName: userName);
+      final bool _fgConnectionSpecificNStatus =
+          await _localStorageHelper.extractImportantTableData(
+              extraImportant: ExtraImportant.FGNStatus, userName: userName);
+
+      print(_bgConnectionSpecificNStatus);
+      print(_fgConnectionSpecificNStatus);
+
+      if (!_bgConnectionSpecificNStatus && !_fgConnectionSpecificNStatus) {
+        _previousStatus = false;
+      } else {
+        _previousStatus = true;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        this._allConnectionChatNotificationStatus[userName] = _previousStatus;
+      });
+    }
   }
 }

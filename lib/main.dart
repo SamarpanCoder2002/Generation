@@ -61,7 +61,7 @@ void main() async {
         else
           print('$_userName Foreground notification off');
       }
-    }else
+    } else
       print('Global Notification Permission Denied');
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
@@ -125,25 +125,24 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
         title: message.notification.title,
         body: message.notification.body,
       );
-    }else{
+    } else {
       final String _userName = message.notification.title.split(' ')[0];
 
       print('Background Notification Comer User Name: $_userName');
 
-      final bool _bgStatus =
-      await LocalStorageHelper().extractImportantTableData(
-          extraImportant: ExtraImportant.BGNStatus, userName: _userName);
+      final bool _bgStatus = await LocalStorageHelper()
+          .extractImportantTableData(
+              extraImportant: ExtraImportant.BGNStatus, userName: _userName);
 
-      if(_bgStatus)
+      if (_bgStatus)
         _receiveAndShowNotificationInitialization(
           title: message.notification.title,
           body: message.notification.body,
         );
       else
         print('$_userName Background notification off');
-
     }
-  }else
+  } else
     print('Background Global Notification Permission Denied');
 }
 

@@ -35,7 +35,6 @@ class _SettingsNotificationConfigurationState
         await _localStorageHelper.extractDataForNotificationConfigTable(
             nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
 
-
     if (mounted) {
       setState(() {
         this._bgStatus = _bgTempStatus;

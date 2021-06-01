@@ -31,16 +31,26 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
   void _extractNotifyInformation() async {
     final bool _bgTempStatus =
         await _localStorageHelper.extractImportantTableData(
-            userName: widget.userName, extraImportant: ExtraImportant.BGNStatus);
+            userName: widget.userName,
+            extraImportant: ExtraImportant.BGNStatus);
     final bool _fgTempStatus =
         await _localStorageHelper.extractImportantTableData(
-            userName: widget.userName, extraImportant: ExtraImportant.FGNStatus);
+            userName: widget.userName,
+            extraImportant: ExtraImportant.FGNStatus);
 
-    final String _userTempJoinDate = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.CreationDate, userName: widget.userName);
+    final String _userTempJoinDate =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.CreationDate,
+            userName: widget.userName);
 
-    final String _userTempJoinTime = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.CreationTime, userName: widget.userName);
+    final String _userTempJoinTime =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.CreationTime,
+            userName: widget.userName);
 
-    final String _userTempAbout = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.About, userName: widget.userName);
+    final String _userTempAbout =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.About, userName: widget.userName);
 
     if (mounted) {
       setState(() {
@@ -254,7 +264,8 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                   child: Text(
                     status ? 'Activated' : 'Deactivated',
                     textAlign: TextAlign.left,
-                    style: TextStyle(color: !status?Colors.red:Colors.green),
+                    style:
+                        TextStyle(color: !status ? Colors.red : Colors.green),
                   ),
                 ),
               ],
@@ -267,24 +278,25 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                 child: Text(
                   status ? 'Deactivate' : 'Activate',
                   style: TextStyle(
-                    color: status?Colors.red:Colors.green,
+                    color: status ? Colors.red : Colors.green,
                   ),
                 ),
                 style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40.0),
                     side: BorderSide(
-                      color: status?Colors.red:Colors.green,
+                      color: status ? Colors.red : Colors.green,
                     ),
                   ),
                 ),
-                onPressed: () async{
-                  if (notificationName == 'Background Notification Annotation') {
+                onPressed: () async {
+                  if (notificationName ==
+                      'Background Notification Annotation') {
                     print('Background Button');
 
                     await _localStorageHelper.updateImportantTableExtraData(
                         userName: widget.userName,
-                        updatedVal: this._bgStatus?'0':'1',
+                        updatedVal: this._bgStatus ? '0' : '1',
                         extraImportant: ExtraImportant.BGNStatus);
 
                     if (mounted) {
@@ -292,12 +304,12 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                         this._bgStatus = !this._bgStatus;
                       });
                     }
-                  } else{
+                  } else {
                     print('Online Button');
 
                     await _localStorageHelper.updateImportantTableExtraData(
                         userName: widget.userName,
-                        updatedVal: this._fgStatus?'0':'1',
+                        updatedVal: this._fgStatus ? '0' : '1',
                         extraImportant: ExtraImportant.FGNStatus);
 
                     if (mounted) {
