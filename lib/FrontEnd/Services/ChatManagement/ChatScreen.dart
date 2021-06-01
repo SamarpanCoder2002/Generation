@@ -1083,12 +1083,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             closedBuilder: (_, __) => SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Text(
-                widget._userName.length <= 12
+                widget._userName.length <= 20
                     ? widget._userName
-                    : '${widget._userName.replaceRange(12, widget._userName.length, '...')}',
+                    : '${widget._userName.replaceRange(20, widget._userName.length, '...')}',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20.0,
+                  fontSize: 18.0,
                   fontFamily: 'Lora',
                   letterSpacing: 1.0,
                 ),
@@ -1112,14 +1112,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               icon: Icon(
                 Icons.call,
                 color: Colors.green,
-              ),
-              highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.videocam_rounded,
-                color: Colors.redAccent,
               ),
               highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
               onPressed: () {},
@@ -3315,6 +3307,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           builder: (context, set) => AlertDialog(
                 elevation: 0.0,
                 backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40.0),
+                ),
                 title: Center(
                   child: Text(
                     'Conform to Delete for me?',
@@ -3446,7 +3441,19 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                             .toString()
                             .split('file:///')[1]
                         : _chatContainer[index].keys.first.toString())
-                    .delete(recursive: true);
+                    .delete(recursive: true)
+                    .whenComplete(() => print('Media File Deletion Complete'));
+
+                if (_mediaTypes[index].toString() ==
+                    MediaTypes.Video.toString())
+                  await File(_chatContainer[index]
+                          .values
+                          .first
+                          .toString()
+                          .split('+')[2])
+                      .delete(recursive: true)
+                      .whenComplete(
+                          () => print('Video Thumbnail Deletion Complete'));
 
                 print('File Deleted From Internal Storage in Delete For Me');
               } catch (e) {

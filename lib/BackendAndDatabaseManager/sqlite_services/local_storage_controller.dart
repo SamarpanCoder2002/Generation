@@ -536,11 +536,14 @@ class LocalStorageHelper {
   }
 
   /// Delete Particular Message
-  Future<bool> deleteChatMessage(String _tableName,
-      {@required String message,
-      @required String time,
-      @required int reference,
-      @required String mediaType}) async {
+  Future<bool> deleteChatMessage(
+    String _tableName, {
+    @required String message,
+    String time,
+    int reference,
+    @required String mediaType,
+    multipleMediaDeletion = false,
+  }) async {
     try {
       final Database db = await this.database;
 
@@ -549,12 +552,17 @@ class LocalStorageHelper {
       print('Reference: $reference');
       print('MediaType: $mediaType');
 
-      final int result = await db.rawDelete(
-          "DELETE FROM $_tableName WHERE $_colMessages = '$message' AND $_colTime = '$time' AND $_colReferences = $reference AND $_colMediaType = '$mediaType'");
+      int result;
+
+      if (multipleMediaDeletion)
+        result = await db.rawDelete(
+            "DELETE FROM $_tableName WHERE $_colMessages = '$message' AND $_colMediaType = '$mediaType'");
+      else
+        result = await db.rawDelete(
+            "DELETE FROM $_tableName WHERE $_colMessages = '$message' AND $_colTime = '$time' AND $_colReferences = $reference AND $_colMediaType = '$mediaType'");
 
       if (result == 0) {
-        var take = await extractMessageData(_tableName);
-        print('Messages: $take');
+        print('Result: $result');
         return false;
       } else {
         print('Delete From Chat Message Result: $result');

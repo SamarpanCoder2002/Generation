@@ -35,6 +35,8 @@ class _ParticularConnectionMediaViewState
             tableName: widget.selectedConnectionUserName,
             mediaType: MediaTypes.Image);
 
+    print('Take it: $takeTempImages');
+
     if (mounted) {
       setState(() {
         this._allImages = takeTempImages;
@@ -92,30 +94,6 @@ class _ParticularConnectionMediaViewState
           backgroundColor: Color.fromRGBO(25, 39, 52, 1),
           elevation: 10.0,
           shadowColor: Colors.white70,
-          actions: [
-            GestureDetector(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: 15.0,
-                ),
-                child: Icon(
-                  Icons.share,
-                  color: Colors.lightBlue,
-                ),
-              ),
-            ),
-            GestureDetector(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: 15.0,
-                ),
-                child: Icon(
-                  Icons.delete_outline,
-                  color: Colors.red,
-                ),
-              ),
-            ),
-          ],
           title: Row(
             children: [
               Container(
@@ -133,9 +111,9 @@ class _ParticularConnectionMediaViewState
                 ),
               ),
               Text(
-                widget.selectedConnectionUserName.length <= 12
+                widget.selectedConnectionUserName.length <= 16
                     ? widget.selectedConnectionUserName
-                    : '${widget.selectedConnectionUserName.replaceRange(12, widget.selectedConnectionUserName.length, '...')}',
+                    : '${widget.selectedConnectionUserName.replaceRange(16, widget.selectedConnectionUserName.length, '...')}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20.0,
@@ -208,13 +186,25 @@ class _ParticularConnectionMediaViewState
         body: TabBarView(
           children: [
             StorageMediaCommonView(
-                mediaTypes: MediaTypes.Image, mediaSources: this._allImages),
+              mediaTypes: MediaTypes.Image,
+              mediaSources: this._allImages,
+              userName: widget.selectedConnectionUserName,
+            ),
             StorageMediaCommonView(
-                mediaTypes: MediaTypes.Video, mediaSources: this._allVideos),
+              mediaTypes: MediaTypes.Video,
+              mediaSources: this._allVideos,
+              userName: widget.selectedConnectionUserName,
+            ),
             StorageMediaCommonView(
-                mediaTypes: MediaTypes.Voice, mediaSources: this._allAudios),
+              mediaTypes: MediaTypes.Voice,
+              mediaSources: this._allAudios,
+              userName: widget.selectedConnectionUserName,
+            ),
             StorageMediaCommonView(
-                mediaTypes: MediaTypes.Document, mediaSources: this._allDocs),
+              mediaTypes: MediaTypes.Document,
+              mediaSources: this._allDocs,
+              userName: widget.selectedConnectionUserName,
+            ),
           ],
         ),
       ),

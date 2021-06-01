@@ -437,7 +437,7 @@ class _ProfileState extends State<Profile> {
                             borderRadius: BorderRadius.circular(40.0),
                             side: BorderSide(color: Colors.red),
                           )),
-                          onPressed: () async{
+                          onPressed: () async {
                             if (mounted) {
                               setState(() {
                                 _isLoading = true;
