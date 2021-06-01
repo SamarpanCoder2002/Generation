@@ -1,7 +1,11 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/connection_media_view.dart';
 
 class ConnectionProfileView extends StatefulWidget {
   final String profileImagePath;
@@ -15,6 +19,46 @@ class ConnectionProfileView extends StatefulWidget {
 }
 
 class _ConnectionProfileViewState extends State<ConnectionProfileView> {
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  bool _bgStatus = true;
+  bool _fgStatus = true;
+
+  String _userAbout = '';
+  String _userJoinDate = '';
+  String _userJoinTime = '';
+
+  void _extractNotifyInformation() async {
+    final bool _bgTempStatus =
+        await _localStorageHelper.extractImportantTableData(
+            userName: widget.userName, extraImportant: ExtraImportant.BGNStatus);
+    final bool _fgTempStatus =
+        await _localStorageHelper.extractImportantTableData(
+            userName: widget.userName, extraImportant: ExtraImportant.FGNStatus);
+
+    final String _userTempJoinDate = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.CreationDate, userName: widget.userName);
+
+    final String _userTempJoinTime = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.CreationTime, userName: widget.userName);
+
+    final String _userTempAbout = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.About, userName: widget.userName);
+
+    if (mounted) {
+      setState(() {
+        this._bgStatus = _bgTempStatus;
+        this._fgStatus = _fgTempStatus;
+        this._userAbout = _userTempAbout;
+        this._userJoinDate = _userTempJoinDate;
+        this._userJoinTime = _userTempJoinTime;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    _extractNotifyInformation();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,15 +146,15 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
   Widget _generalInformationCenter() {
     return Column(
       children: [
-        _firstPortionInformation('About', 'Sample About'),
+        _firstPortionInformation('About', this._userAbout),
         SizedBox(
           height: 30.0,
         ),
-        _firstPortionInformation('Join Date', 'Sample Date'),
+        _firstPortionInformation('Join Date', this._userJoinDate),
         SizedBox(
           height: 30.0,
         ),
-        _firstPortionInformation('Join Time', 'Sample Time'),
+        _firstPortionInformation('Join Time', this._userJoinTime),
       ],
     );
   }
@@ -168,22 +212,24 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
       children: [
         _connectionMenuOptions(
             notificationName: 'Background Notification Annotation',
-            status: true),
+            status: _bgStatus),
         SizedBox(
-          height: 30.0,
+          height: 40.0,
         ),
         _connectionMenuOptions(
-            notificationName: '   Foreground Notification', status: true),
+            notificationName: 'Online Notification', status: _fgStatus),
       ],
     );
   }
 
   Widget _connectionMenuOptions(
       {@required String notificationName, @required bool status}) {
-    return Padding(
+    return Container(
       padding: EdgeInsets.only(
         right: 10.0,
+        left: 15.0,
       ),
+      alignment: Alignment.center,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -194,7 +240,6 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     notificationName,
-                    textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.lightBlue,
                       fontSize: 15.0,
@@ -204,10 +249,13 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                 SizedBox(
                   height: 10.0,
                 ),
-                Text(
-                  status ? 'Activated' : 'Deactivated',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(color: Colors.green),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    status ? 'Activated' : 'Deactivated',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(color: !status?Colors.red:Colors.green),
+                  ),
                 ),
               ],
             ),
@@ -219,18 +267,46 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                 child: Text(
                   status ? 'Deactivate' : 'Activate',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: status?Colors.red:Colors.green,
                   ),
                 ),
                 style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40.0),
                     side: BorderSide(
-                      color: Colors.red,
+                      color: status?Colors.red:Colors.green,
                     ),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () async{
+                  if (notificationName == 'Background Notification Annotation') {
+                    print('Background Button');
+
+                    await _localStorageHelper.updateImportantTableExtraData(
+                        userName: widget.userName,
+                        updatedVal: this._bgStatus?'0':'1',
+                        extraImportant: ExtraImportant.BGNStatus);
+
+                    if (mounted) {
+                      setState(() {
+                        this._bgStatus = !this._bgStatus;
+                      });
+                    }
+                  } else{
+                    print('Online Button');
+
+                    await _localStorageHelper.updateImportantTableExtraData(
+                        userName: widget.userName,
+                        updatedVal: this._fgStatus?'0':'1',
+                        extraImportant: ExtraImportant.FGNStatus);
+
+                    if (mounted) {
+                      setState(() {
+                        this._fgStatus = !this._fgStatus;
+                      });
+                    }
+                  }
+                },
               ),
             ),
           ),
@@ -240,10 +316,26 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
   }
 
   Widget _mediaAndReportVisibilitySection({@required String name}) {
-    return SizedBox(
-      height: 50.0,
-      child: ElevatedButton(
-        child: Align(
+    return OpenContainer(
+      closedColor: const Color.fromRGBO(34, 48, 60, 1),
+      middleColor: const Color.fromRGBO(34, 48, 60, 1),
+      openColor: const Color.fromRGBO(34, 48, 60, 1),
+      closedElevation: 0.0,
+      transitionDuration: Duration(milliseconds: 500),
+      transitionType: ContainerTransitionType.fadeThrough,
+      openBuilder: (_, __) {
+        if (name == 'Media Visibility') {
+          return ParticularConnectionMediaView(
+            selectedConnectionUserName: widget.userName,
+            profileImagePath: widget.profileImagePath,
+          );
+        } else
+          return Center();
+      },
+      closedBuilder: (_, __) => SizedBox(
+        height: 50.0,
+        child: Container(
+            padding: EdgeInsets.only(left: 15.0),
             alignment: Alignment.centerLeft,
             child: Text(
               name,
@@ -254,11 +346,6 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
                 fontSize: 16.0,
               ),
             )),
-        style: ElevatedButton.styleFrom(
-          elevation: 0.0,
-          primary: const Color.fromRGBO(34, 48, 60, 1),
-        ),
-        onPressed: () {},
       ),
     );
   }

@@ -37,11 +37,32 @@ void main() async {
 
     print('Foreground Notification Status: $_fgNotifyStatus');
 
-    if (_fgNotifyStatus)
-      _receiveAndShowNotificationInitialization(
-        title: messageEvent.notification.title,
-        body: messageEvent.notification.body,
-      );
+    if (_fgNotifyStatus) {
+      if (messageEvent.notification.title.contains('Connection Request') ||
+          messageEvent.notification.title.contains('New Connection')) {
+        _receiveAndShowNotificationInitialization(
+          title: messageEvent.notification.title,
+          body: messageEvent.notification.body,
+        );
+      } else {
+        final String _userName = messageEvent.notification.title.split(' ')[0];
+
+        print('Foreground Notification Comer User Name: $_userName');
+
+        final bool _fgStatus =
+            await _localStorageHelper.extractImportantTableData(
+                extraImportant: ExtraImportant.FGNStatus, userName: _userName);
+
+        if (_fgStatus)
+          _receiveAndShowNotificationInitialization(
+            title: messageEvent.notification.title,
+            body: messageEvent.notification.body,
+          );
+        else
+          print('$_userName Foreground notification off');
+      }
+    }else
+      print('Global Notification Permission Denied');
   }, onDone: () => print('Done'), onError: (e) => print('Error: $e'));
 
   // /// Change Navigation Bar Color
@@ -97,11 +118,33 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
 
   print('Background Notification Status: $_bgNotifyStatus');
 
-  if (_bgNotifyStatus)
-    _receiveAndShowNotificationInitialization(
-      title: message.notification.title,
-      body: message.notification.body,
-    );
+  if (_bgNotifyStatus) {
+    if (message.notification.title.contains('Connection Request') ||
+        message.notification.title.contains('New Connection')) {
+      _receiveAndShowNotificationInitialization(
+        title: message.notification.title,
+        body: message.notification.body,
+      );
+    }else{
+      final String _userName = message.notification.title.split(' ')[0];
+
+      print('Background Notification Comer User Name: $_userName');
+
+      final bool _bgStatus =
+      await LocalStorageHelper().extractImportantTableData(
+          extraImportant: ExtraImportant.BGNStatus, userName: _userName);
+
+      if(_bgStatus)
+        _receiveAndShowNotificationInitialization(
+          title: message.notification.title,
+          body: message.notification.body,
+        );
+      else
+        print('$_userName Background notification off');
+
+    }
+  }else
+    print('Background Global Notification Permission Denied');
 }
 
 /// Decide to Switch to widget based of current Scenario

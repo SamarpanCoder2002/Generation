@@ -150,7 +150,11 @@ class _ChatsAndActivityCollectionState
 
           particularConnectionActivity.forEach((everyActivity) async {
             if (_oldActivity != everyActivity) {
-              _oldActivity = everyActivity;
+              if (mounted) {
+                setState(() {
+                  _oldActivity = everyActivity;
+                });
+              }
               if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
                 final String currTime = DateTime.now().toString();
 
