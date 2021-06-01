@@ -13,6 +13,7 @@ import 'package:photo_view/photo_view.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
+import 'package:share/share.dart';
 
 class StorageMediaCommonView extends StatefulWidget {
   final MediaTypes mediaTypes;
@@ -427,13 +428,8 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
               color: Colors.white,
               size: 30.0,
             ),
-            onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _isLoading = true;
-                });
-              }
-            },
+            onPressed:
+                this._selectEveryMedia ? _shareMultipleSelectedFile : null,
           ),
           FloatingActionButton(
             heroTag: '2',
@@ -595,5 +591,40 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
         }
       },
     );
+  }
+
+  void _shareMultipleSelectedFile() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        this._selectEveryMedia = false;
+      });
+    }
+
+    final List<String> _linkTobeShare = [];
+
+    for (int i = 0; i < this._selectedCheckBox.length; i++) {
+      if (this._selectedCheckBox[i]) {
+        final String _tempMediaLink =
+            widget.mediaSources[i].keys.first.toString();
+        _linkTobeShare.add(_tempMediaLink.contains('+')
+            ? _tempMediaLink.split('+')[0]
+            : _tempMediaLink);
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        this._selectedCheckBox.clear();
+      });
+    }
+
+    await Share.shareFiles(_linkTobeShare);
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }
