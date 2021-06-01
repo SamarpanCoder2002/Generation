@@ -363,6 +363,9 @@ class _ChatsAndActivityCollectionState
 
                     this._allConnectionChatNotificationStatus[
                         documentSnapshot['user_name']] = true;
+
+                    _chatNotificationStatusCheckAndUpdate(
+                        documentSnapshot['user_name']);
                   });
                 }
               } else {
