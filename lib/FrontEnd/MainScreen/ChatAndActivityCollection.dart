@@ -315,6 +315,8 @@ class _ChatsAndActivityCollectionState
                     } else
                       profilePicPath = '';
 
+                    final String _globalChatWallpaper = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.ChatWallpaper, userMail: FirebaseAuth.instance.currentUser.email);
+
                     /// Data Store for General Reference
                     await _localStorageHelper.insertOrUpdateDataForThisAccount(
                       userMail: connectionName,
@@ -327,6 +329,7 @@ class _ChatsAndActivityCollectionState
                           : documentSnapshot['profile_pic'].toString(),
                       userAccCreationDate: documentSnapshot['creation_date'],
                       userAccCreationTime: documentSnapshot['creation_time'],
+                      chatWallpaper: _globalChatWallpaper == null?'':_globalChatWallpaper,
                     );
 
                     /// Make a new table to this new connected user Activity

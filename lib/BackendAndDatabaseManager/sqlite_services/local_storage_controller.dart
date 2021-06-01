@@ -105,6 +105,7 @@ class LocalStorageHelper {
     @required String userAbout,
     @required String userAccCreationDate,
     @required String userAccCreationTime,
+    String chatWallpaper = '',
     String profileImagePath = '',
     String profileImageUrl = '',
     String purpose = 'insert',
@@ -126,7 +127,7 @@ class LocalStorageHelper {
         _accountData[_colProfileImagePath] = profileImagePath;
         _accountData[_colProfileImageUrl] = profileImageUrl;
         _accountData[_colAbout] = userAbout;
-        _accountData[_colChatWallPaper] = '';
+        _accountData[_colChatWallPaper] = chatWallpaper;
         _accountData[_colMobileNumber] = '';
         _accountData[_colParticularBGNStatus] = "1";
         _accountData[_colParticularFGNStatus] = "1";
@@ -176,10 +177,10 @@ class LocalStorageHelper {
 
       int result;
 
-      if (allUpdate)
+      if (allUpdate) {
         result = await db.rawUpdate(
             "UPDATE $_allImportantDataStore SET $_query = '$updatedVal'");
-      else
+      } else
         result = await db.rawUpdate(
             "UPDATE $_allImportantDataStore SET $_query = '$updatedVal' WHERE $_colAccountUserName = '$userName'");
 

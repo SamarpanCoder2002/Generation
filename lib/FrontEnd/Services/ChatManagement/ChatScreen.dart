@@ -1095,18 +1095,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
             ),
           ),
-          // onPressed: () {
-          //   print("Name Clicked");
-          //   Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //           builder: (_) => ConnectionProfileView(
-          //                 profileImagePath:
-          //                     widget._connectionProfileImageLocalPath,
-          //                 userName: widget._userName,
-          //               )));
-          // },
-          //),
           actions: [
             IconButton(
               icon: Icon(
@@ -1203,7 +1191,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
               height: _bottomRowHeight,
               decoration: BoxDecoration(
-                color: _thisChatWallPaper != '' ? Colors.black26 : null,
+                color: _thisChatWallPaper != '' ? Color.fromRGBO(0, 0, 0, 0.2) : null,
                 borderRadius: BorderRadius.only(
                   topLeft:
                       Radius.circular(_thisChatWallPaper != '' ? 40.0 : 0.0),

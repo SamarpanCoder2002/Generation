@@ -438,6 +438,8 @@ class _ProfileState extends State<Profile> {
                             side: BorderSide(color: Colors.red),
                           )),
                           onPressed: () async {
+                            Navigator.pop(context);
+
                             if (mounted) {
                               setState(() {
                                 _isLoading = true;

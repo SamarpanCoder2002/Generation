@@ -173,7 +173,7 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
       margin: EdgeInsets.only(top: MediaQuery.of(context).size.height - 140),
       padding: EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
-        color: Colors.black26,
+        color: const Color.fromRGBO(0, 0, 0, 0.2),
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
       ),
