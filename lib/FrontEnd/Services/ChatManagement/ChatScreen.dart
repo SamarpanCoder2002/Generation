@@ -299,7 +299,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   showToast(
                     'Profile Picture Updating...\nPlease Wait',
                     fToast,
-                    fontSize: 16.0,
+                    fontSize: 18.0,
+                    toastColor: Colors.amber,
                   );
 
                   if (mounted) {
