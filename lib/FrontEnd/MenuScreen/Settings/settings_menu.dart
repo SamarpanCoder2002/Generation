@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
-import 'package:generation/FrontEnd/MenuScreen/Settings/chatWallPaperMaker.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/chat_wallpaper_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chat_history_maker_and_media_view.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/settings_notification_screen.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/phone_call_config.dart';
@@ -112,7 +112,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
             return SettingsNotificationConfiguration();
             break;
           case 'Chat Wallpaper':
-            return ChatWallPaperMaker();
+            return ChatWallPaperMaker(allUpdatePermission: true, userName: '',);
             break;
           case 'Generation Direct Calling Setting':
             return PhoneNumberConfig();

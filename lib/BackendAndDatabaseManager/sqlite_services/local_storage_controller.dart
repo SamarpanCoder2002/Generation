@@ -180,9 +180,10 @@ class LocalStorageHelper {
       if (allUpdate) {
         result = await db.rawUpdate(
             "UPDATE $_allImportantDataStore SET $_query = '$updatedVal'");
-      } else
+      } else {
         result = await db.rawUpdate(
             "UPDATE $_allImportantDataStore SET $_query = '$updatedVal' WHERE $_colAccountUserName = '$userName'");
+      }
 
       print(
           'Update Important Data Store Result : ${result > 0 ? true : false}');

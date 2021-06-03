@@ -15,6 +15,7 @@ import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -70,6 +71,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   double _currAudioPlayingTime;
   int _lastAudioPlayingIndex;
   double _bottomRowDownPadding = 7.0;
+  double _audioPlayingSpeed = 1.0;
 
   /// For Control the Scrolling
   final ScrollController _scrollController = ScrollController(
@@ -118,8 +120,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   String _thisChatWallPaper = '';
 
   /// Audio Playing Time Related
-  String _totalDuration;
-  String _loadingTime;
+  String _totalDuration = '0:00';
+  String _loadingTime = '0:00';
 
   /// For Reply a Text
   String _replyText = '';
@@ -1192,7 +1194,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               ),
               height: _bottomRowHeight,
               decoration: BoxDecoration(
-                color: _thisChatWallPaper != '' ? Color.fromRGBO(0, 0, 0, 0.2) : null,
+                color: _thisChatWallPaper != ''
+                    ? Color.fromRGBO(0, 0, 0, 0.2)
+                    : null,
                 borderRadius: BorderRadius.only(
                   topLeft:
                       Radius.circular(_thisChatWallPaper != '' ? 40.0 : 0.0),
@@ -1564,6 +1568,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40.0),
+                              ),
                               elevation: 0.3,
                               backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
                               title: _multipleOptions(index,
@@ -1597,6 +1604,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40.0),
+                        ),
                         elevation: 0.3,
                         backgroundColor: Color.fromRGBO(34, 48, 60, 0.5),
                         title: _multipleOptions(index,
@@ -1620,7 +1630,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 _responseValue ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
               height: 70.0,
-              width: 200.0,
+              width: 250.0,
               decoration: BoxDecoration(
                 color: _responseValue
                     ? Color.fromRGBO(60, 80, 100, 1)
@@ -1673,72 +1683,112 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       ),
                     ],
                   ),
-                  SizedBox(
-                    width: 5.0,
-                  ),
                   Expanded(
-                    //color: Color.fromRGBO(86, 121, 192, 1),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(
-                            top: 26.0,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 5.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(
+                              top: 26.0,
+                            ),
+                            child: LinearPercentIndicator(
+                              percent: _justAudioPlayer.duration == null
+                                  ? 0.0
+                                  : _lastAudioPlayingIndex == index
+                                      ? _currAudioPlayingTime /
+                                          _justAudioPlayer
+                                              .duration.inMicroseconds
+                                              .ceilToDouble()
+                                      : 0,
+                              backgroundColor: Colors.black26,
+                              progressColor: _responseValue
+                                  ? Colors.lightBlue
+                                  : Colors.amber,
+                            ),
                           ),
-                          padding: EdgeInsets.only(right: 10.0),
-                          child: LinearPercentIndicator(
-                            percent: _justAudioPlayer.duration == null
-                                ? 0
-                                : _lastAudioPlayingIndex == index
-                                    ? _currAudioPlayingTime /
-                                        _justAudioPlayer.duration.inMicroseconds
-                                            .ceilToDouble()
-                                    : 0,
-                            backgroundColor: Colors.black26,
-                            progressColor: _responseValue
-                                ? Colors.lightBlue
-                                : Colors.amber,
+                          SizedBox(
+                            height: 10.0,
                           ),
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(
-                            left: 10.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _lastAudioPlayingIndex == index
-                                      ? _loadingTime
-                                      : '0:00',
-                                  style: TextStyle(
-                                    color: Colors.white,
+                          Padding(
+                            padding: EdgeInsets.only(left: 10.0, right: 7.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      _lastAudioPlayingIndex == index
+                                          ? _loadingTime
+                                          : '0:00',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 15.0,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  _lastAudioPlayingIndex == index
-                                      ? _totalDuration
-                                      : '',
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      _lastAudioPlayingIndex == index
+                                          ? _totalDuration
+                                          : '',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 15.0),
+                    child: GestureDetector(
+                      child: _lastAudioPlayingIndex != index
+                          ? CircleAvatar(
+                              radius: 23.0,
+                              backgroundImage: (_responseValue
+                                          ? widget
+                                              ._connectionProfileImageLocalPath
+                                          : ImportantThings
+                                              .thisAccountProfileImagePath) ==
+                                      ''
+                                  ? ExactAssetImage(
+                                      "assets/logo/logo.jpg",
+                                    )
+                                  : FileImage(File(_responseValue
+                                      ? widget._connectionProfileImageLocalPath
+                                      : ImportantThings
+                                          .thisAccountProfileImagePath)),
+                            )
+                          : Text(
+                              '${this._audioPlayingSpeed.toString().contains('.0') ? this._audioPlayingSpeed.toString().split('.')[0] : this._audioPlayingSpeed}x',
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 18.0),
+                            ),
+                      onTap: () {
+                        print('Audio Play Speed Tapped');
+                        if (mounted) {
+                          setState(() {
+                            if (this._audioPlayingSpeed != 3.0)
+                              this._audioPlayingSpeed += 0.5;
+                            else
+                              this._audioPlayingSpeed = 1.0;
+
+                            _justAudioPlayer.setSpeed(this._audioPlayingSpeed);
+                          });
+                        }
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1970,6 +2020,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           showDialog(
                               context: context,
                               builder: (_) => AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(40.0),
+                                    ),
                                     elevation: 0.3,
                                     backgroundColor:
                                         Color.fromRGBO(34, 48, 60, 0.5),
@@ -2326,80 +2379,98 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       {String audioExtension = '.mp3'}) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-      print("Start");
+    if (_justAudioPlayer.duration != null) {
+      if (mounted) {
+        setState(() {
+          _justAudioPlayer.stop();
+          _iconData = Icons.play_arrow_rounded;
+        });
+      }
     }
 
-    final String downloadUrl = await _management.uploadMediaToStorage(
-        File(recordedFilePath), context,
-        reference: 'chatVoices/');
+    await _justAudioPlayer.setFilePath(recordedFilePath);
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-      print("End");
-    }
-
-    final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
-        .doc("generation_users/$_senderMail")
-        .get();
-
-    // Initialize Temporary List
-    List<dynamic> sendingMessages = [];
-
-    // Store Updated sending messages list
-    sendingMessages = documentSnapShot.data()['connections']
-        [FirebaseAuth.instance.currentUser.email.toString()];
-
-    if (mounted) {
-      if (sendingMessages == null) sendingMessages = [];
-
-      setState(() {
-        /// Add data to temporary Storage of Sending
-        sendingMessages.add({
-          downloadUrl:
-              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension',
+    if (_justAudioPlayer.duration.inMinutes > 20)
+      _showDiaLog(
+          titleText: "Longer Audio File",
+          contentText:
+              "Audio File Duration Can't be greater than 20 minutes\n\nCurrent Audio Duration: ${_justAudioPlayer.duration.inMinutes > 59 ? _justAudioPlayer.duration.inMinutes % 60 : _justAudioPlayer.duration.inMinutes} minutes");
+    else {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
         });
+        print("Start");
+      }
 
-        /// Add Data to the UI related all chat Container
-        _chatContainer.add({
-          recordedFilePath: '${DateTime.now().hour}:${DateTime.now().minute}',
-        });
-
-        _response
-            .add(false); // Add the data _response to chat related container
-
-        _mediaTypes.add(MediaTypes.Voice); // Add MediaType
-
-        _inputTextController.clear(); // Get Clear the InputBox
-      });
-
-      /// Data Store in Local Storage
-      await _localStorageHelper.insertNewMessages(
-          widget._userName,
-          recordedFilePath,
-          MediaTypes.Voice,
-          0,
-          _chatContainer.last.values.first.toString());
-
-      /// Data Store in FireStore
-      await _management.addConversationMessages(this._senderMail,
-          sendingMessages, documentSnapShot.data()['connections']);
+      final String downloadUrl = await _management.uploadMediaToStorage(
+          File(recordedFilePath), context,
+          reference: 'chatVoices/');
 
       if (mounted) {
         setState(() {
-          _scrollController
-              .jumpTo(_scrollController.position.maxScrollExtent + 300);
+          _isLoading = false;
         });
+        print("End");
       }
 
-      await _sendNotification.messageNotificationClassifier(MediaTypes.Voice,
-          currAccountUserName: _currAccountUserName,
-          connectionToken: _connectionToken);
+      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+          .doc("generation_users/$_senderMail")
+          .get();
+
+      // Initialize Temporary List
+      List<dynamic> sendingMessages = [];
+
+      // Store Updated sending messages list
+      sendingMessages = documentSnapShot.data()['connections']
+          [FirebaseAuth.instance.currentUser.email.toString()];
+
+      if (mounted) {
+        if (sendingMessages == null) sendingMessages = [];
+
+        setState(() {
+          /// Add data to temporary Storage of Sending
+          sendingMessages.add({
+            downloadUrl:
+                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension',
+          });
+
+          /// Add Data to the UI related all chat Container
+          _chatContainer.add({
+            recordedFilePath: '${DateTime.now().hour}:${DateTime.now().minute}',
+          });
+
+          _response
+              .add(false); // Add the data _response to chat related container
+
+          _mediaTypes.add(MediaTypes.Voice); // Add MediaType
+
+          _inputTextController.clear(); // Get Clear the InputBox
+        });
+
+        /// Data Store in Local Storage
+        await _localStorageHelper.insertNewMessages(
+            widget._userName,
+            recordedFilePath,
+            MediaTypes.Voice,
+            0,
+            _chatContainer.last.values.first.toString());
+
+        /// Data Store in FireStore
+        await _management.addConversationMessages(this._senderMail,
+            sendingMessages, documentSnapShot.data()['connections']);
+
+        if (mounted) {
+          setState(() {
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent + 300);
+          });
+        }
+
+        await _sendNotification.messageNotificationClassifier(MediaTypes.Voice,
+            currAccountUserName: _currAccountUserName,
+            connectionToken: _connectionToken);
+      }
     }
   }
 
@@ -2613,7 +2684,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         if (mounted) {
           setState(() {
             _currAudioPlayingTime = event.inMicroseconds.ceilToDouble();
-            _loadingTime = '${event.inMinutes} : ${event.inSeconds}';
+            _loadingTime =
+                '${event.inMinutes} : ${event.inSeconds > 59 ? event.inSeconds % 60 : event.inSeconds}';
           });
         }
       });
@@ -2623,8 +2695,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _justAudioPlayer.stop();
           if (mounted) {
             setState(() {
-              _loadingTime = '0:00';
-              _iconData = Icons.play_arrow_rounded;
+              this._loadingTime = '0:00';
+              this._iconData = Icons.play_arrow_rounded;
             });
           }
         }
@@ -2637,8 +2709,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           setState(() {
             _lastAudioPlayingIndex = index;
             _totalDuration =
-                '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+                '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds > 59 ? _justAudioPlayer.duration.inSeconds % 60 : _justAudioPlayer.duration.inSeconds}';
             _iconData = Icons.pause;
+            this._audioPlayingSpeed = 1.0;
+            _justAudioPlayer.setSpeed(this._audioPlayingSpeed);
           });
         }
 
@@ -3089,6 +3163,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         builder: (_) => AlertDialog(
               elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
               title: Center(
                   child: Text(
                 titleText,
@@ -3109,6 +3186,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                           Center(
                             child: Text(
                               contentText,
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white,
                               ),

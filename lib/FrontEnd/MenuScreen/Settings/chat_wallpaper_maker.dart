@@ -13,7 +13,10 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ChatWallPaperMaker extends StatefulWidget {
-  const ChatWallPaperMaker({Key key}) : super(key: key);
+  final bool allUpdatePermission;
+  final String userName;
+
+  ChatWallPaperMaker({@required this.allUpdatePermission, @required this.userName});
 
   @override
   _ChatWallPaperMakerState createState() => _ChatWallPaperMakerState();
@@ -301,7 +304,8 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
           await _localStorageHelper.updateImportantTableExtraData(
               extraImportant: ExtraImportant.ChatWallpaper,
               updatedVal: this._chatWallPaperPath,
-              allUpdate: true);
+              allUpdate: widget.allUpdatePermission,
+              userName: widget.userName);
 
           if (mounted) {
             setState(() {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/MenuScreen/Settings/chat_wallpaper_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/connection_media_view.dart';
 
 class ConnectionProfileView extends StatefulWidget {
@@ -80,7 +81,13 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
           SizedBox(
             height: 20.0,
           ),
-          _mediaAndReportVisibilitySection(name: 'Media Visibility'),
+          _extraActivityOptions(
+              name: 'Media Visibility', color: Colors.lightBlue),
+          SizedBox(
+            height: 5.0,
+          ),
+          _extraActivityOptions(
+              name: 'Change Manually Chat Wallpaper', color: Colors.lightBlue),
           Divider(
             thickness: 3.0,
             height: 40.0,
@@ -98,7 +105,7 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
             height: 40.0,
             color: Colors.black26,
           ),
-          _mediaAndReportVisibilitySection(name: 'Report a Problem'),
+          _extraActivityOptions(name: 'Report a Problem', color: Colors.red),
           SizedBox(
             height: 10.0,
           ),
@@ -327,7 +334,7 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
     );
   }
 
-  Widget _mediaAndReportVisibilitySection({@required String name}) {
+  Widget _extraActivityOptions({@required String name, @required Color color}) {
     return OpenContainer(
       closedColor: const Color.fromRGBO(34, 48, 60, 1),
       middleColor: const Color.fromRGBO(34, 48, 60, 1),
@@ -341,8 +348,11 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
             selectedConnectionUserName: widget.userName,
             profileImagePath: widget.profileImagePath,
           );
-        } else
-          return Center();
+        } else if (name == 'Change Manually Chat Wallpaper')
+          return ChatWallPaperMaker(
+              allUpdatePermission: false, userName: widget.userName);
+
+        return Center();
       },
       closedBuilder: (_, __) => SizedBox(
         height: 50.0,
@@ -353,8 +363,7 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
               name,
               textAlign: TextAlign.left,
               style: TextStyle(
-                color:
-                    name == 'Media Visibility' ? Colors.lightBlue : Colors.red,
+                color: color,
                 fontSize: 16.0,
               ),
             )),
