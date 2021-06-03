@@ -11,4 +11,13 @@ class NativeCallback {
     print('Call For Notification Result: $result');
   }
 
+  Future<bool> callToCheckNetworkConnectivity() async {
+    print('Here in Internet Connectivity Native Calling');
+
+    final bool result =
+        await _platform.invokeMethod('checkNetworkConnectivity', '');
+    print('Network Connectivity: $result');
+
+    return result;
+  }
 }

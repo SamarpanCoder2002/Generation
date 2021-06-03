@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -56,12 +57,15 @@ class _ChatsAndActivityCollectionState
   /// For Downloading Purpose
   final Dio _dio = Dio();
 
+  /// Native Call Make Object
+  final NativeCallback _nativeCallback = NativeCallback();
+
   /// Regular Expression for Media Detection
   final RegExp _mediaRegex =
       RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
   final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
-  void _fetchRealTimeData() async {
+  Future<void> _fetchRealTimeData() async {
     await ProfileImageManagement.userProfileNameAndImageExtractor();
 
     print(
@@ -151,30 +155,31 @@ class _ChatsAndActivityCollectionState
               .toList(); // For Avoid Duplicate Inclusion of Activity
 
           particularConnectionActivity.forEach((everyActivity) async {
-            if (_oldActivity != everyActivity) {
-              if (mounted) {
-                setState(() {
-                  _oldActivity = everyActivity;
-                });
-              }
-              if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
-                final String currTime = DateTime.now().toString();
+            if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
+              final String currTime = DateTime.now().toString();
 
-                if (everyActivity.values.first.toString().split('++++++')[1] ==
-                    'video') {
-                  if (storagePermissionStatus.isGranted) {
-                    final activityVideoPath =
-                        await Directory(directory.path + '/.ActivityVideos/')
-                            .create();
+              if (everyActivity.values.first.toString().split('++++++')[1] ==
+                  'video') {
+                if (storagePermissionStatus.isGranted) {
+                  final activityVideoPath =
+                      await Directory(directory.path + '/.ActivityVideos/')
+                          .create();
 
-                    await _dio
-                        .download(everyActivity.keys.first.toString(),
-                            '${activityVideoPath.path}$currTime.mp4')
-                        .whenComplete(() async {
-                      print('Video Download Complete');
-                      print(
-                          'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                    });
+                  if (_oldActivity != everyActivity) {
+                    if (mounted) {
+                      setState(() {
+                        this._oldActivity = everyActivity;
+                      });
+                    }
+
+                    await _dio.download(everyActivity.keys.first.toString(),
+                        '${activityVideoPath.path}$currTime.mp4');
+
+                    print('Video Download Complete');
+                    print(
+                        'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+
+                    print('Add Video Activity to Sqlite');
 
                     /// Insert Video  Activity Data to the local database for future use
                     await _localStorageHelper.insertDataInUserActivityTable(
@@ -189,30 +194,41 @@ class _ChatsAndActivityCollectionState
                           .toString()
                           .split('++++++')[0],
                     );
-                  } else {
-                    print('Storage Permission Denied');
                   }
                 } else {
-                  if (storagePermissionStatus.isGranted) {
-                    /// Create new Hidden Folder once in desired location
-                    final activityImagePath =
-                        await Directory('${directory.path}/.ActivityImages/')
-                            .create();
+                  print('Storage Permission Denied');
+                }
+              } else {
+                if (storagePermissionStatus.isGranted) {
+                  /// Create new Hidden Folder once in desired location
+                  final activityImagePath =
+                      await Directory('${directory.path}/.ActivityImages/')
+                          .create();
+
+                  print('Old Activity: ${this._oldActivity}');
+                  print('Every Activity: $everyActivity');
+
+                  if (_oldActivity != everyActivity) {
+                    if (mounted) {
+                      setState(() {
+                        this._oldActivity = everyActivity;
+                      });
+                    }
 
                     try {
                       /// Download Image Activity from Firebase Storage and store in local database
-                      await _dio
-                          .download(everyActivity.keys.first.toString(),
-                              '${activityImagePath.path}$currTime.jpg')
-                          .whenComplete(() async {
-                        print('Image Download Complete');
+                      await _dio.download(everyActivity.keys.first.toString(),
+                          '${activityImagePath.path}$currTime.jpg');
 
-                        print(
-                            'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                      });
+                      print('Image Download Complete');
+
+                      print(
+                          'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
                     } catch (e) {
                       print('Activity Image Download Error: ${e.toString()}');
                     }
+
+                    print('Add Files to Sqlite');
 
                     /// Add Activity Image Data to Local Storage for Future use
                     await _localStorageHelper.insertDataInUserActivityTable(
@@ -227,12 +243,20 @@ class _ChatsAndActivityCollectionState
                           .toString()
                           .split('++++++')[0],
                     );
-                  } else {
-                    print('Permission Denied');
                   }
+                } else {
+                  print('Permission Denied');
                 }
-              } else {
-                print('Special Babe: $everyActivity');
+              }
+            } else {
+              print('Special Babe: $everyActivity');
+
+              if (this._oldActivity != everyActivity) {
+                if (mounted) {
+                  setState(() {
+                    this._oldActivity = everyActivity;
+                  });
+                }
 
                 /// Add Text Activity Data to Local Storage for future use
                 await _localStorageHelper.insertDataInUserActivityTable(
@@ -261,8 +285,6 @@ class _ChatsAndActivityCollectionState
                   bgInformation: everyActivity.values.first.toString(),
                 );
               }
-            } else {
-              print('Activity Repeat');
             }
           });
         }
@@ -315,7 +337,10 @@ class _ChatsAndActivityCollectionState
                     } else
                       profilePicPath = '';
 
-                    final String _globalChatWallpaper = await _localStorageHelper.extractImportantTableData(extraImportant: ExtraImportant.ChatWallpaper, userMail: FirebaseAuth.instance.currentUser.email);
+                    final String _globalChatWallpaper =
+                        await _localStorageHelper.extractImportantTableData(
+                            extraImportant: ExtraImportant.ChatWallpaper,
+                            userMail: FirebaseAuth.instance.currentUser.email);
 
                     /// Data Store for General Reference
                     await _localStorageHelper.insertOrUpdateDataForThisAccount(
@@ -329,7 +354,9 @@ class _ChatsAndActivityCollectionState
                           : documentSnapshot['profile_pic'].toString(),
                       userAccCreationDate: documentSnapshot['creation_date'],
                       userAccCreationTime: documentSnapshot['creation_time'],
-                      chatWallpaper: _globalChatWallpaper == null?'':_globalChatWallpaper,
+                      chatWallpaper: _globalChatWallpaper == null
+                          ? ''
+                          : _globalChatWallpaper,
                     );
 
                     /// Make a new table to this new connected user Activity
@@ -429,25 +456,65 @@ class _ChatsAndActivityCollectionState
     }
   }
 
+  void _realTimeDataFetchDependsOnNetConnectivity() async {
+    final bool isNetworkExist =
+        await _nativeCallback.callToCheckNetworkConnectivity();
+    if (isNetworkExist) {
+      await _fetchRealTimeData();
+    } else {
+      print('Net Connection Not Found');
+      await _offlineConnectionDataManagement();
+    }
+  }
+
+  Future<void> _offlineConnectionDataManagement() async {
+    final List<Map<String, Object>> _allConnectionTempList =
+        await _localStorageHelper.extractAllUsersName();
+    _allConnectionTempList.forEach((userNameMap) {
+      if (mounted) {
+        setState(() {
+          this._allConnectionsUserName.add(userNameMap.values.first.toString());
+          this._allConnectionChatNotificationStatus[
+              userNameMap.values.first.toString()] = true;
+        });
+      }
+    });
+  }
+
   /// Existing connection having some activity store in local database, user name add
   void _searchAboutExistingConnectionActivity() async {
+    print('Connection Activity Check');
     final List<Map<String, Object>> _alreadyStoredUserNameList =
-        await _localStorageHelper.extractAllUsersName();
+        await _localStorageHelper.extractAllUsersName(
+            thisAccountAllowed:
+                await _nativeCallback.callToCheckNetworkConnectivity()
+                    ? false
+                    : true);
+
     _alreadyStoredUserNameList.forEach((userNameMap) async {
       final int _countTotalActivity = await _localStorageHelper
           .countTotalActivitiesForParticularUserName(userNameMap.values.first);
-      if (_countTotalActivity > 0) {
-        if (!_allUserConnectionActivity.contains(userNameMap.values.first)) {
-          if (mounted) {
-            setState(() {
-              if (userNameMap.values.first ==
-                  ImportantThings.thisAccountUserName)
-                _allUserConnectionActivity.insert(0, userNameMap.values.first);
-              else
-                _allUserConnectionActivity.add(userNameMap.values.first);
-            });
+
+      if (mounted) {
+        setState(() {
+          if (_countTotalActivity > 0 ||
+              ImportantThings.thisAccountUserName ==
+                  userNameMap.values.first.toString()) {
+            if (!_allUserConnectionActivity
+                .contains(userNameMap.values.first)) {
+              if (mounted) {
+                setState(() {
+                  if (userNameMap.values.first ==
+                      ImportantThings.thisAccountUserName)
+                    _allUserConnectionActivity.insert(
+                        0, userNameMap.values.first);
+                  else
+                    _allUserConnectionActivity.add(userNameMap.values.first);
+                });
+              }
+            }
           }
-        }
+        });
       }
     });
   }
@@ -462,7 +529,7 @@ class _ChatsAndActivityCollectionState
     ImportantThings.findImageUrlAndUserName();
 
     try {
-      _fetchRealTimeData();
+      _realTimeDataFetchDependsOnNetConnectivity();
       _searchAboutExistingConnectionActivity();
 
       /// For Unique User Name[Because SomeTimes Duplicate UserName showing after opening the app]
