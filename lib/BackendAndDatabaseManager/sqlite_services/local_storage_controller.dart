@@ -368,7 +368,7 @@ class LocalStorageHelper {
     final Database db = await this.database;
     try {
       await db.execute(
-          "CREATE TABLE ${tableName}_status($_colActivity TEXT, $_colTimeActivity TEXT, $_colMediaType TEXT, $_colExtraText TEXT, $_colBgInformation TEXT, $_colActivitySpecial TEXT)");
+          "CREATE TABLE ${tableName}_status($_colActivity, $_colTimeActivity TEXT PRIMARY KEY, $_colMediaType TEXT, $_colExtraText TEXT, $_colBgInformation TEXT, $_colActivitySpecial TEXT)");
       return true;
     } catch (e) {
       print("Error in Local Storage Create Table For Status: ${e.toString()}");
@@ -377,7 +377,7 @@ class LocalStorageHelper {
   }
 
   /// Insert ActivityData to Activity Table
-  Future<void> insertDataInUserActivityTable(
+  Future<bool> insertDataInUserActivityTable(
       {@required String tableName,
       @required String statusLinkOrString,
       MediaTypes mediaTypes,
@@ -385,20 +385,27 @@ class LocalStorageHelper {
       ActivitySpecialOptions activitySpecialOptions,
       String extraText = '',
       String bgInformation = ''}) async {
-    final Database db = await this.database;
-    final Map<String, dynamic> _activityStoreMap = Map<String, dynamic>();
+    try{
+      final Database db = await this.database;
+      final Map<String, dynamic> _activityStoreMap = Map<String, dynamic>();
 
-    _activityStoreMap[_colActivity] = statusLinkOrString;
-    _activityStoreMap[_colTimeActivity] = activityTime;
-    _activityStoreMap[_colMediaType] =
-        mediaTypes == null ? '' : mediaTypes.toString();
-    _activityStoreMap[_colExtraText] = extraText;
-    _activityStoreMap[_colBgInformation] = bgInformation;
-    _activityStoreMap[_colActivitySpecial] =
-        activitySpecialOptions == null ? '' : activitySpecialOptions.toString();
+      _activityStoreMap[_colActivity] = statusLinkOrString;
+      _activityStoreMap[_colTimeActivity] = activityTime;
+      _activityStoreMap[_colMediaType] =
+      mediaTypes == null ? '' : mediaTypes.toString();
+      _activityStoreMap[_colExtraText] = extraText;
+      _activityStoreMap[_colBgInformation] = bgInformation;
+      _activityStoreMap[_colActivitySpecial] =
+      activitySpecialOptions == null ? '' : activitySpecialOptions.toString();
 
-    /// Result Insert to DB
-    await db.insert('${tableName}_status', _activityStoreMap);
+      /// Result Insert to DB
+      final int result = await db.insert('${tableName}_status', _activityStoreMap);
+
+      return result > 0?true:false;
+    }catch(e){
+      print('Error: Activity Table Data insertion Error: ${e.toString()}');
+      return false;
+    }
   }
 
   /// Extract Status from Table Name

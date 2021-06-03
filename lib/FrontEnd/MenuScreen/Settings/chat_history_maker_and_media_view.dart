@@ -181,11 +181,6 @@ class _ChatHistoryMakerAndMediaViewerState
                     ),
                   ),
                 ),
-                // if (_selectedTile[index])
-                //   Icon(
-                //     Icons.done_outline_rounded,
-                //     color: const Color.fromRGBO(20, 200, 50, 1),
-                //   )
               ],
             ),
           ),

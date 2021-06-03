@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
@@ -43,6 +44,7 @@ class _SelectConnectionState extends State<SelectConnection> {
   final List<Map<String, String>> allConnectionsUserNameAndProfilePicture = [];
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final Management _management = Management();
+  final NativeCallback _nativeCallback = NativeCallback();
 
   final String _noProfileImagePath = 'assets/logo/logo.jpg';
 
@@ -77,7 +79,7 @@ class _SelectConnectionState extends State<SelectConnection> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      floatingActionButton: _floatingActionButtonVisible
+      floatingActionButton: (_floatingActionButtonVisible && this._totalSelected>0)
           ? FloatingActionButton(
               elevation: 10.0,
               backgroundColor: const Color.fromRGBO(20, 200, 50, 1),
@@ -126,7 +128,7 @@ class _SelectConnectionState extends State<SelectConnection> {
           child: ListView.builder(
             itemCount: allConnectionsUserNameAndProfilePicture.length,
             itemBuilder: (context, index) {
-              return connectionTile(index, 'Samarapan');
+              return connectionTile(index);
             },
           ),
         ),
@@ -134,7 +136,7 @@ class _SelectConnectionState extends State<SelectConnection> {
     );
   }
 
-  Widget connectionTile(int index, String userName) {
+  Widget connectionTile(int index) {
     return Card(
         elevation: 0.0,
         color: const Color.fromRGBO(34, 48, 60, 1),
@@ -215,161 +217,178 @@ class _SelectConnectionState extends State<SelectConnection> {
   }
 
   void _sendMessage() async {
-    if (mounted) {
+
+    if(mounted){
       setState(() {
-        _floatingActionButtonVisible = false;
-        _isLoading = true;
+        this._floatingActionButtonVisible = false;
       });
     }
 
-    final List<String> _allConnectionsUserName = [];
+    if (!await _nativeCallback.callToCheckNetworkConnectivity()) {
+      showToast('No Internet Connection', _fToast,
+          toastGravity: ToastGravity.CENTER,
+          seconds: 3,
+          toastColor: Colors.amber);
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
 
-    for (int currIndex = 0; currIndex < _selectedTile.length; currIndex++) {
-      if (_selectedTile[currIndex])
-        _allConnectionsUserName.add(
-            this.allConnectionsUserNameAndProfilePicture[currIndex].keys.first);
-    }
+      final List<String> _allConnectionsUserName = [];
 
-    GeneralMessage _generalMessage;
+      for (int currIndex = 0; currIndex < _selectedTile.length; currIndex++) {
+        if (_selectedTile[currIndex])
+          _allConnectionsUserName.add(this
+              .allConnectionsUserNameAndProfilePicture[currIndex]
+              .keys
+              .first);
+      }
 
-    switch (widget.mediaType) {
-      case MediaTypes.Voice:
-        final String _voiceDownloadUrl = await _management.uploadMediaToStorage(
-            widget.mediaFile, context,
-            reference: 'multipleConnectionSendVoice/');
+      GeneralMessage _generalMessage;
 
-        _generalMessage = GeneralMessage(
-          sendMessage: _voiceDownloadUrl,
-          storeMessage: widget.mediaFile.path,
-          sendTime:
-              '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extra}+multipleConnectionSource',
-          storeTime: '${DateTime.now().hour}:${DateTime.now().minute}',
-          mediaType: widget.mediaType,
-          selectedUsersName: _allConnectionsUserName,
-        );
+      switch (widget.mediaType) {
+        case MediaTypes.Voice:
+          final String _voiceDownloadUrl =
+              await _management.uploadMediaToStorage(widget.mediaFile, context,
+                  reference: 'multipleConnectionSendVoice/');
 
-        await _localStorageHelper.insertNewLinkInLinkRemainingTable(
-            link: _voiceDownloadUrl);
-
-        break;
-
-      case MediaTypes.Image:
-        final String _imageDownLoadUrl = await _management.uploadMediaToStorage(
-            widget.mediaFile, this.context,
-            reference: 'MultipleConnectionImage/');
-
-        _generalMessage = GeneralMessage(
-            sendMessage: _imageDownLoadUrl,
+          _generalMessage = GeneralMessage(
+            sendMessage: _voiceDownloadUrl,
             storeMessage: widget.mediaFile.path,
             sendTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource',
-            storeTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}',
+                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extra}+multipleConnectionSource',
+            storeTime: '${DateTime.now().hour}:${DateTime.now().minute}',
             mediaType: widget.mediaType,
-            selectedUsersName: _allConnectionsUserName);
+            selectedUsersName: _allConnectionsUserName,
+          );
 
-        await _localStorageHelper.insertNewLinkInLinkRemainingTable(
-            link: _imageDownLoadUrl);
+          await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+              link: _voiceDownloadUrl);
 
-        break;
+          break;
 
-      case MediaTypes.Video:
-        String thumbNailPicturePath, thumbNailPicturePathUrl;
+        case MediaTypes.Image:
+          final String _imageDownLoadUrl = await _management
+              .uploadMediaToStorage(widget.mediaFile, this.context,
+                  reference: 'MultipleConnectionImage/');
 
-        final String _videoDownLoadUrl = await _management.uploadMediaToStorage(
-            widget.mediaFile, this.context,
-            reference: 'MultipleConnectionVideo/');
+          _generalMessage = GeneralMessage(
+              sendMessage: _imageDownLoadUrl,
+              storeMessage: widget.mediaFile.path,
+              sendTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource',
+              storeTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}',
+              mediaType: widget.mediaType,
+              selectedUsersName: _allConnectionsUserName);
 
-        final Directory directory = await getExternalStorageDirectory();
+          await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+              link: _imageDownLoadUrl);
 
-        final Directory _newDirectory =
-            await Directory('${directory.path}/.ThumbNails/')
-                .create(); // Create New Folder about the desire location;
+          break;
 
-        thumbNailPicturePath = await Thumbnails.getThumbnail(
-            thumbnailFolder: _newDirectory.path,
-            videoFile: widget.mediaFile.path,
-            imageType: ThumbFormat.JPEG,
-            quality: 20);
+        case MediaTypes.Video:
+          String thumbNailPicturePath, thumbNailPicturePathUrl;
 
-        thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
-            File(thumbNailPicturePath), context,
-            reference: 'MultipleConnectionThumbnail/');
+          final String _videoDownLoadUrl = await _management
+              .uploadMediaToStorage(widget.mediaFile, this.context,
+                  reference: 'MultipleConnectionVideo/');
 
-        _generalMessage = GeneralMessage(
-            sendMessage: '$_videoDownLoadUrl+$thumbNailPicturePathUrl',
-            storeMessage: widget.mediaFile.path,
-            sendTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource',
-            storeTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}+$thumbNailPicturePath',
-            mediaType: widget.mediaType,
-            selectedUsersName: _allConnectionsUserName);
+          final Directory directory = await getExternalStorageDirectory();
 
-        await _localStorageHelper.insertNewLinkInLinkRemainingTable(
-            link: _videoDownLoadUrl);
-        await _localStorageHelper.insertNewLinkInLinkRemainingTable(
-            link: thumbNailPicturePathUrl);
+          final Directory _newDirectory =
+              await Directory('${directory.path}/.ThumbNails/')
+                  .create(); // Create New Folder about the desire location;
 
-        break;
+          thumbNailPicturePath = await Thumbnails.getThumbnail(
+              thumbnailFolder: _newDirectory.path,
+              videoFile: widget.mediaFile.path,
+              imageType: ThumbFormat.JPEG,
+              quality: 20);
 
-      case MediaTypes.Text:
-        _generalMessage = GeneralMessage(
-            sendMessage: widget.textContent,
-            storeMessage: widget.textContent,
-            sendTime:
-                "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
-            storeTime: "${DateTime.now().hour}:${DateTime.now().minute}",
-            mediaType: widget.mediaType,
-            selectedUsersName: _allConnectionsUserName);
-        break;
+          thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
+              File(thumbNailPicturePath), context,
+              reference: 'MultipleConnectionThumbnail/');
 
-      case MediaTypes.Sticker:
-        break;
+          _generalMessage = GeneralMessage(
+              sendMessage: '$_videoDownLoadUrl+$thumbNailPicturePathUrl',
+              storeMessage: widget.mediaFile.path,
+              sendTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource',
+              storeTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}+$thumbNailPicturePath',
+              mediaType: widget.mediaType,
+              selectedUsersName: _allConnectionsUserName);
 
-      case MediaTypes.Location:
-        _generalMessage = GeneralMessage(
-            sendMessage: widget.extra,
-            storeMessage: widget.extra,
-            sendTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
-            storeTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
-            mediaType: widget.mediaType,
-            selectedUsersName: _allConnectionsUserName);
-        break;
+          await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+              link: _videoDownLoadUrl);
+          await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+              link: thumbNailPicturePathUrl);
 
-      case MediaTypes.Document:
-        final String _documentDownLoadUrl =
-            await _management.uploadMediaToStorage(widget.mediaFile, context,
-                reference: 'MultipleConnectionDocument/');
+          break;
 
-        _generalMessage = GeneralMessage(
-            sendMessage: _documentDownLoadUrl,
-            storeMessage: widget.mediaFile.path,
-            sendTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+${widget.extra}+multipleConnectionSource',
-            storeTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}+${widget.extra}',
-            mediaType: widget.mediaType,
-            selectedUsersName: _allConnectionsUserName);
+        case MediaTypes.Text:
+          _generalMessage = GeneralMessage(
+              sendMessage: widget.textContent,
+              storeMessage: widget.textContent,
+              sendTime:
+                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
+              storeTime: "${DateTime.now().hour}:${DateTime.now().minute}",
+              mediaType: widget.mediaType,
+              selectedUsersName: _allConnectionsUserName);
+          break;
 
-        await _localStorageHelper.insertNewLinkInLinkRemainingTable(
-            link: _documentDownLoadUrl);
+        case MediaTypes.Sticker:
+          break;
 
-        break;
-      case MediaTypes.Indicator:
-        break;
+        case MediaTypes.Location:
+          _generalMessage = GeneralMessage(
+              sendMessage: widget.extra,
+              storeMessage: widget.extra,
+              sendTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
+              storeTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
+              mediaType: widget.mediaType,
+              selectedUsersName: _allConnectionsUserName);
+          break;
+
+        case MediaTypes.Document:
+          final String _documentDownLoadUrl =
+              await _management.uploadMediaToStorage(widget.mediaFile, context,
+                  reference: 'MultipleConnectionDocument/');
+
+          _generalMessage = GeneralMessage(
+              sendMessage: _documentDownLoadUrl,
+              storeMessage: widget.mediaFile.path,
+              sendTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+${widget.extra}+multipleConnectionSource',
+              storeTime:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}+${widget.extra}',
+              mediaType: widget.mediaType,
+              selectedUsersName: _allConnectionsUserName);
+
+          await _localStorageHelper.insertNewLinkInLinkRemainingTable(
+              link: _documentDownLoadUrl);
+
+          break;
+        case MediaTypes.Indicator:
+          break;
+      }
+      await _generalMessage.storeInFireStore();
+      await _generalMessage.storeInLocalStorage();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      showToast('Message Send Successfully', _fToast, toastColor: Colors.amber);
+
+      Navigator.pop(context);
     }
-    await _generalMessage.storeInFireStore();
-    await _generalMessage.storeInLocalStorage();
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-
-    Navigator.pop(context);
   }
 }

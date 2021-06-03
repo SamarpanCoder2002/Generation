@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:circle_list/circle_list.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -152,7 +154,12 @@ class _ApplicationListState extends State<ApplicationList> {
                   )),
               child: GestureDetector(
                 onTap: () async {
-                  await _locationSend();
+                  if (!await NativeCallback().callToCheckNetworkConnectivity())
+                    _showDiaLog(titleText: 'No Internet Connection');
+                  else {
+                    _showDiaLog(titleText: 'Wait for map');
+                    await _locationSend();
+                  }
                 },
                 child: Icon(
                   Icons.location_on_rounded,
@@ -256,6 +263,8 @@ class _ApplicationListState extends State<ApplicationList> {
           zIndex: 1.0,
           draggable: true,
           position: LatLng(position.latitude, position.longitude));
+
+      Navigator.pop(context);
 
       showDialog(
           context: context,
@@ -414,6 +423,9 @@ class _ApplicationListState extends State<ApplicationList> {
         builder: (_) => AlertDialog(
               elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
               title: Center(
                   child: Text(
                 titleText,

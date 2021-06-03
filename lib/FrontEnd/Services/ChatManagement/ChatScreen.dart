@@ -16,6 +16,7 @@ import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -91,6 +92,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final Management _management = Management();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final SendNotification _sendNotification = SendNotification();
+  final NativeCallback _nativeCallback = NativeCallback();
 
   /// Audio Player and Dio Downloader Initialized
   final AudioPlayer _justAudioPlayer = AudioPlayer();
@@ -1303,8 +1305,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                     if (mounted) {
                                       setState(() {
                                         _showEmojiPicker = false;
-                                        // if (_bottomRowDownPadding == 7.0)
-                                        //   _bottomRowDownPadding -= 7.0;
                                         _chatBoxHeight =
                                             MediaQuery.of(context).size.height -
                                                 150;
@@ -2232,99 +2232,87 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void _textSend() async {
     try {
       print("Send Pressed");
-      if (_inputTextController.text.isNotEmpty) {
-        /// Take Document Data related to old messages
-        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
-            .instance
-            .doc("generation_users/$_senderMail")
-            .get();
 
-        /// Initialize Temporary List
-        List<dynamic> sendingMessages = [];
+      if (!await _nativeCallback.callToCheckNetworkConnectivity())
+        _showDiaLog(titleText: 'No Internet Connection');
+      else {
+        if (_inputTextController.text.isNotEmpty) {
+          /// Take Document Data related to old messages
+          final DocumentSnapshot documentSnapShot = await FirebaseFirestore
+              .instance
+              .doc("generation_users/$_senderMail")
+              .get();
 
-        /// Store Updated sending messages list
-        sendingMessages = documentSnapShot.data()['connections']
-            [FirebaseAuth.instance.currentUser.email.toString()];
+          /// Initialize Temporary List
+          List<dynamic> sendingMessages = [];
 
-        if (mounted) {
-          if (sendingMessages == null) sendingMessages = [];
+          /// Store Updated sending messages list
+          sendingMessages = documentSnapShot.data()['connections']
+              [FirebaseAuth.instance.currentUser.email.toString()];
 
-          setState(() {
-            /// Add data to temporary Storage of Sending
-            sendingMessages.add({
-              _replyText != ''
-                      ? '$_replyText[[[@]]]${_inputTextController.text}'
-                      : '${_inputTextController.text}':
-                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
+          if (mounted) {
+            if (sendingMessages == null) sendingMessages = [];
+
+            setState(() {
+              /// Add data to temporary Storage of Sending
+              sendingMessages.add({
+                _replyText != ''
+                        ? '$_replyText[[[@]]]${_inputTextController.text}'
+                        : '${_inputTextController.text}':
+                    "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
+              });
+
+              /// Add Data to the UI related all chat Container
+              _chatContainer.add({
+                _replyText != ''
+                        ? '$_replyText[[[@]]]${_inputTextController.text}'
+                        : '${_inputTextController.text}':
+                    "${DateTime.now().hour}:${DateTime.now().minute}",
+              });
+
+              _response.add(
+                  false); // Add the data _response to chat related container
+
+              _mediaTypes.add(MediaTypes.Text); // Add MediaType
+
+              _iconChanger = true; // IconChanger Should Change
+
+              if (_replyText != '') {
+                _replyText = '';
+
+                this._bottomRowHeight = 80.0;
+              }
             });
+          }
 
-            /// Add Data to the UI related all chat Container
-            _chatContainer.add({
-              _replyText != ''
-                      ? '$_replyText[[[@]]]${_inputTextController.text}'
-                      : '${_inputTextController.text}':
-                  "${DateTime.now().hour}:${DateTime.now().minute}",
-            });
+          if (_chatContainer.last.keys.first.contains('[[[@]]]'))
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent + 130);
+          else
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent + 100);
 
-            _response
-                .add(false); // Add the data _response to chat related container
+          /// Data Store in Local Storage
+          await _localStorageHelper.insertNewMessages(
+              widget._userName,
+              _chatContainer.last.keys.first.toString(),
+              MediaTypes.Text,
+              0,
+              _chatContainer.last.values.first.toString());
 
-            _mediaTypes.add(MediaTypes.Text); // Add MediaType
+          /// Data Store in Firestore
+          await _management.addConversationMessages(this._senderMail,
+              sendingMessages, documentSnapShot.data()['connections']);
 
-            _iconChanger = true; // IconChanger Should Change
+          final String _textToSend = _inputTextController.text;
 
-            if (_replyText != '') {
-              _replyText = '';
+          _inputTextController.clear();
 
-              this._bottomRowHeight = 80.0;
-            }
-          });
+          await _sendNotification.messageNotificationClassifier(MediaTypes.Text,
+              textMsg: _textToSend,
+              connectionToken: _connectionToken,
+              currAccountUserName: _currAccountUserName);
         }
-
-        if (_chatContainer.last.keys.first.contains('[[[@]]]'))
-          _scrollController
-              .jumpTo(_scrollController.position.maxScrollExtent + 130);
-        else
-          _scrollController
-              .jumpTo(_scrollController.position.maxScrollExtent + 100);
-
-        /// Data Store in Local Storage
-        await _localStorageHelper.insertNewMessages(
-            widget._userName,
-            _chatContainer.last.keys.first.toString(),
-            MediaTypes.Text,
-            0,
-            _chatContainer.last.values.first.toString());
-
-        //
-        //
-        //
-        //
-        // /// Work from Here Now
-        // var take = documentSnapShot.data()['connections'];
-        //
-        // print('Pre Testing: $take');
-        //
-        // take[FirebaseAuth.instance.currentUser.email.toString()] = sendingMessages;
-        //
-        // print('Testing: $take');
-        //
-        //
-        //
-        //
-
-        /// Data Store in Firestore
-        await _management.addConversationMessages(this._senderMail,
-            sendingMessages, documentSnapShot.data()['connections']);
-
-        final String _textToSend = _inputTextController.text;
-
-        _inputTextController.clear();
-
-        await _sendNotification.messageNotificationClassifier(MediaTypes.Text,
-            textMsg: _textToSend,
-            connectionToken: _connectionToken,
-            currAccountUserName: _currAccountUserName);
       }
     } catch (e) {
       showDialog(
@@ -2379,97 +2367,104 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       {String audioExtension = '.mp3'}) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-    if (_justAudioPlayer.duration != null) {
-      if (mounted) {
-        setState(() {
-          _justAudioPlayer.stop();
-          _iconData = Icons.play_arrow_rounded;
-        });
-      }
-    }
-
-    await _justAudioPlayer.setFilePath(recordedFilePath);
-
-    if (_justAudioPlayer.duration.inMinutes > 20)
-      _showDiaLog(
-          titleText: "Longer Audio File",
-          contentText:
-              "Audio File Duration Can't be greater than 20 minutes\n\nCurrent Audio Duration: ${_justAudioPlayer.duration.inMinutes > 59 ? _justAudioPlayer.duration.inMinutes % 60 : _justAudioPlayer.duration.inMinutes} minutes");
+    if (!await _nativeCallback.callToCheckNetworkConnectivity())
+      _showDiaLog(titleText: 'No Internet Connection');
     else {
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
-        print("Start");
+      if (_justAudioPlayer.duration != null) {
+        if (mounted) {
+          setState(() {
+            _justAudioPlayer.stop();
+            _iconData = Icons.play_arrow_rounded;
+          });
+        }
       }
 
-      final String downloadUrl = await _management.uploadMediaToStorage(
-          File(recordedFilePath), context,
-          reference: 'chatVoices/');
+      await _justAudioPlayer.setFilePath(recordedFilePath);
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        print("End");
-      }
-
-      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
-          .doc("generation_users/$_senderMail")
-          .get();
-
-      // Initialize Temporary List
-      List<dynamic> sendingMessages = [];
-
-      // Store Updated sending messages list
-      sendingMessages = documentSnapShot.data()['connections']
-          [FirebaseAuth.instance.currentUser.email.toString()];
-
-      if (mounted) {
-        if (sendingMessages == null) sendingMessages = [];
-
-        setState(() {
-          /// Add data to temporary Storage of Sending
-          sendingMessages.add({
-            downloadUrl:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension',
+      if (_justAudioPlayer.duration.inMinutes > 20)
+        _showDiaLog(
+            titleText: "Longer Audio File",
+            contentText:
+                "Audio File Duration Can't be greater than 20 minutes\n\nCurrent Audio Duration: ${_justAudioPlayer.duration.inMinutes > 59 ? _justAudioPlayer.duration.inMinutes % 60 : _justAudioPlayer.duration.inMinutes} minutes");
+      else {
+        if (mounted) {
+          setState(() {
+            _isLoading = true;
           });
+          print("Start");
+        }
 
-          /// Add Data to the UI related all chat Container
-          _chatContainer.add({
-            recordedFilePath: '${DateTime.now().hour}:${DateTime.now().minute}',
-          });
-
-          _response
-              .add(false); // Add the data _response to chat related container
-
-          _mediaTypes.add(MediaTypes.Voice); // Add MediaType
-
-          _inputTextController.clear(); // Get Clear the InputBox
-        });
-
-        /// Data Store in Local Storage
-        await _localStorageHelper.insertNewMessages(
-            widget._userName,
-            recordedFilePath,
-            MediaTypes.Voice,
-            0,
-            _chatContainer.last.values.first.toString());
-
-        /// Data Store in FireStore
-        await _management.addConversationMessages(this._senderMail,
-            sendingMessages, documentSnapShot.data()['connections']);
+        final String downloadUrl = await _management.uploadMediaToStorage(
+            File(recordedFilePath), context,
+            reference: 'chatVoices/');
 
         if (mounted) {
           setState(() {
-            _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent + 300);
+            _isLoading = false;
           });
+          print("End");
         }
 
-        await _sendNotification.messageNotificationClassifier(MediaTypes.Voice,
-            currAccountUserName: _currAccountUserName,
-            connectionToken: _connectionToken);
+        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
+            .instance
+            .doc("generation_users/$_senderMail")
+            .get();
+
+        // Initialize Temporary List
+        List<dynamic> sendingMessages = [];
+
+        // Store Updated sending messages list
+        sendingMessages = documentSnapShot.data()['connections']
+            [FirebaseAuth.instance.currentUser.email.toString()];
+
+        if (mounted) {
+          if (sendingMessages == null) sendingMessages = [];
+
+          setState(() {
+            /// Add data to temporary Storage of Sending
+            sendingMessages.add({
+              downloadUrl:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension',
+            });
+
+            /// Add Data to the UI related all chat Container
+            _chatContainer.add({
+              recordedFilePath:
+                  '${DateTime.now().hour}:${DateTime.now().minute}',
+            });
+
+            _response
+                .add(false); // Add the data _response to chat related container
+
+            _mediaTypes.add(MediaTypes.Voice); // Add MediaType
+
+            _inputTextController.clear(); // Get Clear the InputBox
+          });
+
+          /// Data Store in Local Storage
+          await _localStorageHelper.insertNewMessages(
+              widget._userName,
+              recordedFilePath,
+              MediaTypes.Voice,
+              0,
+              _chatContainer.last.values.first.toString());
+
+          /// Data Store in FireStore
+          await _management.addConversationMessages(this._senderMail,
+              sendingMessages, documentSnapShot.data()['connections']);
+
+          if (mounted) {
+            setState(() {
+              _scrollController
+                  .jumpTo(_scrollController.position.maxScrollExtent + 300);
+            });
+          }
+
+          await _sendNotification.messageNotificationClassifier(
+              MediaTypes.Voice,
+              currAccountUserName: _currAccountUserName,
+              connectionToken: _connectionToken);
+        }
       }
     }
   }
@@ -2478,137 +2473,145 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       {MediaTypes mediaTypesForSend = MediaTypes.Image,
       String extraText = '',
       String extension = '.pdf'}) async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-
-    final String _imageDownLoadUrl = await _management
-        .uploadMediaToStorage(_takeImageFile, context, reference: 'chatMedia/');
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-
-    final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
-        .doc("generation_users/$_senderMail")
-        .get();
-
-    // Initialize Temporary List
-    List<dynamic> _sendingMessages = [];
-
-    // Store Updated Sending Messages List
-    _sendingMessages = documentSnapShot.data()['connections']
-        [FirebaseAuth.instance.currentUser.email.toString()];
-
-    String thumbNailPicturePath, thumbNailPicturePathUrl;
-
-    if (mediaTypesForSend == MediaTypes.Video) {
-      final Directory directory = await getExternalStorageDirectory();
-
-      final Directory _newDirectory =
-          await Directory('${directory.path}/.ThumbNails/')
-              .create(); // Create New Folder about the desire location;
-
-      thumbNailPicturePath = await Thumbnails.getThumbnail(
-          thumbnailFolder: _newDirectory.path,
-          videoFile: _takeImageFile.path,
-          imageType: ThumbFormat.JPEG,
-          quality: 20);
-
-      thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
-          File(thumbNailPicturePath), context,
-          reference: 'videoThumbNail/');
-    }
-
-    if (mounted) {
-      if (_sendingMessages == null) _sendingMessages = [];
-
-      setState(() {
-        if (mediaTypesForSend == MediaTypes.Video) {
-          // Add data to temporary Storage of Sending
-          _sendingMessages.add({
-            '$_imageDownLoadUrl+$thumbNailPicturePathUrl':
-                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
-          });
-
-          // Add Data to the UI related all Chat Container
-          _chatContainer.add({
-            _takeImageFile.path:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$thumbNailPicturePath',
-          });
-        } else if (mediaTypesForSend == MediaTypes.Image) {
-          // Add data to temporary Storage of Sending
-          _sendingMessages.add({
-            _imageDownLoadUrl:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
-          });
-
-          // Add Data to the UI related all Chat Container
-          _chatContainer.add({
-            _takeImageFile.path:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
-          });
-        } else if (mediaTypesForSend == MediaTypes.Document) {
-          // Add data to temporary Storage of Sending
-          _sendingMessages.add({
-            _imageDownLoadUrl:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}',
-          });
-
-          // Add Data to the UI related all Chat Container
-          _chatContainer.add({
-            _takeImageFile.path:
-                '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+${_takeImageFile.path.split('/').last}',
-          });
-        }
-
-        _response
-            .add(false); // Add the data _response to chat related container
-
-        _mediaTypes.add(mediaTypesForSend); // Add MediaType
-
-        _inputTextController.clear(); // Get Clear the InputBox
-      });
-
-      // Data Store in Local Storage
-      await _localStorageHelper.insertNewMessages(
-          widget._userName,
-          _takeImageFile.path,
-          mediaTypesForSend,
-          0,
-          _chatContainer.last.values.first.toString());
-
-      // Data Store in Firestore
-      await _management.addConversationMessages(this._senderMail,
-          _sendingMessages, documentSnapShot.data()['connections']);
-
+    if (!await _nativeCallback.callToCheckNetworkConnectivity())
+      _showDiaLog(titleText: 'No Internet Connection');
+    else {
       if (mounted) {
         setState(() {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
-              (MediaQuery.of(context).size.height * 0.8));
+          _isLoading = true;
         });
       }
 
+      final String _imageDownLoadUrl = await _management.uploadMediaToStorage(
+          _takeImageFile, context,
+          reference: 'chatMedia/');
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+          .doc("generation_users/$_senderMail")
+          .get();
+
+      // Initialize Temporary List
+      List<dynamic> _sendingMessages = [];
+
+      // Store Updated Sending Messages List
+      _sendingMessages = documentSnapShot.data()['connections']
+          [FirebaseAuth.instance.currentUser.email.toString()];
+
+      String thumbNailPicturePath, thumbNailPicturePathUrl;
+
       if (mediaTypesForSend == MediaTypes.Video) {
-        await _sendNotification.messageNotificationClassifier(MediaTypes.Video,
-            textMsg: extraText,
-            currAccountUserName: _currAccountUserName,
-            connectionToken: _connectionToken);
-      } else if (mediaTypesForSend == MediaTypes.Image) {
-        await _sendNotification.messageNotificationClassifier(MediaTypes.Image,
-            textMsg: extraText,
-            currAccountUserName: _currAccountUserName,
-            connectionToken: _connectionToken);
-      } else if (mediaTypesForSend == MediaTypes.Document) {
-        await _sendNotification.messageNotificationClassifier(
-            MediaTypes.Document,
-            textMsg: extraText,
-            currAccountUserName: _currAccountUserName,
-            connectionToken: _connectionToken);
+        final Directory directory = await getExternalStorageDirectory();
+
+        final Directory _newDirectory =
+            await Directory('${directory.path}/.ThumbNails/')
+                .create(); // Create New Folder about the desire location;
+
+        thumbNailPicturePath = await Thumbnails.getThumbnail(
+            thumbnailFolder: _newDirectory.path,
+            videoFile: _takeImageFile.path,
+            imageType: ThumbFormat.JPEG,
+            quality: 20);
+
+        thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
+            File(thumbNailPicturePath), context,
+            reference: 'videoThumbNail/');
+      }
+
+      if (mounted) {
+        if (_sendingMessages == null) _sendingMessages = [];
+
+        setState(() {
+          if (mediaTypesForSend == MediaTypes.Video) {
+            // Add data to temporary Storage of Sending
+            _sendingMessages.add({
+              '$_imageDownLoadUrl+$thumbNailPicturePathUrl':
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
+            });
+
+            // Add Data to the UI related all Chat Container
+            _chatContainer.add({
+              _takeImageFile.path:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$thumbNailPicturePath',
+            });
+          } else if (mediaTypesForSend == MediaTypes.Image) {
+            // Add data to temporary Storage of Sending
+            _sendingMessages.add({
+              _imageDownLoadUrl:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
+            });
+
+            // Add Data to the UI related all Chat Container
+            _chatContainer.add({
+              _takeImageFile.path:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$extraText',
+            });
+          } else if (mediaTypesForSend == MediaTypes.Document) {
+            // Add data to temporary Storage of Sending
+            _sendingMessages.add({
+              _imageDownLoadUrl:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}',
+            });
+
+            // Add Data to the UI related all Chat Container
+            _chatContainer.add({
+              _takeImageFile.path:
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+${_takeImageFile.path.split('/').last}',
+            });
+          }
+
+          _response
+              .add(false); // Add the data _response to chat related container
+
+          _mediaTypes.add(mediaTypesForSend); // Add MediaType
+
+          _inputTextController.clear(); // Get Clear the InputBox
+        });
+
+        // Data Store in Local Storage
+        await _localStorageHelper.insertNewMessages(
+            widget._userName,
+            _takeImageFile.path,
+            mediaTypesForSend,
+            0,
+            _chatContainer.last.values.first.toString());
+
+        // Data Store in Firestore
+        await _management.addConversationMessages(this._senderMail,
+            _sendingMessages, documentSnapShot.data()['connections']);
+
+        if (mounted) {
+          setState(() {
+            _scrollController.jumpTo(
+                _scrollController.position.maxScrollExtent +
+                    (MediaQuery.of(context).size.height * 0.8));
+          });
+        }
+
+        if (mediaTypesForSend == MediaTypes.Video) {
+          await _sendNotification.messageNotificationClassifier(
+              MediaTypes.Video,
+              textMsg: extraText,
+              currAccountUserName: _currAccountUserName,
+              connectionToken: _connectionToken);
+        } else if (mediaTypesForSend == MediaTypes.Image) {
+          await _sendNotification.messageNotificationClassifier(
+              MediaTypes.Image,
+              textMsg: extraText,
+              currAccountUserName: _currAccountUserName,
+              connectionToken: _connectionToken);
+        } else if (mediaTypesForSend == MediaTypes.Document) {
+          await _sendNotification.messageNotificationClassifier(
+              MediaTypes.Document,
+              textMsg: extraText,
+              currAccountUserName: _currAccountUserName,
+              connectionToken: _connectionToken);
+        }
       }
     }
   }
@@ -2616,66 +2619,71 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   void _locationSend({double latitude, double longitude}) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
-          .doc("generation_users/$_senderMail")
-          .get();
-
-      /// Initialize Temporary List
-      List<dynamic> _sendingMessages = [];
-
-      /// Store Updated Sending Messages List
-      _sendingMessages = documentSnapShot.data()['connections']
-          [FirebaseAuth.instance.currentUser.email.toString()];
-
-      setState(() {
-        // Add data to temporary Storage of Sending
-        _sendingMessages.add({
-          '$latitude+$longitude':
-              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+    if (!await _nativeCallback.callToCheckNetworkConnectivity())
+      _showDiaLog(titleText: 'No Internet Connection');
+    else {
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
         });
 
-        _chatContainer.add({
-          '$latitude+$longitude':
-              '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
+            .instance
+            .doc("generation_users/$_senderMail")
+            .get();
+
+        /// Initialize Temporary List
+        List<dynamic> _sendingMessages = [];
+
+        /// Store Updated Sending Messages List
+        _sendingMessages = documentSnapShot.data()['connections']
+            [FirebaseAuth.instance.currentUser.email.toString()];
+
+        setState(() {
+          // Add data to temporary Storage of Sending
+          _sendingMessages.add({
+            '$latitude+$longitude':
+                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+          });
+
+          _chatContainer.add({
+            '$latitude+$longitude':
+                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+          });
+
+          _response.add(false);
+
+          _mediaTypes.add(MediaTypes.Location);
         });
 
-        _response.add(false);
+        // Data Store in Local Storage
+        await _localStorageHelper.insertNewMessages(
+            widget._userName,
+            '$latitude+$longitude',
+            MediaTypes.Location,
+            0,
+            _chatContainer.last.values.first.toString());
 
-        _mediaTypes.add(MediaTypes.Location);
-      });
+        // Data Store in Firestore
+        await _management.addConversationMessages(this._senderMail,
+            _sendingMessages, documentSnapShot.data()['connections']);
 
-      // Data Store in Local Storage
-      await _localStorageHelper.insertNewMessages(
-          widget._userName,
-          '$latitude+$longitude',
-          MediaTypes.Location,
-          0,
-          _chatContainer.last.values.first.toString());
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      if (mounted) {
+        setState(() {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
+              (MediaQuery.of(context).size.height * 0.8));
+        });
+      }
 
-      // Data Store in Firestore
-      await _management.addConversationMessages(this._senderMail,
-          _sendingMessages, documentSnapShot.data()['connections']);
-
-      setState(() {
-        _isLoading = false;
-      });
+      await _sendNotification.messageNotificationClassifier(MediaTypes.Location,
+          textMsg: 'Click Red Pointer in Map to Open in Google Map',
+          currAccountUserName: _currAccountUserName,
+          connectionToken: _connectionToken);
     }
-    if (mounted) {
-      setState(() {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent +
-            (MediaQuery.of(context).size.height * 0.8));
-      });
-    }
-
-    await _sendNotification.messageNotificationClassifier(MediaTypes.Location,
-        textMsg: 'Click Red Pointer in Map to Open in Google Map',
-        currAccountUserName: _currAccountUserName,
-        connectionToken: _connectionToken);
   }
 
   void chatMicrophoneOnTapAction(int index) async {
@@ -3107,7 +3115,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   color: Colors.white,
                 ),
                 decoration: InputDecoration(
-                    labelText: 'Type Here',
+                    labelText: 'Type Here...',
                     labelStyle: TextStyle(
                       color: Colors.white70,
                       fontFamily: 'Lora',
