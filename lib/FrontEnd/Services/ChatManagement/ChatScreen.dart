@@ -647,9 +647,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      /// Toast Message
-      showToast('Click Red Pointer in Map to Open in Google Map', fToast,
-          seconds: 5, fontSize: 16.0);
+      try{
+        /// Toast Message
+        showToast('Click Red Pointer in Map to Open in Google Map', fToast,
+            seconds: 5, fontSize: 16.0);
+      }catch(e){
+        print('Toast Error in Chat Screen: ${e.toString()}');
+      }
     }
   }
 
@@ -1106,8 +1110,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 Icons.call,
                 color: Colors.green,
               ),
-              highlightColor: Color.fromRGBO(0, 200, 200, 0.3),
-              onPressed: () {},
+              highlightColor: const Color.fromRGBO(0, 200, 200, 0.3),
+              onPressed: _makeGenerationPhoneCall,
             ),
           ],
         ),
@@ -2965,12 +2969,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               )),
                           child: GestureDetector(
                             onTap: () async {
-                              showToast(
-                                'Waiting for Map',
-                                fToast,
-                                fontSize: 16.0,
-                              );
-                              _showMap();
+                              try{
+                                showToast(
+                                  'Waiting for Map',
+                                  fToast,
+                                  fontSize: 16.0,
+                                );
+                                _showMap();
+                              }catch(e){
+                                print('Error: Location Show Toast Error to open Map: ${e.toString()}');
+                              }
                             },
                             child: Icon(
                               Icons.location_on_rounded,
@@ -3185,9 +3193,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               )),
               content: contentText == ''
                   ? null
-                  : SizedBox(
+                  : Container(
                       height: 100,
                       width: MediaQuery.of(context).size.width,
+                      alignment: Alignment.center,
                       child: ListView(
                         shrinkWrap: true,
                         children: [
@@ -3587,5 +3596,20 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
       },
     );
+  }
+
+  void _makeGenerationPhoneCall() async{
+    if(!await _nativeCallback.callToCheckNetworkConnectivity())
+      _showDiaLog(titleText: 'No Internet Connection');
+    else{
+      final String phoneNumber = await _management.phoneNumberExtractor(widget._userName);
+
+      if(phoneNumber != null && phoneNumber != ''){
+        print('Phone number is: $phoneNumber');
+      }else{
+        print('Connected User Phone Number not found');
+        _showDiaLog(titleText: 'Not Found', contentText: 'Connected user not registered phone number');
+      }
+    }
   }
 }

@@ -386,7 +386,7 @@ class _SelectConnectionState extends State<SelectConnection> {
         });
       }
 
-      showToast('Message Send Successfully', _fToast, toastColor: Colors.amber);
+      showToast('Message Sent Successfully', _fToast, toastColor: Colors.amber);
 
       Navigator.pop(context);
     }

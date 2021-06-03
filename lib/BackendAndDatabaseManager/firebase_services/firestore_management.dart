@@ -373,4 +373,12 @@ class Management {
       print('Profile Pic Upload Error: ${e.toString()}');
     }
   }
+
+  Future<String> phoneNumberExtractor(String _userName) async{
+    final String _userMail = await localStorageHelper.extractImportantDataFromThatAccount(userName: _userName);
+
+    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance.doc('generation_users/$_userMail').get();
+    
+    return documentSnapshot.get('phone_number').toString();
+  }
 }
