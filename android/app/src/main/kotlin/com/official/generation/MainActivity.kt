@@ -10,6 +10,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
+
 class MainActivity : FlutterActivity() {
 
     private val CHANNEL = "com.official.generation/nativeCallBack"
@@ -31,10 +32,8 @@ class MainActivity : FlutterActivity() {
         return try {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancelAll()
-
             true
         } catch (e: Throwable) {
-
             false
         }
     }
@@ -59,7 +58,5 @@ class MainActivity : FlutterActivity() {
         }
         return false
     }
-
-
 }
 

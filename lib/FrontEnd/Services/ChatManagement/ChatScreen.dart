@@ -16,6 +16,7 @@ import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -94,6 +95,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final SendNotification _sendNotification = SendNotification();
   final NativeCallback _nativeCallback = NativeCallback();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   /// Audio Player and Dio Downloader Initialized
   final AudioPlayer _justAudioPlayer = AudioPlayer();
@@ -183,8 +185,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             if (mounted) {
               setState(() {
                 _chatContainer.add({
-                  messageContainer[0].toString():
-                      messageContainer[1].toString(),
+                  _encryptionMaker
+                          .decryptionMaker(messageContainer[0].toString()):
+                      _encryptionMaker
+                          .decryptionMaker(messageContainer[1].toString()),
                 });
                 if (messageContainer[2] == 1)
                   _response.add(true);
@@ -409,7 +413,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                   /// Taking all the remaining messages to store in local container
                   messages.forEach((everyMessage) async {
-                    print('EveryMessage: $everyMessage');
+                    everyMessage = {
+                      _encryptionMaker.decryptionMaker(
+                              everyMessage.keys.first.toString()):
+                          _encryptionMaker.decryptionMaker(
+                              everyMessage.values.first.toString()),
+                    };
 
                     _incomingInformationContainer =
                         everyMessage.values.first.toString().split('+');
@@ -418,7 +427,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     switch (_incomingInformationContainer[1]) {
                       case 'MediaTypes.Text': // If Message Type is Text
 
-                        if (everyMessage.keys.first.contains('[[[@]]]')) {
+                        if (everyMessage.keys.first
+                            .toString()
+                            .contains('[[[@]]]')) {
                           _positionToScroll = 110;
                         }
 
@@ -513,16 +524,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     /// Store Data in local Storage
     await _localStorageHelper.insertNewMessages(
         widget._userName,
-        everyMessage.keys.first.toString(),
+        _encryptionMaker.encryptionMaker(everyMessage.keys.first.toString()),
         MediaTypes.Text,
         1,
-        _incomingInformationContainer[0]);
+        _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]));
+
+    print('Encrypted Every Message: $everyMessage');
 
     if (mounted) {
       setState(() {
         _mediaTypes.add(MediaTypes.Text);
-
-        print('Time is: ${_incomingInformationContainer[0]}');
 
         _chatContainer.add({
           /// Current Running information Store
@@ -2262,9 +2273,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               /// Add data to temporary Storage of Sending
               sendingMessages.add({
                 _replyText != ''
-                        ? '$_replyText[[[@]]]${_inputTextController.text}'
-                        : '${_inputTextController.text}':
-                    "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
+                        ? "${_encryptionMaker.encryptionMaker('$_replyText[[[@]]]${_inputTextController.text}')}"
+                        : '${_encryptionMaker.encryptionMaker(_inputTextController.text)}':
+                    "${_encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}')}",
               });
 
               /// Add Data to the UI related all chat Container
@@ -2300,16 +2311,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           /// Data Store in Local Storage
           await _localStorageHelper.insertNewMessages(
               widget._userName,
-              _chatContainer.last.keys.first.toString(),
+              _encryptionMaker.encryptionMaker(_chatContainer.last.keys.first.toString()),
               MediaTypes.Text,
               0,
-              _chatContainer.last.values.first.toString());
+              _encryptionMaker.encryptionMaker(_chatContainer.last.values.first.toString()));
 
           /// Data Store in Firestore
           await _management.addConversationMessages(this._senderMail,
               sendingMessages, documentSnapShot.data()['connections']);
 
-          final String _textToSend = _inputTextController.text;
+          final String _textToSend =
+              _inputTextController.text;
 
           _inputTextController.clear();
 

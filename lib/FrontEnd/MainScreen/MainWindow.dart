@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -358,15 +359,34 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () async {
                       print('Clicked Refresh in MainWindow');
 
-                      await _localStorageHelper.showAll();
+                      /// Testing Enccryption
+                      final plainText = 'Samarpan Dasgupta';
+                      final key = encrypt.Key.fromBase64('ODf9v33JRP4B08L7W9ii4bvuWrkdBYqvA/MeMDJEE6g=');
+                      final iv = encrypt.IV.fromLength(16);
 
-                      if (mounted) {
-                        setState(() {
-                          ImportantThings.findImageUrlAndUserName();
-                        });
-                      }
+                      final makeEncryption = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.ctr, padding: null));
 
-                      _removeAnonymousNotificationChecking();
+                      final encrypt.Encrypted encrypted = makeEncryption.encrypt(plainText, iv: iv);
+                      final decrypted = makeEncryption.decrypt(encrypted, iv: iv);
+
+                      print(decrypted);
+                      print(encrypted.base64);
+
+                      print('Before: $decrypted');
+
+                      var take = makeEncryption.decrypt64(encrypted.base64, iv: iv);
+
+                      print('After: $take');
+
+                      // await _localStorageHelper.showAll();
+                      //
+                      // if (mounted) {
+                      //   setState(() {
+                      //     ImportantThings.findImageUrlAndUserName();
+                      //   });
+                      // }
+                      //
+                      // _removeAnonymousNotificationChecking();
                     },
                   ),
                 )

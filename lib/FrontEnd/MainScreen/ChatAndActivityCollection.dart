@@ -908,7 +908,7 @@ class _ChatsAndActivityCollectionState
                             height: 12.0,
                           ),
                           // For Extract latest Conversation Message
-                          _latestDataForConnectionExtractPerfectly(_userName)
+                          //_latestDataForConnectionExtractPerfectly(_userName)
                           //Text('Samarpan'),
                         ],
                       ),
@@ -926,8 +926,8 @@ class _ChatsAndActivityCollectionState
                     child: Column(
                       children: [
                         // For Extract latest Conversation Time
-                        _latestDataForConnectionExtractPerfectly(_userName,
-                            purpose: 'lastConnectionTime'),
+                        // _latestDataForConnectionExtractPerfectly(_userName,
+                        //     purpose: 'lastConnectionTime'),
 
                         //Text('12:00'),
                         SizedBox(
