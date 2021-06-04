@@ -604,10 +604,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         /// Store Data in local Storage
         _localStorageHelper.insertNewMessages(
             widget._userName,
-            '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}',
+            _encryptionMaker.encryptionMaker(
+                '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}'),
             MediaTypes.Voice,
             1,
-            _incomingInformationContainer[0]);
+            _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]));
       }
     } catch (e) {
       print('Voice Download Error: ${e.toString()}');
@@ -635,10 +636,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       /// Store in Local Database
       await _localStorageHelper.insertNewMessages(
           widget._userName,
-          everyMessage.keys.first,
+          _encryptionMaker.encryptionMaker(everyMessage.keys.first),
           MediaTypes.Location,
           1,
-          everyMessage.values.first);
+          _encryptionMaker.encryptionMaker(everyMessage.values.first));
 
       /// Important Local Container Updated
       if (mounted) {
@@ -709,10 +710,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         await _localStorageHelper.insertNewMessages(
             widget._userName,
-            '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}',
+            _encryptionMaker.encryptionMaker('${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}'),
             MediaTypes.Document,
             1,
-            '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}');
+            _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}'));
 
         if (mounted) {
           setState(() {
@@ -872,14 +873,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         /// Store Data in local Storage
         _localStorageHelper.insertNewMessages(
             widget._userName,
-            _filePathStore,
+            _encryptionMaker.encryptionMaker(_filePathStore),
             _incomingInformationContainer[1] == MediaTypes.Image.toString()
                 ? MediaTypes.Image
                 : MediaTypes.Video,
             1,
             _incomingInformationContainer[1] == MediaTypes.Image.toString()
-                ? '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}'
-                : '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg');
+                ? _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}')
+                : _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg'));
 
         if (mounted) {
           setState(() {
@@ -2311,17 +2312,18 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           /// Data Store in Local Storage
           await _localStorageHelper.insertNewMessages(
               widget._userName,
-              _encryptionMaker.encryptionMaker(_chatContainer.last.keys.first.toString()),
+              _encryptionMaker
+                  .encryptionMaker(_chatContainer.last.keys.first.toString()),
               MediaTypes.Text,
               0,
-              _encryptionMaker.encryptionMaker(_chatContainer.last.values.first.toString()));
+              _encryptionMaker.encryptionMaker(
+                  _chatContainer.last.values.first.toString()));
 
           /// Data Store in Firestore
           await _management.addConversationMessages(this._senderMail,
               sendingMessages, documentSnapShot.data()['connections']);
 
-          final String _textToSend =
-              _inputTextController.text;
+          final String _textToSend = _inputTextController.text;
 
           _inputTextController.clear();
 
@@ -2440,8 +2442,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           setState(() {
             /// Add data to temporary Storage of Sending
             sendingMessages.add({
-              downloadUrl:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension',
+              _encryptionMaker
+                  .encryptionMaker(
+                      downloadUrl): _encryptionMaker.encryptionMaker(
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension'),
             });
 
             /// Add Data to the UI related all chat Container
@@ -2461,10 +2465,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           /// Data Store in Local Storage
           await _localStorageHelper.insertNewMessages(
               widget._userName,
-              recordedFilePath,
+              _encryptionMaker.encryptionMaker(recordedFilePath),
               MediaTypes.Voice,
               0,
-              _chatContainer.last.values.first.toString());
+              _encryptionMaker.encryptionMaker(
+                  _chatContainer.last.values.first.toString()));
 
           /// Data Store in FireStore
           await _management.addConversationMessages(this._senderMail,
@@ -2547,8 +2552,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           if (mediaTypesForSend == MediaTypes.Video) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
-              '$_imageDownLoadUrl+$thumbNailPicturePathUrl':
-                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
+              _encryptionMaker.encryptionMaker('$_imageDownLoadUrl+$thumbNailPicturePathUrl'):
+                 _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2559,8 +2564,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else if (mediaTypesForSend == MediaTypes.Image) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
-              _imageDownLoadUrl:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText',
+              _encryptionMaker.encryptionMaker(_imageDownLoadUrl):
+                  _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2571,8 +2576,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else if (mediaTypesForSend == MediaTypes.Document) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
-              _imageDownLoadUrl:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}',
+              _encryptionMaker.encryptionMaker(_imageDownLoadUrl):
+                  _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2593,10 +2598,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         // Data Store in Local Storage
         await _localStorageHelper.insertNewMessages(
             widget._userName,
-            _takeImageFile.path,
+            _encryptionMaker.encryptionMaker(_takeImageFile.path),
             mediaTypesForSend,
             0,
-            _chatContainer.last.values.first.toString());
+            _encryptionMaker.encryptionMaker(_chatContainer.last.values.first.toString()));
 
         // Data Store in Firestore
         await _management.addConversationMessages(this._senderMail,
@@ -2659,8 +2664,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         setState(() {
           // Add data to temporary Storage of Sending
           _sendingMessages.add({
-            '$latitude+$longitude':
-                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}',
+            _encryptionMaker.encryptionMaker('$latitude+$longitude'):
+                _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}'),
           });
 
           _chatContainer.add({
@@ -2676,10 +2681,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         // Data Store in Local Storage
         await _localStorageHelper.insertNewMessages(
             widget._userName,
-            '$latitude+$longitude',
+            _encryptionMaker.encryptionMaker('$latitude+$longitude'),
             MediaTypes.Location,
             0,
-            _chatContainer.last.values.first.toString());
+            _encryptionMaker.encryptionMaker(_chatContainer.last.values.first.toString()));
 
         // Data Store in Firestore
         await _management.addConversationMessages(this._senderMail,
