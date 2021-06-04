@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
@@ -647,11 +648,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      try{
+      try {
         /// Toast Message
         showToast('Click Red Pointer in Map to Open in Google Map', fToast,
             seconds: 5, fontSize: 16.0);
-      }catch(e){
+      } catch (e) {
         print('Toast Error in Chat Screen: ${e.toString()}');
       }
     }
@@ -2969,15 +2970,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               )),
                           child: GestureDetector(
                             onTap: () async {
-                              try{
+                              try {
                                 showToast(
                                   'Waiting for Map',
                                   fToast,
                                   fontSize: 16.0,
                                 );
                                 _showMap();
-                              }catch(e){
-                                print('Error: Location Show Toast Error to open Map: ${e.toString()}');
+                              } catch (e) {
+                                print(
+                                    'Error: Location Show Toast Error to open Map: ${e.toString()}');
                               }
                             },
                             child: Icon(
@@ -3598,17 +3600,27 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  void _makeGenerationPhoneCall() async{
-    if(!await _nativeCallback.callToCheckNetworkConnectivity())
+  void _makeGenerationPhoneCall() async {
+    if (!await _nativeCallback.callToCheckNetworkConnectivity())
       _showDiaLog(titleText: 'No Internet Connection');
-    else{
-      final String phoneNumber = await _management.phoneNumberExtractor(widget._userName);
+    else {
+      String phoneNumber =
+          await _management.phoneNumberExtractor(widget._userName);
 
-      if(phoneNumber != null && phoneNumber != ''){
+      if (phoneNumber != null && phoneNumber != '') {
+        phoneNumber =
+            !phoneNumber.contains('+') ? '+$phoneNumber' : phoneNumber;
+
         print('Phone number is: $phoneNumber');
-      }else{
+
+        final bool res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+
+        print('Phone Calling Response: $res');
+      } else {
         print('Connected User Phone Number not found');
-        _showDiaLog(titleText: 'Not Found', contentText: 'Connected user not registered phone number');
+        _showDiaLog(
+            titleText: 'Not Found',
+            contentText: 'Connected user not registered phone number');
       }
     }
   }

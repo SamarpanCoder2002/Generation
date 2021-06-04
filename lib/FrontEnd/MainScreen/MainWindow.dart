@@ -358,8 +358,6 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () async {
                       print('Clicked Refresh in MainWindow');
 
-                      await _nativeCallback.callToCheckNetworkConnectivity();
-
                       await _localStorageHelper.showAll();
 
                       if (mounted) {

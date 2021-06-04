@@ -80,40 +80,72 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
                     SizedBox(
                       height: 20.0,
                     ),
-                    TextButton(
-                      child: Text(
-                        'Add New Phone Number',
-                        style: TextStyle(
-                          color: Colors.green,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          child: Text(
+                            'Add New Phone Number',
+                            style: TextStyle(
+                              color: Colors.green,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40.0),
+                            side: BorderSide(
+                              color: Colors.green,
+                            ),
+                          )),
+                          onPressed: _mobileNumberExtractor,
                         ),
-                      ),
-                      style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40.0),
-                        side: BorderSide(
-                          color: Colors.green,
+                        TextButton(
+                          child: Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          style: TextButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(40.0),
+                            side: BorderSide(color: Colors.red),
+                          )),
+                          onPressed: () async {
+                            await _deleteRegisteredMobileNumber();
+                          },
                         ),
-                      )),
-                      onPressed: _mobileNumberExtractor,
+                      ],
                     ),
+                    _alertMessageWidget(),
                   ],
                 )
-              : TextButton(
-                  child: Text(
-                    'Add Phone Number',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 18.0,
+              : Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height / 2),
+                      child: TextButton(
+                        child: Text(
+                          'Add Phone Number',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40.0),
+                          side: BorderSide(color: Colors.green),
+                        )),
+                        onPressed: () async {
+                          _mobileNumberExtractor();
+                        },
+                      ),
                     ),
-                  ),
-                  style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40.0),
-                    side: BorderSide(color: Colors.green),
-                  )),
-                  onPressed: () async {
-                    _mobileNumberExtractor();
-                  },
+                    _alertMessageWidget(),
+                  ],
                 ),
         ),
       ),
@@ -124,6 +156,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
     final PermissionStatus permissionStatus = await Permission.phone.request();
     if (permissionStatus.isGranted) {
       print('Phone Permission Granted');
+
       final List<SimCard> simCards = await MobileNumber.getSimCards;
 
       _selectMobileNumberToRegister(simCards);
@@ -148,32 +181,40 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
                 ),
               ),
               content: Container(
-                height: 90,
+                height: 100,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     for (int i = 0; i < simCards.length; i++)
-                      TextButton(
-                        child: Text(
-                          simCards[i].number.startsWith('+')
-                              ? simCards[i].number
-                              : '+${simCards[i].number}',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40.0),
-                            side: BorderSide(color: Colors.green,),
-                          )
-                        ),
-                        onPressed: () => _proceedWithSelectedNum(
-                            simCards[i].number.startsWith('+')
-                                ? simCards[i].number
-                                : '+${simCards[i].number}'),
-                      ),
+                      simCards[i].number != ''
+                          ? TextButton(
+                              child: Text(
+                                simCards[i].number.startsWith('+')
+                                    ? simCards[i].number
+                                    : '+${simCards[i].number}',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                              style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40.0),
+                                side: BorderSide(
+                                  color: Colors.green,
+                                ),
+                              )),
+                              onPressed: () => _proceedWithSelectedNum(
+                                  simCards[i].number.startsWith('+')
+                                      ? simCards[i].number
+                                      : '+${simCards[i].number}'),
+                            )
+                          : Text(
+                              "Number can't detect",
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(color: Colors.red, fontSize: 16.0),
+                            ),
                   ],
                 ),
               ),
@@ -221,5 +262,55 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
         toastColor: Colors.red,
         fontSize: 18.0,
       );
+  }
+
+  Widget _alertMessageWidget() {
+    return Container(
+      margin: EdgeInsets.only(top: 20.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+      alignment: Alignment.bottomCenter,
+      child: Text(
+        'Alert: If you registered your number and if any connection will call you, your number will visible in their call Logs...',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.red, fontSize: 16.0),
+      ),
+    );
+  }
+
+  Future<void> _deleteRegisteredMobileNumber() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    final String mobileNum =
+        await _localStorageHelper.extractImportantTableData(
+            extraImportant: ExtraImportant.MobileNumber,
+            userMail: FirebaseAuth.instance.currentUser.email);
+
+    if (mobileNum != null) {
+      await _localStorageHelper.deleteParticularUpdatedImportantData(
+          extraImportant: ExtraImportant.MobileNumber,
+          shouldBeDeleted: mobileNum);
+
+      await FirebaseFirestore.instance
+          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .update({
+        'phone_number': '',
+      });
+
+      if (mounted) {
+        setState(() {
+          this._registeredPhoneNumber = '';
+        });
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }

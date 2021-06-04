@@ -385,24 +385,26 @@ class LocalStorageHelper {
       ActivitySpecialOptions activitySpecialOptions,
       String extraText = '',
       String bgInformation = ''}) async {
-    try{
+    try {
       final Database db = await this.database;
       final Map<String, dynamic> _activityStoreMap = Map<String, dynamic>();
 
       _activityStoreMap[_colActivity] = statusLinkOrString;
       _activityStoreMap[_colTimeActivity] = activityTime;
       _activityStoreMap[_colMediaType] =
-      mediaTypes == null ? '' : mediaTypes.toString();
+          mediaTypes == null ? '' : mediaTypes.toString();
       _activityStoreMap[_colExtraText] = extraText;
       _activityStoreMap[_colBgInformation] = bgInformation;
-      _activityStoreMap[_colActivitySpecial] =
-      activitySpecialOptions == null ? '' : activitySpecialOptions.toString();
+      _activityStoreMap[_colActivitySpecial] = activitySpecialOptions == null
+          ? ''
+          : activitySpecialOptions.toString();
 
       /// Result Insert to DB
-      final int result = await db.insert('${tableName}_status', _activityStoreMap);
+      final int result =
+          await db.insert('${tableName}_status', _activityStoreMap);
 
-      return result > 0?true:false;
-    }catch(e){
+      return result > 0 ? true : false;
+    } catch (e) {
       print('Error: Activity Table Data insertion Error: ${e.toString()}');
       return false;
     }
