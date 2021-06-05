@@ -339,7 +339,7 @@ class LocalStorageHelper {
       result = await db.rawQuery(
           "SELECT $_colProfileImagePath FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
-    return result[0].values.first;
+    return result[0].values.first == null?'':result[0].values.first;
   }
 
   Future<String> extractProfilePicUrl({@required String userName}) async {
@@ -363,7 +363,7 @@ class LocalStorageHelper {
     else
       result = await db
           .rawQuery("SELECT $_colAccountUserName FROM $_allImportantDataStore");
-    return result;
+    return result == null?[]:result;
   }
 
   /// Make Tables for user Activity
@@ -890,7 +890,7 @@ class LocalStorageHelper {
   }
 
   Future<void> insertDataForCallLog(String tableName,
-      {@required String callData,
+      {@required String callDate,
       @required String callTime,
       CallTypes callTypes = CallTypes.AudioCall}) async {
     try {
@@ -898,7 +898,7 @@ class LocalStorageHelper {
 
       final Map<String, Object> tempMap = Map<String, Object>();
 
-      tempMap[_colCallDate] = callData;
+      tempMap[_colCallDate] = callDate;
       tempMap[_colCallTime] = callTime;
       tempMap[_colCallType] = callTypes.toString();
 
@@ -910,13 +910,13 @@ class LocalStorageHelper {
     }
   }
 
-  Future<dynamic> countTotalCallLogs(String tableName,
+  Future<dynamic> countOrExtractTotalCallLogs(String tableName,
       {String purpose = 'COUNT'}) async {
     try {
       final Database db = await this.database;
 
       final List<Map<String, Object>> result =
-          await db.rawQuery("$purpose * FROM '${tableName}_callHistory'");
+          await db.rawQuery("SELECT ${purpose == 'COUNT'?'COUNT(*)':'*'} FROM ${tableName}_callHistory");
 
       if (purpose == 'COUNT') return result == null ? 0 : result.length;
 

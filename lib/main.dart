@@ -73,6 +73,7 @@ void main() async {
   runApp(MaterialApp(
     title: 'Generation',
     debugShowCheckedModeBanner: false,
+    themeMode: ThemeMode.dark,
     home: await differentContext(),
   ));
 }

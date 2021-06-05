@@ -14,11 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker/emoji_picker.dart';
 import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
-import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -45,7 +41,10 @@ import 'package:generation/BackendAndDatabaseManager/global_controller/different
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Services/multiple_message_send_connection_selection.dart';
-
+import 'package:generation/BackendAndDatabaseManager/general_services/make_audio_call.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'connection_profile_view.dart';
 
 // ignore: must_be_immutable
@@ -280,8 +279,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
               String _profilePicFormattedUrl = '';
 
-              if(connectionSnapShot.data()['profile_pic'] != '')
-                _profilePicFormattedUrl = _encryptionMaker.decryptionMaker(connectionSnapShot.data()['profile_pic']);
+              if (connectionSnapShot.data()['profile_pic'] != '')
+                _profilePicFormattedUrl = _encryptionMaker
+                    .decryptionMaker(connectionSnapShot.data()['profile_pic']);
 
               /// Profile Picture Updation Check
               if (_profilePicFormattedUrl != _profilePicUrl) {
@@ -298,19 +298,19 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 print('Profile Pic Formatted Url: $_profilePicFormattedUrl');
 
                 /// If Updated ProfilePic not null and Empty String
-                if (_profilePicFormattedUrl.toString() !=
-                        null &&
+                if (_profilePicFormattedUrl.toString() != null &&
                     _profilePicFormattedUrl.toString() != '') {
                   print('Path: ${widget._connectionProfileImageLocalPath}');
 
-                  try{
+                  try {
                     if (widget._connectionProfileImageLocalPath != '')
                       await File(widget._connectionProfileImageLocalPath)
                           .delete(recursive: true)
                           .whenComplete(() => print(
-                          'Old Profile Image of Connection Deletion Complete'));
-                  }catch(e){
-                    print('Error: Old Profile Pic Already Deleted: ${e.toString()}');
+                              'Old Profile Image of Connection Deletion Complete'));
+                  } catch (e) {
+                    print(
+                        'Error: Old Profile Pic Already Deleted: ${e.toString()}');
                   }
 
                   print(
@@ -331,8 +331,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                   try {
                     await _dio
-                        .download(_profilePicFormattedUrl,
-                            profilePicPath)
+                        .download(_profilePicFormattedUrl, profilePicPath)
                         .whenComplete(() {
                       print('Profile Picture Download Complete');
                     });
@@ -340,8 +339,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     print('Profile Pic Download Error: ${e.toString()}');
                   }
                 } else {
-                  if (_profilePicFormattedUrl.toString() ==
-                          '' &&
+                  if (_profilePicFormattedUrl.toString() == '' &&
                       widget._connectionProfileImageLocalPath != '')
                     await File(widget._connectionProfileImageLocalPath)
                         .delete(recursive: true)
@@ -361,8 +359,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 /// Update Local And Remote Profile Image Path
                 await _localStorageHelper.insertProfilePictureInImportant(
                     imagePath: profilePicPath,
-                    imageUrl: _profilePicFormattedUrl !=
-                            null
+                    imageUrl: _profilePicFormattedUrl != null
                         ? _profilePicFormattedUrl.toString()
                         : '',
                     mail: _connectionMail);
@@ -719,10 +716,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         await _localStorageHelper.insertNewMessages(
             widget._userName,
-            _encryptionMaker.encryptionMaker('${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}'),
+            _encryptionMaker.encryptionMaker(
+                '${_newDirectory.path}$currTime${everyMessage.values.first.split('+')[3]}'),
             MediaTypes.Document,
             1,
-            _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}'));
+            _encryptionMaker.encryptionMaker(
+                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}'));
 
         if (mounted) {
           setState(() {
@@ -879,7 +878,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         print('Recorded Path: $_filePathStore');
 
-        print('Encoded: ${_encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg')}');
+        print(
+            'Encoded: ${_encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg')}');
 
         /// Store Data in local Storage
         _localStorageHelper.insertNewMessages(
@@ -890,8 +890,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 : MediaTypes.Video,
             1,
             _incomingInformationContainer[1] == MediaTypes.Image.toString()
-                ? _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}')
-                : _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg'));
+                ? _encryptionMaker.encryptionMaker(
+                    '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}')
+                : _encryptionMaker.encryptionMaker(
+                    '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg'));
 
         if (mounted) {
           setState(() {
@@ -1135,7 +1137,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 color: Colors.green,
               ),
               highlightColor: const Color.fromRGBO(0, 200, 200, 0.3),
-              onPressed: _makeGenerationPhoneCall,
+              onPressed: () async {
+                final CallManagement _callManagement =
+                    CallManagement(this.context, widget._userName);
+                await _callManagement.makeGenerationPhoneCall();
+              },
             ),
           ],
         ),
@@ -2563,8 +2569,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           if (mediaTypesForSend == MediaTypes.Video) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
-              _encryptionMaker.encryptionMaker('$_imageDownLoadUrl+$thumbNailPicturePathUrl'):
-                 _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
+              _encryptionMaker.encryptionMaker(
+                      '$_imageDownLoadUrl+$thumbNailPicturePathUrl'):
+                  _encryptionMaker.encryptionMaker(
+                      '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2575,8 +2583,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else if (mediaTypesForSend == MediaTypes.Image) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
-              _encryptionMaker.encryptionMaker(_imageDownLoadUrl):
-                  _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
+              _encryptionMaker
+                  .encryptionMaker(
+                      _imageDownLoadUrl): _encryptionMaker.encryptionMaker(
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2587,8 +2597,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else if (mediaTypesForSend == MediaTypes.Document) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
-              _encryptionMaker.encryptionMaker(_imageDownLoadUrl):
-                  _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}'),
+              _encryptionMaker
+                  .encryptionMaker(
+                      _imageDownLoadUrl): _encryptionMaker.encryptionMaker(
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2612,7 +2624,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _encryptionMaker.encryptionMaker(_takeImageFile.path),
             mediaTypesForSend,
             0,
-            _encryptionMaker.encryptionMaker(_chatContainer.last.values.first.toString()));
+            _encryptionMaker
+                .encryptionMaker(_chatContainer.last.values.first.toString()));
 
         // Data Store in Firestore
         await _management.addConversationMessages(this._senderMail,
@@ -2675,8 +2688,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         setState(() {
           // Add data to temporary Storage of Sending
           _sendingMessages.add({
-            _encryptionMaker.encryptionMaker('$latitude+$longitude'):
-                _encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}'),
+            _encryptionMaker
+                .encryptionMaker(
+                    '$latitude+$longitude'): _encryptionMaker.encryptionMaker(
+                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}'),
           });
 
           _chatContainer.add({
@@ -2695,7 +2710,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _encryptionMaker.encryptionMaker('$latitude+$longitude'),
             MediaTypes.Location,
             0,
-            _encryptionMaker.encryptionMaker(_chatContainer.last.values.first.toString()));
+            _encryptionMaker
+                .encryptionMaker(_chatContainer.last.values.first.toString()));
 
         // Data Store in Firestore
         await _management.addConversationMessages(this._senderMail,
@@ -3626,30 +3642,5 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
       },
     );
-  }
-
-  void _makeGenerationPhoneCall() async {
-    if (!await _nativeCallback.callToCheckNetworkConnectivity())
-      _showDiaLog(titleText: 'No Internet Connection');
-    else {
-      String phoneNumber =
-          await _management.phoneNumberExtractor(widget._userName);
-
-      if (phoneNumber != null && phoneNumber != '') {
-        phoneNumber =
-            !phoneNumber.contains('+') ? '+$phoneNumber' : phoneNumber;
-
-        print('Phone number is: $phoneNumber');
-
-        final bool res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
-
-        print('Phone Calling Response: $res');
-      } else {
-        print('Connected User Phone Number not found');
-        _showDiaLog(
-            titleText: 'Not Found',
-            contentText: 'Connected user not registered phone number');
-      }
-    }
   }
 }

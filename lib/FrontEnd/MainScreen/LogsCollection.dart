@@ -1,5 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation/BackendAndDatabaseManager/general_services/make_audio_call.dart';
+
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/Services/CallHistory/call_history_show.dart';
 
 class ScreenLogs extends StatefulWidget {
   @override
@@ -7,9 +13,36 @@ class ScreenLogs extends StatefulWidget {
 }
 
 class _ScreenLogsState extends State<ScreenLogs> {
+  final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+  final List<Map<String, String>> _nameAndImageForCallLog = [];
+
+  void _takeAllCallLogsCount() async {
+    final List<Map<String, Object>> _connectedUserCollection =
+        await _localStorageHelper.extractAllUsersName();
+
+    _connectedUserCollection.forEach((userNameMap) async {
+      final int totalCallLogs = await _localStorageHelper
+          .countOrExtractTotalCallLogs(userNameMap.values.first.toString());
+
+      if (totalCallLogs > 0) {
+        final String _userProfilePicLocalPath =
+            await _localStorageHelper.extractProfileImageLocalPath(
+                userName: userNameMap.values.first.toString());
+
+        if (mounted) {
+          setState(() {
+            this._nameAndImageForCallLog.add({
+              userNameMap.values.first.toString(): _userProfilePicLocalPath,
+            });
+          });
+        }
+      }
+    });
+  }
 
   @override
   void initState() {
+    _takeAllCallLogsCount();
     super.initState();
   }
 
@@ -32,14 +65,14 @@ class _ScreenLogsState extends State<ScreenLogs> {
 
   Widget chatList(BuildContext context) {
     return ListView.builder(
-      itemCount: 30,
+      itemCount: this._nameAndImageForCallLog.length,
       itemBuilder: (context, position) {
-        return chatTile(context);
+        return chatTile(context, position);
       },
     );
   }
 
-  Widget chatTile(BuildContext context) {
+  Widget chatTile(BuildContext context, int index) {
     return Card(
         elevation: 0.0,
         color: Color.fromRGBO(34, 48, 60, 1),
@@ -52,6 +85,8 @@ class _ScreenLogsState extends State<ScreenLogs> {
             ),
             onPressed: () {
               print("Logs Information");
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => ShowCallLogsData(this._nameAndImageForCallLog[index].keys.first.toString())));
             },
             child: Row(
               children: [
@@ -62,48 +97,53 @@ class _ScreenLogsState extends State<ScreenLogs> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: ExactAssetImage("assets/logo/logo.jpg"),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  width: MediaQuery.of(context).size.width / 2 + 20,
-                  padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
-                  child: Text(
-                    "Samarpan Dasgupta",
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.white,
-                    ),
+                    backgroundImage: this
+                                ._nameAndImageForCallLog[index]
+                                .values
+                                .first
+                                .toString() ==
+                            ''
+                        ? ExactAssetImage("assets/logo/logo.jpg")
+                        : FileImage(File(this
+                            ._nameAndImageForCallLog[index]
+                            .values
+                            .first
+                            .toString())),
                   ),
                 ),
                 Expanded(
                   child: Container(
-                    //color: Colors.deepPurpleAccent,
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: IconButton(
-                                icon: Icon(
-                                  Icons.call,
-                                  color: Colors.lightGreen,
-                                ),
-                                onPressed: () {
-                                  print("Call Clicked");
-                                })),
-                        Expanded(
-                            child: IconButton(
-                                icon: Icon(
-                                  Icons.video_call_rounded,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () {
-                                  print("Video Clicked");
-                                })),
-                      ],
+                    alignment: Alignment.center,
+                    //width: MediaQuery.of(context).size.width / 2 + 20,
+                    padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                    child: Text(
+                      this._nameAndImageForCallLog[index].keys.first.toString(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
+                IconButton(
+                    icon: Icon(
+                      Icons.call,
+                      color: Colors.lightGreen,
+                    ),
+                    onPressed: () async {
+                      print("Call Clicked");
+
+                      final CallManagement _callManagement = CallManagement(
+                          this.context,
+                          this
+                              ._nameAndImageForCallLog[index]
+                              .keys
+                              .first
+                              .toString());
+
+                      await _callManagement.makeGenerationPhoneCall();
+                    }),
               ],
             ),
           ),
