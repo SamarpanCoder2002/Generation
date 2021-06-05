@@ -2,7 +2,7 @@ import 'package:encrypt/encrypt.dart';
 
 class EncryptionMaker {
   static final Key _key = Key.fromBase64('YOUR-UNIQUE-KEY-HERE');
-  final _iv = IV.fromLength(16);
+  static final IV _iv = IV.fromLength(16);
 
   Encrypter _makeEncryption;
 
@@ -12,15 +12,13 @@ class EncryptionMaker {
   }
 
   String encryptionMaker(String plainText) {
-    final Encrypted encrypted =
-        _makeEncryption.encrypt(plainText, iv: this._iv);
-    print('Encrypted is: ${encrypted.base64}');
+    final Encrypted encrypted = _makeEncryption.encrypt(plainText, iv: _iv);
     return encrypted.base64;
   }
 
   String decryptionMaker(String encodedStringForm) {
     final String decrypted =
-        this._makeEncryption.decrypt64(encodedStringForm, iv: this._iv);
+        this._makeEncryption.decrypt64(encodedStringForm, iv: _iv);
     return decrypted;
   }
 }

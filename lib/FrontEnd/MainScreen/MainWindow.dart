@@ -58,16 +58,17 @@ Future<void> _deleteFromStorage() async {
     }
 
     _activityLinkDeleteFromStorage.forEach((storageElementToDelete) async {
-      if (storageElementToDelete.contains('https')) {
-        _management
-            .deleteFilesFromFirebaseStorage(storageElementToDelete)
-            .then((value) {
-          print('$storageElementToDelete Deleted From Firebase Storage');
+      print('Storage Element to delete: $storageElementToDelete');
 
-          final bool response =
-              _activityLinkDeleteFromStorage.remove(storageElementToDelete);
-          print('$storageElementToDelete Delete Status: $response');
-        });
+      if (storageElementToDelete.contains('https')) {
+        await _management
+            .deleteFilesFromFirebaseStorage(storageElementToDelete);
+
+        print('$storageElementToDelete Deleted From Firebase Storage');
+
+        final bool response =
+            _activityLinkDeleteFromStorage.remove(storageElementToDelete);
+        print('$storageElementToDelete Delete Status: $response');
       }
     });
   }
@@ -89,14 +90,10 @@ Future<void> _deleteOldTask() async {
         await _localStorageHelper
             .extractActivityForParticularUserName(everyUser.values.first);
 
-    print('Now 1: $_thisUserActivityCollection');
-
     if (_thisUserActivityCollection != null) {
       if (_thisUserActivityCollection.length == 0) {
         print('User Has No Activity');
       } else {
-        print('Now 2: $_thisUserActivityCollection');
-
         _thisUserActivityCollection
             .forEach((Map<String, dynamic> everyActivity) async {
           print('Activity: ${everyActivity['Status']}');
@@ -125,8 +122,6 @@ Future<void> _deleteOldTask() async {
 
           if (_activityDateTime.contains('+'))
             _activityDateTime = _activityDateTime.split('+')[0];
-
-          print('Now 3: $_thisUserActivityCollection');
 
           final String currDate = DateTime.now().toString().split(' ')[0];
           final int currHour = DateTime.now().hour;
@@ -171,6 +166,8 @@ Future<void> _deleteOldTask() async {
 
   final Map<String, String> _linksMap =
       await _localStorageHelper.extractRemainingLinks();
+
+  print('Links Map: $_linksMap');
 
   final String currDate = DateTime.now().toString().split(' ')[0];
   final int currHour = DateTime.now().hour;

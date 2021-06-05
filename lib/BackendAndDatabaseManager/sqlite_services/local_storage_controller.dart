@@ -702,10 +702,12 @@ class LocalStorageHelper {
       map[_colLinks] = _encryptionMaker.encryptionMaker(link);
       map[_colTime] = _encryptionMaker.encryptionMaker(DateTime.now().toString());
 
-      await db.transaction((txn) async {
-        return await txn.insert(
+
+      int result = await db.insert(
             _allRemainingLinksToDeleteFromFirebaseStorage, map);
-      });
+
+      print('Insert New Link Result : $result');
+
     } catch (e) {
       print('Insert Remaining Links Error: ${e.toString()}');
       await createTableForRemainingLinks();
