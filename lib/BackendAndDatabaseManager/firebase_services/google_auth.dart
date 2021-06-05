@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 
@@ -21,6 +22,7 @@ class GoogleAuth {
   final TextEditingController _about = TextEditingController();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   final FToast _fToast = FToast();
 
@@ -102,6 +104,9 @@ class GoogleAuth {
         builder: (context) => AlertDialog(
               elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40.0),
+          ),
               title: Text(
                 _title,
                 textAlign: TextAlign.center,
@@ -127,6 +132,9 @@ class GoogleAuth {
         builder: (_) => AlertDialog(
               elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
               title: Center(
                 child: Text(
                   "Set Additional Details",
@@ -244,15 +252,21 @@ class GoogleAuth {
                                     .collection("generation_users")
                                     .doc(_email)
                                     .set({
-                                  'user_name': this._userName.text,
-                                  'about': this._about.text,
+                                  'user_name': _encryptionMaker
+                                      .encryptionMaker(this._userName.text),
+                                  'about': _encryptionMaker
+                                      .encryptionMaker(this._about.text),
                                   'connection_request': {},
-                                  'creation_date': currDate,
-                                  'creation_time': currTime,
+                                  'creation_date': _encryptionMaker
+                                      .encryptionMaker(currDate),
+                                  'creation_time': _encryptionMaker
+                                      .encryptionMaker(currTime),
                                   'connections': {},
-                                  'total_connections': '0',
+                                  'total_connections':
+                                      _encryptionMaker.encryptionMaker('0'),
                                   'activity': {},
-                                  'token': _getToken,
+                                  'token': _encryptionMaker
+                                      .encryptionMaker(_getToken),
                                   'profile_pic': '',
                                   'phone_number': '',
                                 });

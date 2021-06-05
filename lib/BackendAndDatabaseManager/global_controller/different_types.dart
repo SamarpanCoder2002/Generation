@@ -34,3 +34,8 @@ enum HistoryOrMediaChoice {
   History,
   Media,
 }
+
+enum CallTypes{
+  AudioCall,
+  VideoCall,
+}

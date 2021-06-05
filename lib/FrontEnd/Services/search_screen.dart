@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 
 class Search extends StatefulWidget {
@@ -20,6 +21,7 @@ class _SearchState extends State<Search> {
   final SendNotification _sendNotification = SendNotification();
   final TextEditingController searchUser = TextEditingController();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   QuerySnapshot searchResultSnapshot;
 
@@ -106,7 +108,8 @@ class _SearchState extends State<Search> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  searchResultSnapshot.docs[index][searchArgument],
+                  _encryptionMaker.decryptionMaker(
+                      searchResultSnapshot.docs[index][searchArgument]),
                   style: TextStyle(
                       color: Colors.orange,
                       fontSize: searchArgument != "about" ? 20 : 15),
@@ -115,8 +118,9 @@ class _SearchState extends State<Search> {
                   height: 5.0,
                 ),
                 Text(
-                  searchResultSnapshot.docs[index]
-                      [searchArgument == "about" ? "user_name" : "about"],
+                  _encryptionMaker.decryptionMaker(
+                      searchResultSnapshot.docs[index]
+                          [searchArgument == "about" ? "user_name" : "about"]),
                   style: TextStyle(color: Colors.lightBlue, fontSize: 14),
                 ),
               ],
@@ -180,10 +184,11 @@ class _SearchState extends State<Search> {
 
                 /// Send Notification About the opponent Person About new notification
                 await _sendNotification.sendNotification(
-                  token: searchResultSnapshot.docs[index]['token'],
+                  token: _encryptionMaker.decryptionMaker(
+                      searchResultSnapshot.docs[index]['token']),
                   title: 'New Connection Request',
                   body:
-                      '${documentSnapShotCurrUser.get('user_name')} Send You a Connection Request',
+                      '${_encryptionMaker.decryptionMaker(documentSnapShotCurrUser.get('user_name'))} Send You a Connection Request',
                 );
 
                 print("Updated");
@@ -223,7 +228,7 @@ class _SearchState extends State<Search> {
                   if (mounted) {
                     setState(() {
                       print(
-                          'Request Connection Request: ${searchResultSnapshot.docs[index]['total_connections']}');
+                          'Request Connection Request: ${_encryptionMaker.decryptionMaker(searchResultSnapshot.docs[index]['total_connections'])}');
 
                       FirebaseFirestore.instance
                           .doc(
@@ -232,13 +237,13 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionRequestUser,
                         'connections': connectionsMapRequestUser,
-                        'total_connections':
-                            '${int.parse(searchResultSnapshot.docs[index]['total_connections']) + 1}',
+                        'total_connections': _encryptionMaker.encryptionMaker(
+                            '${int.parse(_encryptionMaker.decryptionMaker(searchResultSnapshot.docs[index]['total_connections'])) + 1}'),
                         'activity': activityMapRequestUser,
                       });
 
                       print(
-                          'Current Connection Request: ${documentSnapShotCurrUser.get('total_connections')}');
+                          'Current Connection Request: ${_encryptionMaker.decryptionMaker(documentSnapShotCurrUser.get('total_connections'))}');
 
                       FirebaseFirestore.instance
                           .doc(
@@ -247,8 +252,8 @@ class _SearchState extends State<Search> {
                         'connection_request':
                             connectionRequestCollectionCurrUser,
                         'connections': connectionsMapCurrUser,
-                        'total_connections':
-                            '${int.parse(documentSnapShotCurrUser.get('total_connections')) + 1}',
+                        'total_connections': _encryptionMaker.encryptionMaker(
+                            '${int.parse(_encryptionMaker.decryptionMaker(documentSnapShotCurrUser.get('total_connections'))) + 1}'),
                         'activity': activityMapCurrUser,
                       });
                     });
@@ -256,19 +261,25 @@ class _SearchState extends State<Search> {
 
                   /// If Same user Already Present, update their account info
                   if (this._allConnectedUserName.contains(
-                      searchResultSnapshot.docs[index]['user_name'])) {
+                      _encryptionMaker.decryptionMaker(
+                          searchResultSnapshot.docs[index]['user_name']))) {
                     final QueryDocumentSnapshot queryDocSs =
                         searchResultSnapshot.docs[index];
 
                     print('Before Updating');
 
                     await _localStorageHelper.insertOrUpdateDataForThisAccount(
-                        userName: queryDocSs['user_name'],
+                        userName: _encryptionMaker
+                            .decryptionMaker(queryDocSs['user_name']),
                         userMail: queryDocSs.id,
-                        userToken: queryDocSs['token'],
-                        userAbout: queryDocSs['about'],
-                        userAccCreationDate: queryDocSs['creation_date'],
-                        userAccCreationTime: queryDocSs['creation_time'],
+                        userToken: _encryptionMaker
+                            .decryptionMaker(queryDocSs['token']),
+                        userAbout: _encryptionMaker
+                            .decryptionMaker(queryDocSs['about']),
+                        userAccCreationDate: _encryptionMaker
+                            .decryptionMaker(queryDocSs['creation_date']),
+                        userAccCreationTime: _encryptionMaker
+                            .decryptionMaker(queryDocSs['creation_time']),
                         purpose: 'update');
 
                     print('After Updating');
@@ -276,10 +287,11 @@ class _SearchState extends State<Search> {
 
                   /// Send Notification to Request Sender about Connection Accepted
                   await _sendNotification.sendNotification(
-                    token: searchResultSnapshot.docs[index]['token'],
+                    token: _encryptionMaker.decryptionMaker(
+                        searchResultSnapshot.docs[index]['token']),
                     title: 'Connection Request Accepted',
                     body:
-                        '${documentSnapShotCurrUser.get('user_name')} Accept Your Connection Request',
+                        '${_encryptionMaker.decryptionMaker(documentSnapShotCurrUser.get('user_name'))} Accept Your Connection Request',
                   );
                 } else {
                   print("Nothing To Do");
@@ -454,8 +466,8 @@ class _SearchState extends State<Search> {
     final String oppositeConnectionStatus = searchResultSnapshot.docs[index]
         .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
 
-    final String otherUserName =
-        searchResultSnapshot.docs[index].data()['user_name'];
+    final String otherUserName = _encryptionMaker
+        .decryptionMaker(searchResultSnapshot.docs[index].data()['user_name']);
 
     if (oppositeConnectionStatus == 'Invitation Came') {
       return Text(
@@ -499,8 +511,8 @@ class _SearchState extends State<Search> {
     String oppositeConnectionStatus = searchResultSnapshot.docs[index]
         .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
 
-    final String otherUserName =
-        searchResultSnapshot.docs[index].data()['user_name'];
+    final String otherUserName = _encryptionMaker
+        .decryptionMaker(searchResultSnapshot.docs[index].data()['user_name']);
 
     if (oppositeConnectionStatus == 'Invitation Came')
       return Colors.amber;

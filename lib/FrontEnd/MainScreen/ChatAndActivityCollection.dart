@@ -156,11 +156,13 @@ class _ChatsAndActivityCollectionState
               .toList(); // For Avoid Duplicate Inclusion of Activity
 
           particularConnectionActivity.forEach((everyActivity) async {
-
-            if(mounted){
+            if (mounted) {
               setState(() {
                 everyActivity = {
-                  _encryptionMaker.decryptionMaker(everyActivity.keys.first.toString()): _encryptionMaker.decryptionMaker(everyActivity.values.first.toString()),
+                  _encryptionMaker
+                          .decryptionMaker(everyActivity.keys.first.toString()):
+                      _encryptionMaker.decryptionMaker(
+                          everyActivity.values.first.toString()),
                 };
               });
             }
@@ -303,11 +305,12 @@ class _ChatsAndActivityCollectionState
                   .get();
 
               /// Checking If Same User Name Present in the list or not
-              if (!_allConnectionsUserName
-                  .contains(documentSnapshot['user_name'])) {
+              if (!_allConnectionsUserName.contains(_encryptionMaker
+                  .decryptionMaker(documentSnapshot['user_name']))) {
                 /// Make SqLite Table With User UserName
                 final bool response = await _localStorageHelper
-                    .createTableForUserName(documentSnapshot['user_name']);
+                    .createTableForUserName(_encryptionMaker
+                        .decryptionMaker(documentSnapshot['user_name']));
 
                 try {
                   if (response) {
@@ -325,7 +328,9 @@ class _ChatsAndActivityCollectionState
                     if (documentSnapshot['profile_pic'] != null &&
                         documentSnapshot['profile_pic'] != '') {
                       await _dio
-                          .download(documentSnapshot['profile_pic'].toString(),
+                          .download(
+                              _encryptionMaker.decryptionMaker(
+                                  documentSnapshot['profile_pic'].toString()),
                               profilePicPath)
                           .whenComplete(
                               () => print('Profile Picture Download Complete'));
@@ -340,15 +345,23 @@ class _ChatsAndActivityCollectionState
                     /// Data Store for General Reference
                     await _localStorageHelper.insertOrUpdateDataForThisAccount(
                       userMail: connectionName,
-                      userName: documentSnapshot['user_name'],
-                      userToken: documentSnapshot['token'],
-                      userAbout: documentSnapshot['about'],
+                      userName: _encryptionMaker
+                          .decryptionMaker(documentSnapshot['user_name']),
+                      userToken: _encryptionMaker
+                          .decryptionMaker(documentSnapshot['token']),
+                      userAbout: _encryptionMaker
+                          .decryptionMaker(documentSnapshot['about']),
                       profileImagePath: profilePicPath,
-                      profileImageUrl: documentSnapshot['profile_pic'] == null
+                      profileImageUrl: (documentSnapshot['profile_pic'] == null)
                           ? ''
-                          : documentSnapshot['profile_pic'].toString(),
-                      userAccCreationDate: documentSnapshot['creation_date'],
-                      userAccCreationTime: documentSnapshot['creation_time'],
+                          : documentSnapshot['profile_pic'] == ''
+                              ? ''
+                              : _encryptionMaker.decryptionMaker(
+                                  documentSnapshot['profile_pic'].toString()),
+                      userAccCreationDate: _encryptionMaker
+                          .decryptionMaker(documentSnapshot['creation_date']),
+                      userAccCreationTime: _encryptionMaker
+                          .decryptionMaker(documentSnapshot['creation_time']),
                       chatWallpaper: _globalChatWallpaper == null
                           ? ''
                           : _globalChatWallpaper,
@@ -356,21 +369,30 @@ class _ChatsAndActivityCollectionState
 
                     /// Make a new table to this new connected user Activity
                     await _localStorageHelper.createTableForUserActivity(
-                        documentSnapshot['user_name']);
+                        _encryptionMaker
+                            .decryptionMaker(documentSnapshot['user_name']));
+
+                    /// For Call Logs Store of new Connection
+                    await _localStorageHelper.createTableForConnectionCallLogs(
+                        _encryptionMaker
+                            .decryptionMaker(documentSnapshot['user_name']));
 
                     await ProfileImageManagement
                         .userProfileNameAndImageExtractor();
 
                     if (ProfileImageManagement
                                 .allConnectionsProfilePicLocalPath[
-                            documentSnapshot['user_name']] !=
+                            _encryptionMaker.decryptionMaker(
+                                documentSnapshot['user_name'])] !=
                         profilePicPath) {
                       print('New Connection Profile Pic Not Matched');
                       if (mounted) {
                         setState(() {
                           ProfileImageManagement
-                                  .allConnectionsProfilePicLocalPath[
-                              documentSnapshot['user_name']] = profilePicPath;
+                                      .allConnectionsProfilePicLocalPath[
+                                  _encryptionMaker.decryptionMaker(
+                                      documentSnapshot['user_name'])] =
+                              profilePicPath;
                         });
                       }
                     }
@@ -384,13 +406,15 @@ class _ChatsAndActivityCollectionState
                 if (mounted) {
                   setState(() {
                     _allConnectionsUserName.insert(
-                        0, documentSnapshot['user_name']);
+                        0,
+                        _encryptionMaker
+                            .decryptionMaker(documentSnapshot['user_name']));
 
-                    this._allConnectionChatNotificationStatus[
-                        documentSnapshot['user_name']] = true;
+                    this._allConnectionChatNotificationStatus[_encryptionMaker
+                        .decryptionMaker(documentSnapshot['user_name'])] = true;
 
-                    _chatNotificationStatusCheckAndUpdate(
-                        documentSnapshot['user_name']);
+                    _chatNotificationStatusCheckAndUpdate(_encryptionMaker
+                        .decryptionMaker(documentSnapshot['user_name']));
                   });
                 }
               } else {
@@ -1051,7 +1075,6 @@ class _ChatsAndActivityCollectionState
   /// Message Type Extract
   Widget _latestMessageTypeExtract(String _message, String _mediaTypesToString,
       String _remainingMessagesLength) {
-
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
         bool _blankMsgIndicator = false;

@@ -357,7 +357,7 @@ class Management {
 
       if (documentSnapshot.data()['profile_pic'].toString() != '')
         await deleteFilesFromFirebaseStorage(
-            documentSnapshot.data()['profile_pic'].toString(),
+            _encryptionMaker.decryptionMaker(documentSnapshot.data()['profile_pic'].toString()),
             specialPurpose: true);
 
       await localStorageHelper.insertProfilePictureInImportant(
@@ -368,7 +368,7 @@ class Management {
       await FirebaseFirestore.instance
           .doc('generation_users/$userMail')
           .update({
-        'profile_pic': _uploadedProfilePicUrl,
+        'profile_pic': _encryptionMaker.encryptionMaker(_uploadedProfilePicUrl),
       });
     } catch (e) {
       print('Profile Pic Upload Error: ${e.toString()}');

@@ -50,6 +50,10 @@ class LocalStorageHelper {
   final String _colAnonymousRemoveNotification =
       '__RemoveAnonymousNotification__';
 
+  final String _colCallTime = '__callTime__';
+  final String _colCallDate = '__callDate__';
+  final String _colCallType = '__callType__';
+
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   /// Create Singleton Objects(Only Created once in the whole application)
@@ -603,12 +607,15 @@ class LocalStorageHelper {
     final Map<String, String> map = Map<String, String>();
 
     if (result != null && result.length > 0) {
-      final String _time = _encryptionMaker.decryptionMaker(result[0][_colTime].toString()).split('+')[0];
+      final String _time = _encryptionMaker
+          .decryptionMaker(result[0][_colTime].toString())
+          .split('+')[0];
 
       print('Now: $_time');
 
       map.addAll({
-        result[0][_colMessages]: '${_encryptionMaker.encryptionMaker(_time)}+${result[0][_colMediaType]}+localDb',
+        result[0][_colMessages]:
+            '${_encryptionMaker.encryptionMaker(_time)}+${result[0][_colMediaType]}+localDb',
       });
     }
 
@@ -649,13 +656,17 @@ class LocalStorageHelper {
       final List<Map<String, String>> _container = [];
 
       result.reversed.toList().forEach((element) async {
-        int _fileSize = await File(_encryptionMaker.decryptionMaker(element.values.first.toString())).length();
+        int _fileSize = await File(_encryptionMaker
+                .decryptionMaker(element.values.first.toString()))
+            .length();
 
-        print('PAth now: ${_encryptionMaker.decryptionMaker(element[_colMessages].toString())}');
+        print(
+            'PAth now: ${_encryptionMaker.decryptionMaker(element[_colMessages].toString())}');
 
         _container.add({
           mediaType != MediaTypes.Video
-                  ? _encryptionMaker.decryptionMaker(element[_colMessages].toString())
+                  ? _encryptionMaker
+                      .decryptionMaker(element[_colMessages].toString())
                   : '${_encryptionMaker.decryptionMaker(element[_colMessages].toString())}+${_encryptionMaker.decryptionMaker(element[_colTime].toString()).split('+')[2]}':
               '${_formatBytes(_fileSize.toDouble())}',
         });
@@ -700,14 +711,13 @@ class LocalStorageHelper {
 
       final Map<String, String> map = Map<String, String>();
       map[_colLinks] = _encryptionMaker.encryptionMaker(link);
-      map[_colTime] = _encryptionMaker.encryptionMaker(DateTime.now().toString());
+      map[_colTime] =
+          _encryptionMaker.encryptionMaker(DateTime.now().toString());
 
-
-      int result = await db.insert(
-            _allRemainingLinksToDeleteFromFirebaseStorage, map);
+      int result =
+          await db.insert(_allRemainingLinksToDeleteFromFirebaseStorage, map);
 
       print('Insert New Link Result : $result');
-
     } catch (e) {
       print('Insert Remaining Links Error: ${e.toString()}');
       await createTableForRemainingLinks();
@@ -737,7 +747,9 @@ class LocalStorageHelper {
 
       result.forEach((everyResult) {
         map.addAll({
-          _encryptionMaker.decryptionMaker(everyResult[_colLinks].toString()): _encryptionMaker.decryptionMaker(everyResult[_colTime].toString()),
+          _encryptionMaker.decryptionMaker(everyResult[_colLinks].toString()):
+              _encryptionMaker
+                  .decryptionMaker(everyResult[_colTime].toString()),
         });
       });
 
@@ -861,6 +873,70 @@ class LocalStorageHelper {
       print(
           'Error: Extract Data From Notification Table Error: ${e.toString()}');
       return true;
+    }
+  }
+
+  /// For Call Log Data Management
+
+  Future<void> createTableForConnectionCallLogs(String tableName) async {
+    try {
+      final Database db = await this.database;
+
+      await db.rawQuery(
+          'CREATE TABLE ${tableName}_callHistory($_colCallDate TEXT, $_colCallTime TEXT, $_colCallType TEXT)');
+    } catch (e) {
+      print('Error: Create Table For Call Logs: ${e.toString()}');
+    }
+  }
+
+  Future<void> insertDataForCallLog(String tableName,
+      {@required String callData,
+      @required String callTime,
+      CallTypes callTypes = CallTypes.AudioCall}) async {
+    try {
+      final Database db = await this.database;
+
+      final Map<String, Object> tempMap = Map<String, Object>();
+
+      tempMap[_colCallDate] = callData;
+      tempMap[_colCallTime] = callTime;
+      tempMap[_colCallType] = callTypes.toString();
+
+      final int result = await db.insert('${tableName}_callHistory', tempMap);
+
+      print('Call Log data insertion Result: $result ');
+    } catch (e) {
+      print('Error: Insert data in Call Log Error: ${e.toString()}');
+    }
+  }
+
+  Future<dynamic> countTotalCallLogs(String tableName,
+      {String purpose = 'COUNT'}) async {
+    try {
+      final Database db = await this.database;
+
+      final List<Map<String, Object>> result =
+          await db.rawQuery("$purpose * FROM '${tableName}_callHistory'");
+
+      if (purpose == 'COUNT') return result == null ? 0 : result.length;
+
+      return result == null ? [] : result;
+    } catch (e) {
+      print('Error: Count total Call Logs Error: ${e.toString()}');
+      return purpose == 'COUNT' ? 0 : [];
+    }
+  }
+
+  Future<void> deleteParticularConnectionAllCallLogs(String tableName) async {
+    try {
+      final Database db = await this.database;
+
+      final int result =
+          await db.rawDelete("DELETE FROM '${tableName}_callHistory'");
+
+      print('Call Log Deletion Result is: $result');
+    } catch (e) {
+      print('Error: Delete Particular Call Log: ${e.toString()}');
     }
   }
 }

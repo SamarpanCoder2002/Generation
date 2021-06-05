@@ -278,8 +278,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       .doc('generation_users/$_connectionMail')
                       .get();
 
+              String _profilePicFormattedUrl = '';
+
+              if(connectionSnapShot.data()['profile_pic'] != '')
+                _profilePicFormattedUrl = _encryptionMaker.decryptionMaker(connectionSnapShot.data()['profile_pic']);
+
               /// Profile Picture Updation Check
-              if (connectionSnapShot.data()['profile_pic'] != _profilePicUrl) {
+              if (_profilePicFormattedUrl != _profilePicUrl) {
                 final Directory directory = await getExternalStorageDirectory();
 
                 /// Create new Hidden Folder once in desired location
@@ -290,17 +295,23 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 String profilePicPath =
                     '${profilePicDir.path}${DateTime.now()}';
 
+                print('Profile Pic Formatted Url: $_profilePicFormattedUrl');
+
                 /// If Updated ProfilePic not null and Empty String
-                if (connectionSnapShot.data()['profile_pic'].toString() !=
+                if (_profilePicFormattedUrl.toString() !=
                         null &&
-                    connectionSnapShot.data()['profile_pic'].toString() != '') {
+                    _profilePicFormattedUrl.toString() != '') {
                   print('Path: ${widget._connectionProfileImageLocalPath}');
 
-                  if (widget._connectionProfileImageLocalPath != '')
-                    await File(widget._connectionProfileImageLocalPath)
-                        .delete(recursive: true)
-                        .whenComplete(() => print(
-                            'Old Profile Image of Connection Deletion Complete'));
+                  try{
+                    if (widget._connectionProfileImageLocalPath != '')
+                      await File(widget._connectionProfileImageLocalPath)
+                          .delete(recursive: true)
+                          .whenComplete(() => print(
+                          'Old Profile Image of Connection Deletion Complete'));
+                  }catch(e){
+                    print('Error: Old Profile Pic Already Deleted: ${e.toString()}');
+                  }
 
                   print(
                       'Cute: ${connectionSnapShot['profile_pic'].toString()}');
@@ -320,7 +331,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
                   try {
                     await _dio
-                        .download(connectionSnapShot['profile_pic'].toString(),
+                        .download(_profilePicFormattedUrl,
                             profilePicPath)
                         .whenComplete(() {
                       print('Profile Picture Download Complete');
@@ -329,7 +340,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     print('Profile Pic Download Error: ${e.toString()}');
                   }
                 } else {
-                  if (connectionSnapShot.data()['profile_pic'].toString() ==
+                  if (_profilePicFormattedUrl.toString() ==
                           '' &&
                       widget._connectionProfileImageLocalPath != '')
                     await File(widget._connectionProfileImageLocalPath)
@@ -350,11 +361,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 /// Update Local And Remote Profile Image Path
                 await _localStorageHelper.insertProfilePictureInImportant(
                     imagePath: profilePicPath,
-                    imageUrl: connectionSnapShot
-                                .data()['profile_pic']
-                                .toString() !=
+                    imageUrl: _profilePicFormattedUrl !=
                             null
-                        ? connectionSnapShot.data()['profile_pic'].toString()
+                        ? _profilePicFormattedUrl.toString()
                         : '',
                     mail: _connectionMail);
               }
@@ -369,7 +378,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   });
                 }
                 showToast(
-                  'Profile Picture Update Error...',
+                  'Profile Picture Update Error....',
                   fToast,
                   fontSize: 16.0,
                 );
