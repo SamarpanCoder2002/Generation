@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
@@ -50,6 +51,9 @@ class _ChatsAndActivityCollectionState
 
   /// For Local Database Management Purpose
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
+
+  /// For Encrytion make object
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   /// For Downloading Purpose
   final Dio _dio = Dio();
@@ -908,7 +912,7 @@ class _ChatsAndActivityCollectionState
                             height: 12.0,
                           ),
                           // For Extract latest Conversation Message
-                          //_latestDataForConnectionExtractPerfectly(_userName)
+                          _latestDataForConnectionExtractPerfectly(_userName)
                           //Text('Samarpan'),
                         ],
                       ),
@@ -926,8 +930,8 @@ class _ChatsAndActivityCollectionState
                     child: Column(
                       children: [
                         // For Extract latest Conversation Time
-                        // _latestDataForConnectionExtractPerfectly(_userName,
-                        //     purpose: 'lastConnectionTime'),
+                        _latestDataForConnectionExtractPerfectly(_userName,
+                            purpose: 'lastConnectionTime'),
 
                         //Text('12:00'),
                         SizedBox(
@@ -965,7 +969,29 @@ class _ChatsAndActivityCollectionState
 
       /// Extract UserName Specific Messages from temp storage
       if (_allLatestMessages != null && _allLatestMessages.length > 0) {
-        final Map<String, String> _lastMessage = _allLatestMessages.last;
+        Map<String, String> _lastMessage = _allLatestMessages.last;
+
+        String take = '';
+        if (_lastMessage.values.first.toString().contains('+MediaTypes'))
+          take = this._encryptionMaker.decryptionMaker(
+              _lastMessage.values.first.toString().split('+MediaTypes')[0]);
+
+        _lastMessage = {
+          this
+                  ._encryptionMaker
+                  .decryptionMaker(_lastMessage.keys.first.toString()):
+              _lastMessage.values.first.toString().contains('+MediaTypes')
+                  ? _lastMessage.values.first.toString().replaceRange(
+                      0,
+                      _lastMessage.values.first
+                          .toString()
+                          .split('+MediaTypes')[0]
+                          .length,
+                      take)
+                  : this
+                      ._encryptionMaker
+                      .decryptionMaker(_lastMessage.values.first.toString()),
+        };
 
         /// For Extract Last Conversation Time
         if (purpose == 'lastConnectionTime') {
@@ -1016,6 +1042,7 @@ class _ChatsAndActivityCollectionState
   /// Message Type Extract
   Widget _latestMessageTypeExtract(String _message, String _mediaTypesToString,
       String _remainingMessagesLength) {
+
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
         bool _blankMsgIndicator = false;
@@ -1208,6 +1235,7 @@ class _ChatsAndActivityCollectionState
   Widget _latestConversationTime(Map<String, String> _lastMessage) {
     if (_lastMessage.isNotEmpty) {
       print('Last Message: $_lastMessage');
+
       String _willReturnTime = '';
       if (_lastMessage != null &&
           _lastMessage.values.last.toString().split('+')[0].toString() != '') {

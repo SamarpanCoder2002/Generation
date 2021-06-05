@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
@@ -15,6 +16,7 @@ class GeneralMessage {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final SendNotification _sendNotification = SendNotification();
   final Management _management = Management();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   GeneralMessage(
       {this.sendMessage,
@@ -35,7 +37,7 @@ class GeneralMessage {
   Future<void> storeInLocalStorage() async {
     this.selectedUsersName.forEach((everyUser) async {
       await _localStorageHelper.insertNewMessages(
-          everyUser, this.storeMessage, this.mediaType, 0, this.storeTime);
+          everyUser, this._encryptionMaker.encryptionMaker(this.storeMessage), this.mediaType, 0, this._encryptionMaker.encryptionMaker(this.storeTime));
     });
   }
 
@@ -62,7 +64,7 @@ class GeneralMessage {
 
       /// Add data to temporary Storage of Sending
       sendingMessages.add({
-        this.sendMessage: this.sendTime,
+        this._encryptionMaker.encryptionMaker(this.sendMessage): this._encryptionMaker.encryptionMaker(this.sendTime),
       });
 
       /// Data Store in FireStore

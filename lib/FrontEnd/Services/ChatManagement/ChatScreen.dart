@@ -870,6 +870,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         print('Recorded Path: $_filePathStore');
 
+        print('Encoded: ${_encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg')}');
+
         /// Store Data in local Storage
         _localStorageHelper.insertNewMessages(
             widget._userName,

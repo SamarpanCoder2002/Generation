@@ -359,34 +359,34 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () async {
                       print('Clicked Refresh in MainWindow');
 
-                      /// Testing Enccryption
-                      final plainText = 'Samarpan Dasgupta';
-                      final key = encrypt.Key.fromBase64('ODf9v33JRP4B08L7W9ii4bvuWrkdBYqvA/MeMDJEE6g=');
-                      final iv = encrypt.IV.fromLength(16);
-
-                      final makeEncryption = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.ctr, padding: null));
-
-                      final encrypt.Encrypted encrypted = makeEncryption.encrypt(plainText, iv: iv);
-                      final decrypted = makeEncryption.decrypt(encrypted, iv: iv);
-
-                      print(decrypted);
-                      print(encrypted.base64);
-
-                      print('Before: $decrypted');
-
-                      var take = makeEncryption.decrypt64(encrypted.base64, iv: iv);
-
-                      print('After: $take');
-
-                      // await _localStorageHelper.showAll();
+                      // /// Testing Enccryption
+                      // final plainText = 'Samarpan Dasgupta';
+                      // final key = encrypt.Key.fromBase64('ODf9v33JRP4B08L7W9ii4bvuWrkdBYqvA/MeMDJEE6g=');
+                      // final iv = encrypt.IV.fromLength(16);
                       //
-                      // if (mounted) {
-                      //   setState(() {
-                      //     ImportantThings.findImageUrlAndUserName();
-                      //   });
-                      // }
+                      // final makeEncryption = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.ctr, padding: null));
                       //
-                      // _removeAnonymousNotificationChecking();
+                      // final encrypt.Encrypted encrypted = makeEncryption.encrypt(plainText, iv: iv);
+                      // final decrypted = makeEncryption.decrypt(encrypted, iv: iv);
+                      //
+                      // print(decrypted);
+                      // print(encrypted.base64);
+                      //
+                      // print('Before: $decrypted');
+                      //
+                      // var take = makeEncryption.decrypt64(encrypted.base64, iv: iv);
+                      //
+                      // print('After: $take');
+
+                      await _localStorageHelper.showAll();
+
+                      if (mounted) {
+                        setState(() {
+                          ImportantThings.findImageUrlAndUserName();
+                        });
+                      }
+
+                      _removeAnonymousNotificationChecking();
                     },
                   ),
                 )

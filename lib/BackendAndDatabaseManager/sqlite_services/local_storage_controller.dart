@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -48,6 +49,8 @@ class LocalStorageHelper {
   final String _colRemoveBirthNotification = '__RemoveBirthNotification__';
   final String _colAnonymousRemoveNotification =
       '__RemoveAnonymousNotification__';
+
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   /// Create Singleton Objects(Only Created once in the whole application)
   static LocalStorageHelper _localStorageHelper;
@@ -600,10 +603,12 @@ class LocalStorageHelper {
     final Map<String, String> map = Map<String, String>();
 
     if (result != null && result.length > 0) {
-      final String _time = result[0][_colTime].toString().split('+')[0];
+      final String _time = _encryptionMaker.decryptionMaker(result[0][_colTime].toString()).split('+')[0];
+
+      print('Now: $_time');
 
       map.addAll({
-        result[0][_colMessages]: '$_time+${result[0][_colMediaType]}+localDb',
+        result[0][_colMessages]: '${_encryptionMaker.encryptionMaker(_time)}+${result[0][_colMediaType]}+localDb',
       });
     }
 
