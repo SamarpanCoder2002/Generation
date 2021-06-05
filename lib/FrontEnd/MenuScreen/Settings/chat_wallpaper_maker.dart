@@ -16,7 +16,8 @@ class ChatWallPaperMaker extends StatefulWidget {
   final bool allUpdatePermission;
   final String userName;
 
-  ChatWallPaperMaker({@required this.allUpdatePermission, @required this.userName});
+  ChatWallPaperMaker(
+      {@required this.allUpdatePermission, @required this.userName});
 
   @override
   _ChatWallPaperMakerState createState() => _ChatWallPaperMakerState();

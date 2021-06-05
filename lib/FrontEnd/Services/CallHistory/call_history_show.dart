@@ -68,12 +68,12 @@ class _ShowCallLogsDataState extends State<ShowCallLogsData> {
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child: ListView.builder(
+        child: this._callHistoryCollection.length>0?ListView.builder(
           itemCount: this._callHistoryCollection.length,
           itemBuilder: (context, position) {
             return _historyCallLogsList(position);
           },
-        ),
+        ):Center(child: Text('No Call History Found', style: TextStyle(color: Colors.red, fontSize: 18.0),),),
       ),
     );
   }

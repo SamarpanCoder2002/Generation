@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -51,75 +52,60 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(0, 0, 0, 1),
-      floatingActionButton:
-          widget.purpose == 'status' ? floatingActionButtonCall() : null,
+      backgroundColor: Colors.black12,
       body: ModalProgressHUD(
         inAsyncCall: _isLoading,
-        color: const Color.fromRGBO(50, 20, 40, 0.8),
-        progressIndicator: const CircularProgressIndicator(
-          backgroundColor: Colors.black87,
-        ),
         child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: PhotoView(
-            imageProvider: FileImage(
-              File(widget.imageFile.path),
-            ),
-            loadingBuilder: (context, event) => Center(
-              child: CircularProgressIndicator(),
-            ),
-            errorBuilder: (context, obj, stackTrace) => Center(
-                child: Text(
-              'Image not Found',
-              style: TextStyle(
-                fontSize: 23.0,
-                color: Colors.red,
-                fontFamily: 'Lora',
-                letterSpacing: 1.0,
-              ),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - 130,
+                  width: MediaQuery.of(context).size.width,
+                  child: PhotoView(
+                    enableRotation: false,
+                    imageProvider: FileImage(
+                      widget.imageFile,
+                    ),
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorBuilder: (context, obj, stackTrace) => Center(
+                        child: Text(
+                      'Image not Found',
+                      style: TextStyle(
+                        fontSize: 23.0,
+                        color: Colors.red,
+                        fontFamily: 'Lora',
+                        letterSpacing: 1.0,
+                      ),
+                    )),
+                  ),
+                ),
+                _bottomContainer(),
+              ],
             )),
-            enableRotation: true,
-          ),
-        ),
       ),
     );
   }
 
-  floatingActionButtonCall() {
-    return Form(
-      key: _imagePreviewKey,
-      child: Container(
-        padding: EdgeInsets.only(
-          bottom: 5.0,
-          left: 15.0,
-        ),
+  Widget _bottomContainer() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 100.0,
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Form(
+        key: this._imagePreviewKey,
         child: Row(
           children: [
-            Container(
-              height: 60.0,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.emoji_emotions_rounded,
-                  color: Colors.orangeAccent,
-                  size: 30.0,
-                ),
-                onPressed: () {
-                  //Close the keyboard
-                  SystemChannels.textInput.invokeMethod('TextInput.hide');
-                },
-              ),
-            ),
             Expanded(
               child: Container(
-                  width: MediaQuery.of(context).size.width * 0.7,
+                  padding: EdgeInsets.only(top: 10.0, left: 15.0),
+                  width: MediaQuery.of(context).size.width * 0.8,
                   constraints: BoxConstraints.loose(
-                      Size(MediaQuery.of(context).size.width * 0.7, 100.0)),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    color: Theme.of(context).primaryColor,
-                  ),
+                      Size(MediaQuery.of(context).size.width * 0.8, 100.0)),
                   child: Scrollbar(
                     showTrackOnHover: true,
                     thickness: 10.0,
@@ -135,29 +121,25 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                       cursorColor: Colors.white,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20.0,
+                        fontSize: 18.0,
                       ),
-                      onTap: () {},
                       maxLines: null,
                       decoration: InputDecoration(
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                        enabledBorder: UnderlineInputBorder(
                           borderSide:
-                              BorderSide(color: Colors.black54, width: 2.0),
+                              BorderSide(color: Colors.blue, width: 2.0),
                         ),
                         hintText: 'Type Here',
                         hintStyle: TextStyle(color: Colors.white),
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.lightBlue)),
                       ),
                     ),
                   )),
             ),
-            Container(
-              //color: Theme.of(context).primaryColor,
+            Padding(
               padding: EdgeInsets.only(left: 20.0),
-              child: FloatingActionButton(
-                backgroundColor: Colors.green,
+              child: IconButton(
+                icon: Icon(Icons.send_rounded,
+                    size: 30.0, color: Colors.lightGreenAccent),
                 onPressed: () async {
                   if (_imagePreviewKey.currentState.validate()) {
                     SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -168,11 +150,11 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                         _isLoading = true;
                       });
                       showToast(
-                        "Image Uploading...\nPlease Wait",
+                        "Image Uploading... Please Wait",
                         fToast,
-                        toastColor: Colors.orange,
-                        toastGravity: ToastGravity.TOP,
-                        fontSize: 16.0,
+                        toastColor: Colors.amber,
+                        toastGravity: ToastGravity.CENTER,
+                        fontSize: 18.0,
                       );
                     }
 
@@ -196,11 +178,6 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                     showToast("Activity Added", fToast);
                   }
                 },
-                child: Icon(
-                  Icons.send_rounded,
-                  size: 30.0,
-                  color: Colors.white,
-                ),
               ),
             ),
           ],

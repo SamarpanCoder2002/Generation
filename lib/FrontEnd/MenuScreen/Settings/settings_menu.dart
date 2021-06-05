@@ -124,7 +124,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
             return ChatHistoryMakerAndMediaViewer(historyOrMediaChoice: HistoryOrMediaChoice.Media);
             break;
         }
-        return Center();
+        return Center(child: Text('Sorry, Not yet Implemented', style: TextStyle(color: Colors.red, fontSize: 18.0),),);
       },
       closedBuilder: (_, __) {
         return Container(
