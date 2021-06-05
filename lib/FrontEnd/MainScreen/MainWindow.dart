@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';

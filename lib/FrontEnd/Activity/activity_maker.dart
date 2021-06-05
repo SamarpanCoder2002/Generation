@@ -3,15 +3,13 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:circle_list/circle_list.dart';
 import 'package:circle_list/radial_drag_gesture_detector.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:generation/FrontEnd/Activity/activity_multiple_options.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:generation/FrontEnd/Activity/activity_multiple_options.dart';
 import 'package:generation/FrontEnd/Activity/status_text_container.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
-
 
 activityList(
     {@required BuildContext context,
@@ -230,11 +228,13 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                 openColor: const Color.fromRGBO(34, 48, 60, 0.6),
                 middleColor: const Color.fromRGBO(34, 48, 60, 0.6),
                 transitionType: ContainerTransitionType.fadeThrough,
-                transitionDuration: Duration(milliseconds: 500,),
-                openBuilder: (context, openWidget){
+                transitionDuration: Duration(
+                  milliseconds: 500,
+                ),
+                openBuilder: (context, openWidget) {
                   return PollMaker();
                 },
-                closedBuilder: (context, closeWidget){
+                closedBuilder: (context, closeWidget) {
                   return Container(
                     width: 38,
                     height: 38,

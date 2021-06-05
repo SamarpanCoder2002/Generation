@@ -156,6 +156,15 @@ class _ChatsAndActivityCollectionState
               .toList(); // For Avoid Duplicate Inclusion of Activity
 
           particularConnectionActivity.forEach((everyActivity) async {
+
+            if(mounted){
+              setState(() {
+                everyActivity = {
+                  _encryptionMaker.decryptionMaker(everyActivity.keys.first.toString()): _encryptionMaker.decryptionMaker(everyActivity.values.first.toString()),
+                };
+              });
+            }
+
             if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
               final String currTime = DateTime.now().toString();
 

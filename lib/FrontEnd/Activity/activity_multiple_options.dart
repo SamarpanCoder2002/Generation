@@ -181,6 +181,9 @@ class _PollMakerState extends State<PollMaker> {
         builder: (_) => AlertDialog(
               elevation: 5.0,
               backgroundColor: const Color.fromRGBO(34, 48, 60, 0.6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
               title: Center(
                 child: Text(
                   'Make Your Pole',
@@ -232,15 +235,15 @@ class _PollMakerState extends State<PollMaker> {
   }
 
   Widget _pollingAlertDialogButtons({@required String buttonName}) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-          primary: buttonName == 'Save' ? Colors.green : Colors.red,
+    return TextButton(
+      style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50.0),
+            side: BorderSide(color: buttonName == 'Save' ? Colors.green : Colors.red)
           )),
       child: Text(
         buttonName,
-        style: TextStyle(fontSize: 18.0, color: Colors.white),
+        style: TextStyle(fontSize: 16.0, color: buttonName == 'Save' ? Colors.green : Colors.red),
       ),
       onPressed: () async {
         if (buttonName != 'Save') {

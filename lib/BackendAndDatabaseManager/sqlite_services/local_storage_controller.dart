@@ -570,10 +570,10 @@ class LocalStorageHelper {
 
       if (multipleMediaDeletion)
         result = await db.rawDelete(
-            "DELETE FROM $_tableName WHERE $_colMessages = '$message' AND $_colMediaType = '$mediaType'");
+            "DELETE FROM $_tableName WHERE $_colMessages = '${_encryptionMaker.encryptionMaker(message)}' AND $_colMediaType = '$mediaType'");
       else
         result = await db.rawDelete(
-            "DELETE FROM $_tableName WHERE $_colMessages = '$message' AND $_colTime = '$time' AND $_colReferences = $reference AND $_colMediaType = '$mediaType'");
+            "DELETE FROM $_tableName WHERE $_colMessages = '${_encryptionMaker.encryptionMaker(message)}' AND $_colTime = '${_encryptionMaker.encryptionMaker(time)}' AND $_colReferences = $reference AND $_colMediaType = '$mediaType'");
 
       if (result == 0) {
         print('Result: $result');
@@ -649,11 +649,14 @@ class LocalStorageHelper {
       final List<Map<String, String>> _container = [];
 
       result.reversed.toList().forEach((element) async {
-        int _fileSize = await File(element.values.first.toString()).length();
+        int _fileSize = await File(_encryptionMaker.decryptionMaker(element.values.first.toString())).length();
+
+        print('PAth now: ${_encryptionMaker.decryptionMaker(element[_colMessages].toString())}');
+
         _container.add({
           mediaType != MediaTypes.Video
-                  ? element[_colMessages].toString()
-                  : '${element[_colMessages].toString()}+${element[_colTime].toString().split('+')[2]}':
+                  ? _encryptionMaker.decryptionMaker(element[_colMessages].toString())
+                  : '${_encryptionMaker.decryptionMaker(element[_colMessages].toString())}+${_encryptionMaker.decryptionMaker(element[_colTime].toString()).split('+')[2]}':
               '${_formatBytes(_fileSize.toDouble())}',
         });
       });
@@ -696,8 +699,8 @@ class LocalStorageHelper {
       final Database db = await this.database;
 
       final Map<String, String> map = Map<String, String>();
-      map[_colLinks] = link;
-      map[_colTime] = DateTime.now().toString();
+      map[_colLinks] = _encryptionMaker.encryptionMaker(link);
+      map[_colTime] = _encryptionMaker.encryptionMaker(DateTime.now().toString());
 
       await db.transaction((txn) async {
         return await txn.insert(
@@ -732,7 +735,7 @@ class LocalStorageHelper {
 
       result.forEach((everyResult) {
         map.addAll({
-          everyResult[_colLinks].toString(): everyResult[_colTime].toString(),
+          _encryptionMaker.decryptionMaker(everyResult[_colLinks].toString()): _encryptionMaker.decryptionMaker(everyResult[_colTime].toString()),
         });
       });
 
@@ -749,7 +752,7 @@ class LocalStorageHelper {
       final Database db = await this.database;
 
       await db.rawDelete(
-          "DELETE FROM $_allRemainingLinksToDeleteFromFirebaseStorage WHERE $_colLinks = '$link'");
+          "DELETE FROM $_allRemainingLinksToDeleteFromFirebaseStorage WHERE $_colLinks = '${_encryptionMaker.encryptionMaker(link)}'");
     } catch (e) {
       print('Remaining Links Deletion Exception: ${e.toString()}');
     }

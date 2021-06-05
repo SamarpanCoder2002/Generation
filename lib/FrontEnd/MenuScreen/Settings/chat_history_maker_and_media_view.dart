@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/connection_media_view.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,6 +30,7 @@ class _ChatHistoryMakerAndMediaViewerState
     extends State<ChatHistoryMakerAndMediaViewer> {
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final FToast _fToast = FToast();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   final String _noProfileImagePath = 'assets/logo/logo.jpg';
 
@@ -300,14 +302,14 @@ class _ChatHistoryMakerAndMediaViewerState
       String _historyMaker = '';
 
       extractedHistoryData.forEach((everyChatData) {
-        String _extractedThatMessage = everyChatData['Messages'].toString();
+        String _extractedThatMessage = _encryptionMaker.decryptionMaker(everyChatData['Messages'].toString());
 
-        String _extractedThatTime = everyChatData['Time'];
+        String _extractedThatTime = _encryptionMaker.decryptionMaker(everyChatData['Time']);
 
         if (everyChatData['Media'] == MediaTypes.Text.toString() &&
-            everyChatData['Messages'].toString().contains('[[[@]]]'))
+            _encryptionMaker.decryptionMaker(everyChatData['Messages'].toString()).contains('[[[@]]]'))
           _extractedThatMessage =
-              everyChatData['Messages'].toString().split('[[[@]]]')[1];
+              _encryptionMaker.decryptionMaker(everyChatData['Messages'].toString()).split('[[[@]]]')[1];
         else if (everyChatData['Media'] == MediaTypes.Text.toString() &&
             _extractedThatMessage.contains('\n'))
           _extractedThatMessage = _extractedThatMessage.split('\n').join(' ');

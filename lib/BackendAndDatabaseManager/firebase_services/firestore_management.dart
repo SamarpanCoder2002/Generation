@@ -8,12 +8,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
-import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class Management {
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
+
   String _currAccountUserName;
 
   _userNameExtractFromLocalDatabase() async {
@@ -84,8 +85,8 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            '$activityText+MediaTypes.Text':
-                '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime',
+            _encryptionMaker.encryptionMaker('$activityText+MediaTypes.Text'):
+                _encryptionMaker.encryptionMaker('${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime'),
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -154,7 +155,7 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            imageUrl: '$manuallyText++++++$mediaType++++++$_currTime',
+            _encryptionMaker.encryptionMaker(imageUrl): _encryptionMaker.encryptionMaker('$manuallyText++++++$mediaType++++++$_currTime'),
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -320,8 +321,8 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            '$id+ActivitySpecialOptions.Polling+${_pollMap['question'].toString()}+$_currTime':
-                _answerCollection,
+           _encryptionMaker.encryptionMaker('$id+ActivitySpecialOptions.Polling+${_pollMap['question'].toString()}+$_currTime'):
+                _encryptionMaker.encryptionMaker(_answerCollection),
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email

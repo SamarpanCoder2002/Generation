@@ -510,6 +510,9 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
 
           List<Map<String, String>> take = [];
 
+          print('Selected Box: ${this._selectedCheckBox}');
+          print('MediaSources: ${widget.mediaSources}');
+
           for (int i = 0; i < this._selectedCheckBox.length; i++) {
             if (this._selectedCheckBox[i]) take.add(widget.mediaSources[i]);
           }
@@ -525,7 +528,7 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
             final bool responseIs = await _localStorageHelper.deleteChatMessage(
                 widget.userName,
                 message: element.keys.first.toString().contains('+')
-                    ? element.keys.first.toString().split('+')[0]
+                    ? (element.keys.first.toString().split('+')[0])
                     : element.keys.first.toString(),
                 multipleMediaDeletion: true,
                 mediaType: widget.mediaTypes.toString());
