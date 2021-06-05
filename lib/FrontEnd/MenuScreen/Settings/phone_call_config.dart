@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -23,6 +24,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
 
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final FToast _fToast = FToast();
+  final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   void _getRegisteredMobileNumberFromLocalDatabase() async {
     final String _savedNumber =
@@ -234,7 +236,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
       await FirebaseFirestore.instance
           .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
           .update({
-        'phone_number': selectedNum,
+        'phone_number': _encryptionMaker.encryptionMaker(selectedNum),
       });
 
       await _localStorageHelper.updateImportantTableExtraData(

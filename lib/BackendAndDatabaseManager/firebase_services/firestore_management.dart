@@ -86,7 +86,8 @@ class Management {
 
           currConnection.add({
             _encryptionMaker.encryptionMaker('$activityText+MediaTypes.Text'):
-                _encryptionMaker.encryptionMaker('${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime'),
+                _encryptionMaker.encryptionMaker(
+                    '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime'),
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -155,7 +156,9 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            _encryptionMaker.encryptionMaker(imageUrl): _encryptionMaker.encryptionMaker('$manuallyText++++++$mediaType++++++$_currTime'),
+            _encryptionMaker.encryptionMaker(imageUrl):
+                _encryptionMaker.encryptionMaker(
+                    '$manuallyText++++++$mediaType++++++$_currTime'),
           });
 
           activityCollection[FirebaseAuth.instance.currentUser.email
@@ -321,7 +324,8 @@ class Management {
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-           _encryptionMaker.encryptionMaker('$id+ActivitySpecialOptions.Polling+${_pollMap['question'].toString()}+$_currTime'):
+            _encryptionMaker.encryptionMaker(
+                    '$id+ActivitySpecialOptions.Polling+${_pollMap['question'].toString()}+$_currTime'):
                 _encryptionMaker.encryptionMaker(_answerCollection),
           });
 
@@ -357,7 +361,8 @@ class Management {
 
       if (documentSnapshot.data()['profile_pic'].toString() != '')
         await deleteFilesFromFirebaseStorage(
-            _encryptionMaker.decryptionMaker(documentSnapshot.data()['profile_pic'].toString()),
+            _encryptionMaker.decryptionMaker(
+                documentSnapshot.data()['profile_pic'].toString()),
             specialPurpose: true);
 
       await localStorageHelper.insertProfilePictureInImportant(
@@ -375,11 +380,17 @@ class Management {
     }
   }
 
-  Future<String> phoneNumberExtractor(String _userName) async{
-    final String _userMail = await localStorageHelper.extractImportantDataFromThatAccount(userName: _userName);
+  Future<String> phoneNumberExtractor(String _userName) async {
+    final String _userMail = await localStorageHelper
+        .extractImportantDataFromThatAccount(userName: _userName);
 
-    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance.doc('generation_users/$_userMail').get();
-    
-    return documentSnapshot.get('phone_number').toString();
+    final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .doc('generation_users/$_userMail')
+        .get();
+
+    return documentSnapshot.get('phone_number').toString() == ''
+        ? ''
+        : _encryptionMaker
+            .decryptionMaker(documentSnapshot.get('phone_number').toString());
   }
 }
