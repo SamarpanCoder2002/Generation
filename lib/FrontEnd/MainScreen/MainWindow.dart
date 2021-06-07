@@ -225,7 +225,7 @@ class _MainScreenState extends State<MainScreen> {
     Workmanager().initialize(
         deleteOldActivity, // The top level function, aka callbackDispatcher
         isInDebugMode:
-            true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+            false // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
         );
 
     /// Periodic task registration
@@ -348,33 +348,13 @@ class _MainScreenState extends State<MainScreen> {
                     right: 20.0,
                   ),
                   child: IconButton(
+                    tooltip: 'Refresh',
                     icon: Icon(
                       Icons.refresh_outlined,
                       size: 25.0,
                     ),
                     onPressed: () async {
                       print('Clicked Refresh in MainWindow');
-
-                      // /// Testing Enccryption
-                      // final plainText = 'Samarpan Dasgupta';
-                      // final key = encrypt.Key.fromBase64('ODf9v33JRP4B08L7W9ii4bvuWrkdBYqvA/MeMDJEE6g=');
-                      // final iv = encrypt.IV.fromLength(16);
-                      //
-                      // final makeEncryption = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.ctr, padding: null));
-                      //
-                      // final encrypt.Encrypted encrypted = makeEncryption.encrypt(plainText, iv: iv);
-                      // final decrypted = makeEncryption.decrypt(encrypted, iv: iv);
-                      //
-                      // print(decrypted);
-                      // print(encrypted.base64);
-                      //
-                      // print('Before: $decrypted');
-                      //
-                      // var take = makeEncryption.decrypt64(encrypted.base64, iv: iv);
-                      //
-                      // print('After: $take');
-
-                      await _localStorageHelper.showAll();
 
                       if (mounted) {
                         setState(() {

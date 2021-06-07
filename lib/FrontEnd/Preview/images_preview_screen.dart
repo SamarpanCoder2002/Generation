@@ -62,10 +62,15 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               shrinkWrap: true,
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height - 130,
+                  height: widget.purpose == 'contacts'
+                      ? MediaQuery.of(context).size.height
+                      : MediaQuery.of(context).size.height - 130,
                   width: MediaQuery.of(context).size.width,
                   child: PhotoView(
                     enableRotation: false,
+                    initialScale: widget.purpose == 'contacts'
+                        ? PhotoViewComputedScale.covered
+                        : null,
                     imageProvider: FileImage(
                       widget.imageFile,
                     ),
@@ -84,7 +89,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                     )),
                   ),
                 ),
-                _bottomContainer(),
+                if (widget.purpose != 'contacts') _bottomContainer(),
               ],
             )),
       ),

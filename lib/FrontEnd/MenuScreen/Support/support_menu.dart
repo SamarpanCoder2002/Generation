@@ -1,6 +1,10 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/FrontEnd/MenuScreen/Support/problem_report_maker.dart';
 
 class SupportMenuMaker extends StatefulWidget {
@@ -50,7 +54,7 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
                 color: Colors.green,
               ),
               title: 'Request a Feature',
-              extraText: 'About Any New Feature in your Mind',
+              extraText: 'Any New Feature in your Mind',
             ),
             _getListOption(
               icon: Icon(
@@ -59,7 +63,16 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
                 color: Colors.amber,
               ),
               title: 'Send Feedback',
-              extraText: 'About Your Experience of that App',
+              extraText: 'Your Experience of that App',
+            ),
+            _getListOption(
+              icon: Icon(
+                Icons.attach_money_outlined,
+                size: 30.0,
+                color: Colors.green,
+              ),
+              title: 'Donate',
+              extraText: 'Help Generation to Grow More',
             ),
           ],
         ),
@@ -83,16 +96,27 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
       openBuilder: (_, __) {
         print(title);
         if (title == 'Report a Problem')
-          return SupportInputTaker(subject: 'Problem', appbarTitle: 'Describe Your Problem',);
+          return SupportInputTaker(
+            subject: 'Problem',
+            appbarTitle: 'Describe Your Problem',
+          );
         else if (title == 'Request a Feature')
-          return SupportInputTaker(subject: 'Feature', appbarTitle: 'Describe the Feature',);
+          return SupportInputTaker(
+            subject: 'Feature',
+            appbarTitle: 'Describe the Feature',
+          );
         else if (title == 'Send Feedback')
-          return SupportInputTaker(subject: 'Feedback', appbarTitle: 'Write Your Feedback',);
+          return SupportInputTaker(
+            subject: 'Feedback',
+            appbarTitle: 'Write Your Feedback',
+          );
+        else if (title == 'Donate') return WhyDonate();
         return Center();
       },
       closedBuilder: (_, __) {
         return Container(
           height: 80.0,
+          alignment: Alignment.center,
           padding: EdgeInsets.only(
             top: 10.0,
             bottom: 10.0,
@@ -106,12 +130,9 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
                 ),
                 child: icon,
               ),
-              SizedBox(
-                width: 30.0,
-              ),
               Expanded(
                 child: Container(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -124,6 +145,7 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
                       ),
                       Text(
                         extraText,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white54,
                           fontSize: 16.0,
@@ -137,6 +159,83 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
           ),
         );
       },
+    );
+  }
+}
+
+class WhyDonate extends StatelessWidget {
+  final FToast _fToast = FToast();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
+      body: Center(
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Center(
+              child: Text(
+                'Why Donate in Generation?',
+                style: TextStyle(color: Colors.amber, fontSize: 20.0),
+              ),
+            ),
+            SizedBox(
+              height: 20.0,
+            ),
+            Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.only(left: 20.0, right: 20.0),
+              child: Text(
+                "I am Samarpan Dasgupta, one and only developer of this app. This app has many features but not sufficient to give a better user experience. Being a Single Developer of this app, it's not possible to me to add such amazing features like end-to-end encrypted video calls and more awesome features to give users a better experience. Your small donation can help me to grow Generation and gives you a more personalized experience. Thank in advance for your donation.",
+                textAlign: TextAlign.justify,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 18.0,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 20.0,
+            ),
+            Center(
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                    side: BorderSide(color: Colors.green),
+                  ),
+                ),
+                child: Text(
+                  'Donate',
+                  style: TextStyle(color: Colors.green, fontSize: 16.0),
+                ),
+                onPressed: () async {
+                  print("Donation Button Pressed");
+                  this._fToast.init(context);
+                  try {
+                    showToast('Please Wait', _fToast,
+                        toastColor: Colors.amber,
+                        fontSize: 18.0,
+                        toastGravity: ToastGravity.TOP);
+                    await launch('Razorpay-Launch-Page-Url-Here');
+                  } catch (e) {
+                    print(
+                        'Payment Gateway Page OnBoarding Error: ${e.toString()}');
+                    showToast('Sorry, Donation Section not Opening', _fToast,
+                        toastColor: Colors.red,
+                        fontSize: 16.0,
+                        toastGravity: ToastGravity.TOP);
+                  }
+                },
+              ),
+            ),
+            SizedBox(
+              height: 20.0,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
