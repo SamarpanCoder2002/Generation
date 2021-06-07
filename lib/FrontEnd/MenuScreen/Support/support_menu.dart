@@ -187,7 +187,7 @@ class WhyDonate extends StatelessWidget {
               alignment: Alignment.center,
               padding: EdgeInsets.only(left: 20.0, right: 20.0),
               child: Text(
-                "I am Samarpan Dasgupta, one and only developer of this app. This app has many features but not sufficient to give a better user experience. Being a Single Developer of this app, it's not possible to me to add such amazing features like end-to-end encrypted video calls and more awesome features to give users a better experience. Your small donation can help me to grow Generation and gives you a more personalized experience. Thank in advance for your donation.",
+                "I am Samarpan Dasgupta, the one and only developer of this app. This app has many features but not sufficient to give a better user experience. Being a Single Developer of this app, it's not possible to me to add such amazing features like end-to-end encrypted video calls and more awesome features to give users a better experience. Your small donation can help me to grow Generation and gives you a more personalized experience. Thank you in advance for your donation.",
                 textAlign: TextAlign.justify,
                 style: TextStyle(
                   color: Colors.white70,
@@ -218,7 +218,9 @@ class WhyDonate extends StatelessWidget {
                         toastColor: Colors.amber,
                         fontSize: 18.0,
                         toastGravity: ToastGravity.TOP);
-                    await launch('Razorpay-Launch-Page-Url-Here');
+
+                    /// Link Added for Live Transaction on RazorPay
+                    await launch('LIVE-ACCOUNT-PAYMENT-LINK');
                   } catch (e) {
                     print(
                         'Payment Gateway Page OnBoarding Error: ${e.toString()}');
