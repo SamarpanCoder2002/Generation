@@ -1883,6 +1883,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               openBuilder: (context, openWidget) {
                 print('MediaTypes: ${_mediaTypes[index]}');
                 return PreviewImageScreen(
+                  purpose: 'chatImageView',
                   imageFile: _mediaTypes[index] == MediaTypes.Image
                       ? File(_chatContainer[index].keys.first)
                       : File(_chatContainer[index].values.first.split('+')[2]),

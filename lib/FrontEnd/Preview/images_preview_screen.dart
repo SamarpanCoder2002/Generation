@@ -18,7 +18,7 @@ class PreviewImageScreen extends StatefulWidget {
 
   PreviewImageScreen(
       {@required this.imageFile,
-      this.purpose = 'contacts',
+      this.purpose = 'profile_pic',
       this.allConnectionUserName});
 
   @override
@@ -62,13 +62,14 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               shrinkWrap: true,
               children: [
                 SizedBox(
-                  height: widget.purpose == 'contacts'
+                  height: (widget.purpose == 'profile_pic' ||
+                          widget.purpose == 'chatImageView')
                       ? MediaQuery.of(context).size.height
                       : MediaQuery.of(context).size.height - 130,
                   width: MediaQuery.of(context).size.width,
                   child: PhotoView(
-                    enableRotation: false,
-                    initialScale: widget.purpose == 'contacts'
+                    enableRotation: widget.purpose == 'status' ? false : true,
+                    initialScale: widget.purpose == 'profile_pic'
                         ? PhotoViewComputedScale.covered
                         : null,
                     imageProvider: FileImage(
@@ -89,7 +90,9 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                     )),
                   ),
                 ),
-                if (widget.purpose != 'contacts') _bottomContainer(),
+                if (widget.purpose != 'profile_pic' &&
+                    widget.purpose != 'chatImageView')
+                  _bottomContainer(),
               ],
             )),
       ),
@@ -151,7 +154,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
                     if (mounted) {
                       setState(() {
-                        widget.purpose = 'contacts';
+                        widget.purpose = 'profile_pic';
                         _isLoading = true;
                       });
                       showToast(

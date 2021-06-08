@@ -339,7 +339,7 @@ class LocalStorageHelper {
       result = await db.rawQuery(
           "SELECT $_colProfileImagePath FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
-    return result[0].values.first == null?'':result[0].values.first;
+    return result[0].values.first == null ? '' : result[0].values.first;
   }
 
   Future<String> extractProfilePicUrl({@required String userName}) async {
@@ -363,7 +363,7 @@ class LocalStorageHelper {
     else
       result = await db
           .rawQuery("SELECT $_colAccountUserName FROM $_allImportantDataStore");
-    return result == null?[]:result;
+    return result == null ? [] : result;
   }
 
   /// Make Tables for user Activity
@@ -915,8 +915,8 @@ class LocalStorageHelper {
     try {
       final Database db = await this.database;
 
-      final List<Map<String, Object>> result =
-          await db.rawQuery("SELECT ${purpose == 'COUNT'?'COUNT(*)':'*'} FROM ${tableName}_callHistory");
+      final List<Map<String, Object>> result = await db.rawQuery(
+          "SELECT ${purpose == 'COUNT' ? 'COUNT(*)' : '*'} FROM ${tableName}_callHistory");
 
       if (purpose == 'COUNT') return result == null ? 0 : result.length;
 

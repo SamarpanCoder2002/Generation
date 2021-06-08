@@ -131,7 +131,9 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
       transitionDuration: Duration(milliseconds: 500),
       middleColor: const Color.fromRGBO(34, 48, 60, 1),
       openColor: const Color.fromRGBO(34, 48, 60, 1),
+      closedColor: const Color.fromRGBO(34, 48, 60, 1),
       openBuilder: (_, __) => PreviewImageScreen(
+        purpose: 'chatImageView',
         imageFile: File(widget.mediaTypes == MediaTypes.Image
             ? widget.mediaSources[index].keys.first.toString()
             : widget.mediaSources[index].keys.first.toString().split('+')[1]),
