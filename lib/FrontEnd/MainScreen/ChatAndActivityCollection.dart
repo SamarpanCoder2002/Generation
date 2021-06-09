@@ -52,7 +52,7 @@ class _ChatsAndActivityCollectionState
   /// For Local Database Management Purpose
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
 
-  /// For Encrytion make object
+  /// For Encryption make object
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   /// For Downloading Purpose
@@ -103,7 +103,9 @@ class _ChatsAndActivityCollectionState
               userMail: FirebaseAuth.instance.currentUser.email);
 
       /// Checking Already This Account Name Present in Local Container or not
-      if (!_allUserConnectionActivity.contains(_thisAccountUserName)) {
+      if (!_allUserConnectionActivity.contains(_thisAccountUserName) &&
+          !_allUserConnectionActivity
+              .contains('$_thisAccountUserName[[[new_activity]]]')) {
         if (mounted) {
           setState(() {
             _allUserConnectionActivity.insert(0, _thisAccountUserName);
@@ -128,7 +130,9 @@ class _ChatsAndActivityCollectionState
 
           /// Checking Already This Account Name Present in Local Container or not
           if (!_allUserConnectionActivity
-              .contains(_connectionUserNameFromLocalDatabase)) {
+                  .contains(_connectionUserNameFromLocalDatabase) &&
+              !_allUserConnectionActivity.contains(
+                  '$_connectionUserNameFromLocalDatabase[[[new_activity]]]')) {
             if (mounted) {
               setState(() {
                 _allUserConnectionActivity
@@ -197,6 +201,8 @@ class _ChatsAndActivityCollectionState
                   /// If path insertion in sqLite having no error, download the video and store it in local storage
                   if (_videoPathStorageResponse) {
                     try {
+                      _newActivityUpdate(_connectionUserNameFromLocalDatabase);
+
                       await _dio.download(everyActivity.keys.first.toString(),
                           '${activityVideoPath.path}$currTime.mp4');
 
@@ -237,6 +243,8 @@ class _ChatsAndActivityCollectionState
                   /// If path insertion in sqLite having no error, download the image and store it in local storage
                   if (_imageActivityInsertionResponse) {
                     try {
+                      _newActivityUpdate(_connectionUserNameFromLocalDatabase);
+
                       /// Download Image Activity from Firebase Storage and store in local database
                       await _dio.downloadUri(
                           Uri.parse(everyActivity.keys.first.toString()),
@@ -256,6 +264,8 @@ class _ChatsAndActivityCollectionState
               }
             } else {
               print('Special Babe: $everyActivity');
+
+              _newActivityUpdate(_connectionUserNameFromLocalDatabase);
 
               /// Add Text Activity Data to Local Storage for future use
               await _localStorageHelper.insertDataInUserActivityTable(
@@ -521,7 +531,9 @@ class _ChatsAndActivityCollectionState
               ImportantThings.thisAccountUserName ==
                   userNameMap.values.first.toString()) {
             if (!_allUserConnectionActivity
-                .contains(userNameMap.values.first)) {
+                    .contains(userNameMap.values.first) &&
+                !_allUserConnectionActivity.contains(
+                    '${userNameMap.values.first}[[[new_activity]]]')) {
               if (mounted) {
                 setState(() {
                   if (userNameMap.values.first ==
@@ -660,6 +672,34 @@ class _ChatsAndActivityCollectionState
         children: [
           Stack(
             children: [
+              if (_allUserConnectionActivity[index]
+                  .contains('[[[new_activity]]]'))
+                Container(
+                  height:
+                      MediaQuery.of(context).orientation == Orientation.portrait
+                          ? (MediaQuery.of(context).size.height *
+                                  (1.2 / 7.95) /
+                                  2.5) *
+                              2
+                          : (MediaQuery.of(context).size.height *
+                                  (2.5 / 7.95) /
+                                  2.5) *
+                              2,
+                  width:
+                      MediaQuery.of(context).orientation == Orientation.portrait
+                          ? (MediaQuery.of(context).size.height *
+                                  (1.2 / 7.95) /
+                                  2.5) *
+                              2
+                          : (MediaQuery.of(context).size.height *
+                                  (2.5 / 7.95) /
+                                  2.5) *
+                              2,
+                  child: CircularProgressIndicator(
+                    color: Colors.blue,
+                    value: 1.0,
+                  ),
+                ),
               OpenContainer(
                 closedColor: const Color.fromRGBO(34, 48, 60, 1),
                 openColor: const Color.fromRGBO(34, 48, 60, 1),
@@ -670,10 +710,28 @@ class _ChatsAndActivityCollectionState
                   milliseconds: 500,
                 ),
                 transitionType: ContainerTransitionType.fadeThrough,
+                onClosed: (val) {
+                  print('Activity Closed');
+                  if (mounted) {
+                    setState(() {
+                      if (this
+                          ._allUserConnectionActivity[index]
+                          .contains('[[[new_activity]]]')) {
+                        this._allUserConnectionActivity[index] = this
+                            ._allUserConnectionActivity[index]
+                            .split('[[[new_activity]]]')[0];
+                      }
+                    });
+                  }
+                },
                 openBuilder: (context, openWidget) {
                   return ActivityView(
                       takeParticularConnectionUserName:
-                          _allUserConnectionActivity[index]);
+                          _allUserConnectionActivity[index]
+                                  .contains('[[[new_activity]]]')
+                              ? _allUserConnectionActivity[index]
+                                  .split('[[[new_activity]]]')[0]
+                              : _allUserConnectionActivity[index]);
                 },
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
@@ -734,9 +792,7 @@ class _ChatsAndActivityCollectionState
               top: 7.0,
             ),
             child: Text(
-              _allUserConnectionActivity[index].length <= 10
-                  ? _allUserConnectionActivity[index]
-                  : '${_allUserConnectionActivity[index].replaceRange(10, _allUserConnectionActivity[index].length, '...')}',
+              _userNameExtractForActivity(index),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12.0,
@@ -1303,14 +1359,14 @@ class _ChatsAndActivityCollectionState
     return ((index == 0 && ImportantThings.thisAccountProfileImagePath == '') ||
             (index > 0 &&
                 ProfileImageManagement.allConnectionsProfilePicLocalPath[
-                        this._allUserConnectionActivity[index]] ==
+                        _getUserNameForActivity(index)] ==
                     ''))
         ? const ExactAssetImage('assets/logo/logo.jpg')
         : FileImage(
             File(index == 0
                 ? ImportantThings.thisAccountProfileImagePath
                 : ProfileImageManagement.allConnectionsProfilePicLocalPath[
-                    this._allUserConnectionActivity[index]]),
+                    _getUserNameForActivity(index)]),
             scale: 0.5,
           );
   }
@@ -1404,6 +1460,32 @@ class _ChatsAndActivityCollectionState
     if (mounted) {
       setState(() {
         this._allConnectionChatNotificationStatus[userName] = _previousStatus;
+      });
+    }
+  }
+
+  String _userNameExtractForActivity(int index) {
+    String _modifiedUserName = _getUserNameForActivity(index);
+
+    return _modifiedUserName.length <= 10
+        ? _modifiedUserName
+        : '${_modifiedUserName.replaceRange(10, _modifiedUserName.length, '...')}';
+  }
+
+  String _getUserNameForActivity(int index) {
+    return this._allUserConnectionActivity[index].contains('[[[new_activity]]]')
+        ? this._allUserConnectionActivity[index].split('[[[new_activity]]]')[0]
+        : this._allUserConnectionActivity[index];
+  }
+
+  void _newActivityUpdate(String realUserName) {
+    if (mounted) {
+      setState(() {
+        if (this._allUserConnectionActivity.contains(realUserName)) {
+          this._allUserConnectionActivity[this
+              ._allUserConnectionActivity
+              .indexOf(realUserName)] = '$realUserName[[[new_activity]]]';
+        }
       });
     }
   }

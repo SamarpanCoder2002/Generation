@@ -212,29 +212,40 @@ class _ActivityViewState extends State<ActivityView>
                     return textActivityView(activityItem['Bg_Information'],
                         activityItem['Status']); // If Current Activity is TEXT
                   else {
-                    if (_pollOptionsPercentageList.isNotEmpty)
-                      _pollOptionsPercentageList.clear();
+                    try {
+                      if (_pollOptionsPercentageList.isNotEmpty)
+                        _pollOptionsPercentageList.clear();
 
-                    _selectedPoll = -1;
+                      _selectedPoll = -1;
 
-                    for (int i = 0;
-                        i <
-                            activityItem['Status']
-                                .split('[[[question]]]')[2]
-                                .split('+')
-                                .length;
-                        i++) {
-                      _pollOptionsPercentageList.add(0.0);
+                      for (int i = 0;
+                          i <
+                              activityItem['Status']
+                                  .split('[[[question]]]')[2]
+                                  .split('+')
+                                  .length;
+                          i++) {
+                        _pollOptionsPercentageList.add(0.0);
+                      }
+
+                      print('Activity Item Status: ${activityItem['Status']}');
+
+                      _pollOptionPercentValueUpdated(activityItem['Status']);
+
+                      print('Special: $_tempList');
+
+                      return _pollActivityView(activityItem['Status'],
+                          activityItem['Bg_Information'], i);
+                    } catch (e) {
+                      print('Activity Opening Error: ${e.toString()}');
+
+                      return Center(
+                        child: Text(
+                          'Sorry, Activity Opening Error',
+                          style: TextStyle(color: Colors.red, fontSize: 20.0),
+                        ),
+                      );
                     }
-
-                    print('Activity Item Status: ${activityItem['Status']}');
-
-                    _pollOptionPercentValueUpdated(activityItem['Status']);
-
-                    print('Special: $_tempList');
-
-                    return _pollActivityView(activityItem['Status'],
-                        activityItem['Bg_Information'], i);
                   }
                 }
               },
@@ -663,12 +674,14 @@ class _ActivityViewState extends State<ActivityView>
                         setState(() {
                           _animationController.forward();
                         });
-                        String _errorMsg = 'Already Voted, Please Refresh to Show Latest Data';
+                        String _errorMsg =
+                            'Already Voted, Please Refresh to Show Latest Data';
 
                         if (int.parse(
                                 _pollActivity.split('[[[question]]]')[3]) ==
                             -1)
-                          _errorMsg = "As Poll Maker, You Can't Vote Here\nPlease Refresh to Show Latest Data";
+                          _errorMsg =
+                              "As Poll Maker, You Can't Vote Here\nPlease Refresh to Show Latest Data";
 
                         showToast(
                           _errorMsg,

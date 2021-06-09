@@ -97,48 +97,53 @@ Future<void> _deleteOldTask() async {
         try {
           _thisUserActivityCollection
               .forEach((Map<String, dynamic> everyActivity) async {
-            print('Activity: ${everyActivity['Status']}');
+            try {
+              print('Activity: ${everyActivity['Status']}');
 
-            String _activityDateTime = everyActivity['Status_Time'];
+              String _activityDateTime = everyActivity['Status_Time'];
 
-            if (_activityDateTime.contains('+'))
-              _activityDateTime = _activityDateTime.split('+')[0];
+              if (_activityDateTime.contains('+'))
+                _activityDateTime = _activityDateTime.split('+')[0];
 
-            final String currDate = DateTime.now().toString().split(' ')[0];
-            final int currHour = DateTime.now().hour;
-            final int currMinute = DateTime.now().minute;
+              final String currDate = DateTime.now().toString().split(' ')[0];
+              final int currHour = DateTime.now().hour;
+              final int currMinute = DateTime.now().minute;
 
-            final List<String> _timeDistribution =
-                _activityDateTime.split(' ')[1].split(':');
+              final List<String> _timeDistribution =
+                  _activityDateTime.split(' ')[1].split(':');
 
-            /// Accurate Work
-            if (_activityDateTime.split(' ')[0] != currDate &&
-                ((int.parse(_timeDistribution[0]) == currHour &&
-                        int.parse(_timeDistribution[1]) <= currMinute) ||
-                    int.parse(_timeDistribution[0]) < currHour)) {
-              print('Delete that Status');
+              /// Accurate Work
+              if (_activityDateTime.split(' ')[0] != currDate &&
+                  ((int.parse(_timeDistribution[0]) == currHour &&
+                          int.parse(_timeDistribution[1]) <= currMinute) ||
+                      int.parse(_timeDistribution[0]) < currHour)) {
+                print('Delete that Status');
 
-              /// Delete Particular Activity
-              await _localStorageHelper.deleteParticularActivity(
-                  tableName: everyUser.values.first,
-                  activity: everyActivity['Status']);
+                /// Delete Particular Activity
+                await _localStorageHelper.deleteParticularActivity(
+                    tableName: everyUser.values.first,
+                    activity: everyActivity['Status']);
 
-              /// Delete File From Local Storage[Exception Handling Because File Can be Deleted by user Manually]
-              try {
-                await File(everyActivity['Status'].split('+')[0])
-                    .delete(recursive: true);
-              } catch (e) {
-                print('File Deleted Already Exception: ${e.toString()}');
+                /// Delete File From Local Storage[Exception Handling Because File Can be Deleted by user Manually]
+                try {
+                  await File(everyActivity['Status'].split('+')[0])
+                      .delete(recursive: true);
+                } catch (e) {
+                  print('File Deleted Already Exception: ${e.toString()}');
+                }
+
+                /// For This Current Account Status For Media
+                if (everyActivity['Status'].contains('+') &&
+                    (everyActivity['Media'] == MediaTypes.Image.toString() ||
+                        everyActivity['Media'] ==
+                            MediaTypes.Video.toString())) {
+                  /// Store in Local Container about Media Store in Firebase Storage
+                  _activityLinkDeleteFromStorage
+                      .add(everyActivity['Status'].split('+')[1]);
+                }
               }
-
-              /// For This Current Account Status For Media
-              if (everyActivity['Status'].contains('+') &&
-                  (everyActivity['Media'] == MediaTypes.Image.toString() ||
-                      everyActivity['Media'] == MediaTypes.Video.toString())) {
-                /// Store in Local Container about Media Store in Firebase Storage
-                _activityLinkDeleteFromStorage
-                    .add(everyActivity['Status'].split('+')[1]);
-              }
+            } catch (e) {
+              print('Error Activity Showing: ${e.toString()}');
             }
           });
         } catch (e) {
