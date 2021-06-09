@@ -171,6 +171,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       /// If messagesList not Empty
       if (messagesGet.isNotEmpty) {
+        String oldDate = '';
         for (Map<String, dynamic> message in messagesGet) {
           /// Change Every Message Value to List
           List<dynamic> messageContainer = message.values.toList();
@@ -183,12 +184,22 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           } else {
             if (mounted) {
               setState(() {
+                if (oldDate != message['Date']) {
+                  _mediaTypes.add(MediaTypes.Indicator);
+                  _chatContainer.add({
+                    '${message['Date']}': '',
+                  });
+                  _response.add(null);
+                  oldDate = message['Date'].toString();
+                }
+
                 _chatContainer.add({
                   _encryptionMaker
                           .decryptionMaker(messageContainer[0].toString()):
                       _encryptionMaker
                           .decryptionMaker(messageContainer[1].toString()),
                 });
+
                 if (messageContainer[2] == 1)
                   _response.add(true);
                 else
@@ -1202,7 +1213,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   itemCount: _chatContainer.length,
                   itemBuilder: (context, position) {
                     if (_mediaTypes[position] == MediaTypes.Indicator) {
-                      return newMessageIndicator(context);
+                      return newMessageIndicator(context, position);
                     } else if (_mediaTypes[position] == MediaTypes.Text)
                       return textConversationList(
                           context, position, _response[position]);
@@ -1423,25 +1434,29 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget newMessageIndicator(BuildContext context) {
+  Widget newMessageIndicator(BuildContext context, int index) {
     return Container(
       alignment: Alignment.center,
       margin: EdgeInsets.only(
-        left: MediaQuery.of(context).size.width / 4,
-        right: MediaQuery.of(context).size.width / 4,
+        left: _chatContainer[index].keys.first.toString() == 'New Messages'?MediaQuery.of(context).size.width /3.3:MediaQuery.of(context).size.width / 2.7,
+        right: _chatContainer[index].keys.first.toString() == 'New Messages'?MediaQuery.of(context).size.width /3.3:MediaQuery.of(context).size.width / 2.7,
         top: 10.0,
-        bottom: 20.0,
+        bottom: _chatContainer[index].keys.first.toString() == 'New Messages'?20.0:10.0,
       ),
       //width: MediaQuery.of(context).size.width / 2,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(_chatContainer[index].keys.first.toString() == 'New Messages'?20.0:10.0),
+        color: _chatContainer[index].keys.first.toString() == 'New Messages'
+            ? Colors.green[500]
+            : Color.fromRGBO(60, 80, 100, 1),
       ),
       child: Text(
-        'New Messages',
+        _chatContainer[index].keys.first.toString(),
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Colors.white,
+          color: _chatContainer[index].keys.first.toString() == 'New Messages'
+              ? Colors.white
+              : Colors.white70,
           fontSize: 16.0,
           //fontFamily: 'Lora',
           letterSpacing: 1.0,

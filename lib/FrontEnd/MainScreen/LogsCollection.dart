@@ -29,7 +29,12 @@ class _ScreenLogsState extends State<ScreenLogs> {
             await _localStorageHelper.extractProfileImageLocalPath(
                 userName: userNameMap.values.first.toString());
 
-        if (mounted) {
+        final int totalCallLogs = await _localStorageHelper
+            .countOrExtractTotalCallLogs(userNameMap.values.first.toString());
+
+        print(totalCallLogs);
+
+        if (totalCallLogs > 0) if (mounted) {
           setState(() {
             this._nameAndImageForCallLog.add({
               userNameMap.values.first.toString(): _userProfilePicLocalPath,
@@ -85,8 +90,14 @@ class _ScreenLogsState extends State<ScreenLogs> {
             ),
             onPressed: () {
               print("Logs Information");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => ShowCallLogsData(this._nameAndImageForCallLog[index].keys.first.toString())));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => ShowCallLogsData(this
+                          ._nameAndImageForCallLog[index]
+                          .keys
+                          .first
+                          .toString())));
             },
             child: Row(
               children: [

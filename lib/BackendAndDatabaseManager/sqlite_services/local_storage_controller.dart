@@ -525,7 +525,7 @@ class LocalStorageHelper {
 
     /// Current Date
     DateTime now = DateTime.now();
-    DateFormat formatter = DateFormat('yyyy-MM-dd');
+    DateFormat formatter = DateFormat('dd-MM-yyyy');
     String _dateIS = formatter.format(now);
 
     /// Insert Data to Map
@@ -548,7 +548,7 @@ class LocalStorageHelper {
     final Database db = await this.database; // DB Reference
 
     final List<Map<String, Object>> result = await db.rawQuery(
-        'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType FROM $_tableName');
+        'SELECT $_colMessages, $_colTime, $_colReferences, $_colMediaType, $_colDate FROM $_tableName');
 
     return result;
   }
@@ -918,7 +918,9 @@ class LocalStorageHelper {
       final List<Map<String, Object>> result = await db.rawQuery(
           "SELECT ${purpose == 'COUNT' ? 'COUNT(*)' : '*'} FROM ${tableName}_callHistory");
 
-      if (purpose == 'COUNT') return result == null ? 0 : result.length;
+      print('Result is: $result');
+
+      if (purpose == 'COUNT') return result == null ? 0 : int.parse(result[0].values.first.toString());
 
       return result == null ? [] : result;
     } catch (e) {

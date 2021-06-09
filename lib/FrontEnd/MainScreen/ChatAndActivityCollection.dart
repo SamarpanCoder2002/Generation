@@ -174,124 +174,136 @@ class _ChatsAndActivityCollectionState
             if (_mediaRegex.hasMatch(everyActivity.keys.first.toString())) {
               final String currTime = DateTime.now().toString();
 
-              if (everyActivity.values.first.toString().split('++++++')[1] ==
-                  'video') {
-                if (storagePermissionStatus.isGranted) {
-                  final activityVideoPath =
-                      await Directory(directory.path + '/.ActivityVideos/')
-                          .create();
+              try {
+                if (everyActivity.values.first.toString().split('++++++')[1] ==
+                    'video') {
+                  if (storagePermissionStatus.isGranted) {
+                    final activityVideoPath =
+                        await Directory(directory.path + '/.ActivityVideos/')
+                            .create();
 
-                  print('Add Video Activity to Sqlite');
+                    print('Add Video Activity to Sqlite');
 
-                  /// Insert Video  Activity Data to the local database for future use
-                  final bool _videoPathStorageResponse =
-                      await _localStorageHelper.insertDataInUserActivityTable(
-                    tableName: _connectionUserNameFromLocalDatabase,
-                    statusLinkOrString:
-                        '${activityVideoPath.path}$currTime.mp4',
-                    mediaTypes: MediaTypes.Video,
-                    activityTime: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[2],
-                    extraText: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[0],
-                  );
+                    /// Insert Video  Activity Data to the local database for future use
+                    final bool _videoPathStorageResponse =
+                        await _localStorageHelper.insertDataInUserActivityTable(
+                      tableName: _connectionUserNameFromLocalDatabase,
+                      statusLinkOrString:
+                          '${activityVideoPath.path}$currTime.mp4',
+                      mediaTypes: MediaTypes.Video,
+                      activityTime: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[2],
+                      extraText: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[0],
+                    );
 
-                  /// If path insertion in sqLite having no error, download the video and store it in local storage
-                  if (_videoPathStorageResponse) {
-                    try {
-                      _newActivityUpdate(_connectionUserNameFromLocalDatabase);
+                    /// If path insertion in sqLite having no error, download the video and store it in local storage
+                    if (_videoPathStorageResponse) {
+                      try {
+                        _newActivityUpdate(
+                            _connectionUserNameFromLocalDatabase);
 
-                      await _dio.download(everyActivity.keys.first.toString(),
-                          '${activityVideoPath.path}$currTime.mp4');
+                        await _dio.download(everyActivity.keys.first.toString(),
+                            '${activityVideoPath.path}$currTime.mp4');
 
-                      print('Video Download Complete');
-                      print(
-                          'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                    } catch (e) {
-                      print('Activity Video Download Error: ${e.toString()}');
+                        print('Video Download Complete');
+                        print(
+                            'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                      } catch (e) {
+                        print('Activity Video Download Error: ${e.toString()}');
+                      }
                     }
+                  } else {
+                    print('Storage Permission Denied');
                   }
                 } else {
-                  print('Storage Permission Denied');
-                }
-              } else {
-                if (storagePermissionStatus.isGranted) {
-                  /// Create new Hidden Folder once in desired location
-                  final activityImagePath =
-                      await Directory('${directory.path}/.ActivityImages/')
-                          .create();
+                  if (storagePermissionStatus.isGranted) {
+                    /// Create new Hidden Folder once in desired location
+                    final activityImagePath =
+                        await Directory('${directory.path}/.ActivityImages/')
+                            .create();
 
-                  print('Add Files to Sqlite');
+                    print('Add Files to Sqlite');
 
-                  /// Add Activity Image Data to Local Storage for Future use and take response about insertion data
-                  final bool _imageActivityInsertionResponse =
-                      await _localStorageHelper.insertDataInUserActivityTable(
-                    tableName: _connectionUserNameFromLocalDatabase,
-                    statusLinkOrString:
-                        '${activityImagePath.path}$currTime.jpg',
-                    mediaTypes: MediaTypes.Image,
-                    activityTime: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[2],
-                    extraText: everyActivity.values.first
-                        .toString()
-                        .split('++++++')[0],
-                  );
+                    /// Add Activity Image Data to Local Storage for Future use and take response about insertion data
+                    final bool _imageActivityInsertionResponse =
+                        await _localStorageHelper.insertDataInUserActivityTable(
+                      tableName: _connectionUserNameFromLocalDatabase,
+                      statusLinkOrString:
+                          '${activityImagePath.path}$currTime.jpg',
+                      mediaTypes: MediaTypes.Image,
+                      activityTime: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[2],
+                      extraText: everyActivity.values.first
+                          .toString()
+                          .split('++++++')[0],
+                    );
 
-                  /// If path insertion in sqLite having no error, download the image and store it in local storage
-                  if (_imageActivityInsertionResponse) {
-                    try {
-                      _newActivityUpdate(_connectionUserNameFromLocalDatabase);
+                    /// If path insertion in sqLite having no error, download the image and store it in local storage
+                    if (_imageActivityInsertionResponse) {
+                      try {
+                        _newActivityUpdate(
+                            _connectionUserNameFromLocalDatabase);
 
-                      /// Download Image Activity from Firebase Storage and store in local database
-                      await _dio.downloadUri(
-                          Uri.parse(everyActivity.keys.first.toString()),
-                          '${activityImagePath.path}$currTime.jpg');
+                        /// Download Image Activity from Firebase Storage and store in local database
+                        await _dio.downloadUri(
+                            Uri.parse(everyActivity.keys.first.toString()),
+                            '${activityImagePath.path}$currTime.jpg');
 
-                      print('Image Download Complete');
+                        print('Image Download Complete');
 
-                      print(
-                          'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
-                    } catch (e) {
-                      print('Activity Image Download Error: ${e.toString()}');
+                        print(
+                            'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                      } catch (e) {
+                        print('Activity Image Download Error: ${e.toString()}');
+                      }
                     }
+                  } else {
+                    print('Permission Denied');
                   }
-                } else {
-                  print('Permission Denied');
                 }
+              } catch (e) {
+                print('Error: Media Activity Saving Error: ${e.toString()}');
               }
             } else {
               print('Special Babe: $everyActivity');
 
               _newActivityUpdate(_connectionUserNameFromLocalDatabase);
 
-              /// Add Text Activity Data to Local Storage for future use
-              await _localStorageHelper.insertDataInUserActivityTable(
-                tableName: _connectionUserNameFromLocalDatabase,
-                statusLinkOrString: everyActivity.keys.first
-                            .toString()
-                            .split('+')[1] ==
-                        ActivitySpecialOptions.Polling.toString()
-                    ? '${everyActivity.keys.first.toString().split('+')[2]}${everyActivity.keys.first.toString().split('+')[0]}[[[question]]]${everyActivity.values.first.toString()}'
-                    : everyActivity.keys.first.toString().split('+')[0],
-                mediaTypes: everyActivity.keys.first.toString().split('+')[1] ==
-                        MediaTypes.Text.toString()
-                    ? MediaTypes.Text
-                    : null,
-                activitySpecialOptions:
-                    everyActivity.keys.first.toString().split('+')[1] ==
-                            ActivitySpecialOptions.Polling.toString()
-                        ? ActivitySpecialOptions.Polling
-                        : null,
-                activityTime:
-                    everyActivity.keys.first.toString().split('+')[1] ==
-                            MediaTypes.Text.toString()
-                        ? everyActivity.values.first.toString().split('+')[5]
-                        : everyActivity.keys.first.toString().split('+')[3],
-                bgInformation: everyActivity.values.first.toString(),
-              );
+              try {
+                /// Add Text Activity Data to Local Storage for future use
+                await _localStorageHelper.insertDataInUserActivityTable(
+                  tableName: _connectionUserNameFromLocalDatabase,
+                  statusLinkOrString: everyActivity.keys.first
+                              .toString()
+                              .split('+')[1] ==
+                          ActivitySpecialOptions.Polling.toString()
+                      ? '${everyActivity.keys.first.toString().split('+')[2]}${everyActivity.keys.first.toString().split('+')[0]}[[[question]]]${everyActivity.values.first.toString()}'
+                      : everyActivity.keys.first.toString().split('+')[0],
+                  mediaTypes:
+                      everyActivity.keys.first.toString().split('+')[1] ==
+                              MediaTypes.Text.toString()
+                          ? MediaTypes.Text
+                          : null,
+                  activitySpecialOptions:
+                      everyActivity.keys.first.toString().split('+')[1] ==
+                              ActivitySpecialOptions.Polling.toString()
+                          ? ActivitySpecialOptions.Polling
+                          : null,
+                  activityTime:
+                      everyActivity.keys.first.toString().split('+')[1] ==
+                              MediaTypes.Text.toString()
+                          ? everyActivity.values.first.toString().split('+')[5]
+                          : everyActivity.keys.first.toString().split('+')[3],
+                  bgInformation: everyActivity.values.first.toString(),
+                );
+              } catch (e) {
+                print(
+                    'Error: Text And Poll Activity Saving Error: ${e.toString()}');
+              }
             }
           });
         }
@@ -982,7 +994,7 @@ class _ChatsAndActivityCollectionState
                   closedBuilder: (context, closeWidget) {
                     return Container(
                       alignment: Alignment.center,
-                      width: MediaQuery.of(context).size.width / 2 + 20,
+                      width: MediaQuery.of(context).size.width / 2 + 30,
                       padding: EdgeInsets.only(
                         top: 5.0,
                         bottom: 5.0,
@@ -992,6 +1004,7 @@ class _ChatsAndActivityCollectionState
                         children: [
                           Text(
                             _userName,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18.0,
                               color: Colors.white,
