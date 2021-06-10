@@ -16,7 +16,7 @@ import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/MainScreen/ChatAndActivityCollection.dart';
 import 'package:generation/FrontEnd/MainScreen/general_applications_section.dart';
-import 'package:generation/FrontEnd/MainScreen/LogsCollection.dart';
+import 'package:generation/FrontEnd/MainScreen/logs_collection.dart';
 import 'package:generation/FrontEnd/MenuScreen/profile_screen.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/settings_menu.dart';
 

@@ -893,7 +893,7 @@ class _ChatsAndActivityCollectionState
                                   _userName]))
                           : Center(
                               child: Text(
-                                'Error',
+                                'No Profile Image',
                                 style: TextStyle(
                                   color: Colors.red,
                                   fontSize: 20.0,
@@ -920,18 +920,6 @@ class _ChatsAndActivityCollectionState
                   transitionDuration: Duration(milliseconds: 50),
                   transitionType: ContainerTransitionType.fadeThrough,
                   onClosed: (value) async {
-                    // // For Set the Latest Close chat index at beginning
-                    // if (_allConnectionsUserName.length > 1) {
-                    //   if (mounted) {
-                    //     setState(() {
-                    //       String _latestUserName =
-                    //           _allConnectionsUserName.removeAt(
-                    //               _allConnectionsUserName.indexOf(_userName));
-                    //       _allConnectionsUserName.insert(0, _latestUserName);
-                    //     });
-                    //   }
-                    // }
-
                     /// Irrespectively make changes when a chat just Close
                     _localStorageHelper
                         .fetchLatestMessage(_userName)
@@ -939,8 +927,6 @@ class _ChatsAndActivityCollectionState
                       if (takeLocalData != null &&
                           takeLocalData.isNotEmpty &&
                           takeLocalData.values.toString().split('+')[0] != '') {
-                        //print('After Chat Closed: $takeLocalData');
-
                         if (_allConnectionsLatestMessage[_userName] != null &&
                             _allConnectionsLatestMessage[_userName].isNotEmpty)
                           _allConnectionsLatestMessage[_userName].clear();

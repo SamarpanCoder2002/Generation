@@ -125,10 +125,9 @@ class _ScreenLogsState extends State<ScreenLogs> {
                 Expanded(
                   child: Container(
                     alignment: Alignment.center,
-                    //width: MediaQuery.of(context).size.width / 2 + 20,
                     padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
                     child: Text(
-                      this._nameAndImageForCallLog[index].keys.first.toString(),
+                      _getUserName(index),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 18.0,
@@ -160,4 +159,14 @@ class _ScreenLogsState extends State<ScreenLogs> {
           ),
         ));
   }
+
+  String _getUserName(int index) => this
+              ._nameAndImageForCallLog[index]
+              .keys
+              .first
+              .toString()
+              .length <=
+          20
+      ? this._nameAndImageForCallLog[index].keys.first.toString()
+      : '${this._nameAndImageForCallLog[index].keys.first.toString().replaceRange(20, this._nameAndImageForCallLog[index].keys.first.toString().length, '...')}';
 }

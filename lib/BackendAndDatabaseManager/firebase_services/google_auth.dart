@@ -10,7 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/FrontEnd/MainScreen/main_window.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 
 class GoogleAuth {

@@ -82,25 +82,17 @@ class _ActivityViewState extends State<ActivityView>
     print('Current User Data Collect: $_activityDataCollect');
 
     if (_activityDataCollect == null || _activityDataCollect.length == 0) {
-      if (mounted) {
-        setState(() {
-          _currUserActivityCollection.add({
-            'Status': 'No Activity Present',
-            'Status_Time': DateTime.now().toString(),
-            'Media': MediaTypes.Text.toString(),
-            'Bg_Information': '0+0+0+1.0+25.0',
-          });
-        });
-      }
     } else {
+      /// Android StatusBar Hide
+      await SystemChrome.setEnabledSystemUIOverlays([]);
+
       if (mounted) {
         setState(() {
           _currUserActivityCollection = _activityDataCollect;
         });
       }
+      _callLoader(); // Initially Call Loader
     }
-
-    _callLoader(); // Initially Call Loader
   }
 
   @override
@@ -111,13 +103,11 @@ class _ActivityViewState extends State<ActivityView>
 
       _collectCurrUserActivity();
 
-      SystemChrome.setEnabledSystemUIOverlays([]); // Android StatusBar Hide
-
-      // For EveryActivity Controller and EveryActivity Animation Controller
+      /// For EveryActivity Controller and EveryActivity Animation Controller
       _activityPageViewController = PageController();
       _animationController = AnimationController(vsync: this);
 
-      // Animation Status Initialized with Add Listner Mode
+      /// Animation Status Initialized with Add Listner Mode
       _animationController.addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           _animationController.stop();
@@ -177,113 +167,122 @@ class _ActivityViewState extends State<ActivityView>
 
   Widget activityViewer() {
     try {
-      return GestureDetector(
-        onTapUp: _onTapUp,
-        onTapDown: _onTapDown,
-        onHorizontalDragEnd: _onHorizontalDragEnd,
-        child: Stack(
-          children: [
-            PageView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              controller: _activityPageViewController,
-              itemCount: _currUserActivityCollection.length,
-              itemBuilder: (context, i) {
-                final Map<String, dynamic> activityItem =
-                    _currUserActivityCollection[_activityCurrIndex];
+      return this._currUserActivityCollection.length > 0
+          ? GestureDetector(
+              onTapUp: _onTapUp,
+              onTapDown: _onTapDown,
+              onHorizontalDragEnd: _onHorizontalDragEnd,
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    controller: _activityPageViewController,
+                    itemCount: this._currUserActivityCollection.length,
+                    itemBuilder: (context, i) {
+                      final Map<String, dynamic> activityItem =
+                          _currUserActivityCollection[_activityCurrIndex];
 
-                List<String> _activityTimeCollection =
-                    activityItem['Status_Time'].toString().split(' ');
-                String _timeIs = _activityTimeCollection.length > 1
-                    ? "${_activityTimeCollection[0]}       ${_activityTimeCollection[1].split(':')[0]}:${_activityTimeCollection[1].split(':')[1]}"
-                    : '';
+                      List<String> _activityTimeCollection =
+                          activityItem['Status_Time'].toString().split(' ');
+                      String _timeIs = _activityTimeCollection.length > 1
+                          ? "${_activityTimeCollection[0]}       ${_activityTimeCollection[1].split(':')[0]}:${_activityTimeCollection[1].split(':')[1]}"
+                          : '';
 
-                if (_mediaRegex.hasMatch(activityItem['Status'])) {
-                  final String mediaDetector = activityItem[
-                      'Media']; // MediaItem(Image/Video) Separated by '++++++'
+                      if (_mediaRegex.hasMatch(activityItem['Status'])) {
+                        final String mediaDetector = activityItem[
+                            'Media']; // MediaItem(Image/Video) Separated by '++++++'
 
-                  String activityMediaActivityFromLocal =
-                      activityItem['Status'];
+                        String activityMediaActivityFromLocal =
+                            activityItem['Status'];
 
-                  if (activityItem['Status'].contains('+'))
-                    activityMediaActivityFromLocal =
-                        activityMediaActivityFromLocal.split('+')[0];
+                        if (activityItem['Status'].contains('+'))
+                          activityMediaActivityFromLocal =
+                              activityMediaActivityFromLocal.split('+')[0];
 
-                  return mediaDetector == MediaTypes.Image.toString()
-                      ? imageActivityView(activityMediaActivityFromLocal,
-                          activityItem['ExtraActivityText'], _timeIs)
-                      : videoActivityView(activityMediaActivityFromLocal,
-                          activityItem['ExtraActivityText'], _timeIs);
-                } else {
-                  String _activityType = activityItem['Media'];
+                        return mediaDetector == MediaTypes.Image.toString()
+                            ? imageActivityView(activityMediaActivityFromLocal,
+                                activityItem['ExtraActivityText'], _timeIs)
+                            : videoActivityView(activityMediaActivityFromLocal,
+                                activityItem['ExtraActivityText'], _timeIs);
+                      } else {
+                        String _activityType = activityItem['Media'];
 
-                  if (_activityType == MediaTypes.Text.toString())
-                    return textActivityView(
-                        activityItem['Bg_Information'],
-                        activityItem['Status'],
-                        _timeIs); // If Current Activity is TEXT
-                  else {
-                    try {
-                      if (_pollOptionsPercentageList.isNotEmpty)
-                        _pollOptionsPercentageList.clear();
+                        if (_activityType == MediaTypes.Text.toString())
+                          return textActivityView(
+                              activityItem['Bg_Information'],
+                              activityItem['Status'],
+                              _timeIs); // If Current Activity is TEXT
+                        else {
+                          try {
+                            if (_pollOptionsPercentageList.isNotEmpty)
+                              _pollOptionsPercentageList.clear();
 
-                      _selectedPoll = -1;
+                            _selectedPoll = -1;
 
-                      for (int i = 0;
-                          i <
-                              activityItem['Status']
-                                  .split('[[[question]]]')[2]
-                                  .split('+')
-                                  .length;
-                          i++) {
-                        _pollOptionsPercentageList.add(0.0);
+                            for (int i = 0;
+                                i <
+                                    activityItem['Status']
+                                        .split('[[[question]]]')[2]
+                                        .split('+')
+                                        .length;
+                                i++) {
+                              _pollOptionsPercentageList.add(0.0);
+                            }
+
+                            print(
+                                'Activity Item Status: ${activityItem['Status']}');
+
+                            _pollOptionPercentValueUpdated(
+                                activityItem['Status']);
+
+                            print('Special: $_tempList');
+
+                            return _pollActivityView(activityItem['Status'],
+                                activityItem['Bg_Information'], i, _timeIs);
+                          } catch (e) {
+                            print('Activity Opening Error: ${e.toString()}');
+
+                            return Center(
+                              child: Text(
+                                'Sorry, Activity Opening Error',
+                                style: TextStyle(
+                                    color: Colors.red, fontSize: 20.0),
+                              ),
+                            );
+                          }
+                        }
                       }
-
-                      print('Activity Item Status: ${activityItem['Status']}');
-
-                      _pollOptionPercentValueUpdated(activityItem['Status']);
-
-                      print('Special: $_tempList');
-
-                      return _pollActivityView(activityItem['Status'],
-                          activityItem['Bg_Information'], i, _timeIs);
-                    } catch (e) {
-                      print('Activity Opening Error: ${e.toString()}');
-
-                      return Center(
-                        child: Text(
-                          'Sorry, Activity Opening Error',
-                          style: TextStyle(color: Colors.red, fontSize: 20.0),
-                        ),
-                      );
-                    }
-                  }
-                }
-              },
-            ),
-            Positioned(
-              top: 10.0,
-              left: 5.0,
-              right: 5.0,
-              child: Row(
-                children: _currUserActivityCollection
-                    .asMap()
-                    .map((mapIndex, e) {
-                      return MapEntry(
-                          mapIndex,
-                          AnimatedBar(
-                            animController: _animationController,
-                            position: mapIndex,
-                            currentIndex: _activityCurrIndex,
-                          ));
-                    })
-                    .values
-                    .toList(),
+                    },
+                  ),
+                  Positioned(
+                    top: 10.0,
+                    left: 5.0,
+                    right: 5.0,
+                    child: Row(
+                      children: _currUserActivityCollection
+                          .asMap()
+                          .map((mapIndex, e) {
+                            return MapEntry(
+                                mapIndex,
+                                AnimatedBar(
+                                  animController: _animationController,
+                                  position: mapIndex,
+                                  currentIndex: _activityCurrIndex,
+                                ));
+                          })
+                          .values
+                          .toList(),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-      );
+            )
+          : Center(
+              child: Text(
+              'No Activity Present',
+              style: TextStyle(color: Colors.red, fontSize: 25.0),
+            ));
     } catch (e) {
       print(e.toString());
       return Container(

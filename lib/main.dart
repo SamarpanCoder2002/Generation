@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/FrontEnd/MainScreen/main_window.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';

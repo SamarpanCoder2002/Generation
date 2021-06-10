@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
-import 'package:generation/FrontEnd/MainScreen/MainWindow.dart';
+import 'package:generation/FrontEnd/MainScreen/main_window.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 
 class EmailAndPasswordAuth {
