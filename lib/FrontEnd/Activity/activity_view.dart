@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -50,6 +51,8 @@ class _ActivityViewState extends State<ActivityView>
 
   // Activity Number Initialized
   int _activityCurrIndex = 0;
+
+  bool _showInformation = false;
 
   // Helper Function to Call _loadActivity Function
   void _callLoader({int activityPosition = 0}) {
@@ -189,6 +192,12 @@ class _ActivityViewState extends State<ActivityView>
                 final Map<String, dynamic> activityItem =
                     _currUserActivityCollection[_activityCurrIndex];
 
+                List<String> _activityTimeCollection =
+                    activityItem['Status_Time'].toString().split(' ');
+                String _timeIs = _activityTimeCollection.length > 1
+                    ? "${_activityTimeCollection[0]}       ${_activityTimeCollection[1].split(':')[0]}:${_activityTimeCollection[1].split(':')[1]}"
+                    : '';
+
                 if (_mediaRegex.hasMatch(activityItem['Status'])) {
                   final String mediaDetector = activityItem[
                       'Media']; // MediaItem(Image/Video) Separated by '++++++'
@@ -202,15 +211,17 @@ class _ActivityViewState extends State<ActivityView>
 
                   return mediaDetector == MediaTypes.Image.toString()
                       ? imageActivityView(activityMediaActivityFromLocal,
-                          activityItem['ExtraActivityText'])
+                          activityItem['ExtraActivityText'], _timeIs)
                       : videoActivityView(activityMediaActivityFromLocal,
-                          activityItem['ExtraActivityText']);
+                          activityItem['ExtraActivityText'], _timeIs);
                 } else {
                   String _activityType = activityItem['Media'];
 
                   if (_activityType == MediaTypes.Text.toString())
-                    return textActivityView(activityItem['Bg_Information'],
-                        activityItem['Status']); // If Current Activity is TEXT
+                    return textActivityView(
+                        activityItem['Bg_Information'],
+                        activityItem['Status'],
+                        _timeIs); // If Current Activity is TEXT
                   else {
                     try {
                       if (_pollOptionsPercentageList.isNotEmpty)
@@ -235,7 +246,7 @@ class _ActivityViewState extends State<ActivityView>
                       print('Special: $_tempList');
 
                       return _pollActivityView(activityItem['Status'],
-                          activityItem['Bg_Information'], i);
+                          activityItem['Bg_Information'], i, _timeIs);
                     } catch (e) {
                       print('Activity Opening Error: ${e.toString()}');
 
@@ -292,7 +303,8 @@ class _ActivityViewState extends State<ActivityView>
     }
   }
 
-  Widget textActivityView(String activityItem, String activityText) {
+  Widget textActivityView(
+      String activityItem, String activityText, String timeIs) {
     final List<String> colorAndFontValues = activityItem.split('+');
 
     final int r = int.parse(colorAndFontValues[0]);
@@ -301,34 +313,51 @@ class _ActivityViewState extends State<ActivityView>
     final double opacity = double.parse(colorAndFontValues[3]);
     final double fontSize = double.parse(colorAndFontValues[4]);
 
-    return Container(
-      color: Color.fromRGBO(r, g, b, opacity),
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
-      child: Center(
-        child: Scrollbar(
-          showTrackOnHover: true,
-          thickness: 10.0,
-          radius: const Radius.circular(30.0),
-          child: Text(
-            activityText,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: activityText == 'No Activity Present'
-                  ? Colors.red
-                  : Colors.white,
-              fontFamily: 'Lora',
-              letterSpacing: 1.0,
+    return Stack(
+      children: [
+        Container(
+          color: Color.fromRGBO(r, g, b, opacity),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+          child: Center(
+            child: Scrollbar(
+              showTrackOnHover: true,
+              thickness: 10.0,
+              radius: const Radius.circular(30.0),
+              child: Text(
+                activityText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  color: activityText == 'No Activity Present'
+                      ? Colors.red
+                      : Colors.white,
+                  fontFamily: 'Lora',
+                  letterSpacing: 1.0,
+                ),
+              ),
             ),
           ),
         ),
-      ),
+        if (this._showInformation)
+          Container(
+            height: 90.0,
+            padding: const EdgeInsets.only(top: 30.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(30.0),
+                  bottomLeft: Radius.circular(30.0)),
+              color: Colors.black26,
+            ),
+            child: _showUserNameOnTap(timeIs),
+          ),
+      ],
     );
   }
 
-  Widget videoActivityView(String videoUrl, String mediaDetector) {
+  Widget videoActivityView(
+      String videoUrl, String mediaDetector, String timeIs) {
     // if (_videoController != null && _videoController.value.isInitialized) {
     //   return SizedBox(
     //       width: MediaQuery.of(context).size.width,
@@ -347,6 +376,8 @@ class _ActivityViewState extends State<ActivityView>
     //             ),
     //           ),
     //           bottomTextActivityView(mediaDetector),
+    //           if(this._showInformation)
+    //              _showUserNameOnTap(timeIs),
     //         ],
     //       ));
     // }
@@ -380,7 +411,8 @@ class _ActivityViewState extends State<ActivityView>
     );
   }
 
-  Widget imageActivityView(String imagePath, String extraActivityText) {
+  Widget imageActivityView(
+      String imagePath, String extraActivityText, String timeIs) {
     return Stack(
       children: [
         PhotoView(
@@ -401,6 +433,18 @@ class _ActivityViewState extends State<ActivityView>
           enableRotation: true,
         ),
         bottomTextActivityView(extraActivityText),
+        if (this._showInformation)
+          Container(
+            height: 90.0,
+            padding: const EdgeInsets.only(top: 30.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  bottomRight: Radius.circular(30.0),
+                  bottomLeft: Radius.circular(30.0)),
+              color: Colors.black26,
+            ),
+            child: _showUserNameOnTap(timeIs),
+          ),
       ],
     );
   }
@@ -500,35 +544,38 @@ class _ActivityViewState extends State<ActivityView>
     if (details.primaryVelocity == 0.0) {
       print("Now Work For OnTapUp and OnTapDown");
     } else {
-      setState(() {
-        if (details.primaryVelocity > 0) {
-          if (_activityCurrIndex - 1 >= 0) {
-            _activityCurrIndex -= 1;
+      if (mounted)
+        setState(() {
+          this._showInformation = false;
 
-            if (_tempList.isNotEmpty) {
-              if (mounted) {
-                setState(() {
-                  _tempList.clear();
-                });
-              }
-            }
-          }
-        } else {
-          if (_activityCurrIndex + 1 < _currUserActivityCollection.length) {
-            _activityCurrIndex += 1;
+          if (details.primaryVelocity > 0) {
+            if (_activityCurrIndex - 1 >= 0) {
+              _activityCurrIndex -= 1;
 
-            if (_tempList.isNotEmpty) {
-              if (mounted) {
-                setState(() {
-                  _tempList.clear();
-                });
+              if (_tempList.isNotEmpty) {
+                if (mounted) {
+                  setState(() {
+                    _tempList.clear();
+                  });
+                }
               }
             }
           } else {
-            Navigator.pop(context);
+            if (_activityCurrIndex + 1 < _currUserActivityCollection.length) {
+              _activityCurrIndex += 1;
+
+              if (_tempList.isNotEmpty) {
+                if (mounted) {
+                  setState(() {
+                    _tempList.clear();
+                  });
+                }
+              }
+            } else {
+              Navigator.pop(context);
+            }
           }
-        }
-      });
+        });
 
       if (_activityCurrIndex == _currUserActivityCollection.length) {
         Navigator.pop(context);
@@ -539,6 +586,12 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   void _onTapDown(TapDownDetails details) {
+    if (mounted) {
+      setState(() {
+        this._showInformation = true;
+      });
+    }
+
     if (_mediaRegex
         .hasMatch(_currUserActivityCollection[_activityCurrIndex]['Status'])) {
       if (_currUserActivityCollection[_activityCurrIndex]['Media'] ==
@@ -558,6 +611,12 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   void _onTapUp(TapUpDetails details) {
+    if (mounted) {
+      setState(() {
+        this._showInformation = false;
+      });
+    }
+
     if (_mediaRegex
         .hasMatch(_currUserActivityCollection[_activityCurrIndex]['Status'])) {
       if (_currUserActivityCollection[_activityCurrIndex]['Media'] ==
@@ -576,78 +635,95 @@ class _ActivityViewState extends State<ActivityView>
       _animationController.forward();
   }
 
-  Widget _pollActivityView(String _pollActivity, String _answers, int index) {
+  Widget _pollActivityView(
+      String _pollActivity, String _answers, int index, String timeIs) {
     _progressPercentProduction();
     return StatefulBuilder(
-        builder: (context, setStateIs) => Container(
-              color: Color.fromRGBO(34, 48, 60, 1),
-              width: double.maxFinite,
-              height: double.maxFinite,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height / 3,
-                left: 10.0,
-                right: 10.0,
-              ),
-              child: Column(
-                children: [
+        builder: (context, setStateIs) => Stack(
+              children: [
+                Container(
+                  color: Color.fromRGBO(34, 48, 60, 1),
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height / 3,
+                    left: 10.0,
+                    right: 10.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.topCenter,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.refresh_rounded,
+                            size: 40.0,
+                            color: Colors.green,
+                          ),
+                          onPressed: () {
+                            if (_pollActivity
+                                    .toString()
+                                    .split('[[[question]]]')
+                                    .length >=
+                                4) {
+                              if (mounted) {
+                                setState(() {
+                                  _tempList.add('Completed');
+                                  _animationController.forward();
+                                });
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30.0,
+                      ),
+                      Center(
+                        child: Text(
+                          _pollActivity.split('[[[question]]]')[0],
+                          style: TextStyle(
+                            color: Colors.lightBlue,
+                            fontSize: 20.0,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 10.0,
+                          right: 10.0,
+                        ),
+                        child: Column(
+                          children: [
+                            for (int i = 0;
+                                i <
+                                    _pollActivity
+                                        .split('[[[question]]]')[2]
+                                        .split('+')
+                                        .length;
+                                i++)
+                              StatefulBuilder(
+                                  builder: (context, setStateIs) =>
+                                      _pollBack(i, _pollActivity)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (this._showInformation)
                   Container(
-                    alignment: Alignment.topCenter,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.refresh_rounded,
-                        size: 40.0,
-                        color: Colors.green,
-                      ),
-                      onPressed: () {
-                        if (_pollActivity
-                                .toString()
-                                .split('[[[question]]]')
-                                .length >=
-                            4) {
-                          if (mounted) {
-                            setState(() {
-                              _tempList.add('Completed');
-                              _animationController.forward();
-                            });
-                          }
-                        }
-                      },
+                    height: 90.0,
+                    padding: const EdgeInsets.only(top: 30.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(30.0),
+                          bottomLeft: Radius.circular(30.0)),
+                      color: Colors.black26,
                     ),
+                    child: _showUserNameOnTap(timeIs),
                   ),
-                  SizedBox(
-                    height: 30.0,
-                  ),
-                  Center(
-                    child: Text(
-                      _pollActivity.split('[[[question]]]')[0],
-                      style: TextStyle(
-                        color: Colors.lightBlue,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 10.0,
-                      right: 10.0,
-                    ),
-                    child: Column(
-                      children: [
-                        for (int i = 0;
-                            i <
-                                _pollActivity
-                                    .split('[[[question]]]')[2]
-                                    .split('+')
-                                    .length;
-                            i++)
-                          StatefulBuilder(
-                              builder: (context, setStateIs) =>
-                                  _pollBack(i, _pollActivity)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ));
   }
 
@@ -830,5 +906,55 @@ class _ActivityViewState extends State<ActivityView>
     print('Percentage is: ${_pollOptionsPercentageList[index]}');
 
     return _pollOptionsPercentageList[index];
+  }
+
+  Widget _showUserNameOnTap(String timeIs) {
+    return Padding(
+      padding: EdgeInsets.only(left: 10.0, bottom: 10.0),
+      child: Row(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: CircleAvatar(
+              radius: 23.0,
+              backgroundImage: ProfileImageManagement
+                              .allConnectionsProfilePicLocalPath[
+                          widget.takeParticularConnectionUserName] ==
+                      ''
+                  ? ExactAssetImage('assets/logo/logo.jpg')
+                  : FileImage(File(
+                      ProfileImageManagement.allConnectionsProfilePicLocalPath[
+                          widget.takeParticularConnectionUserName])),
+            ),
+          ),
+          SizedBox(
+            width: 10.0,
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  widget.takeParticularConnectionUserName.length <= 30
+                      ? widget.takeParticularConnectionUserName
+                      : '${widget.takeParticularConnectionUserName.replaceRange(30, widget.takeParticularConnectionUserName.length, '...')}',
+                  style: TextStyle(color: Colors.white, fontSize: 18.0),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  timeIs,
+                  style: TextStyle(
+                      color: Color.fromRGBO(255, 255, 255, 0.7),
+                      fontSize: 16.0),
+                ),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

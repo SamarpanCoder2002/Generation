@@ -1242,13 +1242,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               height: _bottomRowHeight,
               decoration: BoxDecoration(
                 color: _thisChatWallPaper != ''
-                    ? Color.fromRGBO(0, 0, 0, 0.2)
+                    ? const Color.fromRGBO(25, 39, 52, 1)
                     : null,
                 borderRadius: BorderRadius.only(
                   topLeft:
-                      Radius.circular(_thisChatWallPaper != '' ? 40.0 : 0.0),
+                      Radius.circular(_thisChatWallPaper != '' ? 30.0 : 0.0),
                   topRight:
-                      Radius.circular(_thisChatWallPaper != '' ? 40.0 : 0.0),
+                      Radius.circular(_thisChatWallPaper != '' ? 30.0 : 0.0),
                 ),
               ),
               child: ListView(
@@ -1438,14 +1438,23 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     return Container(
       alignment: Alignment.center,
       margin: EdgeInsets.only(
-        left: _chatContainer[index].keys.first.toString() == 'New Messages'?MediaQuery.of(context).size.width /3.3:MediaQuery.of(context).size.width / 2.7,
-        right: _chatContainer[index].keys.first.toString() == 'New Messages'?MediaQuery.of(context).size.width /3.3:MediaQuery.of(context).size.width / 2.7,
+        left: _chatContainer[index].keys.first.toString() == 'New Messages'
+            ? MediaQuery.of(context).size.width / 3.3
+            : MediaQuery.of(context).size.width / 2.7,
+        right: _chatContainer[index].keys.first.toString() == 'New Messages'
+            ? MediaQuery.of(context).size.width / 3.3
+            : MediaQuery.of(context).size.width / 2.7,
         top: 10.0,
-        bottom: _chatContainer[index].keys.first.toString() == 'New Messages'?20.0:10.0,
+        bottom: _chatContainer[index].keys.first.toString() == 'New Messages'
+            ? 20.0
+            : 10.0,
       ),
       //width: MediaQuery.of(context).size.width / 2,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_chatContainer[index].keys.first.toString() == 'New Messages'?20.0:10.0),
+        borderRadius: BorderRadius.circular(
+            _chatContainer[index].keys.first.toString() == 'New Messages'
+                ? 20.0
+                : 10.0),
         color: _chatContainer[index].keys.first.toString() == 'New Messages'
             ? Colors.green[500]
             : Color.fromRGBO(60, 80, 100, 1),

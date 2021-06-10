@@ -228,17 +228,26 @@ class LocalStorageHelper {
   }
 
   /// Actually Doing Update as for delete, entire row will be rejected from table
-  Future<void> deleteParticularUpdatedImportantData(
-      {@required ExtraImportant extraImportant,
-      @required String shouldBeDeleted}) async {
+  Future<void> deleteParticularUpdatedImportantData({
+    @required ExtraImportant extraImportant,
+    @required String shouldBeDeleted,
+    bool allUpdateStatus = true,
+    String userName = '',
+  }) async {
     try {
       final Database db = await this.database;
 
       final String query =
           identifyExtraImportantData(extraImportant: extraImportant);
 
-      final int result = await db.rawUpdate(
-          "UPDATE $_allImportantDataStore SET $query = '' WHERE $query = '$shouldBeDeleted'");
+      int result;
+
+      if (allUpdateStatus)
+        result = await db.rawUpdate(
+            "UPDATE $_allImportantDataStore SET $query = '' WHERE $query = '$shouldBeDeleted'");
+      else
+        result = await db.rawUpdate(
+            "UPDATE $_allImportantDataStore SET $query = '' WHERE $query = '$shouldBeDeleted' AND $_colAccountUserName = '$userName'");
 
       print(result > 0
           ? 'Particular Important Data Deletion Successful'
@@ -920,7 +929,10 @@ class LocalStorageHelper {
 
       print('Result is: $result');
 
-      if (purpose == 'COUNT') return result == null ? 0 : int.parse(result[0].values.first.toString());
+      if (purpose == 'COUNT')
+        return result == null
+            ? 0
+            : int.parse(result[0].values.first.toString());
 
       return result == null ? [] : result;
     } catch (e) {

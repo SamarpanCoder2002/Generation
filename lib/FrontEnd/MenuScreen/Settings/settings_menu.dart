@@ -112,7 +112,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
             return SettingsNotificationConfiguration();
             break;
           case 'Chat Wallpaper':
-            return ChatWallPaperMaker(allUpdatePermission: true, userName: '',);
+            return ChatWallPaperMaker(allUpdatePermission: true, userName: '');
             break;
           case 'Generation Direct Calling Setting':
             return PhoneNumberConfig();

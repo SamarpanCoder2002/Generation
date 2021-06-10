@@ -44,8 +44,14 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
   void selectChatWallPaper() async {
     final String wallpaperTempPath =
         await _localStorageHelper.extractImportantTableData(
-            userMail: FirebaseAuth.instance.currentUser.email,
-            extraImportant: ExtraImportant.ChatWallpaper);
+      userMail: widget.allUpdatePermission
+          ? FirebaseAuth.instance.currentUser.email
+          : '',
+      userName: widget.allUpdatePermission ? '' : widget.userName,
+      extraImportant: ExtraImportant.ChatWallpaper,
+    );
+
+    print('Chat Wallpaper Path: $wallpaperTempPath');
 
     if (mounted) {
       setState(() {
@@ -175,11 +181,13 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
       width: MediaQuery.of(context).size.width,
       height: 70.0,
       margin: EdgeInsets.only(top: MediaQuery.of(context).size.height - 140),
-      padding: EdgeInsets.only(bottom: 10.0),
+      padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
       decoration: BoxDecoration(
-        color: const Color.fromRGBO(0, 0, 0, 0.2),
+        color: const Color.fromRGBO(25, 39, 52, 1),
         borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
+          topLeft: Radius.circular(30.0),
+          topRight: Radius.circular(30.0),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -187,7 +195,6 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
           Icon(
             Icons.emoji_emotions_rounded,
             color: Colors.amber,
-            size: 30.0,
           ),
           Icon(
             Entypo.link,
@@ -317,7 +324,9 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
           Navigator.pop(context);
 
           showToast(
-            'Common Chat WallPaper Activated',
+            widget.userName == ''
+                ? 'Common Chat WallPaper Activated'
+                : 'This Chat Wallpaper Activated',
             _fToast,
             fontSize: 16.0,
           );
@@ -393,8 +402,11 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
               .whenComplete(() async {
             await _localStorageHelper
                 .deleteParticularUpdatedImportantData(
-                    extraImportant: ExtraImportant.ChatWallpaper,
-                    shouldBeDeleted: this._chatWallPaperPath)
+              extraImportant: ExtraImportant.ChatWallpaper,
+              shouldBeDeleted: this._chatWallPaperPath,
+              allUpdateStatus: widget.allUpdatePermission,
+              userName: widget.userName,
+            )
                 .whenComplete(() {
               print('Old Chat Wallpaper Deleted');
               print('Old Image Path Already Deleted From Local Sqlite Table');

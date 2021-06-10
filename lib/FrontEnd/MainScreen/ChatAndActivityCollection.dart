@@ -738,12 +738,13 @@ class _ChatsAndActivityCollectionState
                 },
                 openBuilder: (context, openWidget) {
                   return ActivityView(
-                      takeParticularConnectionUserName:
-                          _allUserConnectionActivity[index]
-                                  .contains('[[[new_activity]]]')
-                              ? _allUserConnectionActivity[index]
-                                  .split('[[[new_activity]]]')[0]
-                              : _allUserConnectionActivity[index]);
+                    takeParticularConnectionUserName:
+                        _allUserConnectionActivity[index]
+                                .contains('[[[new_activity]]]')
+                            ? _allUserConnectionActivity[index]
+                                .split('[[[new_activity]]]')[0]
+                            : _allUserConnectionActivity[index],
+                  );
                 },
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
