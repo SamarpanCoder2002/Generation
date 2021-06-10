@@ -869,7 +869,7 @@ class _ChatsAndActivityCollectionState
             },
             child: Row(
               children: [
-                Container(
+                Padding(
                   padding: EdgeInsets.only(
                     top: 5.0,
                     bottom: 5.0,
@@ -1004,7 +1004,9 @@ class _ChatsAndActivityCollectionState
                       child: Column(
                         children: [
                           Text(
-                            _userName,
+                            _userName.length <= 18
+                                ? _userName
+                                : '${_userName.replaceRange(18, _userName.length, '...')}',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18.0,
