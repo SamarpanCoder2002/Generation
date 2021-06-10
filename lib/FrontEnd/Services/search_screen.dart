@@ -361,7 +361,7 @@ class _SearchState extends State<Search> {
                       ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        labelText: "Enter Username",
+                        labelText: "Search by ${this.searchArgument == 'user_name'?'UserName':'About'}",
                         suffixIcon: IconButton(
                           icon: _iconSample,
                           onPressed: filterOptions,

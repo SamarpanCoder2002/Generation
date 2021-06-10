@@ -63,21 +63,28 @@ class _ScreenLogsState extends State<ScreenLogs> {
         color: const Color.fromRGBO(34, 48, 60, 1),
         height: MediaQuery.of(context).size.height,
         margin: EdgeInsets.only(top: 10.0, bottom: 13.0),
-        child: chatList(context),
+        child: this._nameAndImageForCallLog.length > 0
+            ? _logsList(context)
+            : Center(
+                child: Text(
+                  'No Call Logs',
+                  style: TextStyle(color: Colors.red, fontSize: 23.0),
+                ),
+              ),
       ),
     );
   }
 
-  Widget chatList(BuildContext context) {
+  Widget _logsList(BuildContext context) {
     return ListView.builder(
       itemCount: this._nameAndImageForCallLog.length,
       itemBuilder: (context, position) {
-        return chatTile(context, position);
+        return _logsTile(context, position);
       },
     );
   }
 
-  Widget chatTile(BuildContext context, int index) {
+  Widget _logsTile(BuildContext context, int index) {
     return Card(
         elevation: 0.0,
         color: Color.fromRGBO(34, 48, 60, 1),
