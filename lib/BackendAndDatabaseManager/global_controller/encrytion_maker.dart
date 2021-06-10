@@ -2,7 +2,7 @@ import 'package:encrypt/encrypt.dart';
 
 class EncryptionMaker {
   static final Key _key =
-      Key.fromBase64('');
+      Key.fromBase64('ODf9v33JRP4B08L7W9ii4bvuWrkdBYqvA/MeMDJEE6g=');
   static final IV _iv = IV.fromLength(16);
 
   Encrypter _makeEncryption;

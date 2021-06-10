@@ -54,6 +54,7 @@ class LocalStorageHelper {
   final String _colCallDate = '__callDate__';
   final String _colCallType = '__callType__';
 
+  /// Make Object to encrypt and decrypt messages
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   /// Create Singleton Objects(Only Created once in the whole application)
