@@ -299,7 +299,7 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
             });
           }
 
-          if (this._oldWallPaperPath != '') {
+          if (this._oldWallPaperPath != '' && widget.allUpdatePermission) {
             try {
               print(_oldWallPaperPath);
               await File(this._oldWallPaperPath).delete(recursive: true);
@@ -396,10 +396,11 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
         ),
       ),
       onPressed: () async {
-        try {
-          await File(this._chatWallPaperPath)
-              .delete(recursive: true)
-              .whenComplete(() async {
+        if (decision) {
+          try {
+            if (widget.allUpdatePermission)
+              await File(this._chatWallPaperPath).delete(recursive: true);
+
             await _localStorageHelper
                 .deleteParticularUpdatedImportantData(
               extraImportant: ExtraImportant.ChatWallpaper,
@@ -416,9 +417,9 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
                 });
               }
             });
-          });
-        } catch (e) {
-          print('Error: Old Chat Wallpaper Delete Error: ${e.toString()}');
+          } catch (e) {
+            print('Error: Old Chat Wallpaper Delete Error: ${e.toString()}');
+          }
         }
 
         Navigator.pop(context);
