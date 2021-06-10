@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chat_wallpaper_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chat_history_maker_and_media_view.dart';
@@ -71,13 +72,6 @@ class _SettingsWindowState extends State<SettingsWindow> {
               mainText: 'Storage',
               icon: Icons.storage,
               smallDescription: 'Storage Usage'),
-          SizedBox(
-            height: 15.0,
-          ),
-          everySettingsItem(
-              mainText: 'Invite a Friend',
-              icon: Icons.wc_outlined,
-              smallDescription: 'Request Your Friend to use Generation'),
           SizedBox(
             height: 30.0,
           ),

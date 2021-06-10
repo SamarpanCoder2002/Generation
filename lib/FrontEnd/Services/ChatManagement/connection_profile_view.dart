@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chat_wallpaper_maker.dart';
@@ -100,14 +101,8 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
             color: Colors.black26,
           ),
           _generalInformationCenter(),
-          Divider(
-            thickness: 3.0,
-            height: 40.0,
-            color: Colors.black26,
-          ),
-          _extraActivityOptions(name: 'Report a Problem', color: Colors.red),
           SizedBox(
-            height: 10.0,
+            height: 15.0,
           ),
         ]))
       ]),
@@ -149,7 +144,7 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
               )
             : Center(
                 child: Text(
-                  'No Profile Image Found',
+                  'No Profile Image',
                   style: TextStyle(
                     color: Colors.red,
                     fontSize: 20.0,

@@ -220,7 +220,7 @@ class WhyDonate extends StatelessWidget {
                         toastGravity: ToastGravity.TOP);
 
                     /// Link Added for Live Transaction on RazorPay
-                    await launch('Open-Razorpay');
+                    await launch('');
                   } catch (e) {
                     print(
                         'Payment Gateway Page OnBoarding Error: ${e.toString()}');
