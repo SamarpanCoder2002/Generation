@@ -187,7 +187,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 if (oldDate != message['Date']) {
                   _mediaTypes.add(MediaTypes.Indicator);
                   _chatContainer.add({
-                    '${message['Date']}': '',
+                    "${message['Date'].toString().split('-')[0] == DateTime.now().day.toString() ? 'Today' : message['Date']}":
+                        '',
                   });
                   _response.add(null);
                   oldDate = message['Date'].toString();
@@ -1435,7 +1436,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget newMessageIndicator(BuildContext context, int index) {
-    return Container(
+    return _chatContainer[index].keys.first.toString() !='Today'?Container(
       alignment: Alignment.center,
       margin: EdgeInsets.only(
         left: _chatContainer[index].keys.first.toString() == 'New Messages'
@@ -1457,7 +1458,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 : 10.0),
         color: _chatContainer[index].keys.first.toString() == 'New Messages'
             ? Colors.green[500]
-            : Color.fromRGBO(60, 80, 100, 1),
+            : null, // Color.fromRGBO(60, 80, 100, 1),
       ),
       child: Text(
         _chatContainer[index].keys.first.toString(),
@@ -1471,6 +1472,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           letterSpacing: 1.0,
         ),
       ),
+    ):Container(
+      margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
+      alignment: Alignment.center,
+      child: Text('Today', style: TextStyle(color: Colors.white70, fontSize: 16.0),),
     );
   }
 

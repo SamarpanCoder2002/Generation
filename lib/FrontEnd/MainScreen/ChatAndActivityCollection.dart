@@ -1101,7 +1101,7 @@ class _ChatsAndActivityCollectionState
 
           /// After Filtering Extract Latest Message and Return Message Widget
           return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
-              _mediaType, _remainingMessagesLength);
+              _mediaType, _remainingMessagesLength, _userName);
         }
 
         /// If there is no last message
@@ -1132,7 +1132,7 @@ class _ChatsAndActivityCollectionState
 
   /// Message Type Extract
   Widget _latestMessageTypeExtract(String _message, String _mediaTypesToString,
-      String _remainingMessagesLength) {
+      String _remainingMessagesLength, String _userName) {
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
         bool _blankMsgIndicator = false;
@@ -1181,7 +1181,7 @@ class _ChatsAndActivityCollectionState
               ),
             ),
             if (_remainingMessagesLength != '')
-              _totalRemainingMessagesTake(_remainingMessagesLength),
+              _totalRemainingMessagesTake(_remainingMessagesLength, _userName),
           ],
         );
 
@@ -1202,7 +1202,7 @@ class _ChatsAndActivityCollectionState
               ),
             ),
             if (_remainingMessagesLength != '')
-              _totalRemainingMessagesTake(_remainingMessagesLength),
+              _totalRemainingMessagesTake(_remainingMessagesLength, _userName),
           ],
         );
 
@@ -1223,7 +1223,7 @@ class _ChatsAndActivityCollectionState
               ),
             ),
             if (_remainingMessagesLength != '')
-              _totalRemainingMessagesTake(_remainingMessagesLength),
+              _totalRemainingMessagesTake(_remainingMessagesLength, _userName),
           ],
         );
 
@@ -1244,7 +1244,7 @@ class _ChatsAndActivityCollectionState
               ),
             ),
             if (_remainingMessagesLength != '')
-              _totalRemainingMessagesTake(_remainingMessagesLength),
+              _totalRemainingMessagesTake(_remainingMessagesLength, _userName),
           ],
         );
 
@@ -1265,7 +1265,7 @@ class _ChatsAndActivityCollectionState
               ),
             ),
             if (_remainingMessagesLength != '')
-              _totalRemainingMessagesTake(_remainingMessagesLength),
+              _totalRemainingMessagesTake(_remainingMessagesLength, _userName),
           ],
         );
 
@@ -1286,7 +1286,7 @@ class _ChatsAndActivityCollectionState
               ),
             ),
             if (_remainingMessagesLength != '')
-              _totalRemainingMessagesTake(_remainingMessagesLength),
+              _totalRemainingMessagesTake(_remainingMessagesLength, _userName),
           ],
         );
     }
@@ -1307,7 +1307,18 @@ class _ChatsAndActivityCollectionState
   }
 
   /// Count Total Remaining Messages
-  Widget _totalRemainingMessagesTake(String _remainingMessagesLength) {
+  Widget _totalRemainingMessagesTake(
+      String _remainingMessagesLength, String _userName) {
+    print('Remaining Messages: $_remainingMessagesLength');
+
+    /// Latest Chat Message show on at first
+    if (int.parse(_remainingMessagesLength) > 0 &&
+        this._allConnectionsUserName.indexOf(_userName) > 0) {
+      this._allConnectionsUserName.remove(_userName);
+      this._allConnectionsUserName.insert(0, _userName);
+    }
+
+    /// Return Remaining Messages Widget
     return Container(
       margin: EdgeInsets.only(left: 20.0),
       child: Text(
@@ -1484,9 +1495,15 @@ class _ChatsAndActivityCollectionState
     if (mounted) {
       setState(() {
         if (this._allUserConnectionActivity.contains(realUserName)) {
-          this._allUserConnectionActivity[this
+          // this._allUserConnectionActivity[this
+          //     ._allUserConnectionActivity
+          //     .indexOf(realUserName)] = '$realUserName[[[new_activity]]]';
+
+          /// Remove New Activity Containing user at the second
+          this._allUserConnectionActivity.remove(realUserName);
+          this
               ._allUserConnectionActivity
-              .indexOf(realUserName)] = '$realUserName[[[new_activity]]]';
+              .insert(1, '$realUserName[[[new_activity]]]');
         }
       });
     }

@@ -68,7 +68,7 @@ class _ScreenLogsState extends State<ScreenLogs> {
             : Center(
                 child: Text(
                   'No Call Logs',
-                  style: TextStyle(color: Colors.red, fontSize: 23.0),
+                  style: TextStyle(color: Colors.red, fontSize: 18.0),
                 ),
               ),
       ),

@@ -361,16 +361,14 @@ class _SearchState extends State<Search> {
                       ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        labelText: "Search by ${this.searchArgument == 'user_name'?'UserName':'About'}",
+                        labelText: "Search by ${this.searchArgument == 'user_name'?'User Name':'About'}",
                         suffixIcon: IconButton(
                           icon: _iconSample,
                           onPressed: filterOptions,
                         ),
                         labelStyle: TextStyle(
                           color: Colors.green,
-                          fontSize: 16,
-                          fontFamily: 'Lora',
-                          letterSpacing: 1.0,
+                          fontSize: 18,
                         ),
                       ),
                       onChanged: (inputValue) {

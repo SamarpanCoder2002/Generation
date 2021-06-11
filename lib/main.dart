@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import 'package:generation/FrontEnd/Introduction_Screen/intro_screen.dart';
 import 'package:generation/FrontEnd/MainScreen/main_window.dart';
-import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
@@ -149,7 +149,7 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
 
 /// Decide to Switch to widget based of current Scenario
 Future<Widget> differentContext() async {
-  if (FirebaseAuth.instance.currentUser == null) return SignUpAuthentication();
+  if (FirebaseAuth.instance.currentUser == null) return IntroductionScreen();
 
   try {
     final DocumentSnapshot responseData = await FirebaseFirestore.instance
@@ -163,11 +163,11 @@ Future<Widget> differentContext() async {
       final bool response = await GoogleAuth().logOut();
 
       if (!response) FirebaseAuth.instance.signOut();
-      return SignUpAuthentication();
+      return IntroductionScreen();
     }
     return MainScreen();
   } catch (e) {
     print("Starting Error is: $e");
-    return SignUpAuthentication();
+    return IntroductionScreen();
   }
 }

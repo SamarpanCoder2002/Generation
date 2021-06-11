@@ -6,10 +6,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
-import 'package:generation/FrontEnd/MenuScreen/Support/support_menu.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
+import 'package:generation/FrontEnd/MenuScreen/Support/support_menu.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
@@ -19,6 +19,7 @@ import 'package:generation/FrontEnd/MainScreen/general_applications_section.dart
 import 'package:generation/FrontEnd/MainScreen/logs_collection.dart';
 import 'package:generation/FrontEnd/MenuScreen/profile_screen.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/settings_menu.dart';
+import 'package:generation/FrontEnd/MenuScreen/About/about_app_description.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
@@ -306,6 +307,10 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     _menuOptions(Icons.support_outlined, 'Support'),
                     SizedBox(
+                      height: 10.0,
+                    ),
+                    _menuOptions(Icons.description_outlined, 'About'),
+                    SizedBox(
                       height: 30.0,
                     ),
                     exitButtonCall(),
@@ -443,13 +448,14 @@ class _MainScreenState extends State<MainScreen> {
           return Profile();
         else if (menuOptionIs == 'Setting')
           return SettingsWindow();
-        else if (menuOptionIs == 'Support') return SupportMenuMaker();
+        else if (menuOptionIs == 'Support')
+          return SupportMenuMaker();
+        else if (menuOptionIs == 'About') return AboutSection();
         return Center();
       },
       closedBuilder: (context, closeWidget) {
-        return Container(
+        return SizedBox(
           height: 60.0,
-          //color: Colors.white,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

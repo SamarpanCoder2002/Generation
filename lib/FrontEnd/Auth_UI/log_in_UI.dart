@@ -222,10 +222,10 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                         height: 30.0,
                       ),
                       SizedBox(
-                        width: 250.0,
+
                         child: ElevatedButton(
                           child: Row(
-                            //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 "Don't have an account? ",
