@@ -27,6 +27,8 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
 
   int _fontSizeController = 1;
 
+  bool _sendButton = true;
+
   @override
   void initState() {
     isLoading = false;
@@ -46,7 +48,7 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: pickColor,
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: !this.isLoading?FloatingActionButton(
           elevation: 5.0,
           backgroundColor: Color.fromRGBO(100, 200, 10, 1),
           child: const Icon(
@@ -72,12 +74,12 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
 
               Navigator.pop(context);
 
-              if (response) showToast("Activity Added", fToast, toastGravity: ToastGravity.BOTTOM,);
+              if (response) showToast("Activity Added", fToast, toastGravity: ToastGravity.TOP,);
 
               print("Activity Response: $response");
             }
           },
-        ),
+        ):null,
         body: ModalProgressHUD(
           inAsyncCall: isLoading,
           color: Color.fromRGBO(0, 0, 0, 1),

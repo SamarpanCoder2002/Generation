@@ -161,7 +161,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                         "Image Uploading... Please Wait",
                         fToast,
                         toastColor: Colors.amber,
-                        toastGravity: ToastGravity.CENTER,
+                        toastGravity: ToastGravity.TOP,
                         fontSize: 18.0,
                       );
                     }
