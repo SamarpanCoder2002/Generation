@@ -20,6 +20,7 @@ import 'package:generation/FrontEnd/MainScreen/logs_collection.dart';
 import 'package:generation/FrontEnd/MenuScreen/profile_screen.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/settings_menu.dart';
 import 'package:generation/FrontEnd/MenuScreen/About/about_app_description.dart';
+import 'package:generation/FrontEnd/Services/search_screen_connections_management.dart';
 
 final List<String> _activityLinkDeleteFromStorage = [];
 
@@ -320,7 +321,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             appBar: AppBar(
               brightness: Brightness.dark,
-              backgroundColor: Color.fromRGBO(25, 39, 52, 1),
+              backgroundColor: const Color.fromRGBO(25, 39, 52, 1),
               elevation: 10.0,
               shadowColor: Colors.white70,
               shape: RoundedRectangleBorder(
@@ -336,7 +337,24 @@ class _MainScreenState extends State<MainScreen> {
                     fontSize: 25.0, fontFamily: 'Lora', letterSpacing: 1.0),
               ),
               actions: [
-                Container(
+                OpenContainer(
+                  openColor: const Color.fromRGBO(25, 39, 52, 1),
+                  middleColor: const Color.fromRGBO(25, 39, 52, 1),
+                  closedColor: const Color.fromRGBO(25, 39, 52, 1),
+                  closedElevation: 0.0,
+                  closedShape: CircleBorder(),
+                  transitionType: ContainerTransitionType.fadeThrough,
+                  transitionDuration: Duration(milliseconds: 500),
+                  openBuilder: (_, __) => Search(searchType: SearchType.InternalSearch,),
+                  closedBuilder: (_, __) => Padding(
+                    padding: EdgeInsets.only(right: 10.0),
+                    child: Icon(
+                      Icons.search_outlined,
+                      size: 25.0,
+                    ),
+                  ),
+                ),
+                Padding(
                   padding: EdgeInsets.only(
                     right: 20.0,
                   ),
@@ -358,7 +376,7 @@ class _MainScreenState extends State<MainScreen> {
                       _removeAnonymousNotificationChecking();
                     },
                   ),
-                )
+                ),
               ],
               bottom: TabBar(
                 indicatorPadding: EdgeInsets.only(left: 20.0, right: 20.0),

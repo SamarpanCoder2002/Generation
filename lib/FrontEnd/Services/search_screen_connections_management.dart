@@ -1,20 +1,32 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'ChatManagement/ChatScreen.dart';
 
 class Search extends StatefulWidget {
+  final SearchType searchType;
+
+  Search({this.searchType = SearchType.ExternalSearch});
+
   @override
   _SearchState createState() => _SearchState();
 }
 
 class _SearchState extends State<Search> {
-  Icon _iconSample = Icon(Icons.filter_list_rounded);
   final List<String> _allConnectedUserName = [];
+
+  List<Map<String, String>> _userNameProfilePicCollection = [];
+  List<Map<String, String>> _selectedUserNameAndProfilePicCollection = [];
 
   String searchArgument;
 
@@ -27,6 +39,274 @@ class _SearchState extends State<Search> {
 
   bool isLoading = false;
   bool haveUserSearched = false;
+
+  void _internalSearchItems() async {
+    if (mounted) {
+      setState(() {
+        this.isLoading = true;
+      });
+    }
+
+    await ProfileImageManagement.userProfileNameAndImageExtractor();
+
+    final String _currAccUserName =
+        await _localStorageHelper.extractImportantDataFromThatAccount(
+            userMail: FirebaseAuth.instance.currentUser.email);
+
+    if (mounted) {
+      setState(() {
+        Map<String, dynamic> tempMap = Map<String, dynamic>();
+
+        tempMap = ProfileImageManagement.allConnectionsProfilePicLocalPath;
+
+        tempMap.forEach((userName, userProfilePicPath) {
+          if (userName != _currAccUserName) {
+            this._userNameProfilePicCollection.add({
+              userName: userProfilePicPath,
+            });
+
+            this._selectedUserNameAndProfilePicCollection.add({
+              userName: userProfilePicPath,
+            });
+          }
+        });
+      });
+    }
+
+    if (mounted) {
+      setState(() {
+        this.isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    searchArgument = "user_name";
+    if (widget.searchType == SearchType.InternalSearch) _internalSearchItems();
+  }
+
+  @override
+  void dispose() {
+    this._userNameProfilePicCollection.clear();
+    this._selectedUserNameAndProfilePicCollection.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
+      body: Container(
+        //color: Colors.black87,
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height,
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 5,
+                bottom: 10,
+              ),
+              margin: EdgeInsets.only(bottom: 20.0),
+              decoration: BoxDecoration(
+                color: Color.fromRGBO(25, 39, 52, 1),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      autofocus: true,
+                      controller: this.searchUser,
+                      cursorColor: Colors.white,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        labelText:
+                            "Search by ${this.searchArgument == 'user_name' ? 'User Name' : 'About'}",
+                        suffixIcon:
+                            widget.searchType == SearchType.ExternalSearch
+                                ? IconButton(
+                                    icon: Icon(Icons.filter_list_rounded),
+                                    onPressed: filterOptions,
+                                  )
+                                : null,
+                        labelStyle: TextStyle(
+                          color: Colors.green,
+                          fontSize: 18,
+                        ),
+                      ),
+                      onChanged: (inputValue) {
+                        if (widget.searchType == SearchType.ExternalSearch)
+                          initiateSearch();
+                        else {
+                          if (mounted) {
+                            setState(() {
+                              this.isLoading = true;
+                            });
+                          }
+
+                          if (mounted) {
+                            setState(() {
+                              this
+                                  ._selectedUserNameAndProfilePicCollection
+                                  .clear();
+
+                              this
+                                  ._userNameProfilePicCollection
+                                  .forEach((userNameMap) {
+                                if (userNameMap.keys.first
+                                    .toString()
+                                    .toLowerCase()
+                                    .startsWith(
+                                        '${this.searchUser.text.toLowerCase()}'))
+                                  this
+                                      ._selectedUserNameAndProfilePicCollection
+                                      .add(userNameMap);
+                              });
+                            });
+                          }
+
+                          if (mounted) {
+                            setState(() {
+                              this.isLoading = false;
+                            });
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            isLoading
+                ? Container(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.black,
+                      ),
+                    ),
+                  )
+                : widget.searchType == SearchType.ExternalSearch
+                    ? userList()
+                    : _internalChatConnectionCollections(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _internalChatConnectionCollections() {
+    return ModalProgressHUD(
+      inAsyncCall: this.isLoading,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: ListView.builder(
+          itemCount: this._selectedUserNameAndProfilePicCollection.length,
+          itemBuilder: (context, position) {
+            return _logsTile(context, position);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _logsTile(BuildContext context, int index) {
+    return Card(
+        elevation: 0.0,
+        color: Color.fromRGBO(34, 48, 60, 1),
+        child: Container(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Color.fromRGBO(34, 48, 60, 1),
+              onPrimary: Colors.lightBlueAccent,
+              elevation: 0.0,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => ChatScreenSetUp(
+                          this
+                              ._selectedUserNameAndProfilePicCollection[index]
+                              .keys
+                              .first
+                              .toString(),
+                          this
+                              ._selectedUserNameAndProfilePicCollection[index]
+                              .values
+                              .first
+                              .toString())));
+            },
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.only(
+                    top: 5.0,
+                    bottom: 5.0,
+                  ),
+                  child: CircleAvatar(
+                    radius: 30.0,
+                    backgroundImage: this
+                                ._selectedUserNameAndProfilePicCollection[index]
+                                .values
+                                .first
+                                .toString() ==
+                            ''
+                        ? ExactAssetImage("assets/logo/logo.jpg")
+                        : FileImage(File(this
+                            ._selectedUserNameAndProfilePicCollection[index]
+                            .values
+                            .first
+                            .toString())),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 5.0, bottom: 5.0),
+                    child: Text(
+                      _getUserName(index),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
+  }
+
+  String _getUserName(int index) => this
+              ._selectedUserNameAndProfilePicCollection[index]
+              .keys
+              .first
+              .toString()
+              .length <=
+          20
+      ? this
+          ._selectedUserNameAndProfilePicCollection[index]
+          .keys
+          .first
+          .toString()
+      : '${this._selectedUserNameAndProfilePicCollection[index].keys.first.toString().replaceRange(20, this._selectedUserNameAndProfilePicCollection[index].keys.first.toString().length, '...')}';
 
   void _getAllConnectionsFromLocalStorage() async {
     final List<Map<String, Object>> _connectedUsersCollection =
@@ -54,15 +334,16 @@ class _SearchState extends State<Search> {
           .collection("generation_users")
           .where(
             searchArgument,
+
+            /// We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
             isGreaterThanOrEqualTo: searchUser.text.toUpperCase(),
-            // We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
           )
           .get()
           .catchError((e) {
         print(e.toString());
       }).then((snapshot) {
         searchResultSnapshot = snapshot;
-        print("$searchResultSnapshot");
+
         if (mounted) {
           setState(() {
             isLoading = false;
@@ -82,7 +363,7 @@ class _SearchState extends State<Search> {
               print(searchResultSnapshot.docs[index]);
               if (searchResultSnapshot.docs[index].id ==
                   FirebaseAuth.instance.currentUser.email) {
-                return SizedBox();
+                return Center();
               }
               return userTile(index);
             })
@@ -312,84 +593,6 @@ class _SearchState extends State<Search> {
             },
           ),
         ],
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    searchArgument = "user_name";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      body: Container(
-        //color: Colors.black87,
-        width: double.maxFinite,
-        height: MediaQuery.of(context).size.height,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Container(
-              padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 5,
-                bottom: 10,
-              ),
-              margin: EdgeInsets.only(bottom: 20.0),
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(25, 39, 52, 1),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30.0),
-                  bottomRight: Radius.circular(30.0),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      autofocus: true,
-                      controller: searchUser,
-                      cursorColor: Colors.white,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                      ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        labelText: "Search by ${this.searchArgument == 'user_name'?'User Name':'About'}",
-                        suffixIcon: IconButton(
-                          icon: _iconSample,
-                          onPressed: filterOptions,
-                        ),
-                        labelStyle: TextStyle(
-                          color: Colors.green,
-                          fontSize: 18,
-                        ),
-                      ),
-                      onChanged: (inputValue) {
-                        initiateSearch();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            isLoading
-                ? Container(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        backgroundColor: Colors.black,
-                      ),
-                    ),
-                  )
-                : userList(),
-          ],
-        ),
       ),
     );
   }

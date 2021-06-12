@@ -320,6 +320,8 @@ class LocalStorageHelper {
     return tempMap;
   }
 
+
+
   Future<String> extractToken(
       {String userMail = '', String userName = ''}) async {
     final Database db = await this.database;
@@ -434,7 +436,7 @@ class LocalStorageHelper {
       final Database db = await this.database;
       final List<Map<String, Object>> tables =
           await db.rawQuery("SELECT * FROM ${tableName}_status");
-      return tables;
+      return tables == null?[]:tables;
     } catch (e) {
       print('Extract USer Name Activity Exception: ${e.toString()}');
       return null;

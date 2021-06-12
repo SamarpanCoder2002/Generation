@@ -39,3 +39,8 @@ enum CallTypes{
   AudioCall,
   VideoCall,
 }
+
+enum SearchType{
+  ExternalSearch,
+  InternalSearch,
+}

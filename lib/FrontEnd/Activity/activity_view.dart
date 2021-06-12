@@ -17,8 +17,9 @@ import 'package:generation/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {
   final String takeParticularConnectionUserName;
+  final int activityStartIndex;
 
-  ActivityView({@required this.takeParticularConnectionUserName});
+  ActivityView({@required this.takeParticularConnectionUserName, @required this.activityStartIndex});
 
   @override
   _ActivityViewState createState() => _ActivityViewState();
@@ -54,7 +55,7 @@ class _ActivityViewState extends State<ActivityView>
 
   bool _showInformation = false;
 
-  // Helper Function to Call _loadActivity Function
+  /// Helper Function to Call _loadActivity Function
   void _callLoader({int activityPosition = 0}) {
     if (_mediaRegex
         .hasMatch(_currUserActivityCollection[activityPosition]['Status'])) {
@@ -100,6 +101,10 @@ class _ActivityViewState extends State<ActivityView>
     /// If Have Some Activity of Current User
     if (widget.takeParticularConnectionUserName != null) {
       _fToast.init(context);
+
+      print('Starting index: ${widget.activityStartIndex}');
+      if(widget.activityStartIndex > 0)
+        this._activityCurrIndex = widget.activityStartIndex;
 
       _collectCurrUserActivity();
 

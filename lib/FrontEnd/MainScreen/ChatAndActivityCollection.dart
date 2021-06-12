@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
+import 'package:generation/FrontEnd/Services/search_screen_connections_management.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,7 +20,6 @@ import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/FrontEnd/Activity/activity_maker.dart';
-import 'package:generation/FrontEnd/Services/search_screen.dart';
 import 'package:generation/FrontEnd/Activity/activity_view.dart';
 import 'package:generation/FrontEnd/Services/ChatManagement/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
@@ -45,6 +45,7 @@ class _ChatsAndActivityCollectionState
       Map<String, bool>();
 
   final List<String> _allUserConnectionActivity = [];
+  final Map<String, int> _everyUserActivityTotalCountTake = Map<String, int>();
 
   /// For FireStore Management Purpose
   final Management _management = Management();
@@ -202,8 +203,9 @@ class _ChatsAndActivityCollectionState
                     /// If path insertion in sqLite having no error, download the video and store it in local storage
                     if (_videoPathStorageResponse) {
                       try {
-                        _newActivityUpdate(
-                            _connectionUserNameFromLocalDatabase);
+                        await _newActivityUpdate(
+                            _connectionUserNameFromLocalDatabase,
+                            MediaTypes.Video);
 
                         await _dio.download(everyActivity.keys.first.toString(),
                             '${activityVideoPath.path}$currTime.mp4');
@@ -245,8 +247,9 @@ class _ChatsAndActivityCollectionState
                     /// If path insertion in sqLite having no error, download the image and store it in local storage
                     if (_imageActivityInsertionResponse) {
                       try {
-                        _newActivityUpdate(
-                            _connectionUserNameFromLocalDatabase);
+                        await _newActivityUpdate(
+                            _connectionUserNameFromLocalDatabase,
+                            MediaTypes.Image);
 
                         /// Download Image Activity from Firebase Storage and store in local database
                         await _dio.downloadUri(
@@ -269,9 +272,8 @@ class _ChatsAndActivityCollectionState
                 print('Error: Media Activity Saving Error: ${e.toString()}');
               }
             } else {
-              print('Special Babe: $everyActivity');
-
-              _newActivityUpdate(_connectionUserNameFromLocalDatabase);
+              await _newActivityUpdate(
+                  _connectionUserNameFromLocalDatabase, MediaTypes.Text);
 
               try {
                 /// Add Text Activity Data to Local Storage for future use
@@ -554,6 +556,9 @@ class _ChatsAndActivityCollectionState
                         0, userNameMap.values.first);
                   else
                     _allUserConnectionActivity.add(userNameMap.values.first);
+
+                  this._everyUserActivityTotalCountTake[
+                      userNameMap.values.first] = 0;
                 });
               }
             }
@@ -632,7 +637,7 @@ class _ChatsAndActivityCollectionState
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.search_rounded,
+                Icons.add,
                 color: Colors.white,
                 size: 37.0,
               ),
@@ -723,7 +728,6 @@ class _ChatsAndActivityCollectionState
                 ),
                 transitionType: ContainerTransitionType.fadeThrough,
                 onClosed: (val) {
-                  print('Activity Closed');
                   if (mounted) {
                     setState(() {
                       if (this
@@ -732,18 +736,30 @@ class _ChatsAndActivityCollectionState
                         this._allUserConnectionActivity[index] = this
                             ._allUserConnectionActivity[index]
                             .split('[[[new_activity]]]')[0];
+
+                        this._everyUserActivityTotalCountTake[
+                            this._allUserConnectionActivity[index]] = 0;
                       }
                     });
                   }
                 },
                 openBuilder: (context, openWidget) {
+                  final String getOpenActivityConnectionUserName =
+                      _allUserConnectionActivity[index]
+                              .contains('[[[new_activity]]]')
+                          ? _allUserConnectionActivity[index]
+                              .split('[[[new_activity]]]')[0]
+                          : _allUserConnectionActivity[index];
+
                   return ActivityView(
                     takeParticularConnectionUserName:
-                        _allUserConnectionActivity[index]
-                                .contains('[[[new_activity]]]')
-                            ? _allUserConnectionActivity[index]
-                                .split('[[[new_activity]]]')[0]
-                            : _allUserConnectionActivity[index],
+                        getOpenActivityConnectionUserName,
+                    activityStartIndex: _allUserConnectionActivity[index]
+                            .contains('[[[new_activity]]]')
+                        ? this._everyUserActivityTotalCountTake[
+                                getOpenActivityConnectionUserName] -
+                            1
+                        : 0,
                   );
                 },
                 closedBuilder: (context, closeWidget) {
@@ -1123,7 +1139,6 @@ class _ChatsAndActivityCollectionState
       return Text('No Messages', style: TextStyle(color: Colors.red));
     } else {
       /// For Empty Data
-
       /// For Extract Last Conversation Time
       if (purpose == 'lastConnectionTime') return Text('');
       return Text('No Messages', style: TextStyle(color: Colors.red));
@@ -1485,25 +1500,37 @@ class _ChatsAndActivityCollectionState
         : '${_modifiedUserName.replaceRange(10, _modifiedUserName.length, '...')}';
   }
 
-  String _getUserNameForActivity(int index) {
-    return this._allUserConnectionActivity[index].contains('[[[new_activity]]]')
-        ? this._allUserConnectionActivity[index].split('[[[new_activity]]]')[0]
-        : this._allUserConnectionActivity[index];
-  }
+  String _getUserNameForActivity(int index) => this
+          ._allUserConnectionActivity[index]
+          .contains('[[[new_activity]]]')
+      ? this._allUserConnectionActivity[index].split('[[[new_activity]]]')[0]
+      : this._allUserConnectionActivity[index];
 
-  void _newActivityUpdate(String realUserName) {
+  /// For New Activity Remainder
+  Future<void> _newActivityUpdate(
+      String realUserName, MediaTypes selectMediaType) async {
+    int _countTotalActivity = 0;
+
+    if (this._allUserConnectionActivity.contains(realUserName))
+      _countTotalActivity = await _localStorageHelper
+          .countTotalActivitiesForParticularUserName(realUserName);
+
     if (mounted) {
       setState(() {
         if (this._allUserConnectionActivity.contains(realUserName)) {
-          // this._allUserConnectionActivity[this
-          //     ._allUserConnectionActivity
-          //     .indexOf(realUserName)] = '$realUserName[[[new_activity]]]';
-
           /// Remove New Activity Containing user at the second
           this._allUserConnectionActivity.remove(realUserName);
           this
               ._allUserConnectionActivity
               .insert(1, '$realUserName[[[new_activity]]]');
+
+          /// Based upon Activity Condition, Activity Starting index set[For Text Activity Store At last but otherCase Activity Store at first in Local Database]
+          this._everyUserActivityTotalCountTake.containsKey(realUserName)
+              ? this._everyUserActivityTotalCountTake[realUserName] =
+                  selectMediaType == MediaTypes.Text
+                      ? _countTotalActivity + 1
+                      : _countTotalActivity
+              : this._everyUserActivityTotalCountTake[realUserName] = 1;
         }
       });
     }
