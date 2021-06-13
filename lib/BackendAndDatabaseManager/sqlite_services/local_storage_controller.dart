@@ -616,7 +616,7 @@ class LocalStorageHelper {
     if (totalMessages == 0) return null;
 
     final List<Map<String, Object>> result = await db.rawQuery(
-        "SELECT $_colMessages, $_colMediaType, $_colTime FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
+        "SELECT $_colMessages, $_colMediaType, $_colTime, $_colDate FROM $_tableName LIMIT 1 OFFSET ${totalMessages - 1}");
 
     print('Result is: $result');
     final Map<String, String> map = Map<String, String>();
@@ -630,7 +630,7 @@ class LocalStorageHelper {
 
       map.addAll({
         result[0][_colMessages]:
-            '${_encryptionMaker.encryptionMaker(_time)}+${result[0][_colMediaType]}+localDb',
+            '${_encryptionMaker.encryptionMaker(_time)}+${result[0][_colMediaType]}+localDb+${result[0][_colDate]}',
       });
     }
 

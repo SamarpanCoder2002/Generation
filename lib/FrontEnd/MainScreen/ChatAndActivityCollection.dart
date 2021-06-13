@@ -871,9 +871,9 @@ class _ChatsAndActivityCollectionState
   Widget chatTile(BuildContext context, int index, String _userName) {
     return Card(
         elevation: 0.0,
-        color: Color.fromRGBO(31, 51, 71, 1),
+        color: const Color.fromRGBO(31, 51, 71, 1),
         child: Container(
-          padding: EdgeInsets.only(left: 1.0, right: 1.0),
+          //padding: EdgeInsets.only(left: 1.0, right: 1.0),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               elevation: 0.0,
@@ -1018,9 +1018,8 @@ class _ChatsAndActivityCollectionState
                           SizedBox(
                             height: 12.0,
                           ),
-                          // For Extract latest Conversation Message
+                          /// For Extract latest Conversation Message
                           _latestDataForConnectionExtractPerfectly(_userName)
-                          //Text('Samarpan'),
                         ],
                       ),
                     );
@@ -1030,13 +1029,13 @@ class _ChatsAndActivityCollectionState
                   child: Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(
-                      right: 20.0,
+                      //right: 20.0,
                       top: 2.0,
                       bottom: 2.0,
                     ),
                     child: Column(
                       children: [
-                        // For Extract latest Conversation Time
+                        /// For Extract latest Conversation Time
                         _latestDataForConnectionExtractPerfectly(_userName,
                             purpose: 'lastConnectionTime'),
 
@@ -1111,7 +1110,7 @@ class _ChatsAndActivityCollectionState
           String _remainingMessagesLength = '';
 
           /// If Last Message Not From Local Database
-          if (_lastMessage.values.last.toString().split('+').length != 3 ||
+          if (_lastMessage.values.last.toString().split('+').length != 4 ||
               _lastMessage.values.last.toString().split('+')[2] != 'localDb')
             _remainingMessagesLength = _allLatestMessages.length.toString();
 
@@ -1355,24 +1354,39 @@ class _ChatsAndActivityCollectionState
       String _willReturnTime = '';
       if (_lastMessage != null &&
           _lastMessage.values.last.toString().split('+')[0].toString() != '') {
-        _willReturnTime =
-            _lastMessage.values.last.toString().split('+')[0].toString();
+        /// Extract Incoming Message Date
+        final String _incomingMessageDate = _lastMessage.values.first
+            .toString()
+            .split('+')
+            .last
+            .toString()
+            .split(' ')[0];
 
-        if (int.parse(_willReturnTime.split(':')[0]) < 10)
-          _willReturnTime = _willReturnTime.replaceRange(
-              0,
-              _willReturnTime.indexOf(':'),
-              '0${_willReturnTime.split(':')[0]}');
-        if (int.parse(_willReturnTime.split(':')[1]) < 10)
-          _willReturnTime = _willReturnTime.replaceRange(
-              _willReturnTime.indexOf(':') + 1,
-              _willReturnTime.length,
-              '0${_willReturnTime.split(':')[1]}');
+        /// Checking if the incoming message date day is less than Today's date
+        if (int.parse(_incomingMessageDate.split('-').last.toString()) <
+            DateTime.now().day) {
+          _willReturnTime = _incomingMessageDate.split('-').reversed.toList().join('-');
+        } else {
+          _willReturnTime =
+              _lastMessage.values.last.toString().split('+')[0].toString();
+
+          if (int.parse(_willReturnTime.split(':')[0]) < 10)
+            _willReturnTime = _willReturnTime.replaceRange(
+                0,
+                _willReturnTime.indexOf(':'),
+                '0${_willReturnTime.split(':')[0]}');
+          if (int.parse(_willReturnTime.split(':')[1]) < 10)
+            _willReturnTime = _willReturnTime.replaceRange(
+                _willReturnTime.indexOf(':') + 1,
+                _willReturnTime.length,
+                '0${_willReturnTime.split(':')[1]}');
+        }
       }
-      return Container(
+
+      return Center(
           child: Text(
         _willReturnTime,
-        style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+        style: TextStyle(fontSize: 12.0, color: Colors.lightBlue),
       ));
     } else
       return Text(
