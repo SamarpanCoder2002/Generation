@@ -27,8 +27,6 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
 
   int _fontSizeController = 1;
 
-  bool _sendButton = true;
-
   @override
   void initState() {
     isLoading = false;
@@ -48,38 +46,45 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: pickColor,
-        floatingActionButton: !this.isLoading?FloatingActionButton(
-          elevation: 5.0,
-          backgroundColor: Color.fromRGBO(100, 200, 10, 1),
-          child: const Icon(
-            Icons.send_rounded,
-          ),
-          onPressed: () async {
-            if (activityText.text.length > 0) {
-              SystemChannels.textInput.invokeMethod('TextInput.hide');
+        floatingActionButton: !this.isLoading
+            ? FloatingActionButton(
+                elevation: 5.0,
+                backgroundColor: Color.fromRGBO(100, 200, 10, 1),
+                child: const Icon(
+                  Icons.send_rounded,
+                ),
+                onPressed: () async {
+                  if (activityText.text.length > 0) {
+                    SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-              setState(() {
-                isLoading = true;
-              });
+                    setState(() {
+                      isLoading = true;
+                    });
 
-              bool response = await management.addTextActivityToFireStore(
-                  activityText.text,
-                  pickColor,
-                  widget._allUserNameContainer,
-                  (_fontSizeController + 20).toDouble());
+                    bool response = await management.addTextActivityToFireStore(
+                        activityText.text,
+                        pickColor,
+                        widget._allUserNameContainer,
+                        (_fontSizeController + 20).toDouble());
 
-              setState(() {
-                isLoading = false;
-              });
+                    setState(() {
+                      isLoading = false;
+                    });
 
-              Navigator.pop(context);
+                    Navigator.pop(context);
 
-              if (response) showToast("Activity Added", fToast, toastGravity: ToastGravity.TOP,);
+                    if (response)
+                      showToast(
+                        "Activity Added",
+                        fToast,
+                        toastGravity: ToastGravity.TOP,
+                      );
 
-              print("Activity Response: $response");
-            }
-          },
-        ):null,
+                    print("Activity Response: $response");
+                  }
+                },
+              )
+            : null,
         body: ModalProgressHUD(
           inAsyncCall: isLoading,
           color: Color.fromRGBO(0, 0, 0, 1),

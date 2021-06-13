@@ -37,7 +37,11 @@ class GeneralMessage {
   Future<void> storeInLocalStorage() async {
     this.selectedUsersName.forEach((everyUser) async {
       await _localStorageHelper.insertNewMessages(
-          everyUser, this._encryptionMaker.encryptionMaker(this.storeMessage), this.mediaType, 0, this._encryptionMaker.encryptionMaker(this.storeTime));
+          everyUser,
+          this._encryptionMaker.encryptionMaker(this.storeMessage),
+          this.mediaType,
+          0,
+          this._encryptionMaker.encryptionMaker(this.storeTime));
     });
   }
 
@@ -64,7 +68,8 @@ class GeneralMessage {
 
       /// Add data to temporary Storage of Sending
       sendingMessages.add({
-        this._encryptionMaker.encryptionMaker(this.sendMessage): this._encryptionMaker.encryptionMaker(this.sendTime),
+        this._encryptionMaker.encryptionMaker(this.sendMessage):
+            this._encryptionMaker.encryptionMaker(this.sendTime),
       });
 
       /// Data Store in FireStore

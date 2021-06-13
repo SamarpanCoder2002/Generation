@@ -79,18 +79,19 @@ class _SelectConnectionState extends State<SelectConnection> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      floatingActionButton: (_floatingActionButtonVisible && this._totalSelected>0)
-          ? FloatingActionButton(
-              elevation: 10.0,
-              backgroundColor: const Color.fromRGBO(20, 200, 50, 1),
-              child: const Icon(
-                Icons.send_rounded,
-                color: Colors.white,
-                size: 30.0,
-              ),
-              onPressed: _sendMessage,
-            )
-          : null,
+      floatingActionButton:
+          (_floatingActionButtonVisible && this._totalSelected > 0)
+              ? FloatingActionButton(
+                  elevation: 10.0,
+                  backgroundColor: const Color.fromRGBO(20, 200, 50, 1),
+                  child: const Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 30.0,
+                  ),
+                  onPressed: _sendMessage,
+                )
+              : null,
       appBar: AppBar(
         brightness: Brightness.dark,
         backgroundColor: Color.fromRGBO(25, 39, 52, 1),
@@ -217,8 +218,7 @@ class _SelectConnectionState extends State<SelectConnection> {
   }
 
   void _sendMessage() async {
-
-    if(mounted){
+    if (mounted) {
       setState(() {
         this._floatingActionButtonVisible = false;
       });
@@ -258,7 +258,7 @@ class _SelectConnectionState extends State<SelectConnection> {
             sendMessage: _voiceDownloadUrl,
             storeMessage: widget.mediaFile.path,
             sendTime:
-                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extra}+multipleConnectionSource',
+                '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extra}+multipleConnectionSource+${DateTime.now()}',
             storeTime: '${DateTime.now().hour}:${DateTime.now().minute}',
             mediaType: widget.mediaType,
             selectedUsersName: _allConnectionsUserName,
@@ -278,7 +278,7 @@ class _SelectConnectionState extends State<SelectConnection> {
               sendMessage: _imageDownLoadUrl,
               storeMessage: widget.mediaFile.path,
               sendTime:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource',
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource+${DateTime.now()}',
               storeTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}',
               mediaType: widget.mediaType,
@@ -316,7 +316,7 @@ class _SelectConnectionState extends State<SelectConnection> {
               sendMessage: '$_videoDownLoadUrl+$thumbNailPicturePathUrl',
               storeMessage: widget.mediaFile.path,
               sendTime:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource',
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource+${DateTime.now()}',
               storeTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}+$thumbNailPicturePath',
               mediaType: widget.mediaType,
@@ -334,7 +334,7 @@ class _SelectConnectionState extends State<SelectConnection> {
               sendMessage: widget.textContent,
               storeMessage: widget.textContent,
               sendTime:
-                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}",
+                  "${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}+${DateTime.now()}",
               storeTime: "${DateTime.now().hour}:${DateTime.now().minute}",
               mediaType: widget.mediaType,
               selectedUsersName: _allConnectionsUserName);
@@ -348,7 +348,7 @@ class _SelectConnectionState extends State<SelectConnection> {
               sendMessage: widget.extra,
               storeMessage: widget.extra,
               sendTime:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${DateTime.now()}',
               storeTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}',
               mediaType: widget.mediaType,
@@ -364,7 +364,7 @@ class _SelectConnectionState extends State<SelectConnection> {
               sendMessage: _documentDownLoadUrl,
               storeMessage: widget.mediaFile.path,
               sendTime:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+${widget.extra}+multipleConnectionSource',
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+${widget.extra}+multipleConnectionSource+${DateTime.now()}',
               storeTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.textContent}+${widget.extra}',
               mediaType: widget.mediaType,

@@ -320,8 +320,6 @@ class LocalStorageHelper {
     return tempMap;
   }
 
-
-
   Future<String> extractToken(
       {String userMail = '', String userName = ''}) async {
     final Database db = await this.database;
@@ -436,7 +434,7 @@ class LocalStorageHelper {
       final Database db = await this.database;
       final List<Map<String, Object>> tables =
           await db.rawQuery("SELECT * FROM ${tableName}_status");
-      return tables == null?[]:tables;
+      return tables == null ? [] : tables;
     } catch (e) {
       print('Extract USer Name Activity Exception: ${e.toString()}');
       return null;
@@ -530,13 +528,18 @@ class LocalStorageHelper {
 
   /// Insert New Messages to Table
   Future<int> insertNewMessages(String _tableName, String _newMessage,
-      MediaTypes _currMediaType, int _ref, String _time, {String incomingMessageDate}) async {
+      MediaTypes _currMediaType, int _ref, String _time,
+      {String incomingMessageDate}) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
 
+    print('Incoming Date: $incomingMessageDate');
+
     /// Current Date
-    DateTime now = incomingMessageDate == null?DateTime.now():DateTime.parse(incomingMessageDate);
+    DateTime now = incomingMessageDate == null
+        ? DateTime.now()
+        : DateTime.parse(incomingMessageDate);
     DateFormat formatter = DateFormat('dd-MM-yyyy');
     String _dateIS = formatter.format(now);
 

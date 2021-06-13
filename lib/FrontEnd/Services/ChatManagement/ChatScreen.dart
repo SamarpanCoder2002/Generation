@@ -546,7 +546,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       MediaTypes.Text,
       1,
       _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]),
-      incomingMessageDate: _incomingInformationContainer[2],
+      incomingMessageDate:
+          _incomingInformationContainer[2] == 'multipleConnectionSource'
+              ? _incomingInformationContainer[3]
+              : _incomingInformationContainer[2],
     );
 
     print('Encrypted Every Message: $everyMessage');
@@ -629,7 +632,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           MediaTypes.Voice,
           1,
           _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]),
-          incomingMessageDate: _incomingInformationContainer[3],
+          incomingMessageDate:
+              _incomingInformationContainer[3] == 'multipleConnectionSource'
+                  ? _incomingInformationContainer[4]
+                  : _incomingInformationContainer[3],
         );
       }
     } catch (e) {
@@ -657,12 +663,16 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       /// Store in Local Database
       await _localStorageHelper.insertNewMessages(
-          widget._userName,
-          _encryptionMaker.encryptionMaker(everyMessage.keys.first),
-          MediaTypes.Location,
-          1,
-          _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[1]}'),
-        incomingMessageDate: _incomingInformationContainer[2],
+        widget._userName,
+        _encryptionMaker.encryptionMaker(everyMessage.keys.first),
+        MediaTypes.Location,
+        1,
+        _encryptionMaker.encryptionMaker(
+            '${_incomingInformationContainer[0]}+${_incomingInformationContainer[1]}'),
+        incomingMessageDate:
+            _incomingInformationContainer[2] == 'multipleConnectionSource'
+                ? _incomingInformationContainer[3]
+                : _incomingInformationContainer[2],
       );
 
       /// Important Local Container Updated
@@ -740,7 +750,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             1,
             _encryptionMaker.encryptionMaker(
                 '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}'),
-            incomingMessageDate: _incomingInformationContainer[4]);
+            incomingMessageDate:
+                _incomingInformationContainer[4] == 'multipleConnectionSource'
+                    ? _incomingInformationContainer[5]
+                    : _incomingInformationContainer[4]);
 
         if (mounted) {
           setState(() {
@@ -913,7 +926,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}')
                 : _encryptionMaker.encryptionMaker(
                     '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg'),
-            incomingMessageDate: _incomingInformationContainer[3]);
+            incomingMessageDate:
+                _incomingInformationContainer[3] == 'multipleConnectionSource'
+                    ? _incomingInformationContainer[4]
+                    : _incomingInformationContainer[3]);
 
         if (mounted) {
           setState(() {
