@@ -613,7 +613,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   onReceiveProgress: _downLoadOnReceiveProgress)
               .whenComplete(() async {
             print('After Download: $_incomingInformationContainer');
-            if (_incomingInformationContainer.length < 4)
+            if (_incomingInformationContainer.length < 5)
               await _management.deleteFilesFromFirebaseStorage(
                   everyMessage.keys.first.toString());
           });
@@ -734,7 +734,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               .whenComplete(() async {
             print(
                 'In When Complete: ${everyMessage.keys.first.toString()}   $_incomingInformationContainer');
-            if (_incomingInformationContainer.length < 5)
+            if (_incomingInformationContainer.length < 6)
               await _management.deleteFilesFromFirebaseStorage(
                   everyMessage.keys.first.toString());
           });
@@ -871,7 +871,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               print('In Gallery Save');
             }
 
-            if (_incomingInformationContainer.length < 4)
+            if (_incomingInformationContainer.length < 5)
               await _management.deleteFilesFromFirebaseStorage(
                   _incomingInformationContainer[1] !=
                           MediaTypes.Video.toString()
@@ -892,7 +892,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   '${_thumbNailDir.path}$currTime.jpg',
                 )
                     .whenComplete(() async {
-                  if (_incomingInformationContainer.length < 4)
+                  if (_incomingInformationContainer.length < 5)
                     await _management.deleteFilesFromFirebaseStorage(
                         everyMessage.keys.first.toString().split('+')[1]);
                 });
