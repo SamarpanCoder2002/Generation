@@ -530,13 +530,13 @@ class LocalStorageHelper {
 
   /// Insert New Messages to Table
   Future<int> insertNewMessages(String _tableName, String _newMessage,
-      MediaTypes _currMediaType, int _ref, String _time) async {
+      MediaTypes _currMediaType, int _ref, String _time, {String incomingMessageDate}) async {
     Database db = await this.database; // DB Reference
     Map<String, dynamic> _helperMap =
         Map<String, dynamic>(); // Map to insert data
 
     /// Current Date
-    DateTime now = DateTime.now();
+    DateTime now = incomingMessageDate == null?DateTime.now():DateTime.parse(incomingMessageDate);
     DateFormat formatter = DateFormat('dd-MM-yyyy');
     String _dateIS = formatter.format(now);
 

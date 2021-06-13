@@ -541,11 +541,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       List<String> _incomingInformationContainer, everyMessage) async {
     /// Store Data in local Storage
     await _localStorageHelper.insertNewMessages(
-        widget._userName,
-        _encryptionMaker.encryptionMaker(everyMessage.keys.first.toString()),
-        MediaTypes.Text,
-        1,
-        _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]));
+      widget._userName,
+      _encryptionMaker.encryptionMaker(everyMessage.keys.first.toString()),
+      MediaTypes.Text,
+      1,
+      _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]),
+      incomingMessageDate: _incomingInformationContainer[2],
+    );
 
     print('Encrypted Every Message: $everyMessage');
 
@@ -621,12 +623,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         /// Store Data in local Storage
         _localStorageHelper.insertNewMessages(
-            widget._userName,
-            _encryptionMaker.encryptionMaker(
-                '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}'),
-            MediaTypes.Voice,
-            1,
-            _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]));
+          widget._userName,
+          _encryptionMaker.encryptionMaker(
+              '${recordingStorage.path}$currTime${_incomingInformationContainer[2]}'),
+          MediaTypes.Voice,
+          1,
+          _encryptionMaker.encryptionMaker(_incomingInformationContainer[0]),
+          incomingMessageDate: _incomingInformationContainer[3],
+        );
       }
     } catch (e) {
       print('Voice Download Error: ${e.toString()}');
@@ -657,7 +661,9 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _encryptionMaker.encryptionMaker(everyMessage.keys.first),
           MediaTypes.Location,
           1,
-          _encryptionMaker.encryptionMaker(everyMessage.values.first));
+          _encryptionMaker.encryptionMaker('${_incomingInformationContainer[0]}+${_incomingInformationContainer[1]}'),
+        incomingMessageDate: _incomingInformationContainer[2],
+      );
 
       /// Important Local Container Updated
       if (mounted) {
@@ -733,7 +739,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             MediaTypes.Document,
             1,
             _encryptionMaker.encryptionMaker(
-                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}'));
+                '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_incomingInformationContainer[3]}'),
+            incomingMessageDate: _incomingInformationContainer[4]);
 
         if (mounted) {
           setState(() {
@@ -905,7 +912,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 ? _encryptionMaker.encryptionMaker(
                     '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}')
                 : _encryptionMaker.encryptionMaker(
-                    '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg'));
+                    '${_incomingInformationContainer[0]}+${_incomingInformationContainer[2]}+${_thumbNailDir.path}$currTime.jpg'),
+            incomingMessageDate: _incomingInformationContainer[3]);
 
         if (mounted) {
           setState(() {
@@ -1436,47 +1444,57 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget newMessageIndicator(BuildContext context, int index) {
-    return _chatContainer[index].keys.first.toString() !='Today'?Container(
-      alignment: Alignment.center,
-      margin: EdgeInsets.only(
-        left: _chatContainer[index].keys.first.toString() == 'New Messages'
-            ? MediaQuery.of(context).size.width / 3.3
-            : MediaQuery.of(context).size.width / 2.7,
-        right: _chatContainer[index].keys.first.toString() == 'New Messages'
-            ? MediaQuery.of(context).size.width / 3.3
-            : MediaQuery.of(context).size.width / 2.7,
-        top: 10.0,
-        bottom: _chatContainer[index].keys.first.toString() == 'New Messages'
-            ? 20.0
-            : 10.0,
-      ),
-      //width: MediaQuery.of(context).size.width / 2,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(
-            _chatContainer[index].keys.first.toString() == 'New Messages'
-                ? 20.0
-                : 10.0),
-        color: _chatContainer[index].keys.first.toString() == 'New Messages'
-            ? Colors.green[500]
-            : null, // Color.fromRGBO(60, 80, 100, 1),
-      ),
-      child: Text(
-        _chatContainer[index].keys.first.toString(),
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: _chatContainer[index].keys.first.toString() == 'New Messages'
-              ? Colors.white
-              : Colors.white70,
-          fontSize: 16.0,
-          //fontFamily: 'Lora',
-          letterSpacing: 1.0,
-        ),
-      ),
-    ):Container(
-      margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
-      alignment: Alignment.center,
-      child: Text('Today', style: TextStyle(color: Colors.white70, fontSize: 16.0),),
-    );
+    return _chatContainer[index].keys.first.toString() != 'Today'
+        ? Container(
+            alignment: Alignment.center,
+            margin: EdgeInsets.only(
+              left:
+                  _chatContainer[index].keys.first.toString() == 'New Messages'
+                      ? MediaQuery.of(context).size.width / 3.3
+                      : MediaQuery.of(context).size.width / 2.7,
+              right:
+                  _chatContainer[index].keys.first.toString() == 'New Messages'
+                      ? MediaQuery.of(context).size.width / 3.3
+                      : MediaQuery.of(context).size.width / 2.7,
+              top: 10.0,
+              bottom:
+                  _chatContainer[index].keys.first.toString() == 'New Messages'
+                      ? 20.0
+                      : 10.0,
+            ),
+            //width: MediaQuery.of(context).size.width / 2,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                  _chatContainer[index].keys.first.toString() == 'New Messages'
+                      ? 20.0
+                      : 10.0),
+              color:
+                  _chatContainer[index].keys.first.toString() == 'New Messages'
+                      ? Colors.green[500]
+                      : null, // Color.fromRGBO(60, 80, 100, 1),
+            ),
+            child: Text(
+              _chatContainer[index].keys.first.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _chatContainer[index].keys.first.toString() ==
+                        'New Messages'
+                    ? Colors.white
+                    : Colors.white70,
+                fontSize: 16.0,
+                //fontFamily: 'Lora',
+                letterSpacing: 1.0,
+              ),
+            ),
+          )
+        : Container(
+            margin: EdgeInsets.only(top: 10.0, bottom: 10.0),
+            alignment: Alignment.center,
+            child: Text(
+              'Today',
+              style: TextStyle(color: Colors.white70, fontSize: 16.0),
+            ),
+          );
   }
 
   /// All Conversation List
@@ -2323,7 +2341,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 _replyText != ''
                         ? "${_encryptionMaker.encryptionMaker('$_replyText[[[@]]]${_inputTextController.text}')}"
                         : '${_encryptionMaker.encryptionMaker(_inputTextController.text)}':
-                    "${_encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}')}",
+                    "${_encryptionMaker.encryptionMaker('${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Text}+${DateTime.now()}')}",
               });
 
               /// Add Data to the UI related all chat Container
@@ -2492,7 +2510,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               _encryptionMaker
                   .encryptionMaker(
                       downloadUrl): _encryptionMaker.encryptionMaker(
-                  '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension'),
+                  '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Voice}+$audioExtension+${DateTime.now()}'),
             });
 
             /// Add Data to the UI related all chat Container
@@ -2602,7 +2620,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               _encryptionMaker.encryptionMaker(
                       '$_imageDownLoadUrl+$thumbNailPicturePathUrl'):
                   _encryptionMaker.encryptionMaker(
-                      '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
+                      '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${DateTime.now()}'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2616,7 +2634,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               _encryptionMaker
                   .encryptionMaker(
                       _imageDownLoadUrl): _encryptionMaker.encryptionMaker(
-                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText'),
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${DateTime.now()}'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2630,7 +2648,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               _encryptionMaker
                   .encryptionMaker(
                       _imageDownLoadUrl): _encryptionMaker.encryptionMaker(
-                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}'),
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${_takeImageFile.path.split('/').last}+${DateTime.now()}'),
             });
 
             // Add Data to the UI related all Chat Container
@@ -2721,7 +2739,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _encryptionMaker
                 .encryptionMaker(
                     '$latitude+$longitude'): _encryptionMaker.encryptionMaker(
-                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}'),
+                '${DateTime.now().hour}:${DateTime.now().minute}+${MediaTypes.Location}+${DateTime.now()}'),
           });
 
           _chatContainer.add({
