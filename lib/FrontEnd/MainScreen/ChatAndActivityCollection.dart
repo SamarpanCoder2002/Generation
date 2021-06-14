@@ -512,6 +512,9 @@ class _ChatsAndActivityCollectionState
 
   /// ChatCollection, Notification Management when you are offline
   Future<void> _offlineConnectionDataManagement() async {
+
+    _showDiaLog(titleText: 'You Are Offline', contentText: 'Please Connect to the Internet to send Messages');
+
     final List<Map<String, Object>> _allConnectionTempList =
         await _localStorageHelper.extractAllUsersName();
     _allConnectionTempList.forEach((userNameMap) {
@@ -523,6 +526,13 @@ class _ChatsAndActivityCollectionState
         });
       }
     });
+
+    if(mounted){
+      setState(() {
+        this._allConnectionsUserName.toSet().toList();
+        this._allUserConnectionActivity.toSet().toList();
+      });
+    }
   }
 
   /// Existing connection having some activity stored in local database, user name add
@@ -1434,6 +1444,9 @@ class _ChatsAndActivityCollectionState
         builder: (_) => AlertDialog(
               elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
               title: Center(
                   child: Text(
                 titleText,
@@ -1445,9 +1458,10 @@ class _ChatsAndActivityCollectionState
               )),
               content: contentText == ''
                   ? null
-                  : SizedBox(
+                  : Container(
                       height: 150,
                       width: MediaQuery.of(context).size.width,
+                      alignment: Alignment.center,
                       child: ListView(
                         shrinkWrap: true,
                         children: [
