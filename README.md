@@ -1,6 +1,8 @@
-# generation
+# Generation
 
-A new Flutter application.
+### A Private, Secure, End-to-End Encrypted Messaging app made in Flutter that helps you to connect with your connections without any Ads, promotion. No other third-party person, organization, or even Generation Team can't read your messages.
+
+Your Privacy our biggest priority.
 
 ## Getting Started
 
