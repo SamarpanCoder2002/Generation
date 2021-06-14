@@ -19,23 +19,28 @@ class EmailAndPasswordAuth {
   /// Regular Expression
   final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
+  /// For Form Key
   final GlobalKey<FormState> _userNameKey = GlobalKey<FormState>();
+
+  /// For Make Objects of some important class
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
-  TextEditingController _userName = TextEditingController();
-  TextEditingController _about = TextEditingController();
+  /// For Take User Name
+  final TextEditingController _userName = TextEditingController();
+  final TextEditingController _about = TextEditingController();
 
+  /// For Toast Message
   final FToast _fToast = FToast();
 
   EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
-    //Close the keyboard
+    /// Close the keyboard
     SystemChannels.textInput.invokeMethod('TextInput.hide');
   }
 
   Future<void> signUp() async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance
+      final UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
               email: this._email, password: this._pwd);
       userCredential.user.sendEmailVerification();
@@ -80,15 +85,6 @@ class EmailAndPasswordAuth {
 
         print(responseData.exists);
 
-        // if (responseData.exists)
-        //   await FirebaseFirestore.instance
-        //       .doc(
-        //           'generation_users/${FirebaseAuth.instance.currentUser.email}')
-        //       .delete();
-        //
-        // print("Email Not Present");
-        // await userNameChecking();
-
         if (!responseData.exists) {
           print("Email Not Present");
         } else {
@@ -115,38 +111,6 @@ class EmailAndPasswordAuth {
       showAlertBox(
           "Log-in Error", "Email or Password not Match", Colors.redAccent);
     }
-  }
-
-  void showAlertBox(
-    String _title,
-    String _content, [
-    Color _titleColor = Colors.white,
-  ]) {
-    showDialog<String>(
-        context: this._context,
-        builder: (context) => AlertDialog(
-              elevation: 5.0,
-              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40.0),
-              ),
-              title: Text(
-                _title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: _titleColor,
-                  fontSize: 18.0,
-                ),
-              ),
-              content: Text(
-                _content,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.lightBlue,
-                  fontSize: 16.0,
-                ),
-              ),
-            ));
   }
 
   Future<void> userNameChecking(BuildContext context) async {
@@ -230,114 +194,131 @@ class EmailAndPasswordAuth {
                                 TextStyle(fontSize: 18.0, color: Colors.white),
                           ),
                           onPressed: () async {
-                            if (_userNameKey.currentState.validate()) {
-                              print("ok");
-
-                              /// Hide Keyboard
-                              SystemChannels.textInput
-                                  .invokeMethod('TextInput.hide');
-
-                              /// Flutter Toast Initialization and show
-                              _fToast.init(context);
-                              showToast(
-                                'Wait, We Creating Your Account',
-                                _fToast,
-                                fontSize: 18.0,
-                                toastColor: Colors.amber,
-                                toastGravity: ToastGravity.TOP,
-                              );
-
-                              QuerySnapshot querySnapShotForUserNameChecking =
-                                  await FirebaseFirestore.instance
-                                      .collection('generation_users')
-                                      .where('user_name',
-                                          isEqualTo: this._userName.text)
-                                      .get();
-
-                              print(querySnapShotForUserNameChecking.docs);
-
-                              if (querySnapShotForUserNameChecking
-                                  .docs.isEmpty) {
-                                final String _getToken =
-                                    await FirebaseMessaging.instance.getToken();
-
-                                final String currDate = DateFormat('dd-MM-yyyy')
-                                    .format(DateTime.now());
-
-                                final String currTime =
-                                    "${DateFormat('hh:mm a').format(DateTime.now())}";
-
-                                FirebaseFirestore.instance
-                                    .collection("generation_users")
-                                    .doc(_email)
-                                    .set({
-                                  'user_name': _encryptionMaker
-                                      .encryptionMaker(this._userName.text),
-                                  'about': _encryptionMaker
-                                      .encryptionMaker(this._about.text),
-                                  'connection_request': {},
-                                  'creation_date': _encryptionMaker
-                                      .encryptionMaker(currDate),
-                                  'creation_time': _encryptionMaker
-                                      .encryptionMaker(currTime),
-                                  'connections': {},
-                                  'total_connections':
-                                      _encryptionMaker.encryptionMaker('0'),
-                                  'activity': {},
-                                  'token': _encryptionMaker
-                                      .encryptionMaker(_getToken),
-                                  'profile_pic': '',
-                                  'phone_number': '',
-                                });
-
-                                await _localStorageHelper
-                                    .createTableForStorePrimaryData();
-
-                                await _localStorageHelper
-                                    .insertOrUpdateDataForThisAccount(
-                                  userMail:
-                                      FirebaseAuth.instance.currentUser.email,
-                                  userName: this._userName.text,
-                                  userToken: _getToken,
-                                  userAbout: this._about.text,
-                                  userAccCreationDate: currDate,
-                                  userAccCreationTime: currTime,
-                                );
-
-                                await _localStorageHelper
-                                    .createTableForUserActivity(
-                                        this._userName.text);
-
-                                await _localStorageHelper
-                                    .createTableForRemainingLinks();
-
-                                await _localStorageHelper
-                                    .createTableForNotificationGlobalConfig();
-                                await _localStorageHelper
-                                    .insertDataForNotificationGlobalConfig();
-
-                                print("Log-In Successful: User Name: $_email");
-
-                                Navigator.pushAndRemoveUntil(
-                                    this._context,
-                                    MaterialPageRoute(
-                                        builder: (_) => MainScreen()),
-                                    (route) => false);
-
-                                showAlertBox("Log-In Successful",
-                                    "Enjoy this app", Colors.green);
-                              } else {
-                                showAlertBox("User Name Already Exist",
-                                    "Try Another User Name", Colors.amber);
-                              }
-                            } else {
-                              print("Not Validate");
-                            }
+                            await _validationAndSetToFireStore(context, _email);
                           },
                         ),
                       )
                     ],
                   ),
+                ),
+              ),
+            ));
+  }
+
+  Future<void> _validationAndSetToFireStore(
+      BuildContext context, String email) async {
+    if (_userNameKey.currentState.validate()) {
+      print("ok");
+
+      /// Hide Keyboard
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+      /// Flutter Toast Initialization and show
+      _fToast.init(context);
+      showToast(
+        'Wait, We Creating Your Account',
+        _fToast,
+        fontSize: 18.0,
+        toastColor: Colors.amber,
+        toastGravity: ToastGravity.TOP,
+      );
+
+      final QuerySnapshot querySnapShotForUserNameChecking =
+          await FirebaseFirestore.instance
+              .collection('generation_users')
+              .where('user_name', isEqualTo: this._userName.text)
+              .get();
+
+      print(querySnapShotForUserNameChecking.docs);
+
+      if (querySnapShotForUserNameChecking.docs.isEmpty) {
+        Navigator.pop(context);
+
+        final String _getToken = await FirebaseMessaging.instance.getToken();
+
+        final String currDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+        final String currTime =
+            "${DateFormat('hh:mm a').format(DateTime.now())}";
+
+        await FirebaseFirestore.instance
+            .collection("generation_users")
+            .doc(_email)
+            .set({
+          'user_name': _encryptionMaker.encryptionMaker(this._userName.text),
+          'about': _encryptionMaker.encryptionMaker(this._about.text),
+          'connection_request': {},
+          'creation_date': _encryptionMaker.encryptionMaker(currDate),
+          'creation_time': _encryptionMaker.encryptionMaker(currTime),
+          'connections': {},
+          'total_connections': _encryptionMaker.encryptionMaker('0'),
+          'activity': {},
+          'token': _encryptionMaker.encryptionMaker(_getToken),
+          'profile_pic': '',
+          'phone_number': '',
+        });
+
+        await _localStorageHelper.createTableForStorePrimaryData();
+
+        await _localStorageHelper.insertOrUpdateDataForThisAccount(
+          userMail: FirebaseAuth.instance.currentUser.email,
+          userName: this._userName.text,
+          userToken: _getToken,
+          userAbout: this._about.text,
+          userAccCreationDate: currDate,
+          userAccCreationTime: currTime,
+        );
+
+        await _localStorageHelper
+            .createTableForUserActivity(this._userName.text);
+
+        await _localStorageHelper.createTableForRemainingLinks();
+
+        await _localStorageHelper.createTableForNotificationGlobalConfig();
+        await _localStorageHelper.insertDataForNotificationGlobalConfig();
+
+        print("Log-In Successful: User Name: $_email");
+
+        Navigator.pushAndRemoveUntil(this._context,
+            MaterialPageRoute(builder: (_) => MainScreen()), (route) => false);
+
+        showAlertBox("Log-In Successful", "Enjoy this app", Colors.green);
+      } else {
+        showAlertBox(
+            "User Name Already Exist", "Try Another User Name", Colors.amber);
+      }
+    } else {
+      print("Not Validate");
+    }
+  }
+
+  void showAlertBox(
+    String _title,
+    String _content, [
+    Color _titleColor = Colors.white,
+  ]) {
+    showDialog<String>(
+        context: this._context,
+        builder: (context) => AlertDialog(
+              elevation: 5.0,
+              backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40.0),
+              ),
+              title: Text(
+                _title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: _titleColor,
+                  fontSize: 18.0,
+                ),
+              ),
+              content: Text(
+                _content,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                  fontSize: 16.0,
                 ),
               ),
             ));
