@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 
 class LocalStorageHelper {
-  // Database Columns
+  /// Database Columns
   final String _colMessages = "Messages";
   final String _colReferences = "Reference";
   final String _colMediaType = "Media";
@@ -20,6 +20,7 @@ class LocalStorageHelper {
   final String _colAbout = "About";
   final String _colToken = "Token";
 
+  /// For Activity Column
   final String _colActivity = 'Status';
   final String _colTimeActivity = 'Status_Time';
   final String _colExtraText = 'ExtraActivityText';

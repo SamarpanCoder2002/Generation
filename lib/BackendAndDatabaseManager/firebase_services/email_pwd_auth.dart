@@ -229,8 +229,6 @@ class EmailAndPasswordAuth {
               .where('user_name', isEqualTo: this._userName.text)
               .get();
 
-      print(querySnapShotForUserNameChecking.docs);
-
       if (querySnapShotForUserNameChecking.docs.isEmpty) {
         Navigator.pop(context);
 

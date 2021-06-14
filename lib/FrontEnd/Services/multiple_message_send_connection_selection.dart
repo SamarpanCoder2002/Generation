@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
-import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thumbnails/thumbnails.dart';
 
+import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
@@ -37,6 +37,7 @@ class _SelectConnectionState extends State<SelectConnection> {
   bool _isLoading = false;
   bool _floatingActionButtonVisible = true;
   int _totalSelected = 0;
+
   final FToast _fToast = FToast();
 
   List<bool> _selectedTile;

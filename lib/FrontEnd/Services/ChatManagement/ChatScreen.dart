@@ -244,8 +244,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         print('No Old Messages in Local Database');
       }
 
+      /// Update Connected User Profile pic if updated
+      await _updateProfilePicIfUpdatedByConnection();
+
       /// After Get the old Conversation messages from SqLite, Take New Messages Data from FireStore
-      _extractDataFromFireStore();
+      await _extractDataFromFireStore();
     } catch (e) {
       // For AutoScroll to the end position
 
@@ -265,7 +268,124 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  _extractDataFromFireStore() {
+  Future<void> _updateProfilePicIfUpdatedByConnection() async {
+    try {
+      /// For Profile Pic Update Purpose
+      final String _profilePicUrl = await _localStorageHelper
+          .extractProfilePicUrl(userName: widget._userName);
+      final String _connectionMail = await _localStorageHelper
+          .extractImportantDataFromThatAccount(userName: widget._userName);
+
+      final DocumentSnapshot connectionSnapShot = await FirebaseFirestore
+          .instance
+          .doc('generation_users/$_connectionMail')
+          .get();
+
+      String _profilePicFormattedUrl = '';
+
+      if (connectionSnapShot.data() != null &&
+          connectionSnapShot.data()['profile_pic'] != '')
+        _profilePicFormattedUrl = _encryptionMaker
+            .decryptionMaker(connectionSnapShot.data()['profile_pic']);
+
+      /// Profile Picture Updation Check
+      if (_profilePicFormattedUrl != _profilePicUrl) {
+        final Directory directory = await getExternalStorageDirectory();
+
+        /// Create new Hidden Folder once in desired location
+        final Directory profilePicDir =
+            await Directory('${directory.path}/.ProfilePictures/')
+                .create(recursive: true);
+
+        String profilePicPath = '${profilePicDir.path}${DateTime.now()}';
+
+        print('Profile Pic Formatted Url: $_profilePicFormattedUrl');
+
+        /// If Updated ProfilePic not null and Empty String
+        if (_profilePicFormattedUrl.toString() != null &&
+            _profilePicFormattedUrl.toString() != '') {
+          print('Path: ${widget._connectionProfileImageLocalPath}');
+
+          try {
+            if (widget._connectionProfileImageLocalPath != '')
+              await File(widget._connectionProfileImageLocalPath)
+                  .delete(recursive: true)
+                  .whenComplete(() => print(
+                      'Old Profile Image of Connection Deletion Complete'));
+          } catch (e) {
+            print('Error: Old Profile Pic Already Deleted: ${e.toString()}');
+          }
+
+          print('Cute: ${connectionSnapShot['profile_pic'].toString()}');
+
+          showToast(
+            'Profile Picture Updating...\nPlease Wait',
+            fToast,
+            fontSize: 18.0,
+            toastColor: Colors.amber,
+          );
+
+          if (mounted) {
+            setState(() {
+              _isLoading = true;
+            });
+          }
+
+          try {
+            await _dio
+                .download(_profilePicFormattedUrl, profilePicPath)
+                .whenComplete(() {
+              print('Profile Picture Download Complete');
+            });
+          } catch (e) {
+            print('Profile Pic Download Error: ${e.toString()}');
+          }
+        } else {
+          if (_profilePicFormattedUrl.toString() == '' &&
+              widget._connectionProfileImageLocalPath != '')
+            await File(widget._connectionProfileImageLocalPath)
+                .delete(recursive: true)
+                .whenComplete(() =>
+                    print('Old Profile Image of Connection Deletion Complete'));
+
+          profilePicPath = '';
+        }
+
+        if (mounted) {
+          setState(() {
+            widget._connectionProfileImageLocalPath = profilePicPath;
+            if (_isLoading) _isLoading = false;
+          });
+        }
+
+        /// Update Local And Remote Profile Image Path
+        await _localStorageHelper.insertProfilePictureInImportant(
+            imagePath: profilePicPath,
+            imageUrl: _profilePicFormattedUrl != null
+                ? _profilePicFormattedUrl.toString()
+                : '',
+            mail: _connectionMail);
+      }
+    } catch (e) {
+      print(
+          'Exception Error : In Chat Screen Profile Pic Updation Error: ${e.toString()}');
+
+      if (_isLoading) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        showToast(
+          'Profile Picture Update Error....',
+          fToast,
+          fontSize: 16.0,
+        );
+      }
+    }
+  }
+
+  Future<void> _extractDataFromFireStore() async {
     try {
       double _positionToScroll = 100;
 
@@ -276,124 +396,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         } else {
           /// Checking If Sender Mail Present or Not
           if (event.data()['connections'].containsKey(this._senderMail)) {
-            try {
-              /// For Profile Pic Updation Purpose
-              final String _profilePicUrl = await _localStorageHelper
-                  .extractProfilePicUrl(userName: widget._userName);
-              final String _connectionMail =
-                  await _localStorageHelper.extractImportantDataFromThatAccount(
-                      userName: widget._userName);
-
-              final DocumentSnapshot connectionSnapShot =
-                  await FirebaseFirestore.instance
-                      .doc('generation_users/$_connectionMail')
-                      .get();
-
-              String _profilePicFormattedUrl = '';
-
-              if (connectionSnapShot.data()['profile_pic'] != '')
-                _profilePicFormattedUrl = _encryptionMaker
-                    .decryptionMaker(connectionSnapShot.data()['profile_pic']);
-
-              /// Profile Picture Updation Check
-              if (_profilePicFormattedUrl != _profilePicUrl) {
-                final Directory directory = await getExternalStorageDirectory();
-
-                /// Create new Hidden Folder once in desired location
-                final Directory profilePicDir =
-                    await Directory('${directory.path}/.ProfilePictures/')
-                        .create(recursive: true);
-
-                String profilePicPath =
-                    '${profilePicDir.path}${DateTime.now()}';
-
-                print('Profile Pic Formatted Url: $_profilePicFormattedUrl');
-
-                /// If Updated ProfilePic not null and Empty String
-                if (_profilePicFormattedUrl.toString() != null &&
-                    _profilePicFormattedUrl.toString() != '') {
-                  print('Path: ${widget._connectionProfileImageLocalPath}');
-
-                  try {
-                    if (widget._connectionProfileImageLocalPath != '')
-                      await File(widget._connectionProfileImageLocalPath)
-                          .delete(recursive: true)
-                          .whenComplete(() => print(
-                              'Old Profile Image of Connection Deletion Complete'));
-                  } catch (e) {
-                    print(
-                        'Error: Old Profile Pic Already Deleted: ${e.toString()}');
-                  }
-
-                  print(
-                      'Cute: ${connectionSnapShot['profile_pic'].toString()}');
-
-                  showToast(
-                    'Profile Picture Updating...\nPlease Wait',
-                    fToast,
-                    fontSize: 18.0,
-                    toastColor: Colors.amber,
-                  );
-
-                  if (mounted) {
-                    setState(() {
-                      _isLoading = true;
-                    });
-                  }
-
-                  try {
-                    await _dio
-                        .download(_profilePicFormattedUrl, profilePicPath)
-                        .whenComplete(() {
-                      print('Profile Picture Download Complete');
-                    });
-                  } catch (e) {
-                    print('Profile Pic Download Error: ${e.toString()}');
-                  }
-                } else {
-                  if (_profilePicFormattedUrl.toString() == '' &&
-                      widget._connectionProfileImageLocalPath != '')
-                    await File(widget._connectionProfileImageLocalPath)
-                        .delete(recursive: true)
-                        .whenComplete(() => print(
-                            'Old Profile Image of Connection Deletion Complete'));
-
-                  profilePicPath = '';
-                }
-
-                if (mounted) {
-                  setState(() {
-                    widget._connectionProfileImageLocalPath = profilePicPath;
-                    if (_isLoading) _isLoading = false;
-                  });
-                }
-
-                /// Update Local And Remote Profile Image Path
-                await _localStorageHelper.insertProfilePictureInImportant(
-                    imagePath: profilePicPath,
-                    imageUrl: _profilePicFormattedUrl != null
-                        ? _profilePicFormattedUrl.toString()
-                        : '',
-                    mail: _connectionMail);
-              }
-            } catch (e) {
-              print(
-                  'Exception Error : In Chat Screen Profile Pic Updation Error: ${e.toString()}');
-
-              if (_isLoading) {
-                if (mounted) {
-                  setState(() {
-                    _isLoading = false;
-                  });
-                }
-                showToast(
-                  'Profile Picture Update Error....',
-                  fToast,
-                  fontSize: 16.0,
-                );
-              }
-            }
-
             /// Take Corresponding messages of that Contact
             List<dynamic> messages = [];
             messages = event.data()['connections'][this._senderMail];
