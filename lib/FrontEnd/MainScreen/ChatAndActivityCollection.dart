@@ -203,12 +203,11 @@ class _ChatsAndActivityCollectionState
                     /// If path insertion in sqLite having no error, download the video and store it in local storage
                     if (_videoPathStorageResponse) {
                       try {
-                        await _newActivityUpdate(
-                            _connectionUserNameFromLocalDatabase,
-                            MediaTypes.Video);
-
                         await _dio.download(everyActivity.keys.first.toString(),
                             '${activityVideoPath.path}$currTime.mp4');
+
+                        await _newActivityUpdate(
+                            _connectionUserNameFromLocalDatabase);
 
                         print('Video Download Complete');
                         print(
@@ -247,14 +246,13 @@ class _ChatsAndActivityCollectionState
                     /// If path insertion in sqLite having no error, download the image and store it in local storage
                     if (_imageActivityInsertionResponse) {
                       try {
-                        await _newActivityUpdate(
-                            _connectionUserNameFromLocalDatabase,
-                            MediaTypes.Image);
-
                         /// Download Image Activity from Firebase Storage and store in local database
                         await _dio.downloadUri(
                             Uri.parse(everyActivity.keys.first.toString()),
                             '${activityImagePath.path}$currTime.jpg');
+
+                        await _newActivityUpdate(
+                            _connectionUserNameFromLocalDatabase);
 
                         print('Image Download Complete');
 
@@ -272,9 +270,6 @@ class _ChatsAndActivityCollectionState
                 print('Error: Media Activity Saving Error: ${e.toString()}');
               }
             } else {
-              await _newActivityUpdate(
-                  _connectionUserNameFromLocalDatabase, MediaTypes.Text);
-
               try {
                 /// Add Text Activity Data to Local Storage for future use
                 await _localStorageHelper.insertDataInUserActivityTable(
@@ -302,6 +297,8 @@ class _ChatsAndActivityCollectionState
                           : everyActivity.keys.first.toString().split('+')[3],
                   bgInformation: everyActivity.values.first.toString(),
                 );
+
+                await _newActivityUpdate(_connectionUserNameFromLocalDatabase);
               } catch (e) {
                 print(
                     'Error: Text And Poll Activity Saving Error: ${e.toString()}');
@@ -753,9 +750,12 @@ class _ChatsAndActivityCollectionState
                             this._allUserConnectionActivity[index]] = 0;
                       }
 
-                      if(index > 0){
-                        final String _connectionUserNameExtracted = this._allUserConnectionActivity.removeAt(index);
-                        this._allUserConnectionActivity.add(_connectionUserNameExtracted);
+                      if (index > 0) {
+                        final String _connectionUserNameExtracted =
+                            this._allUserConnectionActivity.removeAt(index);
+                        this
+                            ._allUserConnectionActivity
+                            .add(_connectionUserNameExtracted);
                       }
                     });
                   }
@@ -1561,8 +1561,7 @@ class _ChatsAndActivityCollectionState
       : this._allUserConnectionActivity[index];
 
   /// For New Activity Remainder
-  Future<void> _newActivityUpdate(
-      String realUserName, MediaTypes selectMediaType) async {
+  Future<void> _newActivityUpdate(String realUserName) async {
     int _countTotalActivity = 0;
 
     if (this._allUserConnectionActivity.contains(realUserName))
@@ -1581,9 +1580,7 @@ class _ChatsAndActivityCollectionState
           /// Based upon Activity Condition, Activity Starting index set[For Text Activity Store At last but otherCase Activity Store at first in Local Database]
           this._everyUserActivityTotalCountTake.containsKey(realUserName)
               ? this._everyUserActivityTotalCountTake[realUserName] =
-                  selectMediaType == MediaTypes.Text
-                      ? _countTotalActivity + 1
-                      : _countTotalActivity
+                  _countTotalActivity
               : this._everyUserActivityTotalCountTake[realUserName] = 1;
         }
       });
