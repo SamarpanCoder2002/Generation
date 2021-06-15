@@ -752,6 +752,11 @@ class _ChatsAndActivityCollectionState
                         this._everyUserActivityTotalCountTake[
                             this._allUserConnectionActivity[index]] = 0;
                       }
+
+                      if(index > 0){
+                        final String _connectionUserNameExtracted = this._allUserConnectionActivity.removeAt(index);
+                        this._allUserConnectionActivity.add(_connectionUserNameExtracted);
+                      }
                     });
                   }
                 },
