@@ -1358,8 +1358,6 @@ class _ChatsAndActivityCollectionState
   /// Extract last Conversation Message
   Widget _latestConversationTime(Map<String, String> _lastMessage) {
     if (_lastMessage.isNotEmpty) {
-      print('Last Message: $_lastMessage');
-
       String _willReturnTime = '';
       if (_lastMessage != null &&
           _lastMessage.values.last.toString().split('+')[0].toString() != '') {
