@@ -15,6 +15,8 @@
 
 ### <p align="center"> Generation App Sample Looks </p>
 
+<p align="center">
+
 <img src="./readme_documents/1.png" width=200 alt="1st sample"/>
 <img src="./readme_documents/2.png" width=200 alt="2nd sample"/>
 <img src="./readme_documents/3.png" width=200 alt="3rd sample"/>
@@ -23,6 +25,8 @@
 <img src="./readme_documents/6.png" width=200 alt="6th sample"/>
 <img src="./readme_documents/7.png" width=200 alt="7th sample"/>
 <img src="./readme_documents/8.png" width=200 alt="8th sample"/>
+
+</p>
 
 ### 🎯 Authentication Types:-
 | Email and Password Authentication 	| Google Authentication 	|
