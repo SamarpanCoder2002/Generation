@@ -204,7 +204,7 @@ class GoogleAuth {
         _fToast,
         fontSize: 18.0,
         toastColor: Colors.amber,
-        toastGravity: ToastGravity.TOP,
+        toastGravity: ToastGravity.CENTER,
       );
 
       final QuerySnapshot querySnapShotForUserNameChecking =

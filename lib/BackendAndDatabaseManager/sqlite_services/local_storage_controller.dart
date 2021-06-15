@@ -122,6 +122,8 @@ class LocalStorageHelper {
     try {
       final Database db = await this.database;
 
+      userToken = _encryptionMaker.encryptionMaker(userToken);
+
       if (purpose != 'insert') {
         final int updateResult = await db.rawUpdate(
             "UPDATE $_allImportantDataStore SET $_colToken = '$userToken', $_colAbout = '$userAbout', $_colAccountUserMail = '$userMail', $_colCreationDate = '$userAccCreationDate', $_colCreationTime = '$userAccCreationTime' WHERE $_colAccountUserName = '$userName'");
@@ -334,7 +336,7 @@ class LocalStorageHelper {
       result = await db.rawQuery(
           "SELECT $_colToken FROM $_allImportantDataStore WHERE $_colAccountUserName = '$userName'");
 
-    return result[0].values.first;
+    return _encryptionMaker.decryptionMaker(result[0].values.first.toString());
   }
 
   Future<String> extractProfileImageLocalPath(
@@ -365,16 +367,21 @@ class LocalStorageHelper {
 
   Future<List<Map<String, Object>>> extractAllUsersName(
       {bool thisAccountAllowed = false}) async {
-    Database db = await this.database;
-    List<Map<String, Object>> result;
+    try{
+      Database db = await this.database;
+      List<Map<String, Object>> result;
 
-    if (!thisAccountAllowed)
-      result = await db.rawQuery(
-          "SELECT $_colAccountUserName FROM $_allImportantDataStore WHERE $_colAccountUserMail != '${FirebaseAuth.instance.currentUser.email}'");
-    else
-      result = await db
-          .rawQuery("SELECT $_colAccountUserName FROM $_allImportantDataStore");
-    return result == null ? [] : result;
+      if (!thisAccountAllowed)
+        result = await db.rawQuery(
+            "SELECT $_colAccountUserName FROM $_allImportantDataStore WHERE $_colAccountUserMail != '${FirebaseAuth.instance.currentUser.email}'");
+      else
+        result = await db
+            .rawQuery("SELECT $_colAccountUserName FROM $_allImportantDataStore");
+      return result == null ? [] : result;
+    }catch(e){
+      print('User Name Extraction Error: ${e.toString()}');
+      return [];
+    }
   }
 
   /// Make Tables for user Activity

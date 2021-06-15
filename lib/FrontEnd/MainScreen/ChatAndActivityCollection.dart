@@ -512,8 +512,9 @@ class _ChatsAndActivityCollectionState
 
   /// ChatCollection, Notification Management when you are offline
   Future<void> _offlineConnectionDataManagement() async {
-
-    _showDiaLog(titleText: 'You Are Offline', contentText: 'Please Connect to the Internet to send Messages');
+    _showDiaLog(
+        titleText: 'You Are Offline',
+        contentText: 'Please Connect to the Internet to send Messages');
 
     final List<Map<String, Object>> _allConnectionTempList =
         await _localStorageHelper.extractAllUsersName();
@@ -527,7 +528,7 @@ class _ChatsAndActivityCollectionState
       }
     });
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         this._allConnectionsUserName.toSet().toList();
         this._allUserConnectionActivity.toSet().toList();
@@ -1028,6 +1029,7 @@ class _ChatsAndActivityCollectionState
                           SizedBox(
                             height: 12.0,
                           ),
+
                           /// For Extract latest Conversation Message
                           _latestDataForConnectionExtractPerfectly(_userName)
                         ],
@@ -1178,15 +1180,12 @@ class _ChatsAndActivityCollectionState
           _message = _message.split('[[[@]]]')[1];
 
         if (_messageRegex.hasMatch(_message)) {
-          print('Under Regex Match');
           if (_message.length > 16) {
             List<String> take = _message.split('').sublist(0, 16);
 
             _message = '${take.join('')}...';
           }
         }
-
-        print(_message);
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1375,7 +1374,8 @@ class _ChatsAndActivityCollectionState
         /// Checking if the incoming message date day is less than Today's date
         if (int.parse(_incomingMessageDate.split('-').last.toString()) <
             DateTime.now().day) {
-          _willReturnTime = _incomingMessageDate.split('-').reversed.toList().join('-');
+          _willReturnTime =
+              _incomingMessageDate.split('-').reversed.toList().join('-');
         } else {
           _willReturnTime =
               _lastMessage.values.last.toString().split('+')[0].toString();
