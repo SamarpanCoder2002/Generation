@@ -675,7 +675,7 @@ class _ChatsAndActivityCollectionState
   Widget _activityList(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(
-        top: 23.0,
+        top: 20.0,
         left: 10.0,
       ),
       width: MediaQuery.of(context).size.width,
@@ -695,6 +695,7 @@ class _ChatsAndActivityCollectionState
   Widget _activityCollectionList(BuildContext context, int index) {
     return Container(
       margin: EdgeInsets.only(right: MediaQuery.of(context).size.width / 18),
+      padding: EdgeInsets.only(top: 3.0),
       height: MediaQuery.of(context).size.height * (1.5 / 8),
       child: Column(
         children: [
@@ -870,7 +871,23 @@ class _ChatsAndActivityCollectionState
           width: 1.0,
         ),
       ),
-      child: ListView.builder(
+      child: ReorderableListView.builder(
+        onReorder: (first, last) {
+          if (mounted) {
+            setState(() {
+              final String _draggableConnection =
+                  this._allConnectionsUserName.removeAt(first);
+
+              this._allConnectionsUserName.insert(
+                  last >= this._allConnectionsUserName.length
+                      ? this._allConnectionsUserName.length
+                      : last > first
+                          ? --last
+                          : last,
+                  _draggableConnection);
+            });
+          }
+        },
         itemCount: _allConnectionsUserName.length,
         itemBuilder: (context, position) {
           return chatTile(context, position, _allConnectionsUserName[position]);
@@ -881,6 +898,7 @@ class _ChatsAndActivityCollectionState
 
   Widget chatTile(BuildContext context, int index, String _userName) {
     return Card(
+        key: Key('$index'),
         elevation: 0.0,
         color: const Color.fromRGBO(31, 51, 71, 1),
         child: Container(
@@ -1369,11 +1387,16 @@ class _ChatsAndActivityCollectionState
             .toString()
             .split(' ')[0];
 
+        final String compareString =
+            _incomingMessageDate.split('-').last.length <= 2
+                ? _incomingMessageDate.split('-').last
+                : _incomingMessageDate.split('-').first;
+
         /// Checking if the incoming message date day is less than Today's date
-        if (int.parse(_incomingMessageDate.split('-').last.toString()) <
-            DateTime.now().day) {
-          _willReturnTime =
-              _incomingMessageDate.split('-').reversed.toList().join('-');
+        if (int.parse(compareString) < DateTime.now().day) {
+          _willReturnTime = _incomingMessageDate.split('-').last.length <= 2
+              ? _incomingMessageDate.split('-').reversed.toList().join('-')
+              : _incomingMessageDate;
         } else {
           _willReturnTime =
               _lastMessage.values.last.toString().split('+')[0].toString();

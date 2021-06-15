@@ -262,8 +262,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showDialog(
           context: context,
           builder: (_) => AlertDialog(
-                title: Text("Local Database Error"),
-                content: Text(e.toString()),
+                title: Text("Internal Error"),
+                content: Text('Sorry, for that'),
               ));
     }
   }
@@ -533,8 +533,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       showDialog(
           context: context,
           builder: (_) => AlertDialog(
-                title: Text("FireStore Problem"),
-                content: Text(e.toString()),
+                title: Text("Message Sending Problem"),
+                content: Text('Sorry, for that'),
               ));
     }
   }
@@ -2422,7 +2422,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           builder: (_) {
             return AlertDialog(
               title: Text("Text Send Problem"),
-              content: Text(e.toString()),
+              content: Text('Sorry, for that'),
             );
           });
     }

@@ -483,9 +483,8 @@ class _ActivityViewState extends State<ActivityView>
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16.0,
-                        fontFamily: 'Lora',
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 1.0,
+                        fontWeight: FontWeight.w500,
+
                       ),
                     ),
                   ),
