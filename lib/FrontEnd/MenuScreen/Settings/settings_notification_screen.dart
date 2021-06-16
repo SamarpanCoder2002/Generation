@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:generation/FrontEnd/ShowCase/common_description_show.dart';
 
 class SettingsNotificationConfiguration extends StatefulWidget {
   const SettingsNotificationConfiguration({Key key}) : super(key: key);
@@ -140,19 +141,35 @@ class _SettingsNotificationConfigurationState
     double fontSize = 16.0,
   }) {
     return GestureDetector(
-      onTap: (){
-        switch(mainText){
+      onTap: () {
+        switch (mainText) {
           case 'BackGround Notification Annotation':
-            _notificationDescription(title: mainText, content: 'Notification pop-up when the app is in Background. If Deactivated, notification will come silently but no pop-up.');
+            notificationDescription(
+                title: mainText,
+                context: context,
+                content:
+                    'Notification pop-up when the app is in Background. If Deactivated, notification will come silently but no pop-up.');
             break;
           case 'Online Notification':
-            _notificationDescription(title: mainText, content: 'When the app is open, notification come. If deactivated, no notification will come when app is open.');
+            notificationDescription(
+                title: mainText,
+                context: context,
+                content:
+                    'When the app is open, notification come. If deactivated, no notification will come when app is open.');
             break;
           case 'Remove Birth Notification':
-            _notificationDescription(title: mainText, content: 'If Activated, When the app is opening, all notifications will remove.');
+            notificationDescription(
+                title: mainText,
+                context: context,
+                content:
+                    'If Activated, When the app is opening, all notifications will remove.');
             break;
           case 'Remove Anonymous Notification':
-            _notificationDescription(title: mainText, content: 'If Activated, When you pressed Refresh Button in MainScreen, all notifications will remove');
+            notificationDescription(
+                title: mainText,
+                context: context,
+                content:
+                    'If Activated, When you pressed Refresh Button in MainScreen, all notifications will remove');
             break;
         }
       },
@@ -229,9 +246,10 @@ class _SettingsNotificationConfigurationState
                 if (mainText.split(' ')[0] == 'BackGround') {
                   print('Background Button');
 
-                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                      updatedNotifyCondition: !_bgStatus,
-                      nConfigTypes: NConfigTypes.BgNotification);
+                  await _localStorageHelper
+                      .updateDataForNotificationGlobalConfig(
+                          updatedNotifyCondition: !_bgStatus,
+                          nConfigTypes: NConfigTypes.BgNotification);
 
                   if (mounted) {
                     setState(() {
@@ -241,9 +259,10 @@ class _SettingsNotificationConfigurationState
                 } else if (mainText.split(' ')[0] == 'Online') {
                   print('Online Button');
 
-                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                      updatedNotifyCondition: !_fgStatus,
-                      nConfigTypes: NConfigTypes.FGNotification);
+                  await _localStorageHelper
+                      .updateDataForNotificationGlobalConfig(
+                          updatedNotifyCondition: !_fgStatus,
+                          nConfigTypes: NConfigTypes.FGNotification);
 
                   if (mounted) {
                     setState(() {
@@ -253,9 +272,10 @@ class _SettingsNotificationConfigurationState
                 } else if (mainText.split(' ')[1] == 'Birth') {
                   print('Remove Birth Notification');
 
-                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                      updatedNotifyCondition: !this._removeBirthStatus,
-                      nConfigTypes: NConfigTypes.RemoveBirthNotification);
+                  await _localStorageHelper
+                      .updateDataForNotificationGlobalConfig(
+                          updatedNotifyCondition: !this._removeBirthStatus,
+                          nConfigTypes: NConfigTypes.RemoveBirthNotification);
 
                   if (mounted) {
                     setState(() {
@@ -265,13 +285,16 @@ class _SettingsNotificationConfigurationState
                 } else if (mainText.split(' ')[1] == 'Anonymous') {
                   print('Remove Anonymous Notification');
 
-                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                      updatedNotifyCondition: !this._removeAnonymousStatus,
-                      nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
+                  await _localStorageHelper
+                      .updateDataForNotificationGlobalConfig(
+                          updatedNotifyCondition: !this._removeAnonymousStatus,
+                          nConfigTypes:
+                              NConfigTypes.RemoveAnonymousNotification);
 
                   if (mounted) {
                     setState(() {
-                      this._removeAnonymousStatus = !this._removeAnonymousStatus;
+                      this._removeAnonymousStatus =
+                          !this._removeAnonymousStatus;
                     });
                   }
                 }
@@ -281,44 +304,5 @@ class _SettingsNotificationConfigurationState
         ),
       ),
     );
-  }
-
-  void _notificationDescription(
-      {@required String title, @required String content}) {
-    showModalBottomSheet(
-        backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
-        elevation: 5.0,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
-        ),
-        context: context,
-        builder: (_) => Container(
-          width: double.maxFinite,
-          height: MediaQuery.of(context).size.height * (1/5),
-          padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Center(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.amber, fontSize: 18.0),
-                ),
-              ),
-              SizedBox(height: 10.0,),
-              Center(
-                child: Text(
-                  content,
-                  textAlign: TextAlign.justify,
-                  style: TextStyle(color: Colors.white, fontSize: 16.0),
-                ),
-              ),
-              SizedBox(height: 10.0,),
-            ],
-          ),
-        ));
   }
 }

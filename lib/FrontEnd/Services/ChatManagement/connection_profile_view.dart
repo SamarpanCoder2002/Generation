@@ -8,6 +8,7 @@ import 'package:generation/BackendAndDatabaseManager/global_controller/different
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/chat_wallpaper_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/connection_media_view.dart';
+import '../../ShowCase/common_description_show.dart';
 
 class ConnectionProfileView extends StatefulWidget {
   final String profileImagePath;
@@ -237,13 +238,21 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
   Widget _connectionMenuOptions(
       {@required String notificationName, @required bool status}) {
     return GestureDetector(
-      onTap: (){
-        switch(notificationName){
+      onTap: () {
+        switch (notificationName) {
           case 'Background Notification Annotation':
-            _notificationDescription(title: notificationName, content: 'For this Connection, Notification pop-up when the app is in Background. If Deactivated, notification will come silently but no pop-up.');
+            notificationDescription(
+                title: notificationName,
+                content:
+                    'For this Connection, Notification pop-up when the app is in Background. If Deactivated, notification will come silently but no pop-up.',
+                context: context);
             break;
           case 'Online Notification':
-            _notificationDescription(title: notificationName, content: 'For this Connection, When the app is open, notification come. If deactivated, no notification will come when app is open.');
+            notificationDescription(
+                title: notificationName,
+                content:
+                    'For this Connection, When the app is open, notification come. If deactivated, no notification will come when app is open.',
+                context: context);
             break;
         }
       },
@@ -376,44 +385,5 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
             )),
       ),
     );
-  }
-
-  void _notificationDescription(
-      {@required String title, @required String content}) {
-    showModalBottomSheet(
-        backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
-        elevation: 5.0,
-        isScrollControlled: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
-        ),
-        context: context,
-        builder: (_) => Container(
-          width: double.maxFinite,
-          height: MediaQuery.of(context).size.height * (1/5),
-          padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Center(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.amber, fontSize: 18.0),
-                ),
-              ),
-              SizedBox(height: 10.0,),
-              Center(
-                child: Text(
-                  content,
-                  textAlign: TextAlign.justify,
-                  style: TextStyle(color: Colors.white, fontSize: 16.0),
-                ),
-              ),
-              SizedBox(height: 10.0,),
-            ],
-          ),
-        ));
   }
 }
