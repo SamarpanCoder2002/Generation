@@ -103,6 +103,7 @@
 #### 💥 Some Feature of this app written in Native part(Kotlin)
 #### 💥 Screenshot and Screen Recording is restricted for this app due to Security
 #### 💥 Except Audio Calling, all Messages and Activity are End-to-End-Encrypted
+#### 💥 API keys along with google-services.json file and Secure Keys removed for unwanted or unauthorized uses
 
 ***
 
