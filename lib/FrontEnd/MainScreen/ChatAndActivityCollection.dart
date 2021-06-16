@@ -8,9 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
-import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
-import 'package:generation/FrontEnd/Services/search_screen_connections_management.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,6 +22,9 @@ import 'package:generation/FrontEnd/Services/ChatManagement/ChatScreen.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
+import 'package:generation/FrontEnd/Services/search_screen_connections_management.dart';
 
 class ChatsAndActivityCollection extends StatefulWidget {
   @override

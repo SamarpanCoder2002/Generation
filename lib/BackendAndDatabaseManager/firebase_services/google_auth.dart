@@ -205,7 +205,6 @@ class GoogleAuth {
         fontSize: 18.0,
         toastColor: Colors.amber,
         toastGravity: ToastGravity.CENTER,
-        seconds: 3,
       );
 
       final QuerySnapshot querySnapShotForUserNameChecking =
@@ -213,8 +212,6 @@ class GoogleAuth {
               .collection('generation_users')
               .where('user_name', isEqualTo: this._userName.text)
               .get();
-
-      print(querySnapShotForUserNameChecking.docs);
 
       if (querySnapShotForUserNameChecking.docs.isEmpty) {
         Navigator.pop(context);

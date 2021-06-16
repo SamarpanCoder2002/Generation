@@ -4,9 +4,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:intl/intl.dart';
 
+import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/FrontEnd/MainScreen/main_window.dart';

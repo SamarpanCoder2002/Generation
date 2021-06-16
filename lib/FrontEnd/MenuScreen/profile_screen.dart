@@ -6,12 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/BackendAndDatabaseManager/firebase_services/delete_my_account_service.dart';
-import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
-import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
+import 'package:generation/BackendAndDatabaseManager/firebase_services/delete_my_account_service.dart';
+import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
+import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
