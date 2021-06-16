@@ -105,6 +105,10 @@
 #### 💥 Except Audio Calling, all Messages and Activity are End-to-End-Encrypted
 #### 💥 API keys along with google-services.json file and Secure Keys removed for unwanted or unauthorized uses
 
+</br>
+
+### 🙋 For Any Enquery related to this project, Please Raise an issue in that Repo.
+
 ***
 
 <h3 align="center">Show 💘 by Starring This Repo</h3>
@@ -112,5 +116,7 @@
 - ### [Click Here to See the Project Video](https://youtu.be/nCxB039zXOY)
 
 - ### [Video in LinkedIn](https://www.linkedin.com/in/samarpan-dasgupta-4aa1061b0/ "LCO")
+
+- ### [APK File Download Link]()
 
 <h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>
