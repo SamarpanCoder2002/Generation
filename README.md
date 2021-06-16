@@ -94,7 +94,7 @@
 </br>
 
 ### 🎯 Plugins Used
-#### 👉 Please see in `pubspec.yaml` file
+#### 👉 Please see in [`pubspec.yaml`](https://github.com/SamarpanCoder2002/Generation/blob/main/pubspec.yaml) file
 
 </br>
 
