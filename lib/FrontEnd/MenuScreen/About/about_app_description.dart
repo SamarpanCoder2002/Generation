@@ -31,7 +31,7 @@ class AboutSection extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  "A Private, Secure, End-to-End Encrypted Messaging app that helps you to connect with your connections without any Ads, promotion. No other third party person, organization, or even Generation Team can't read your messages.",
+                  "A Private, Secure, End-to-End Encrypted Messaging app that helps you to connect with your connections without any Ads, promotion. No other third party person, organization, or even Generation Team can't read your messages. Nobody can't take screenshot or can't do screen recording of this app.",
                   textAlign: TextAlign.justify,
                   style: TextStyle(color: Colors.white70, fontSize: 16.0),
                 ),
@@ -55,7 +55,7 @@ class AboutSection extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  'Messages except Audio Calling\nare End-to-End Encrypted',
+                  'Messages and Activity except Audio Calling\nare End-to-End Encrypted',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.amber, fontSize: 16.0),
                 ),
