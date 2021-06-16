@@ -236,95 +236,107 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
 
   Widget _connectionMenuOptions(
       {@required String notificationName, @required bool status}) {
-    return Container(
-      padding: EdgeInsets.only(
-        right: 10.0,
-        left: 15.0,
-      ),
-      alignment: Alignment.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    notificationName,
-                    style: TextStyle(
-                      color: Colors.lightBlue,
-                      fontSize: 15.0,
+    return GestureDetector(
+      onTap: (){
+        switch(notificationName){
+          case 'Background Notification Annotation':
+            _notificationDescription(title: notificationName, content: 'For this Connection, Notification pop-up when the app is in Background. If Deactivated, notification will come silently but no pop-up.');
+            break;
+          case 'Online Notification':
+            _notificationDescription(title: notificationName, content: 'For this Connection, When the app is open, notification come. If deactivated, no notification will come when app is open.');
+            break;
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.only(
+          right: 10.0,
+          left: 15.0,
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      notificationName,
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                        fontSize: 15.0,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    status ? 'Activated' : 'Deactivated',
-                    textAlign: TextAlign.left,
-                    style:
-                        TextStyle(color: !status ? Colors.red : Colors.green),
+                  SizedBox(
+                    height: 10.0,
                   ),
-                ),
-              ],
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      status ? 'Activated' : 'Deactivated',
+                      textAlign: TextAlign.left,
+                      style:
+                          TextStyle(color: !status ? Colors.red : Colors.green),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                child: Text(
-                  status ? 'Deactivate' : 'Activate',
-                  style: TextStyle(
-                    color: status ? Colors.red : Colors.green,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40.0),
-                    side: BorderSide(
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  child: Text(
+                    status ? 'Deactivate' : 'Activate',
+                    style: TextStyle(
                       color: status ? Colors.red : Colors.green,
                     ),
                   ),
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40.0),
+                      side: BorderSide(
+                        color: status ? Colors.red : Colors.green,
+                      ),
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (notificationName ==
+                        'Background Notification Annotation') {
+                      print('Background Button');
+
+                      await _localStorageHelper.updateImportantTableExtraData(
+                          userName: widget.userName,
+                          updatedVal: this._bgStatus ? '0' : '1',
+                          extraImportant: ExtraImportant.BGNStatus);
+
+                      if (mounted) {
+                        setState(() {
+                          this._bgStatus = !this._bgStatus;
+                        });
+                      }
+                    } else {
+                      print('Online Button');
+
+                      await _localStorageHelper.updateImportantTableExtraData(
+                          userName: widget.userName,
+                          updatedVal: this._fgStatus ? '0' : '1',
+                          extraImportant: ExtraImportant.FGNStatus);
+
+                      if (mounted) {
+                        setState(() {
+                          this._fgStatus = !this._fgStatus;
+                        });
+                      }
+                    }
+                  },
                 ),
-                onPressed: () async {
-                  if (notificationName ==
-                      'Background Notification Annotation') {
-                    print('Background Button');
-
-                    await _localStorageHelper.updateImportantTableExtraData(
-                        userName: widget.userName,
-                        updatedVal: this._bgStatus ? '0' : '1',
-                        extraImportant: ExtraImportant.BGNStatus);
-
-                    if (mounted) {
-                      setState(() {
-                        this._bgStatus = !this._bgStatus;
-                      });
-                    }
-                  } else {
-                    print('Online Button');
-
-                    await _localStorageHelper.updateImportantTableExtraData(
-                        userName: widget.userName,
-                        updatedVal: this._fgStatus ? '0' : '1',
-                        extraImportant: ExtraImportant.FGNStatus);
-
-                    if (mounted) {
-                      setState(() {
-                        this._fgStatus = !this._fgStatus;
-                      });
-                    }
-                  }
-                },
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -364,5 +376,44 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
             )),
       ),
     );
+  }
+
+  void _notificationDescription(
+      {@required String title, @required String content}) {
+    showModalBottomSheet(
+        backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
+        elevation: 5.0,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
+        ),
+        context: context,
+        builder: (_) => Container(
+          width: double.maxFinite,
+          height: MediaQuery.of(context).size.height * (1/5),
+          padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Center(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.amber, fontSize: 18.0),
+                ),
+              ),
+              SizedBox(height: 10.0,),
+              Center(
+                child: Text(
+                  content,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(color: Colors.white, fontSize: 16.0),
+                ),
+              ),
+              SizedBox(height: 10.0,),
+            ],
+          ),
+        ));
   }
 }

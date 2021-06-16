@@ -1062,9 +1062,8 @@ class _ChatsAndActivityCollectionState
                 ),
                 Expanded(
                   child: Container(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.center,
                     padding: const EdgeInsets.only(
-                      //right: 20.0,
                       top: 2.0,
                       bottom: 2.0,
                     ),
@@ -1074,22 +1073,18 @@ class _ChatsAndActivityCollectionState
                         _latestDataForConnectionExtractPerfectly(_userName,
                             purpose: 'lastConnectionTime'),
 
-                        //Text('12:00'),
                         SizedBox(
                           height: 10.0,
                         ),
-                        Container(
-                          child: this._allConnectionChatNotificationStatus[
-                                  _userName]
-                              ? const Icon(
-                                  Icons.notification_important_outlined,
-                                  color: Colors.green,
-                                )
-                              : const Icon(
-                                  Icons.notifications_off_outlined,
-                                  color: Colors.red,
-                                ),
-                        ),
+                        this._allConnectionChatNotificationStatus[_userName]
+                            ? const Icon(
+                                Icons.notification_important_outlined,
+                                color: Colors.green,
+                              )
+                            : const Icon(
+                                Icons.notifications_off_outlined,
+                                color: Colors.red,
+                              ),
                       ],
                     ),
                   ),

@@ -126,6 +126,9 @@ class _SettingsNotificationConfigurationState
           _notificationOptions(
               mainText: 'Remove Anonymous Notification',
               status: this._removeAnonymousStatus),
+          SizedBox(
+            height: 10.0,
+          ),
         ],
       ),
     );
@@ -136,131 +139,186 @@ class _SettingsNotificationConfigurationState
     @required bool status,
     double fontSize = 16.0,
   }) {
-    return Container(
-      height: 50,
-      alignment: Alignment.center,
-      padding: EdgeInsets.only(
-        right: 15.0,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 5.0,
-                      ),
-                      child: GestureDetector(
+    return GestureDetector(
+      onTap: (){
+        switch(mainText){
+          case 'BackGround Notification Annotation':
+            _notificationDescription(title: mainText, content: 'Notification pop-up when the app is in Background. If Deactivated, notification will come silently but no pop-up.');
+            break;
+          case 'Online Notification':
+            _notificationDescription(title: mainText, content: 'When the app is open, notification come. If deactivated, no notification will come when app is open.');
+            break;
+          case 'Remove Birth Notification':
+            _notificationDescription(title: mainText, content: 'If Activated, When the app is opening, all notifications will remove.');
+            break;
+          case 'Remove Anonymous Notification':
+            _notificationDescription(title: mainText, content: 'If Activated, When you pressed Refresh Button in MainScreen, all notifications will remove');
+            break;
+        }
+      },
+      child: Container(
+        height: 50,
+        alignment: Alignment.center,
+        padding: EdgeInsets.only(
+          right: 15.0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 5.0,
+                        ),
                         child: Icon(
                           Icons.description_outlined,
                           color: Colors.lightBlue,
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        mainText,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: fontSize,
+                      Expanded(
+                        child: Text(
+                          mainText,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: fontSize,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 5.0,
-                    left: 40.0,
+                    ],
                   ),
-                  child: Text(
-                    '${status ? 'Activated' : 'Deactivated'}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: status ? Colors.green : Colors.redAccent,
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 5.0,
+                      left: 40.0,
+                    ),
+                    child: Text(
+                      '${status ? 'Activated' : 'Deactivated'}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: status ? Colors.green : Colors.redAccent,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              elevation: 0.0,
-              //backgroundColor: status ? Colors.red : Colors.green,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40.0),
-                side: BorderSide(
+            TextButton(
+              style: TextButton.styleFrom(
+                elevation: 0.0,
+                //backgroundColor: status ? Colors.red : Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40.0),
+                  side: BorderSide(
+                    color: status ? Colors.red : Colors.green,
+                  ),
+                ),
+              ),
+              child: Text(
+                status ? 'Deactivate' : 'Activate',
+                textAlign: TextAlign.center,
+                style: TextStyle(
                   color: status ? Colors.red : Colors.green,
                 ),
               ),
+              onPressed: () async {
+                if (mainText.split(' ')[0] == 'BackGround') {
+                  print('Background Button');
+
+                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
+                      updatedNotifyCondition: !_bgStatus,
+                      nConfigTypes: NConfigTypes.BgNotification);
+
+                  if (mounted) {
+                    setState(() {
+                      _bgStatus = !_bgStatus;
+                    });
+                  }
+                } else if (mainText.split(' ')[0] == 'Online') {
+                  print('Online Button');
+
+                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
+                      updatedNotifyCondition: !_fgStatus,
+                      nConfigTypes: NConfigTypes.FGNotification);
+
+                  if (mounted) {
+                    setState(() {
+                      _fgStatus = !_fgStatus;
+                    });
+                  }
+                } else if (mainText.split(' ')[1] == 'Birth') {
+                  print('Remove Birth Notification');
+
+                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
+                      updatedNotifyCondition: !this._removeBirthStatus,
+                      nConfigTypes: NConfigTypes.RemoveBirthNotification);
+
+                  if (mounted) {
+                    setState(() {
+                      this._removeBirthStatus = !this._removeBirthStatus;
+                    });
+                  }
+                } else if (mainText.split(' ')[1] == 'Anonymous') {
+                  print('Remove Anonymous Notification');
+
+                  await _localStorageHelper.updateDataForNotificationGlobalConfig(
+                      updatedNotifyCondition: !this._removeAnonymousStatus,
+                      nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
+
+                  if (mounted) {
+                    setState(() {
+                      this._removeAnonymousStatus = !this._removeAnonymousStatus;
+                    });
+                  }
+                }
+              },
             ),
-            child: Text(
-              status ? 'Deactivate' : 'Activate',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: status ? Colors.red : Colors.green,
-              ),
-            ),
-            onPressed: () async {
-              if (mainText.split(' ')[0] == 'BackGround') {
-                print('Background Button');
-
-                await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                    updatedNotifyCondition: !_bgStatus,
-                    nConfigTypes: NConfigTypes.BgNotification);
-
-                if (mounted) {
-                  setState(() {
-                    _bgStatus = !_bgStatus;
-                  });
-                }
-              } else if (mainText.split(' ')[0] == 'Online') {
-                print('Online Button');
-
-                await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                    updatedNotifyCondition: !_fgStatus,
-                    nConfigTypes: NConfigTypes.FGNotification);
-
-                if (mounted) {
-                  setState(() {
-                    _fgStatus = !_fgStatus;
-                  });
-                }
-              } else if (mainText.split(' ')[1] == 'Birth') {
-                print('Remove Birth Notification');
-
-                await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                    updatedNotifyCondition: !this._removeBirthStatus,
-                    nConfigTypes: NConfigTypes.RemoveBirthNotification);
-
-                if (mounted) {
-                  setState(() {
-                    this._removeBirthStatus = !this._removeBirthStatus;
-                  });
-                }
-              } else if (mainText.split(' ')[1] == 'Anonymous') {
-                print('Remove Anonymous Notification');
-
-                await _localStorageHelper.updateDataForNotificationGlobalConfig(
-                    updatedNotifyCondition: !this._removeAnonymousStatus,
-                    nConfigTypes: NConfigTypes.RemoveAnonymousNotification);
-
-                if (mounted) {
-                  setState(() {
-                    this._removeAnonymousStatus = !this._removeAnonymousStatus;
-                  });
-                }
-              }
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  void _notificationDescription(
+      {@required String title, @required String content}) {
+    showModalBottomSheet(
+        backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
+        elevation: 5.0,
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
+        ),
+        context: context,
+        builder: (_) => Container(
+          width: double.maxFinite,
+          height: MediaQuery.of(context).size.height * (1/5),
+          padding: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Center(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.amber, fontSize: 18.0),
+                ),
+              ),
+              SizedBox(height: 10.0,),
+              Center(
+                child: Text(
+                  content,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(color: Colors.white, fontSize: 16.0),
+                ),
+              ),
+              SizedBox(height: 10.0,),
+            ],
+          ),
+        ));
   }
 }
