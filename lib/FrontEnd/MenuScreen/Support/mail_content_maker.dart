@@ -7,7 +7,7 @@ class SupportInputTaker extends StatefulWidget {
   final String subject;
   final String appbarTitle;
 
-  SupportInputTaker({@required this.subject,@required this.appbarTitle});
+  SupportInputTaker({@required this.subject, @required this.appbarTitle});
 
   @override
   _SupportInputTakerState createState() => _SupportInputTakerState();
