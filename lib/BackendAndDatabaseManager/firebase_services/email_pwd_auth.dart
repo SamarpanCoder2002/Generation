@@ -221,6 +221,7 @@ class EmailAndPasswordAuth {
         fontSize: 18.0,
         toastColor: Colors.amber,
         toastGravity: ToastGravity.CENTER,
+        seconds: 3,
       );
 
       final QuerySnapshot querySnapShotForUserNameChecking =
