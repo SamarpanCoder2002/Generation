@@ -84,7 +84,12 @@ class _SearchState extends State<Search> {
   void initState() {
     super.initState();
     searchArgument = "user_name";
-    if (widget.searchType == SearchType.InternalSearch) _internalSearchItems();
+    if (widget.searchType == SearchType.InternalSearch)
+      _internalSearchItems();
+    else {
+      print('Here 1');
+      initiateSearch();
+    }
   }
 
   @override
@@ -105,91 +110,101 @@ class _SearchState extends State<Search> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            Container(
-              padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 5,
-                bottom: 10,
-              ),
-              margin: EdgeInsets.only(bottom: 20.0),
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(25, 39, 52, 1),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30.0),
-                  bottomRight: Radius.circular(30.0),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      autofocus: true,
-                      controller: this.searchUser,
-                      cursorColor: Colors.white,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
+            widget.searchType == SearchType.InternalSearch
+                ? Container(
+                    padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 5,
+                      bottom: 10,
+                    ),
+                    margin: EdgeInsets.only(bottom: 20.0),
+                    decoration: BoxDecoration(
+                      color: Color.fromRGBO(25, 39, 52, 1),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(30.0),
+                        bottomRight: Radius.circular(30.0),
                       ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        labelText:
-                            "Search by ${this.searchArgument == 'user_name' ? 'User Name' : 'About'}",
-                        suffixIcon:
-                            widget.searchType == SearchType.ExternalSearch
-                                ? IconButton(
-                                    icon: Icon(Icons.filter_list_rounded),
-                                    onPressed: filterOptions,
-                                  )
-                                : null,
-                        labelStyle: TextStyle(
-                          color: Colors.green,
-                          fontSize: 18,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            autofocus: true,
+                            controller: this.searchUser,
+                            cursorColor: Colors.white,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelText:
+                                  "Search by ${this.searchArgument == 'user_name' ? 'User Name' : 'About'}",
+                              suffixIcon:
+                                  widget.searchType == SearchType.ExternalSearch
+                                      ? IconButton(
+                                          icon: Icon(Icons.filter_list_rounded),
+                                          onPressed: filterOptions,
+                                        )
+                                      : null,
+                              labelStyle: TextStyle(
+                                color: Colors.green,
+                                fontSize: 18,
+                              ),
+                            ),
+                            onChanged: (inputValue) {
+                              if (widget.searchType ==
+                                  SearchType.ExternalSearch)
+                                initiateSearch();
+                              else {
+                                if (mounted) {
+                                  setState(() {
+                                    this.isLoading = true;
+                                  });
+                                }
+
+                                if (mounted) {
+                                  setState(() {
+                                    this
+                                        ._selectedUserNameAndProfilePicCollection
+                                        .clear();
+
+                                    this
+                                        ._userNameProfilePicCollection
+                                        .forEach((userNameMap) {
+                                      if (userNameMap.keys.first
+                                          .toString()
+                                          .toLowerCase()
+                                          .startsWith(
+                                              '${this.searchUser.text.toLowerCase()}'))
+                                        this
+                                            ._selectedUserNameAndProfilePicCollection
+                                            .add(userNameMap);
+                                    });
+                                  });
+                                }
+
+                                if (mounted) {
+                                  setState(() {
+                                    this.isLoading = false;
+                                  });
+                                }
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                      onChanged: (inputValue) {
-                        if (widget.searchType == SearchType.ExternalSearch)
-                          initiateSearch();
-                        else {
-                          if (mounted) {
-                            setState(() {
-                              this.isLoading = true;
-                            });
-                          }
-
-                          if (mounted) {
-                            setState(() {
-                              this
-                                  ._selectedUserNameAndProfilePicCollection
-                                  .clear();
-
-                              this
-                                  ._userNameProfilePicCollection
-                                  .forEach((userNameMap) {
-                                if (userNameMap.keys.first
-                                    .toString()
-                                    .toLowerCase()
-                                    .startsWith(
-                                        '${this.searchUser.text.toLowerCase()}'))
-                                  this
-                                      ._selectedUserNameAndProfilePicCollection
-                                      .add(userNameMap);
-                              });
-                            });
-                          }
-
-                          if (mounted) {
-                            setState(() {
-                              this.isLoading = false;
-                            });
-                          }
-                        }
-                      },
+                      ],
+                    ),
+                  )
+                : Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(top: 5.0, bottom: 10.0),
+                    child: Text(
+                      'Available Connections',
+                      style: TextStyle(color: Colors.white, fontSize: 25.0),
                     ),
                   ),
-                ],
-              ),
-            ),
             isLoading
                 ? Container(
                     child: Center(
@@ -321,52 +336,78 @@ class _SearchState extends State<Search> {
     });
   }
 
-  initiateSearch() async {
+  void initiateSearch() async {
+    print('Here 2');
+
     _getAllConnectionsFromLocalStorage();
 
-    if (searchUser.text.isNotEmpty) {
-      if (mounted) {
-        setState(() {
-          isLoading = true;
-        });
-      }
-      await FirebaseFirestore.instance
-          .collection("generation_users")
-          .where(
-            searchArgument,
-
-            /// We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
-            isGreaterThanOrEqualTo: searchUser.text.toUpperCase(),
-          )
-          .get()
-          .catchError((e) {
-        print(e.toString());
-      }).then((snapshot) {
-        searchResultSnapshot = snapshot;
-
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-            haveUserSearched = true;
-          });
-        }
+    if (mounted) {
+      setState(() {
+        isLoading = true;
       });
     }
+
+    QuerySnapshot querySnapshot;
+
+    try {
+      querySnapshot =
+          await FirebaseFirestore.instance.collection('generation_users').get();
+    } catch (e) {
+      print('Error: ${e.toString()}');
+    }
+
+    if (mounted) {
+      setState(() {
+        this.searchResultSnapshot = querySnapshot;
+        isLoading = false;
+        haveUserSearched = true;
+      });
+    }
+
+    print(this.searchResultSnapshot);
+
+    // await FirebaseFirestore.instance
+    //     .collection("generation_users")
+    //     .where(
+    //   searchArgument,
+    //
+    //   /// We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
+    //   isGreaterThanOrEqualTo: searchUser.text.toUpperCase(),
+    // )
+    //     .get()
+    //     .catchError((e) {
+    //   print(e.toString());
+    // }).then((snapshot) {
+    //   searchResultSnapshot = snapshot;
+    //
+    //   if (mounted) {
+    //     setState(() {
+    //       isLoading = false;
+    //       haveUserSearched = true;
+    //     });
+    //   }
+    // });
   }
 
   Widget userList() {
     return haveUserSearched
-        ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: searchResultSnapshot.docs.length,
-            itemBuilder: (context, index) {
-              print(searchResultSnapshot.docs[index]);
-              if (searchResultSnapshot.docs[index].id ==
-                  FirebaseAuth.instance.currentUser.email) {
-                return Center();
-              }
-              return userTile(index);
-            })
+        ? Container(
+            height: MediaQuery.of(context).size.height - 80,
+            padding: EdgeInsets.only(bottom: 10.0, top: 10.0),
+            child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: searchResultSnapshot == null
+                    ? 0
+                    : searchResultSnapshot.docs.length - 1,
+                itemBuilder: (context, index) {
+                  print(searchResultSnapshot.docs[index]);
+                  if (searchResultSnapshot.docs[index].id ==
+                      FirebaseAuth.instance.currentUser.email) {
+                    return Center();
+                  }
+                  return userTile(index);
+                }),
+          )
         : Container(
             child: Center(
               child: Text(
