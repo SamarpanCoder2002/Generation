@@ -116,6 +116,8 @@
 
 - #### [Click Here to See the Project Video](https://youtu.be/QEDhmxzEqUA)
 
+- #### [LinkedIN Video](https://www.linkedin.com/posts/samarpan-dasgupta-4aa1061b0_connections-introducing-project-activity-6811146891833704448-FyrC)
+
 - #### [APK File Download Link](https://drive.google.com/file/d/1g1vvN6_rD99_N0wLhHjG06SDqi0r4LTx/view?usp=sharing)
 
 <h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>
