@@ -84,8 +84,7 @@ class SendNotification {
     try {
       print('Send');
 
-      final String _serverKey =
-          'AAAAq0K_fTE:APA91bGZYVVXCwF26L5cqkmh1F9_b4Z4mfs2GTx66-GHI8hXpEFY4IUluTCQyXxdk_ARYLjT9z540KvMxZ4itcBMax3COu2s5FxJuv95fWJQc2tfPspUp7oWY4annwhCH58_xAHrIElI';
+      final String _serverKey = 'SERVER-KEY';
 
       final Response response = await post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
