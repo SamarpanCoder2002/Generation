@@ -114,10 +114,8 @@
 
 <h3 align="center">Show 💘 by Starring This Repo</h3>
 
-- #### [Click Here to See the Project Video](https://youtu.be/nCxB039zXOY)
+- #### [Click Here to See the Project Video](https://youtu.be/QEDhmxzEqUA)
 
-- #### [Video in LinkedIn](https://www.linkedin.com/in/samarpan-dasgupta-4aa1061b0/ "LCO")
-
-- #### [APK File Download Link]()
+- #### [APK File Download Link](https://drive.google.com/file/d/1g1vvN6_rD99_N0wLhHjG06SDqi0r4LTx/view?usp=sharing)
 
 <h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>
