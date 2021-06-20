@@ -108,7 +108,7 @@
 
 </br>
 
-### 🙋 For Any Enquery related to this project, Please Raise an issue in that Repo.
+### 🙋 For Any query related to this project, Please Raise an issue in that Repo.
 
 ***
 
