@@ -11,7 +11,7 @@
 
 #### <p align="center"> ✨ A Private, Secure, End-to-End Encrypted Messaging app made in Flutter that helps you to connect with your connections without any Ads, promotion. No other third-party person, organization, or even Generation Team can't read your messages. ✨ </p>
 
-#### <p align="center"> 💖 Your Privacy our biggest priority. 💖</p>
+#### <p align="center"> 💖 Your Privacy is the biggest priority. 💖</p>
 
 ### <p align="center"> Generation App Sample Looks </p>
 
