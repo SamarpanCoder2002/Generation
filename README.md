@@ -28,6 +28,12 @@
 
 </p>
 
+<p align="center">
+  
+#### ✨ Please Read [CONTRIBUTION.md](https://github.com/SamarpanCoder2002/Generation/blob/main/CONTRIBUTING.md) file before contributing in that repo.
+  
+</p>
+
 ### 🎯 Authentication Types:-
 | Email and Password Authentication 	| Google Authentication 	|
 |:-:	|-	|
