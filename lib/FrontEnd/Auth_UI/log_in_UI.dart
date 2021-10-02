@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
@@ -17,10 +17,10 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
   final RegExp _emailRegex = RegExp(
       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
 
-  bool _pwdShowPermission;
-  bool _progressPermission;
+  late bool _pwdShowPermission;
+  late bool _progressPermission;
 
-  TextEditingController _email, _pwd;
+  late TextEditingController _email, _pwd;
 
   @override
   void initState() {
@@ -43,9 +43,9 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      body: ModalProgressHUD(
-        inAsyncCall: _progressPermission,
+      body: LoadingOverlay(
         color: const Color.fromRGBO(0, 0, 0, 1),
+        isLoading: _progressPermission,
         child: Container(
           height: MediaQuery.of(context).size.height,
           child: Center(
@@ -85,7 +85,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                                     BorderSide(color: Colors.lightBlue)),
                           ),
                           validator: (inputValue) {
-                            if (_emailRegex.hasMatch(inputValue)) {
+                            if (_emailRegex.hasMatch(inputValue!)) {
                               return null;
                             }
                             return "Enter Valid Email";
@@ -133,7 +133,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                               ),
                             ),
                             validator: (inputValue) {
-                              if ((inputValue.length >= 8)) {
+                              if ((inputValue!.length >= 8)) {
                                 return null;
                               }
                               return "Password should be more than or equal to 8 characters";
@@ -201,7 +201,7 @@ class _LogInAuthenticationState extends State<LogInAuthentication> {
                           ),
                         ),
                         onPressed: () async {
-                          if (_formKey.currentState.validate()) {
+                          if (_formKey.currentState!.validate()) {
                             print("Proceed with Log-In");
                             setState(() {
                               _progressPermission = true;

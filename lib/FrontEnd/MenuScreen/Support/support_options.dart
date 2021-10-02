@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:generation/FrontEnd/MenuScreen/Support/mail_content_maker.dart';
 
 class SupportMenuMaker extends StatefulWidget {
-  const SupportMenuMaker({Key key}) : super(key: key);
+  const SupportMenuMaker({Key? key}) : super(key: key);
 
   @override
   _SupportMenuMakerState createState() => _SupportMenuMakerState();
@@ -69,9 +69,9 @@ class _SupportMenuMakerState extends State<SupportMenuMaker> {
   }
 
   Widget _getListOption(
-      {@required Icon icon,
-      @required String title,
-      @required String extraText}) {
+      {required Icon icon,
+      required String title,
+      required String extraText}) {
     return OpenContainer(
       closedColor: const Color.fromRGBO(34, 48, 60, 1),
       middleColor: const Color.fromRGBO(34, 48, 60, 1),

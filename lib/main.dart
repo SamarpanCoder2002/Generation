@@ -12,7 +12,7 @@ import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_stora
 import 'package:generation/BackendAndDatabaseManager/firebase_services/google_auth.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState>? navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +29,7 @@ void main() async {
   /// For Foreground Message Handling
   FirebaseMessaging.onMessage.listen((messageEvent) async {
     print(
-        'Message Data is: ${messageEvent.notification.title}      ${messageEvent.notification.body}');
+        'Message Data is: ${messageEvent.notification!.title}      ${messageEvent.notification!.body}');
 
     final bool _fgNotifyStatus =
         await _localStorageHelper.extractDataForNotificationConfigTable(
@@ -38,14 +38,14 @@ void main() async {
     print('Foreground Notification Status: $_fgNotifyStatus');
 
     if (_fgNotifyStatus) {
-      if (messageEvent.notification.title.contains('Connection Request') ||
-          messageEvent.notification.title.contains('New Connection')) {
+      if (messageEvent.notification!.title!.toString().contains('Connection Request') ||
+          messageEvent.notification!.title!.toString().contains('New Connection')) {
         _receiveAndShowNotificationInitialization(
-          title: messageEvent.notification.title,
-          body: messageEvent.notification.body,
+          title: messageEvent.notification!.title.toString(),
+          body: messageEvent.notification!.body.toString(),
         );
       } else {
-        final String _userName = messageEvent.notification.title.split(' ')[0];
+        final String _userName = messageEvent.notification!.title!.toString().split(' ')[0];
 
         print('Foreground Notification Comer User Name: $_userName');
 
@@ -55,8 +55,8 @@ void main() async {
 
         if (_fgStatus)
           _receiveAndShowNotificationInitialization(
-            title: messageEvent.notification.title,
-            body: messageEvent.notification.body,
+            title: messageEvent.notification!.title.toString(),
+            body: messageEvent.notification!.body.toString(),
           );
         else
           print('$_userName Foreground notification off');
@@ -80,7 +80,7 @@ void main() async {
 
 /// Receive And Show Notification Customization
 void _receiveAndShowNotificationInitialization(
-    {@required String title, @required String body}) async {
+    {required String title, required String body}) async {
   final ForeGroundNotificationReceiveAndShow
       _foregroundNotificationReceiveAndShow =
       ForeGroundNotificationReceiveAndShow();
@@ -111,7 +111,7 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   print(
-      'Background Message Data: ${message.notification.body}   ${message.notification.title}');
+      'Background Message Data: ${message.notification!.body}   ${message.notification!.title}');
 
   final bool _bgNotifyStatus = await LocalStorageHelper()
       .extractDataForNotificationConfigTable(
@@ -120,14 +120,14 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
   print('Background Notification Status: $_bgNotifyStatus');
 
   if (_bgNotifyStatus) {
-    if (message.notification.title.contains('Connection Request') ||
-        message.notification.title.contains('New Connection')) {
+    if (message.notification!.title!.contains('Connection Request') ||
+        message.notification!.title!.contains('New Connection')) {
       _receiveAndShowNotificationInitialization(
-        title: message.notification.title,
-        body: message.notification.body,
+        title: message.notification!.title.toString(),
+        body: message.notification!.body.toString(),
       );
     } else {
-      final String _userName = message.notification.title.split(' ')[0];
+      final String _userName = message.notification!.title!.split(' ')[0];
 
       print('Background Notification Comer User Name: $_userName');
 
@@ -137,8 +137,8 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
 
       if (_bgStatus)
         _receiveAndShowNotificationInitialization(
-          title: message.notification.title,
-          body: message.notification.body,
+          title: message.notification!.title.toString(),
+          body: message.notification!.body.toString(),
         );
       else
         print('$_userName Background notification off');
@@ -153,7 +153,7 @@ Future<Widget> differentContext() async {
 
   try {
     final DocumentSnapshot responseData = await FirebaseFirestore.instance
-        .doc("generation_users/${FirebaseAuth.instance.currentUser.email}")
+        .doc("generation_users/${FirebaseAuth.instance.currentUser!.email}")
         .get();
 
     print(responseData.exists);

@@ -88,7 +88,7 @@ Future<void> _deleteOldTask() async {
   print('Delete Activity Executing 2: $_connectionUserName');
 
   _connectionUserName.forEach((everyUser) async {
-    final List<Map<String, dynamic>> _thisUserActivityCollection =
+    final List<Map<String, dynamic>>? _thisUserActivityCollection =
         await _localStorageHelper
             .extractActivityForParticularUserName(everyUser.values.first);
 
@@ -155,7 +155,7 @@ Future<void> _deleteOldTask() async {
     }
   });
 
-  final Map<String, String> _linksMap =
+  final Map<String, String>? _linksMap =
       await _localStorageHelper.extractRemainingLinks();
 
   print('Links Map: $_linksMap');
@@ -275,15 +275,7 @@ class _MainScreenState extends State<MainScreen> {
                       },
                       child: Center(
                         child: CircleAvatar(
-                          backgroundImage:
-                              ImportantThings.thisAccountProfileImagePath == ''
-                                  ? const ExactAssetImage(
-                                      "assets/logo/logo.jpg",
-                                    )
-                                  : FileImage(
-                                      File(ImportantThings
-                                          .thisAccountProfileImagePath),
-                                    ),
+                          backgroundImage: _getImageWithProvider(),
                           radius: MediaQuery.of(context).orientation ==
                                   Orientation.portrait
                               ? MediaQuery.of(context).size.height *
@@ -345,7 +337,9 @@ class _MainScreenState extends State<MainScreen> {
                   closedShape: CircleBorder(),
                   transitionType: ContainerTransitionType.fadeThrough,
                   transitionDuration: Duration(milliseconds: 500),
-                  openBuilder: (_, __) => Search(searchType: SearchType.InternalSearch,),
+                  openBuilder: (_, __) => Search(
+                    searchType: SearchType.InternalSearch,
+                  ),
                   closedBuilder: (_, __) => Padding(
                     padding: EdgeInsets.only(right: 10.0),
                     child: Icon(
@@ -534,5 +528,15 @@ class _MainScreenState extends State<MainScreen> {
 
     /// Notification Remove from Notification Tray if Permission Granted
     if (_removeAStatus) await _nativeCallback.callForCancelNotifications();
+  }
+
+  _getImageWithProvider() {
+    if (ImportantThings.thisAccountProfileImagePath == '')
+      return const ExactAssetImage(
+        "assets/logo/logo.png",
+      );
+    return FileImage(
+      File(ImportantThings.thisAccountProfileImagePath),
+    );
   }
 }

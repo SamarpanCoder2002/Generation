@@ -7,7 +7,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:open_file/open_file.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -21,9 +21,9 @@ class StorageMediaCommonView extends StatefulWidget {
   final String userName;
 
   StorageMediaCommonView(
-      {@required this.mediaTypes,
-      @required this.mediaSources,
-      @required this.userName});
+      {required this.mediaTypes,
+      required this.mediaSources,
+      required this.userName});
 
   @override
   _StorageMediaCommonViewState createState() => _StorageMediaCommonViewState();
@@ -75,8 +75,8 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
             this._selectEveryMedia && this._selectedCheckBox.contains(true)
                 ? _multipleOptions()
                 : null,
-        body: ModalProgressHUD(
-          inAsyncCall: _isLoading,
+        body: LoadingOverlay(
+          isLoading:  _isLoading,
           child: _differentProceed(),
         ),
       ),
@@ -212,7 +212,7 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
                               onChanged: (changedVal) {
                                 if (mounted) {
                                   setState(() {
-                                    this._selectedCheckBox[index] = changedVal;
+                                    this._selectedCheckBox[index] = changedVal!;
                                   });
                                 }
                               },
@@ -248,7 +248,7 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
     );
   }
 
-  void openFileResultStatus({@required OpenResult openResult}) {
+  void openFileResultStatus({required OpenResult openResult}) {
     if (openResult.type == ResultType.permissionDenied)
       showToast('Permission Denied to Open File', _fToast);
     else if (openResult.type == ResultType.noAppToOpen)
@@ -386,7 +386,7 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
                       onChanged: (changedVal) {
                         if (mounted) {
                           setState(() {
-                            this._selectedCheckBox[index] = changedVal;
+                            this._selectedCheckBox[index] = changedVal!;
                           });
                         }
                       },
@@ -483,7 +483,7 @@ class _StorageMediaCommonViewState extends State<StorageMediaCommonView> {
   }
 
   Widget _alertDialogOptionMaker(
-      {@required String buttonName, @required bool rightButton}) {
+      {required String buttonName, required bool rightButton}) {
     return TextButton(
       child: Text(
         buttonName,

@@ -17,8 +17,8 @@ class _ScreenLogsState extends State<ScreenLogs> {
   final List<Map<String, String>> _nameAndImageForCallLog = [];
 
   void _takeAllCallLogsCount() async {
-    final List<Map<String, Object>> _connectedUserCollection =
-        await _localStorageHelper.extractAllUsersName();
+    final List<Map<String, Object?>> _connectedUserCollection =
+    await _localStorageHelper.extractAllUsersName();
 
     _connectedUserCollection.forEach((userNameMap) async {
       final int totalCallLogs = await _localStorageHelper
@@ -26,8 +26,8 @@ class _ScreenLogsState extends State<ScreenLogs> {
 
       if (totalCallLogs > 0) {
         final String _userProfilePicLocalPath =
-            await _localStorageHelper.extractProfileImageLocalPath(
-                userName: userNameMap.values.first.toString());
+        await _localStorageHelper.extractProfileImageLocalPath(
+            userName: userNameMap.values.first.toString());
 
         final int totalCallLogs = await _localStorageHelper
             .countOrExtractTotalCallLogs(userNameMap.values.first.toString());
@@ -61,16 +61,19 @@ class _ScreenLogsState extends State<ScreenLogs> {
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
       body: Container(
         color: const Color.fromRGBO(34, 48, 60, 1),
-        height: MediaQuery.of(context).size.height,
+        height: MediaQuery
+            .of(context)
+            .size
+            .height,
         margin: EdgeInsets.only(top: 10.0, bottom: 13.0),
         child: this._nameAndImageForCallLog.length > 0
             ? _logsList(context)
             : Center(
-                child: Text(
-                  'No Call Logs',
-                  style: TextStyle(color: Colors.red, fontSize: 18.0),
-                ),
-              ),
+          child: Text(
+            'No Call Logs',
+            style: TextStyle(color: Colors.red, fontSize: 18.0),
+          ),
+        ),
       ),
     );
   }
@@ -100,11 +103,12 @@ class _ScreenLogsState extends State<ScreenLogs> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => ShowCallLogsData(this
-                          ._nameAndImageForCallLog[index]
-                          .keys
-                          .first
-                          .toString())));
+                      builder: (_) =>
+                          ShowCallLogsData(this
+                              ._nameAndImageForCallLog[index]
+                              .keys
+                              .first
+                              .toString())));
             },
             child: Row(
               children: [
@@ -115,18 +119,7 @@ class _ScreenLogsState extends State<ScreenLogs> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: this
-                                ._nameAndImageForCallLog[index]
-                                .values
-                                .first
-                                .toString() ==
-                            ''
-                        ? ExactAssetImage("assets/logo/logo.jpg")
-                        : FileImage(File(this
-                            ._nameAndImageForCallLog[index]
-                            .values
-                            .first
-                            .toString())),
+                    backgroundImage: _getImageWithProvider(index),
                   ),
                 ),
                 Expanded(
@@ -167,13 +160,32 @@ class _ScreenLogsState extends State<ScreenLogs> {
         ));
   }
 
-  String _getUserName(int index) => this
-              ._nameAndImageForCallLog[index]
-              .keys
-              .first
-              .toString()
-              .length <=
+  String _getUserName(int index) =>
+      this
+          ._nameAndImageForCallLog[index]
+          .keys
+          .first
+          .toString()
+          .length <=
           20
-      ? this._nameAndImageForCallLog[index].keys.first.toString()
-      : '${this._nameAndImageForCallLog[index].keys.first.toString().replaceRange(20, this._nameAndImageForCallLog[index].keys.first.toString().length, '...')}';
+          ? this._nameAndImageForCallLog[index].keys.first.toString()
+          : '${this._nameAndImageForCallLog[index].keys.first.toString()
+          .replaceRange(20, this._nameAndImageForCallLog[index].keys.first
+          .toString()
+          .length, '...')}';
+
+  _getImageWithProvider(int index) {
+    if (this
+        ._nameAndImageForCallLog[index]
+        .values
+        .first
+        .toString() ==
+        '')
+      return const ExactAssetImage("assets/logo/logo.png");
+    return FileImage(File(this
+        ._nameAndImageForCallLog[index]
+        .values
+        .first
+        .toString()));
+  }
 }

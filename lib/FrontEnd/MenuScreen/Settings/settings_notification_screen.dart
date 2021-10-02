@@ -6,7 +6,7 @@ import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_stora
 import 'package:generation/FrontEnd/ShowCase/common_description_show.dart';
 
 class SettingsNotificationConfiguration extends StatefulWidget {
-  const SettingsNotificationConfiguration({Key key}) : super(key: key);
+  const SettingsNotificationConfiguration({Key? key}) : super(key: key);
 
   @override
   _SettingsNotificationConfigurationState createState() =>
@@ -136,8 +136,8 @@ class _SettingsNotificationConfigurationState
   }
 
   Widget _notificationOptions({
-    @required String mainText,
-    @required bool status,
+    required String mainText,
+    required bool status,
     double fontSize = 16.0,
   }) {
     return GestureDetector(

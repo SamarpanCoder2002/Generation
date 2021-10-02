@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:animations/animations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -40,9 +40,9 @@ class _ChatsAndActivityCollectionState
   /// Initialize Some Containers to Store data in Future
   final List<String> _allConnectionsUserName = [];
   final Map<String, dynamic> _allConnectionsLatestMessage =
-      Map<String, dynamic>();
+  Map<String, dynamic>();
   final Map<String, bool> _allConnectionChatNotificationStatus =
-      Map<String, bool>();
+  Map<String, bool>();
 
   final List<String> _allUserConnectionActivity = [];
   final Map<String, int> _everyUserActivityTotalCountTake = Map<String, int>();
@@ -64,7 +64,7 @@ class _ChatsAndActivityCollectionState
 
   /// Regular Expression for Media Detection
   final RegExp _mediaRegex =
-      RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
+  RegExp(r"(http(s?):)|([/|.|\w|\s])*\.(?:jpg|gif|png)");
   final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
   Future<void> _fetchRealTimeData() async {
@@ -81,7 +81,7 @@ class _ChatsAndActivityCollectionState
 
     /// Storage Request
     final PermissionStatus storagePermissionStatus =
-        await Permission.storage.request();
+    await Permission.storage.request();
 
     await Permission.microphone.request();
 
@@ -89,19 +89,19 @@ class _ChatsAndActivityCollectionState
       _showDiaLog(
           titleText: 'Storage Permission Denied',
           contentText:
-              "If any connection send you a media file, You can't receive that.\n\nPlease Go the Phone Settings and\nGo to Apps -> Generation ->\nPermission -> Allow Access for Storage");
+          "If any connection send you a media file, You can't receive that.\n\nPlease Go the Phone Settings and\nGo to Apps -> Generation ->\nPermission -> Allow Access for Storage");
 
-    final Directory directory = await getExternalStorageDirectory();
+    final Directory? directory = await getExternalStorageDirectory();
 
     /// Listen to the realTime Data Fetch
     _management.getDatabaseData().listen((event) async {
       final Map<String, dynamic> _allUserConnectionActivityTake =
-          event.data()['activity'] as Map;
+      event.data()!['activity'] as Map<String, dynamic>;
 
       /// Current Account User Name Take
       final String _thisAccountUserName =
-          await _localStorageHelper.extractImportantDataFromThatAccount(
-              userMail: FirebaseAuth.instance.currentUser.email);
+      await _localStorageHelper.extractImportantDataFromThatAccount(
+          userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
       /// Checking Already This Account Name Present in Local Container or not
       if (!_allUserConnectionActivity.contains(_thisAccountUserName) &&
@@ -118,20 +118,22 @@ class _ChatsAndActivityCollectionState
       _allUserConnectionActivityTake
           .forEach((connectionMail, connectionActivity) async {
         /// If There no new Activity in FireStore Record
-        if (connectionActivity.toList().isEmpty) {
+        if (connectionActivity
+            .toList()
+            .isEmpty) {
           print("Empty Container");
         } else {
           final List<dynamic> particularConnectionActivity =
-              _allUserConnectionActivityTake[connectionMail] as List;
+          _allUserConnectionActivityTake[connectionMail] as List;
 
           final String _connectionUserNameFromLocalDatabase =
-              await _localStorageHelper.extractImportantDataFromThatAccount(
-                  userMail:
-                      connectionMail); // FindOut User Name from local database
+          await _localStorageHelper.extractImportantDataFromThatAccount(
+              userMail:
+              connectionMail); // FindOut User Name from local database
 
           /// Checking Already This Account Name Present in Local Container or not
           if (!_allUserConnectionActivity
-                  .contains(_connectionUserNameFromLocalDatabase) &&
+              .contains(_connectionUserNameFromLocalDatabase) &&
               !_allUserConnectionActivity.contains(
                   '$_connectionUserNameFromLocalDatabase[[[new_activity]]]')) {
             if (mounted) {
@@ -149,7 +151,8 @@ class _ChatsAndActivityCollectionState
 
               FirebaseFirestore.instance
                   .doc(
-                      'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                  'generation_users/${FirebaseAuth.instance.currentUser!.email
+                      .toString()}')
                   .update({
                 'activity': _allUserConnectionActivityTake,
               });
@@ -165,9 +168,9 @@ class _ChatsAndActivityCollectionState
               setState(() {
                 everyActivity = {
                   _encryptionMaker
-                          .decryptionMaker(everyActivity.keys.first.toString()):
-                      _encryptionMaker.decryptionMaker(
-                          everyActivity.values.first.toString()),
+                      .decryptionMaker(everyActivity.keys.first.toString()):
+                  _encryptionMaker.decryptionMaker(
+                      everyActivity.values.first.toString()),
                 };
               });
             }
@@ -180,17 +183,17 @@ class _ChatsAndActivityCollectionState
                     'video') {
                   if (storagePermissionStatus.isGranted) {
                     final activityVideoPath =
-                        await Directory(directory.path + '/.ActivityVideos/')
-                            .create();
+                    await Directory(directory!.path + '/.ActivityVideos/')
+                        .create();
 
                     print('Add Video Activity to Sqlite');
 
                     /// Insert Video  Activity Data to the local database for future use
                     final bool _videoPathStorageResponse =
-                        await _localStorageHelper.insertDataInUserActivityTable(
+                    await _localStorageHelper.insertDataInUserActivityTable(
                       tableName: _connectionUserNameFromLocalDatabase,
                       statusLinkOrString:
-                          '${activityVideoPath.path}$currTime.mp4',
+                      '${activityVideoPath.path}$currTime.mp4',
                       mediaTypes: MediaTypes.Video,
                       activityTime: everyActivity.values.first
                           .toString()
@@ -211,7 +214,8 @@ class _ChatsAndActivityCollectionState
 
                         print('Video Download Complete');
                         print(
-                            'Activity Video Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                            'Activity Video Time: ${everyActivity.values.first
+                                .toString().split('++++++')[2]}');
                       } catch (e) {
                         print('Activity Video Download Error: ${e.toString()}');
                       }
@@ -223,17 +227,17 @@ class _ChatsAndActivityCollectionState
                   if (storagePermissionStatus.isGranted) {
                     /// Create new Hidden Folder once in desired location
                     final activityImagePath =
-                        await Directory('${directory.path}/.ActivityImages/')
-                            .create();
+                    await Directory('${directory!.path}/.ActivityImages/')
+                        .create();
 
                     print('Add Files to Sqlite');
 
                     /// Add Activity Image Data to Local Storage for Future use and take response about insertion data
                     final bool _imageActivityInsertionResponse =
-                        await _localStorageHelper.insertDataInUserActivityTable(
+                    await _localStorageHelper.insertDataInUserActivityTable(
                       tableName: _connectionUserNameFromLocalDatabase,
                       statusLinkOrString:
-                          '${activityImagePath.path}$currTime.jpg',
+                      '${activityImagePath.path}$currTime.jpg',
                       mediaTypes: MediaTypes.Image,
                       activityTime: everyActivity.values.first
                           .toString()
@@ -257,7 +261,8 @@ class _ChatsAndActivityCollectionState
                         print('Image Download Complete');
 
                         print(
-                            'Activity Image Time: ${everyActivity.values.first.toString().split('++++++')[2]}');
+                            'Activity Image Time: ${everyActivity.values.first
+                                .toString().split('++++++')[2]}');
                       } catch (e) {
                         print('Activity Image Download Error: ${e.toString()}');
                       }
@@ -275,33 +280,37 @@ class _ChatsAndActivityCollectionState
                 await _localStorageHelper.insertDataInUserActivityTable(
                   tableName: _connectionUserNameFromLocalDatabase,
                   statusLinkOrString: everyActivity.keys.first
-                              .toString()
-                              .split('+')[1] ==
-                          ActivitySpecialOptions.Polling.toString()
-                      ? '${everyActivity.keys.first.toString().split('+')[2]}${everyActivity.keys.first.toString().split('+')[0]}[[[question]]]${everyActivity.values.first.toString()}'
+                      .toString()
+                      .split('+')[1] ==
+                      ActivitySpecialOptions.Polling.toString()
+                      ? '${everyActivity.keys.first.toString().split(
+                      '+')[2]}${everyActivity.keys.first.toString().split(
+                      '+')[0]}[[[question]]]${everyActivity.values.first
+                      .toString()}'
                       : everyActivity.keys.first.toString().split('+')[0],
                   mediaTypes:
-                      everyActivity.keys.first.toString().split('+')[1] ==
-                              MediaTypes.Text.toString()
-                          ? MediaTypes.Text
-                          : null,
+                  everyActivity.keys.first.toString().split('+')[1] ==
+                      MediaTypes.Text.toString()
+                      ? MediaTypes.Text
+                      : null,
                   activitySpecialOptions:
-                      everyActivity.keys.first.toString().split('+')[1] ==
-                              ActivitySpecialOptions.Polling.toString()
-                          ? ActivitySpecialOptions.Polling
-                          : null,
+                  everyActivity.keys.first.toString().split('+')[1] ==
+                      ActivitySpecialOptions.Polling.toString()
+                      ? ActivitySpecialOptions.Polling
+                      : null,
                   activityTime:
-                      everyActivity.keys.first.toString().split('+')[1] ==
-                              MediaTypes.Text.toString()
-                          ? everyActivity.values.first.toString().split('+')[5]
-                          : everyActivity.keys.first.toString().split('+')[3],
+                  everyActivity.keys.first.toString().split('+')[1] ==
+                      MediaTypes.Text.toString()
+                      ? everyActivity.values.first.toString().split('+')[5]
+                      : everyActivity.keys.first.toString().split('+')[3],
                   bgInformation: everyActivity.values.first.toString(),
                 );
 
                 await _newActivityUpdate(_connectionUserNameFromLocalDatabase);
               } catch (e) {
                 print(
-                    'Error: Text And Poll Activity Saving Error: ${e.toString()}');
+                    'Error: Text And Poll Activity Saving Error: ${e
+                        .toString()}');
               }
             }
           });
@@ -309,10 +318,10 @@ class _ChatsAndActivityCollectionState
       });
 
       /// Connection Request Processing
-      if (event.data()['connection_request'].length > 0) {
+      if (event.data()!['connection_request'].length > 0) {
         if (mounted) {
-          final Map<String, Object> allConnectionRequest =
-              event.data()['connection_request']; // Take All Connection Request
+          final Map<String, dynamic> allConnectionRequest = event
+              .data()!['connection_request']; // Take All Connection Request
 
           /// Take all Connection Request Data to Update Connectivity
           allConnectionRequest
@@ -331,7 +340,7 @@ class _ChatsAndActivityCollectionState
                 /// Make SqLite Table With User UserName
                 final bool response = await _localStorageHelper
                     .createTableForUserName(_encryptionMaker
-                        .decryptionMaker(documentSnapshot['user_name']));
+                    .decryptionMaker(documentSnapshot['user_name']));
 
                 try {
                   if (response) {
@@ -340,8 +349,8 @@ class _ChatsAndActivityCollectionState
 
                     /// Create new Hidden Folder once in desired location
                     final Directory profilePicDir =
-                        await Directory('${directory.path}/.ProfilePictures/')
-                            .create(recursive: true);
+                    await Directory('${directory!.path}/.ProfilePictures/')
+                        .create(recursive: true);
 
                     String profilePicPath =
                         '${profilePicDir.path}${DateTime.now()}';
@@ -350,18 +359,19 @@ class _ChatsAndActivityCollectionState
                         documentSnapshot['profile_pic'] != '') {
                       await _dio
                           .download(
-                              _encryptionMaker.decryptionMaker(
-                                  documentSnapshot['profile_pic'].toString()),
-                              profilePicPath)
+                          _encryptionMaker.decryptionMaker(
+                              documentSnapshot['profile_pic'].toString()),
+                          profilePicPath)
                           .whenComplete(
                               () => print('Profile Picture Download Complete'));
                     } else
                       profilePicPath = '';
 
-                    final String _globalChatWallpaper =
-                        await _localStorageHelper.extractImportantTableData(
-                            extraImportant: ExtraImportant.ChatWallpaper,
-                            userMail: FirebaseAuth.instance.currentUser.email);
+                    final String? _globalChatWallpaper =
+                    await _localStorageHelper.extractImportantTableData(
+                        extraImportant: ExtraImportant.ChatWallpaper,
+                        userMail: FirebaseAuth.instance.currentUser!.email
+                            .toString());
 
                     /// Data Store for General Reference
                     await _localStorageHelper.insertOrUpdateDataForThisAccount(
@@ -376,9 +386,9 @@ class _ChatsAndActivityCollectionState
                       profileImageUrl: (documentSnapshot['profile_pic'] == null)
                           ? ''
                           : documentSnapshot['profile_pic'] == ''
-                              ? ''
-                              : _encryptionMaker.decryptionMaker(
-                                  documentSnapshot['profile_pic'].toString()),
+                          ? ''
+                          : _encryptionMaker.decryptionMaker(
+                          documentSnapshot['profile_pic'].toString()),
                       userAccCreationDate: _encryptionMaker
                           .decryptionMaker(documentSnapshot['creation_date']),
                       userAccCreationTime: _encryptionMaker
@@ -402,17 +412,17 @@ class _ChatsAndActivityCollectionState
                         .userProfileNameAndImageExtractor();
 
                     if (ProfileImageManagement
-                                .allConnectionsProfilePicLocalPath[
-                            _encryptionMaker.decryptionMaker(
-                                documentSnapshot['user_name'])] !=
+                        .allConnectionsProfilePicLocalPath[
+                    _encryptionMaker.decryptionMaker(
+                        documentSnapshot['user_name'])] !=
                         profilePicPath) {
                       print('New Connection Profile Pic Not Matched');
                       if (mounted) {
                         setState(() {
                           ProfileImageManagement
-                                      .allConnectionsProfilePicLocalPath[
-                                  _encryptionMaker.decryptionMaker(
-                                      documentSnapshot['user_name'])] =
+                              .allConnectionsProfilePicLocalPath[
+                          _encryptionMaker.decryptionMaker(
+                              documentSnapshot['user_name'])] =
                               profilePicPath;
                         });
                       }
@@ -420,7 +430,8 @@ class _ChatsAndActivityCollectionState
                   }
                 } catch (e) {
                   print(
-                      'Error New Connected Connection Data Entry Error: ${e.toString()}');
+                      'Error New Connected Connection Data Entry Error: ${e
+                          .toString()}');
                 }
 
                 /// Insert New Connected user name at the front of local container
@@ -444,32 +455,32 @@ class _ChatsAndActivityCollectionState
 
               /// User Latest Data Fetch
               final Map<String, dynamic> _allActiveConnections =
-                  event.data()['connections'];
+              event.data()!['connections'];
 
               /// For Every Connection, Latest Data to Show
               _allConnectionsUserName.forEach((everyUserName) async {
                 final String _connectionMail = await _localStorageHelper
                     .extractImportantDataFromThatAccount(
-                        userName: everyUserName);
+                    userName: everyUserName);
 
-                final List<dynamic> _allRemainingMessages =
-                    _allActiveConnections[_connectionMail];
+                final List<dynamic>? _allRemainingMessages =
+                _allActiveConnections[_connectionMail];
 
-                final List<Map<String, String>> _lastMessage = [];
+                final List<Map<String, String>>? _lastMessage = [];
 
                 if (_allRemainingMessages == null ||
                     _allRemainingMessages.length == 0) {
-                  final Map<String, String> takeLocalData =
-                      await _localStorageHelper
-                          .fetchLatestMessage(everyUserName);
+                  final Map<String, String>? takeLocalData =
+                  await _localStorageHelper
+                      .fetchLatestMessage(everyUserName);
 
                   if (takeLocalData != null && takeLocalData.isNotEmpty)
-                    _lastMessage.add(takeLocalData);
+                    _lastMessage!.add(takeLocalData);
                 } else {
                   _allRemainingMessages.forEach((everyMessage) {
-                    _lastMessage.add({
+                    _lastMessage!.add({
                       everyMessage.keys.first.toString():
-                          everyMessage.values.first.toString(),
+                      everyMessage.values.first.toString(),
                     });
                   });
                 }
@@ -498,7 +509,7 @@ class _ChatsAndActivityCollectionState
 
   void _realTimeDataFetchDependsOnNetConnectivity() async {
     final bool isNetworkExist =
-        await _nativeCallback.callToCheckNetworkConnectivity();
+    await _nativeCallback.callToCheckNetworkConnectivity();
     if (isNetworkExist) {
       await _fetchRealTimeData();
     } else {
@@ -513,14 +524,16 @@ class _ChatsAndActivityCollectionState
         titleText: 'You Are Offline',
         contentText: 'Please Connect to the Internet to send Messages');
 
-    final List<Map<String, Object>> _allConnectionTempList =
-        await _localStorageHelper.extractAllUsersName();
+    final List<Map<String, Object?>> _allConnectionTempList =
+    await _localStorageHelper.extractAllUsersName();
     _allConnectionTempList.forEach((userNameMap) {
       if (mounted) {
         setState(() {
-          this._allConnectionsUserName.add(userNameMap.values.first.toString());
+          this
+              ._allConnectionsUserName
+              .add(userNameMap.values.first.toString().toString());
           this._allConnectionChatNotificationStatus[
-              userNameMap.values.first.toString()] = true;
+          userNameMap.values.first.toString().toString()] = true;
         });
       }
     });
@@ -536,37 +549,40 @@ class _ChatsAndActivityCollectionState
   /// Existing connection having some activity stored in local database, user name add
   void _searchAboutExistingConnectionActivity() async {
     print('Connection Activity Check');
-    final List<Map<String, Object>> _alreadyStoredUserNameList =
-        await _localStorageHelper.extractAllUsersName(
-            thisAccountAllowed:
-                await _nativeCallback.callToCheckNetworkConnectivity()
-                    ? false
-                    : true);
+    final List<Map<String, Object?>> _alreadyStoredUserNameList =
+    await _localStorageHelper.extractAllUsersName(
+        thisAccountAllowed:
+        await _nativeCallback.callToCheckNetworkConnectivity()
+            ? false
+            : true);
 
     _alreadyStoredUserNameList.forEach((userNameMap) async {
-      final int _countTotalActivity = await _localStorageHelper
-          .countTotalActivitiesForParticularUserName(userNameMap.values.first);
+      final int _countTotalActivity =
+      await _localStorageHelper.countTotalActivitiesForParticularUserName(
+          userNameMap.values.first.toString());
 
       if (mounted) {
         setState(() {
           if (_countTotalActivity > 0 ||
               ImportantThings.thisAccountUserName ==
-                  userNameMap.values.first.toString()) {
+                  userNameMap.values.first.toString().toString()) {
             if (!_allUserConnectionActivity
-                    .contains(userNameMap.values.first) &&
+                .contains(userNameMap.values.first.toString()) &&
                 !_allUserConnectionActivity.contains(
-                    '${userNameMap.values.first}[[[new_activity]]]')) {
+                    '${userNameMap.values.first
+                        .toString()}[[[new_activity]]]')) {
               if (mounted) {
                 setState(() {
-                  if (userNameMap.values.first ==
+                  if (userNameMap.values.first.toString() ==
                       ImportantThings.thisAccountUserName)
                     _allUserConnectionActivity.insert(
-                        0, userNameMap.values.first);
+                        0, userNameMap.values.first.toString());
                   else
-                    _allUserConnectionActivity.add(userNameMap.values.first);
+                    _allUserConnectionActivity
+                        .add(userNameMap.values.first.toString());
 
                   this._everyUserActivityTotalCountTake[
-                      userNameMap.values.first] = 0;
+                  userNameMap.values.first.toString()] = 0;
                 });
               }
             }
@@ -580,8 +596,8 @@ class _ChatsAndActivityCollectionState
   void initState() {
     super.initState();
     print("Initialization");
-    SystemChrome.setEnabledSystemUIOverlays(
-        SystemUiOverlay.values); // Android StatusBar and Navigation Bar Show
+    SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual, overlays: SystemUiOverlay.values); // Android StatusBar and Navigation Bar Show
 
     ImportantThings.findImageUrlAndUserName();
 
@@ -595,7 +611,8 @@ class _ChatsAndActivityCollectionState
     } catch (e) {
       showDialog(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (_) =>
+              AlertDialog(
                 title: Text('Chat Collection Load Error'),
                 content: Text(e.toString()),
               ));
@@ -652,8 +669,8 @@ class _ChatsAndActivityCollectionState
             );
           },
         ),
-        body: ModalProgressHUD(
-          inAsyncCall: _isLoading,
+        body: LoadingOverlay(
+          isLoading: _isLoading,
           color: const Color.fromRGBO(0, 0, 0, 0.5),
           progressIndicator: const CircularProgressIndicator(
             backgroundColor: Colors.black87,
@@ -675,10 +692,21 @@ class _ChatsAndActivityCollectionState
         top: 20.0,
         left: 10.0,
       ),
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).orientation == Orientation.portrait
-          ? MediaQuery.of(context).size.height * (1.5 / 8)
-          : MediaQuery.of(context).size.height * (3 / 8),
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
+      height: MediaQuery
+          .of(context)
+          .orientation == Orientation.portrait
+          ? MediaQuery
+          .of(context)
+          .size
+          .height * (1.5 / 8)
+          : MediaQuery
+          .of(context)
+          .size
+          .height * (3 / 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal, // Make ListView Horizontally
         itemCount: _allUserConnectionActivity.length,
@@ -691,9 +719,15 @@ class _ChatsAndActivityCollectionState
 
   Widget _activityCollectionList(BuildContext context, int index) {
     return Container(
-      margin: EdgeInsets.only(right: MediaQuery.of(context).size.width / 18),
+      margin: EdgeInsets.only(right: MediaQuery
+          .of(context)
+          .size
+          .width / 18),
       padding: EdgeInsets.only(top: 3.0),
-      height: MediaQuery.of(context).size.height * (1.5 / 8),
+      height: MediaQuery
+          .of(context)
+          .size
+          .height * (1.5 / 8),
       child: Column(
         children: [
           Stack(
@@ -702,25 +736,41 @@ class _ChatsAndActivityCollectionState
                   .contains('[[[new_activity]]]'))
                 Container(
                   height:
-                      MediaQuery.of(context).orientation == Orientation.portrait
-                          ? (MediaQuery.of(context).size.height *
-                                  (1.2 / 7.95) /
-                                  2.5) *
-                              2
-                          : (MediaQuery.of(context).size.height *
-                                  (2.5 / 7.95) /
-                                  2.5) *
-                              2,
+                  MediaQuery
+                      .of(context)
+                      .orientation == Orientation.portrait
+                      ? (MediaQuery
+                      .of(context)
+                      .size
+                      .height *
+                      (1.2 / 7.95) /
+                      2.5) *
+                      2
+                      : (MediaQuery
+                      .of(context)
+                      .size
+                      .height *
+                      (2.5 / 7.95) /
+                      2.5) *
+                      2,
                   width:
-                      MediaQuery.of(context).orientation == Orientation.portrait
-                          ? (MediaQuery.of(context).size.height *
-                                  (1.2 / 7.95) /
-                                  2.5) *
-                              2
-                          : (MediaQuery.of(context).size.height *
-                                  (2.5 / 7.95) /
-                                  2.5) *
-                              2,
+                  MediaQuery
+                      .of(context)
+                      .orientation == Orientation.portrait
+                      ? (MediaQuery
+                      .of(context)
+                      .size
+                      .height *
+                      (1.2 / 7.95) /
+                      2.5) *
+                      2
+                      : (MediaQuery
+                      .of(context)
+                      .size
+                      .height *
+                      (2.5 / 7.95) /
+                      2.5) *
+                      2,
                   child: CircularProgressIndicator(
                     color: Colors.blue,
                     value: 1.0,
@@ -747,12 +797,12 @@ class _ChatsAndActivityCollectionState
                             .split('[[[new_activity]]]')[0];
 
                         this._everyUserActivityTotalCountTake[
-                            this._allUserConnectionActivity[index]] = 0;
+                        this._allUserConnectionActivity[index]] = 0;
                       }
 
                       if (index > 0) {
                         final String _connectionUserNameExtracted =
-                            this._allUserConnectionActivity.removeAt(index);
+                        this._allUserConnectionActivity.removeAt(index);
                         this
                             ._allUserConnectionActivity
                             .add(_connectionUserNameExtracted);
@@ -762,73 +812,106 @@ class _ChatsAndActivityCollectionState
                 },
                 openBuilder: (context, openWidget) {
                   final String getOpenActivityConnectionUserName =
-                      _allUserConnectionActivity[index]
-                              .contains('[[[new_activity]]]')
-                          ? _allUserConnectionActivity[index]
-                              .split('[[[new_activity]]]')[0]
-                          : _allUserConnectionActivity[index];
+                  _allUserConnectionActivity[index]
+                      .contains('[[[new_activity]]]')
+                      ? _allUserConnectionActivity[index]
+                      .split('[[[new_activity]]]')[0]
+                      : _allUserConnectionActivity[index];
 
                   return ActivityView(
                     takeParticularConnectionUserName:
-                        getOpenActivityConnectionUserName,
+                    getOpenActivityConnectionUserName,
                     activityStartIndex: _allUserConnectionActivity[index]
-                            .contains('[[[new_activity]]]')
+                        .contains('[[[new_activity]]]')
                         ? this._everyUserActivityTotalCountTake[
-                                getOpenActivityConnectionUserName] -
-                            1
+                    getOpenActivityConnectionUserName]! -
+                        1
                         : 0,
                   );
                 },
                 closedBuilder: (context, closeWidget) {
                   return CircleAvatar(
                     backgroundImage:
-                        getProperImageProviderForConnectionActivity(index),
-                    radius: MediaQuery.of(context).orientation ==
-                            Orientation.portrait
-                        ? MediaQuery.of(context).size.height * (1.2 / 8) / 2.5
-                        : MediaQuery.of(context).size.height * (2.5 / 8) / 2.5,
+                    getProperImageProviderForConnectionActivity(index),
+                    radius: MediaQuery
+                        .of(context)
+                        .orientation ==
+                        Orientation.portrait
+                        ? MediaQuery
+                        .of(context)
+                        .size
+                        .height * (1.2 / 8) / 2.5
+                        : MediaQuery
+                        .of(context)
+                        .size
+                        .height * (2.5 / 8) / 2.5,
                   );
                 },
               ),
               index == 0 // This is for current user Account
                   ? Padding(
-                      padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).orientation ==
-                                Orientation.portrait
-                            ? MediaQuery.of(context).size.height * (0.7 / 8) -
-                                10
-                            : MediaQuery.of(context).size.height * (1.5 / 8) -
-                                10,
-                        left: MediaQuery.of(context).orientation ==
-                                Orientation.portrait
-                            ? MediaQuery.of(context).size.width / 3 - 65
-                            : MediaQuery.of(context).size.width / 8 - 15,
+                padding: EdgeInsets.only(
+                  top: MediaQuery
+                      .of(context)
+                      .orientation ==
+                      Orientation.portrait
+                      ? MediaQuery
+                      .of(context)
+                      .size
+                      .height * (0.7 / 8) -
+                      10
+                      : MediaQuery
+                      .of(context)
+                      .size
+                      .height * (1.5 / 8) -
+                      10,
+                  left: MediaQuery
+                      .of(context)
+                      .orientation ==
+                      Orientation.portrait
+                      ? MediaQuery
+                      .of(context)
+                      .size
+                      .width / 3 - 65
+                      : MediaQuery
+                      .of(context)
+                      .size
+                      .width / 8 - 15,
+                ),
+                child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.lightBlue,
+                    ),
+                    child: GestureDetector(
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: MediaQuery
+                            .of(context)
+                            .orientation ==
+                            Orientation.portrait
+                            ? MediaQuery
+                            .of(context)
+                            .size
+                            .height *
+                            (1.3 / 8) /
+                            2.5 *
+                            (3.5 / 6)
+                            : MediaQuery
+                            .of(context)
+                            .size
+                            .height *
+                            (1.3 / 8) /
+                            2,
                       ),
-                      child: Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.lightBlue,
-                          ),
-                          child: GestureDetector(
-                            child: Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: MediaQuery.of(context).orientation ==
-                                      Orientation.portrait
-                                  ? MediaQuery.of(context).size.height *
-                                      (1.3 / 8) /
-                                      2.5 *
-                                      (3.5 / 6)
-                                  : MediaQuery.of(context).size.height *
-                                      (1.3 / 8) /
-                                      2,
-                            ),
-                            onTap: () => activityList(
-                                context: context,
-                                allConnectionsUserName:
-                                    _allConnectionsUserName),
-                          )),
-                    )
+                      onTap: () =>
+                          activityList(
+                              context: context,
+                              allConnectionsUserName:
+                              _allConnectionsUserName),
+                    )),
+              )
                   : const SizedBox(),
             ],
           ),
@@ -853,52 +936,60 @@ class _ChatsAndActivityCollectionState
   Widget _connectionList(BuildContext context) {
     return SafeArea(
         child: Container(
-      margin: EdgeInsets.only(
-          top: MediaQuery.of(context).orientation == Orientation.portrait
-              ? 5.0
-              : 0.0),
-      padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
-      height: MediaQuery.of(context).size.height * (5.15 / 8),
-      decoration: BoxDecoration(
-        color: const Color.fromRGBO(31, 51, 71, 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10.0,
-            spreadRadius: 0.0,
-            offset: const Offset(0.0, -5.0), // shadow direction: bottom right
-          )
-        ],
-        borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(40.0), topRight: Radius.circular(40.0)),
-        border: Border.all(
-          color: Colors.black26,
-          width: 1.0,
-        ),
-      ),
-      child: ReorderableListView.builder(
-        onReorder: (first, last) {
-          if (mounted) {
-            setState(() {
-              final String _draggableConnection =
+          margin: EdgeInsets.only(
+              top: MediaQuery
+                  .of(context)
+                  .orientation == Orientation.portrait
+                  ? 5.0
+                  : 0.0),
+          padding: const EdgeInsets.only(top: 18.0, bottom: 10.0),
+          height: MediaQuery
+              .of(context)
+              .size
+              .height * (5.15 / 8),
+          decoration: BoxDecoration(
+            color: const Color.fromRGBO(31, 51, 71, 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10.0,
+                spreadRadius: 0.0,
+                offset: const Offset(
+                    0.0, -5.0), // shadow direction: bottom right
+              )
+            ],
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(40.0),
+                topRight: Radius.circular(40.0)),
+            border: Border.all(
+              color: Colors.black26,
+              width: 1.0,
+            ),
+          ),
+          child: ReorderableListView.builder(
+            onReorder: (first, last) {
+              if (mounted) {
+                setState(() {
+                  final String _draggableConnection =
                   this._allConnectionsUserName.removeAt(first);
 
-              this._allConnectionsUserName.insert(
-                  last >= this._allConnectionsUserName.length
-                      ? this._allConnectionsUserName.length
-                      : last > first
+                  this._allConnectionsUserName.insert(
+                      last >= this._allConnectionsUserName.length
+                          ? this._allConnectionsUserName.length
+                          : last > first
                           ? --last
                           : last,
-                  _draggableConnection);
-            });
-          }
-        },
-        itemCount: _allConnectionsUserName.length,
-        itemBuilder: (context, position) {
-          return chatTile(context, position, _allConnectionsUserName[position]);
-        },
-      ),
-    ));
+                      _draggableConnection);
+                });
+              }
+            },
+            itemCount: _allConnectionsUserName.length,
+            itemBuilder: (context, position) {
+              return chatTile(
+                  context, position, _allConnectionsUserName[position]);
+            },
+          ),
+        ));
   }
 
   Widget chatTile(BuildContext context, int index, String _userName) {
@@ -934,29 +1025,29 @@ class _ChatsAndActivityCollectionState
                     transitionType: ContainerTransitionType.fadeThrough,
                     openBuilder: (_, __) {
                       return ProfileImageManagement
-                                      .allConnectionsProfilePicLocalPath[
-                                  _userName] !=
-                              ''
+                          .allConnectionsProfilePicLocalPath[
+                      _userName] !=
+                          ''
                           ? PreviewImageScreen(
-                              imageFile: File(ProfileImageManagement
-                                      .allConnectionsProfilePicLocalPath[
-                                  _userName]))
+                          imageFile: File(ProfileImageManagement
+                              .allConnectionsProfilePicLocalPath[
+                          _userName]))
                           : Center(
-                              child: Text(
-                                'No Profile Image',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            );
+                        child: Text(
+                          'No Profile Image',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 20.0,
+                          ),
+                        ),
+                      );
                     },
                     closedBuilder: (_, __) {
                       return CircleAvatar(
                         radius: 30.0,
                         backgroundImage:
-                            getProperImageProviderForConnectionsCollection(
-                                _userName),
+                        getProperImageProviderForConnectionsCollection(
+                            _userName),
                       );
                     },
                   ),
@@ -973,7 +1064,7 @@ class _ChatsAndActivityCollectionState
                     /// Irrespectively make changes when a chat just Close
                     _localStorageHelper
                         .fetchLatestMessage(_userName)
-                        .then((Map<String, String> takeLocalData) {
+                        .then((Map<String, String>? takeLocalData) {
                       if (takeLocalData != null &&
                           takeLocalData.isNotEmpty &&
                           takeLocalData.values.toString().split('+')[0] != '') {
@@ -1000,16 +1091,17 @@ class _ChatsAndActivityCollectionState
                         .extractProfileImageLocalPath(userName: _userName)
                         .then((String profileImageLocalPath) {
                       print(
-                          'All Closed: ${ProfileImageManagement.allConnectionsProfilePicLocalPath[_userName]}');
+                          'All Closed: ${ProfileImageManagement
+                              .allConnectionsProfilePicLocalPath[_userName]}');
 
                       if (ProfileImageManagement
-                              .allConnectionsProfilePicLocalPath[_userName] !=
+                          .allConnectionsProfilePicLocalPath[_userName] !=
                           profileImageLocalPath) {
                         if (mounted) {
                           setState(() {
                             ProfileImageManagement
-                                    .allConnectionsProfilePicLocalPath[
-                                _userName] = profileImageLocalPath;
+                                .allConnectionsProfilePicLocalPath[
+                            _userName] = profileImageLocalPath;
                           });
                         }
                       }
@@ -1021,17 +1113,20 @@ class _ChatsAndActivityCollectionState
                     return ChatScreenSetUp(
                         _userName,
                         ProfileImageManagement
-                                        .allConnectionsProfilePicLocalPath[
-                                    _userName] ==
-                                null
+                            .allConnectionsProfilePicLocalPath[
+                        _userName] ==
+                            null
                             ? ''
                             : ProfileImageManagement
-                                .allConnectionsProfilePicLocalPath[_userName]);
+                            .allConnectionsProfilePicLocalPath[_userName]);
                   },
                   closedBuilder: (context, closeWidget) {
                     return Container(
                       alignment: Alignment.center,
-                      width: MediaQuery.of(context).size.width / 2 + 30,
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 2 + 30,
                       padding: EdgeInsets.only(
                         top: 5.0,
                         bottom: 5.0,
@@ -1042,7 +1137,8 @@ class _ChatsAndActivityCollectionState
                           Text(
                             _userName.length <= 18
                                 ? _userName
-                                : '${_userName.replaceRange(18, _userName.length, '...')}',
+                                : '${_userName.replaceRange(
+                                18, _userName.length, '...')}',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 18.0,
@@ -1069,6 +1165,7 @@ class _ChatsAndActivityCollectionState
                     ),
                     child: Column(
                       children: [
+
                         /// For Extract latest Conversation Time
                         _latestDataForConnectionExtractPerfectly(_userName,
                             purpose: 'lastConnectionTime'),
@@ -1076,15 +1173,15 @@ class _ChatsAndActivityCollectionState
                         SizedBox(
                           height: 10.0,
                         ),
-                        this._allConnectionChatNotificationStatus[_userName]
+                        this._allConnectionChatNotificationStatus[_userName]!
                             ? const Icon(
-                                Icons.notification_important_outlined,
-                                color: Colors.green,
-                              )
+                          Icons.notification_important_outlined,
+                          color: Colors.green,
+                        )
                             : const Icon(
-                                Icons.notifications_off_outlined,
-                                color: Colors.red,
-                              ),
+                          Icons.notifications_off_outlined,
+                          color: Colors.red,
+                        ),
                       ],
                     ),
                   ),
@@ -1100,12 +1197,12 @@ class _ChatsAndActivityCollectionState
       {String purpose = 'lastMessage'}) {
     if (_allConnectionsLatestMessage[_userName] != null &&
         _allConnectionsLatestMessage[_userName].isNotEmpty) {
-      final List<Map<String, String>> _allLatestMessages =
-          _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
+      final List<Map<String, String>>? _allLatestMessages =
+      _allConnectionsLatestMessage[_userName] as List<Map<String, String>>;
 
       /// Extract UserName Specific Messages from temp storage
       if (_allLatestMessages != null && _allLatestMessages.length > 0) {
-        Map<String, String> _lastMessage = _allLatestMessages.last;
+        Map<String, String>? _lastMessage = _allLatestMessages.last;
 
         String take = '';
         if (_lastMessage.values.first.toString().contains('+MediaTypes'))
@@ -1114,19 +1211,19 @@ class _ChatsAndActivityCollectionState
 
         _lastMessage = {
           this
-                  ._encryptionMaker
-                  .decryptionMaker(_lastMessage.keys.first.toString()):
-              _lastMessage.values.first.toString().contains('+MediaTypes')
-                  ? _lastMessage.values.first.toString().replaceRange(
-                      0,
-                      _lastMessage.values.first
-                          .toString()
-                          .split('+MediaTypes')[0]
-                          .length,
-                      take)
-                  : this
-                      ._encryptionMaker
-                      .decryptionMaker(_lastMessage.values.first.toString()),
+              ._encryptionMaker
+              .decryptionMaker(_lastMessage.keys.first.toString()):
+          _lastMessage.values.first.toString().contains('+MediaTypes')
+              ? _lastMessage.values.first.toString().replaceRange(
+              0,
+              _lastMessage.values.first
+                  .toString()
+                  .split('+MediaTypes')[0]
+                  .length,
+              take)
+              : this
+              ._encryptionMaker
+              .decryptionMaker(_lastMessage.values.first.toString()),
         };
 
         /// For Extract Last Conversation Time
@@ -1135,34 +1232,37 @@ class _ChatsAndActivityCollectionState
         }
 
         /// For Extract Last Conversation Message
-        if (_lastMessage != null) {
+
           String _mediaType = _lastMessage.values.last.toString().split('+')[1];
           String _remainingMessagesLength = '';
 
           /// If Last Message Not From Local Database
-          if (_lastMessage.values.last.toString().split('+').length != 4 ||
+          if (_lastMessage.values.last
+              .toString()
+              .split('+')
+              .length != 4 ||
               _lastMessage.values.last.toString().split('+')[2] != 'localDb')
             _remainingMessagesLength = _allLatestMessages.length.toString();
 
           /// After Filtering Extract Latest Message and Return Message Widget
           return _latestMessageTypeExtract(_lastMessage.keys.last.toString(),
               _mediaType, _remainingMessagesLength, _userName);
-        }
 
-        /// If there is no last message
-        return Text(
-          'No Messages',
-          style: TextStyle(color: Colors.red),
-        );
+
+        // /// If there is no last message
+        // return Text(
+        //   'No Messages',
+        //   style: TextStyle(color: Colors.red),
+        // );
       }
 
       /// For Extract Last Connection Time
       if (purpose == 'lastConnectionTime')
         return Container(
             child: Text(
-          '',
-          style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
-        ));
+              '',
+              style: TextStyle(fontSize: 13.0, color: Colors.lightBlue),
+            ));
 
       /// For Null Control
       return Text('No Messages', style: TextStyle(color: Colors.red));
@@ -1180,15 +1280,14 @@ class _ChatsAndActivityCollectionState
     switch (_mediaTypesToString) {
       case 'MediaTypes.Text':
         bool _blankMsgIndicator = false;
-        bool _onlyEmoji = false;
 
-        final List<String> splitMsg = _message.split('\n');
+        final List<String>? splitMsg = _message.split('\n');
 
-        while (splitMsg.contains('')) {
+        while (splitMsg!.contains('')) {
           splitMsg.remove('');
         }
 
-        if (splitMsg == null || splitMsg.length == 0) {
+        if (splitMsg.length == 0) {
           _message = 'Blank Message';
           _blankMsgIndicator = true;
         } else
@@ -1210,14 +1309,14 @@ class _ChatsAndActivityCollectionState
           children: [
             Expanded(
               child: Text(
-                _message ??= 'Error',
+                _message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.0,
                   color: _blankMsgIndicator
                       ? Colors.redAccent
                       : const Color.fromRGBO(150, 150, 150, 1),
-                  fontFamily: _onlyEmoji ? 'Apple Color Emoji' : 'Arial',
+                  fontFamily: 'Arial',
                 ),
               ),
             ),
@@ -1348,8 +1447,8 @@ class _ChatsAndActivityCollectionState
   }
 
   /// Count Total Remaining Messages
-  Widget _totalRemainingMessagesTake(
-      String _remainingMessagesLength, String _userName) {
+  Widget _totalRemainingMessagesTake(String _remainingMessagesLength,
+      String _userName) {
     print('Remaining Messages: $_remainingMessagesLength');
 
     /// Latest Chat Message show on at first
@@ -1374,11 +1473,10 @@ class _ChatsAndActivityCollectionState
   }
 
   /// Extract last Conversation Message
-  Widget _latestConversationTime(Map<String, String> _lastMessage) {
-    if (_lastMessage.isNotEmpty) {
+  Widget _latestConversationTime(Map<String, String>? _lastMessage) {
+    if (_lastMessage!.isNotEmpty) {
       String _willReturnTime = '';
-      if (_lastMessage != null &&
-          _lastMessage.values.last.toString().split('+')[0].toString() != '') {
+      if (_lastMessage.values.last.toString().split('+')[0].toString() != '') {
         /// Extract Incoming Message Date
         final String _incomingMessageDate = _lastMessage.values.first
             .toString()
@@ -1388,14 +1486,30 @@ class _ChatsAndActivityCollectionState
             .split(' ')[0];
 
         final String compareString =
-            _incomingMessageDate.split('-').last.length <= 2
-                ? _incomingMessageDate.split('-').last
-                : _incomingMessageDate.split('-').first;
+        _incomingMessageDate
+            .split('-')
+            .last
+            .length <= 2
+            ? _incomingMessageDate
+            .split('-')
+            .last
+            : _incomingMessageDate
+            .split('-')
+            .first;
 
         /// Checking if the incoming message date day is less than Today's date
-        if (int.parse(compareString) < DateTime.now().day) {
-          _willReturnTime = _incomingMessageDate.split('-').last.length <= 2
-              ? _incomingMessageDate.split('-').reversed.toList().join('-')
+        if (int.parse(compareString) < DateTime
+            .now()
+            .day) {
+          _willReturnTime = _incomingMessageDate
+              .split('-')
+              .last
+              .length <= 2
+              ? _incomingMessageDate
+              .split('-')
+              .reversed
+              .toList()
+              .join('-')
               : _incomingMessageDate;
         } else {
           _willReturnTime =
@@ -1416,9 +1530,9 @@ class _ChatsAndActivityCollectionState
 
       return Center(
           child: Text(
-        _willReturnTime,
-        style: TextStyle(fontSize: 12.0, color: Colors.lightBlue),
-      ));
+            _willReturnTime,
+            style: TextStyle(fontSize: 12.0, color: Colors.lightBlue),
+          ));
     } else
       return Text(
         '',
@@ -1428,41 +1542,47 @@ class _ChatsAndActivityCollectionState
       );
   }
 
-  ImageProvider getProperImageProviderForConnectionActivity(int index) {
-    return ((index == 0 && ImportantThings.thisAccountProfileImagePath == '') ||
-            (index > 0 &&
-                ProfileImageManagement.allConnectionsProfilePicLocalPath[
-                        _getUserNameForActivity(index)] ==
-                    ''))
-        ? const ExactAssetImage('assets/logo/logo.jpg')
-        : FileImage(
-            File(index == 0
-                ? ImportantThings.thisAccountProfileImagePath
-                : ProfileImageManagement.allConnectionsProfilePicLocalPath[
-                    _getUserNameForActivity(index)]),
-            scale: 0.5,
-          );
+  ImageProvider<Object>?  getProperImageProviderForConnectionActivity(int index) {
+
+    print('Probleming Here');
+
+    if ((index == 0 && ImportantThings.thisAccountProfileImagePath == '') ||
+        (index > 0 &&
+            ProfileImageManagement.allConnectionsProfilePicLocalPath[
+            _getUserNameForActivity(index)] ==
+                ''))
+      return const ExactAssetImage('assets/logo/logo.png');
+    else {
+      if (index == 0)
+        return FileImage(
+          File(ImportantThings.thisAccountProfileImagePath),
+          scale: 0.5,
+        );
+      return FileImage(File(ProfileImageManagement
+          .allConnectionsProfilePicLocalPath[_getUserNameForActivity(index)]));
+    }
   }
 
-  ImageProvider getProperImageProviderForConnectionsCollection(
+  ImageProvider<Object>?  getProperImageProviderForConnectionsCollection(
       String userName) {
-    return ProfileImageManagement.allConnectionsProfilePicLocalPath[userName] ==
-                null ||
-            ProfileImageManagement
-                    .allConnectionsProfilePicLocalPath[userName] ==
-                ''
-        ? const ExactAssetImage('assets/logo/logo.jpg')
-        : FileImage(
-            File(ProfileImageManagement
-                .allConnectionsProfilePicLocalPath[userName]),
-            scale: 0.5,
-          );
+    if (ProfileImageManagement.allConnectionsProfilePicLocalPath[userName] ==
+        null ||
+        ProfileImageManagement
+            .allConnectionsProfilePicLocalPath[userName] ==
+            '')
+      return const ExactAssetImage('assets/logo/logo.png');
+    return FileImage(
+      File(ProfileImageManagement
+          .allConnectionsProfilePicLocalPath[userName]),
+      scale: 0.5,
+    );
   }
 
-  void _showDiaLog({@required String titleText, String contentText = ''}) {
+  void _showDiaLog({required String titleText, String contentText = ''}) {
     showDialog(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (_) =>
+            AlertDialog(
               elevation: 5.0,
               backgroundColor: Color.fromRGBO(34, 48, 60, 0.6),
               shape: RoundedRectangleBorder(
@@ -1470,46 +1590,49 @@ class _ChatsAndActivityCollectionState
               ),
               title: Center(
                   child: Text(
-                titleText,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 18.0,
-                ),
-              )),
+                    titleText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 18.0,
+                    ),
+                  )),
               content: contentText == ''
                   ? null
                   : Container(
-                      height: 150,
-                      width: MediaQuery.of(context).size.width,
-                      alignment: Alignment.center,
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          Center(
-                            child: Text(
-                              contentText,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
+                height: 150,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width,
+                alignment: Alignment.center,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Center(
+                      child: Text(
+                        contentText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
             ));
   }
 
   Future<void> _chatNotificationStatusCheckAndUpdate(String userName) async {
-    bool _previousStatus = this._allConnectionChatNotificationStatus[userName];
+    bool _previousStatus = this._allConnectionChatNotificationStatus[userName]!;
 
     final bool _bgNGlobalStatus =
-        await _localStorageHelper.extractDataForNotificationConfigTable(
-            nConfigTypes: NConfigTypes.BgNotification);
+    await _localStorageHelper.extractDataForNotificationConfigTable(
+        nConfigTypes: NConfigTypes.BgNotification);
     final bool _fgNGlobalStatus =
-        await _localStorageHelper.extractDataForNotificationConfigTable(
-            nConfigTypes: NConfigTypes.FGNotification);
+    await _localStorageHelper.extractDataForNotificationConfigTable(
+        nConfigTypes: NConfigTypes.FGNotification);
 
     print(_bgNGlobalStatus);
     print(_fgNGlobalStatus);
@@ -1518,11 +1641,11 @@ class _ChatsAndActivityCollectionState
       _previousStatus = false;
     } else {
       final bool _bgConnectionSpecificNStatus =
-          await _localStorageHelper.extractImportantTableData(
-              extraImportant: ExtraImportant.BGNStatus, userName: userName);
+      await _localStorageHelper.extractImportantTableData(
+          extraImportant: ExtraImportant.BGNStatus, userName: userName);
       final bool _fgConnectionSpecificNStatus =
-          await _localStorageHelper.extractImportantTableData(
-              extraImportant: ExtraImportant.FGNStatus, userName: userName);
+      await _localStorageHelper.extractImportantTableData(
+          extraImportant: ExtraImportant.FGNStatus, userName: userName);
 
       print(_bgConnectionSpecificNStatus);
       print(_fgConnectionSpecificNStatus);
@@ -1546,14 +1669,17 @@ class _ChatsAndActivityCollectionState
 
     return _modifiedUserName.length <= 10
         ? _modifiedUserName
-        : '${_modifiedUserName.replaceRange(10, _modifiedUserName.length, '...')}';
+        : '${_modifiedUserName.replaceRange(
+        10, _modifiedUserName.length, '...')}';
   }
 
-  String _getUserNameForActivity(int index) => this
+  String _getUserNameForActivity(int index) =>
+      this
           ._allUserConnectionActivity[index]
           .contains('[[[new_activity]]]')
-      ? this._allUserConnectionActivity[index].split('[[[new_activity]]]')[0]
-      : this._allUserConnectionActivity[index];
+          ? this._allUserConnectionActivity[index].split(
+          '[[[new_activity]]]')[0]
+          : this._allUserConnectionActivity[index];
 
   /// For New Activity Remainder
   Future<void> _newActivityUpdate(String realUserName) async {
@@ -1575,7 +1701,7 @@ class _ChatsAndActivityCollectionState
           /// Based upon Activity Condition, Activity Starting index set[For Text Activity Store At last but otherCase Activity Store at first in Local Database]
           this._everyUserActivityTotalCountTake.containsKey(realUserName)
               ? this._everyUserActivityTotalCountTake[realUserName] =
-                  _countTotalActivity
+              _countTotalActivity
               : this._everyUserActivityTotalCountTake[realUserName] = 1;
         }
       });

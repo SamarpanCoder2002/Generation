@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:generation/FrontEnd/Auth_UI/sign_up_UI.dart';
 
 class IntroductionScreen extends StatefulWidget {
-  const IntroductionScreen({Key key}) : super(key: key);
+  const IntroductionScreen({Key? key}) : super(key: key);
 
   @override
   _IntroductionScreenState createState() => _IntroductionScreenState();
@@ -23,7 +23,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
             Center(
               child: CircleAvatar(
                 radius: 70,
-                backgroundImage: ExactAssetImage('assets/logo/logo.jpg'),
+                backgroundImage: ExactAssetImage('assets/logo/logo.png'),
               ),
             ),
             SizedBox(

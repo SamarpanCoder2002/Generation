@@ -33,7 +33,7 @@ class EmailAndPasswordAuth {
   /// For Toast Message
   final FToast _fToast = FToast();
 
-  EmailAndPasswordAuth([this._context, this._email, this._pwd]) {
+  EmailAndPasswordAuth(this._context, this._email, this._pwd) {
     /// Close the keyboard
     SystemChannels.textInput.invokeMethod('TextInput.hide');
   }
@@ -43,7 +43,7 @@ class EmailAndPasswordAuth {
       final UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
               email: this._email, password: this._pwd);
-      userCredential.user.sendEmailVerification();
+      userCredential.user!.sendEmailVerification();
 
       FirebaseAuth.instance.signOut();
 
@@ -78,9 +78,9 @@ class EmailAndPasswordAuth {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: this._email, password: this._pwd);
 
-      if (userCredential.user.emailVerified) {
+      if (userCredential.user!.emailVerified) {
         DocumentSnapshot responseData = await FirebaseFirestore.instance
-            .doc("generation_users/${userCredential.user.email}")
+            .doc("generation_users/${userCredential.user!.email}")
             .get();
 
         print(responseData.exists);
@@ -90,7 +90,7 @@ class EmailAndPasswordAuth {
         } else {
           await FirebaseFirestore.instance
               .doc(
-                  'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                  'generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
               .delete()
               .onError((e, stackTrace) => print(
                   'In Email-Password Auth Delete User Old Profile from Database Error: ${e.toString()}'));
@@ -139,7 +139,7 @@ class EmailAndPasswordAuth {
                         controller: _userName,
                         style: TextStyle(color: Colors.white),
                         validator: (inputUserName) {
-                          if (inputUserName.length < 6)
+                          if (inputUserName!.length < 6)
                             return "User Name At Least 6 Characters";
                           else if (inputUserName.contains(' ') ||
                               inputUserName.contains('@'))
@@ -165,7 +165,7 @@ class EmailAndPasswordAuth {
                         controller: _about,
                         style: TextStyle(color: Colors.white),
                         validator: (inputUserName) {
-                          if (inputUserName.length < 6)
+                          if (inputUserName!.length < 6)
                             return "About Should be At Least 6 Characters";
                           return null;
                         },
@@ -207,7 +207,7 @@ class EmailAndPasswordAuth {
 
   Future<void> _validationAndSetToFireStore(
       BuildContext context, String email) async {
-    if (_userNameKey.currentState.validate()) {
+    if (_userNameKey.currentState!.validate()) {
       print("ok");
 
       /// Hide Keyboard
@@ -233,7 +233,7 @@ class EmailAndPasswordAuth {
       if (querySnapShotForUserNameChecking.docs.isEmpty) {
         Navigator.pop(context);
 
-        final String _getToken = await FirebaseMessaging.instance.getToken();
+        final String? _getToken = await FirebaseMessaging.instance.getToken();
 
         final String currDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
@@ -252,7 +252,7 @@ class EmailAndPasswordAuth {
           'connections': {},
           'total_connections': _encryptionMaker.encryptionMaker('0'),
           'activity': {},
-          'token': _encryptionMaker.encryptionMaker(_getToken),
+          'token': _encryptionMaker.encryptionMaker(_getToken!),
           'profile_pic': '',
           'phone_number': '',
         });
@@ -260,7 +260,7 @@ class EmailAndPasswordAuth {
         await _localStorageHelper.createTableForStorePrimaryData();
 
         await _localStorageHelper.insertOrUpdateDataForThisAccount(
-          userMail: FirebaseAuth.instance.currentUser.email,
+          userMail: FirebaseAuth.instance.currentUser!.email.toString(),
           userName: this._userName.text,
           userToken: _getToken,
           userAbout: this._about.text,

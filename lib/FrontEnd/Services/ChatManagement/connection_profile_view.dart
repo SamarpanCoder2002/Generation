@@ -15,7 +15,7 @@ class ConnectionProfileView extends StatefulWidget {
   final String userName;
 
   ConnectionProfileView(
-      {@required this.profileImagePath, @required this.userName});
+      {required this.profileImagePath, required this.userName});
 
   @override
   _ConnectionProfileViewState createState() => _ConnectionProfileViewState();
@@ -236,7 +236,7 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
   }
 
   Widget _connectionMenuOptions(
-      {@required String notificationName, @required bool status}) {
+      {required String notificationName, required bool status}) {
     return GestureDetector(
       onTap: () {
         switch (notificationName) {
@@ -350,7 +350,7 @@ class _ConnectionProfileViewState extends State<ConnectionProfileView> {
     );
   }
 
-  Widget _extraActivityOptions({@required String name, @required Color color}) {
+  Widget _extraActivityOptions({required String name, required Color color}) {
     return OpenContainer(
       closedColor: const Color.fromRGBO(34, 48, 60, 1),
       middleColor: const Color.fromRGBO(34, 48, 60, 1),

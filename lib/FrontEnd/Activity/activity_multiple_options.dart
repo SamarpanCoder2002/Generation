@@ -126,7 +126,7 @@ class _PollMakerState extends State<PollMaker> {
   }
 
   Widget optionsMaintain(
-      {@required IconData iconData, @required Color iconColor}) {
+      {required IconData iconData, required Color iconColor}) {
     return Center(
       child: GestureDetector(
         child: Container(
@@ -234,7 +234,7 @@ class _PollMakerState extends State<PollMaker> {
             ));
   }
 
-  Widget _pollingAlertDialogButtons({@required String buttonName}) {
+  Widget _pollingAlertDialogButtons({required String buttonName}) {
     return TextButton(
       style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -251,7 +251,7 @@ class _PollMakerState extends State<PollMaker> {
             element.clear();
           });
         } else {
-          if (this._pollFormKey.currentState.validate()) {
+          if (this._pollFormKey.currentState!.validate()) {
             print('Validate');
 
             final Map<String, dynamic> _pollMapGenUsers =
@@ -291,14 +291,14 @@ class _PollMakerState extends State<PollMaker> {
   }
 
   Widget answersSection(
-      {@required String labelText,
-      @required TextEditingController textEditingController,
-      @required index}) {
+      {required String labelText,
+      required TextEditingController textEditingController,
+      required index}) {
     return TextFormField(
       controller: textEditingController,
       style: TextStyle(color: Colors.white),
       validator: (inputUserName) {
-        if (inputUserName.length > 0) return null;
+        if (inputUserName!.length > 0) return null;
         if (index == 0) return 'Please Add a Question';
         if (inputUserName.contains('[[[@]]]'))
           return "[[[@]]] can't be Accepted";

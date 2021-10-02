@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CallManagement {
   final NativeCallback _nativeCallback = NativeCallback();
@@ -20,7 +20,7 @@ class CallManagement {
     if (!await _nativeCallback.callToCheckNetworkConnectivity())
       _showDiaLog(titleText: 'No Internet Connection');
     else {
-      String phoneNumber =
+      String? phoneNumber =
           await _management.phoneNumberExtractor(this.userName);
 
       if (phoneNumber != null && phoneNumber != '') {
@@ -29,25 +29,38 @@ class CallManagement {
 
         print('Phone number is: $phoneNumber');
 
-        final bool callresponse =
-            await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+        // final bool? callResponse =
+        // await FlutterPhoneDirectCaller.callNumber(phoneNumber);
 
-        print('Phone Calling Response: $callresponse');
+        try {
+          await launch("tel://$phoneNumber");
 
-        if (callresponse)
           await _localStorageHelper.insertDataForCallLog(this.userName,
               callDate: DateTime.now().toString().split(' ')[0],
               callTime: DateTime.now().toString().split(' ')[1]);
-      } else {
-        print('Connected User Phone Number not found');
-        _showDiaLog(
-            titleText: 'Not Found',
-            contentText: 'Connected user not registered phone number');
+        } catch (e) {
+          print('Exception in phone call: ${e.toString}');
+          print('Connected User Phone Number not found');
+          _showDiaLog(
+              titleText: 'Not Found',
+              contentText: 'Connected user not registered phone number');
+        }
+
+        //   if (callResponse!)
+        //     await _localStorageHelper.insertDataForCallLog(this.userName,
+        //         callDate: DateTime.now().toString().split(' ')[0],
+        //         callTime: DateTime.now().toString().split(' ')[1]);
+        // } else {
+        //   print('Connected User Phone Number not found');
+        //   _showDiaLog(
+        //       titleText: 'Not Found',
+        //       contentText: 'Connected user not registered phone number');
+        // }
       }
     }
   }
 
-  void _showDiaLog({@required String titleText, String contentText = ''}) {
+  void _showDiaLog({required String titleText, String contentText = ''}) {
     showDialog(
         context: this.context,
         builder: (_) => AlertDialog(

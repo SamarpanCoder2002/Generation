@@ -8,9 +8,9 @@ class ImportantThings {
   static void findImageUrlAndUserName() async {
     thisAccountProfileImagePath = await LocalStorageHelper()
         .extractProfileImageLocalPath(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
     thisAccountUserName = await LocalStorageHelper()
         .extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/toast_message_manage.dart';
@@ -23,14 +23,12 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
   final Management management = Management();
   TextEditingController activityText = TextEditingController();
   bool isLoading = false;
-  FToast fToast;
+  FToast fToast = FToast();
 
   int _fontSizeController = 1;
 
   @override
   void initState() {
-    isLoading = false;
-    fToast = FToast();
     fToast.init(context);
     super.initState();
   }
@@ -85,8 +83,8 @@ class _StatusTextContainerState extends State<StatusTextContainer> {
                 },
               )
             : null,
-        body: ModalProgressHUD(
-          inAsyncCall: isLoading,
+        body: LoadingOverlay(
+          isLoading: isLoading,
           color: Color.fromRGBO(0, 0, 0, 1),
           progressIndicator: CircularProgressIndicator(
             backgroundColor: Colors.black87,

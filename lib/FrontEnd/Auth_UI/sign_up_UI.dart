@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:generation/FrontEnd/Auth_UI/log_in_UI.dart';
 import 'package:generation/BackendAndDatabaseManager/firebase_services/email_pwd_auth.dart';
@@ -14,13 +14,13 @@ class SignUpAuthentication extends StatefulWidget {
 
 class _SignUpAuthenticationState extends State<SignUpAuthentication> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _pwdShowPermission, _confirmPwdShowPermission;
+  late bool _pwdShowPermission, _confirmPwdShowPermission;
 
-  bool _progressPermission;
+  late bool _progressPermission;
 
-  TextEditingController _email;
-  TextEditingController _pwd;
-  TextEditingController _confirmPwd;
+  TextEditingController _email = TextEditingController();
+  TextEditingController _pwd = TextEditingController();
+  TextEditingController _confirmPwd = TextEditingController();
 
   @override
   void initState() {
@@ -28,10 +28,6 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
     _pwdShowPermission = true;
     _confirmPwdShowPermission = true;
     _progressPermission = false;
-
-    _email = TextEditingController();
-    _pwd = TextEditingController();
-    _confirmPwd = TextEditingController();
   }
 
   @override
@@ -45,9 +41,9 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      body: ModalProgressHUD(
-        inAsyncCall: _progressPermission,
+      body: LoadingOverlay(
         color: const Color.fromRGBO(0, 0, 0, 1),
+        isLoading: _progressPermission,
         child: Container(
           height: MediaQuery.of(context).size.height,
           child: Center(
@@ -91,7 +87,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                           validator: (inputValue) {
                             RegExp _emailRegex = RegExp(
                                 r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-                            if (_emailRegex.hasMatch(inputValue)) {
+                            if (_emailRegex.hasMatch(inputValue!)) {
                               return null;
                             }
                             return "Enter Valid Email";
@@ -141,7 +137,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                               ),
                             ),
                             validator: (inputValue) {
-                              if ((inputValue.length >= 8)) {
+                              if ((inputValue!.length >= 8)) {
                                 return null;
                               }
                               return "Password should be more than or equal to 8 characters";
@@ -190,7 +186,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                               ),
                             ),
                             validator: (inputValue) {
-                              if ((inputValue.length < 8)) {
+                              if ((inputValue!.length < 8)) {
                                 return "Password should be more than or equal to 8 characters";
                               } else if (this._confirmPwd.text !=
                                   this._pwd.text)
@@ -226,7 +222,7 @@ class _SignUpAuthenticationState extends State<SignUpAuthentication> {
                           ),
                         ),
                         onPressed: () async {
-                          if (_formKey.currentState.validate()) {
+                          if (_formKey.currentState!.validate()) {
                             print("Proceed with Sign-Up");
                             setState(() {
                               _progressPermission = true;

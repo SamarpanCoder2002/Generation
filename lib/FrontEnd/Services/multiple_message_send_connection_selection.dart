@@ -3,9 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:thumbnails/thumbnails.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
@@ -20,11 +18,11 @@ class SelectConnection extends StatefulWidget {
   String extra;
   final MediaTypes mediaType;
   String textContent;
-  File mediaFile;
+  File? mediaFile;
 
   SelectConnection({
     this.extra = '',
-    @required this.mediaType,
+    required this.mediaType,
     this.textContent = '',
     this.mediaFile,
   });
@@ -40,24 +38,24 @@ class _SelectConnectionState extends State<SelectConnection> {
 
   final FToast _fToast = FToast();
 
-  List<bool> _selectedTile;
+  List<bool> _selectedTile = [];
 
   final List<Map<String, String>> allConnectionsUserNameAndProfilePicture = [];
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final Management _management = Management();
   final NativeCallback _nativeCallback = NativeCallback();
 
-  final String _noProfileImagePath = 'assets/logo/logo.jpg';
+  final String _noProfileImagePath = 'assets/logo/logo.png';
 
   void fetchAllUsersName() async {
-    final List<Map<String, Object>> userNameList =
+    final List<Map<String, Object?>> userNameList =
         await _localStorageHelper.extractAllUsersName();
 
     if (mounted) {
       setState(() {
         userNameList.forEach((userNameMap) {
           allConnectionsUserNameAndProfilePicture.add({
-            userNameMap.values.first: ProfileImageManagement
+            userNameMap.values.first.toString(): ProfileImageManagement
                 .allConnectionsProfilePicLocalPath[userNameMap.values.first],
           });
         });
@@ -114,12 +112,12 @@ class _SelectConnectionState extends State<SelectConnection> {
           side: BorderSide(width: 0.7),
         ),
       ),
-      body: ModalProgressHUD(
-        inAsyncCall: _isLoading,
+      body: LoadingOverlay(
         color: const Color.fromRGBO(0, 0, 0, 0.5),
         progressIndicator: const CircularProgressIndicator(
           backgroundColor: Colors.black87,
         ),
+        isLoading: _isLoading,
         child: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -180,16 +178,7 @@ class _SelectConnectionState extends State<SelectConnection> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: this
-                                .allConnectionsUserNameAndProfilePicture[index]
-                                .values
-                                .first !=
-                            ''
-                        ? FileImage(File(
-                            allConnectionsUserNameAndProfilePicture[index]
-                                .values
-                                .first))
-                        : ExactAssetImage(this._noProfileImagePath),
+                    backgroundImage: _getImageWithProvider(index),
                   ),
                 ),
                 Expanded(
@@ -247,17 +236,17 @@ class _SelectConnectionState extends State<SelectConnection> {
               .first);
       }
 
-      GeneralMessage _generalMessage;
+      late GeneralMessage _generalMessage;
 
       switch (widget.mediaType) {
         case MediaTypes.Voice:
           final String _voiceDownloadUrl =
-              await _management.uploadMediaToStorage(widget.mediaFile, context,
+              await _management.uploadMediaToStorage(widget.mediaFile!, context,
                   reference: 'multipleConnectionSendVoice/');
 
           _generalMessage = GeneralMessage(
             sendMessage: _voiceDownloadUrl,
-            storeMessage: widget.mediaFile.path,
+            storeMessage: widget.mediaFile!.path,
             sendTime:
                 '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.extra}+multipleConnectionSource+${DateTime.now()}',
             storeTime: '${DateTime.now().hour}:${DateTime.now().minute}',
@@ -272,12 +261,12 @@ class _SelectConnectionState extends State<SelectConnection> {
 
         case MediaTypes.Image:
           final String _imageDownLoadUrl = await _management
-              .uploadMediaToStorage(widget.mediaFile, this.context,
+              .uploadMediaToStorage(widget.mediaFile!, this.context,
                   reference: 'MultipleConnectionImage/');
 
           _generalMessage = GeneralMessage(
               sendMessage: _imageDownLoadUrl,
-              storeMessage: widget.mediaFile.path,
+              storeMessage: widget.mediaFile!.path,
               sendTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource+${DateTime.now()}',
               storeTime:
@@ -294,20 +283,22 @@ class _SelectConnectionState extends State<SelectConnection> {
           String thumbNailPicturePath, thumbNailPicturePathUrl;
 
           final String _videoDownLoadUrl = await _management
-              .uploadMediaToStorage(widget.mediaFile, this.context,
+              .uploadMediaToStorage(widget.mediaFile!, this.context,
                   reference: 'MultipleConnectionVideo/');
+          //
+          // final Directory? directory = await getExternalStorageDirectory();
+          //
+          // final Directory _newDirectory =
+          //     await Directory('${directory!.path}/.ThumbNails/')
+          //         .create(); // Create New Folder about the desire location;
 
-          final Directory directory = await getExternalStorageDirectory();
+          // thumbNailPicturePath = await Thumbnails.getThumbnail(
+          //     thumbnailFolder: _newDirectory.path,
+          //     videoFile: widget.mediaFile.path,
+          //     imageType: ThumbFormat.JPEG,
+          //     quality: 20);
 
-          final Directory _newDirectory =
-              await Directory('${directory.path}/.ThumbNails/')
-                  .create(); // Create New Folder about the desire location;
-
-          thumbNailPicturePath = await Thumbnails.getThumbnail(
-              thumbnailFolder: _newDirectory.path,
-              videoFile: widget.mediaFile.path,
-              imageType: ThumbFormat.JPEG,
-              quality: 20);
+          thumbNailPicturePath = await _nativeCallback.getTheVideoThumbnail(videoPath: widget.mediaFile!.path);
 
           thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
               File(thumbNailPicturePath), context,
@@ -315,7 +306,7 @@ class _SelectConnectionState extends State<SelectConnection> {
 
           _generalMessage = GeneralMessage(
               sendMessage: '$_videoDownLoadUrl+$thumbNailPicturePathUrl',
-              storeMessage: widget.mediaFile.path,
+              storeMessage: widget.mediaFile!.path,
               sendTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+multipleConnectionSource+${DateTime.now()}',
               storeTime:
@@ -358,12 +349,12 @@ class _SelectConnectionState extends State<SelectConnection> {
 
         case MediaTypes.Document:
           final String _documentDownLoadUrl =
-              await _management.uploadMediaToStorage(widget.mediaFile, context,
+              await _management.uploadMediaToStorage(widget.mediaFile!, context,
                   reference: 'MultipleConnectionDocument/');
 
           _generalMessage = GeneralMessage(
               sendMessage: _documentDownLoadUrl,
-              storeMessage: widget.mediaFile.path,
+              storeMessage: widget.mediaFile!.path,
               sendTime:
                   '${DateTime.now().hour}:${DateTime.now().minute}+${widget.mediaType}+${widget.textContent}+${widget.extra}+multipleConnectionSource+${DateTime.now()}',
               storeTime:
@@ -391,5 +382,15 @@ class _SelectConnectionState extends State<SelectConnection> {
 
       Navigator.pop(context);
     }
+  }
+
+  ImageProvider<Object>?  _getImageWithProvider(int index) {
+
+    print('Path is: ${this.allConnectionsUserNameAndProfilePicture[index].values.first}');
+
+    if (this.allConnectionsUserNameAndProfilePicture[index].values.first.toString() != '')
+      return FileImage(
+          File(allConnectionsUserNameAndProfilePicture[index].values.first.toString()));
+    return ExactAssetImage(this._noProfileImagePath);
   }
 }

@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/firestore_management.dart';
@@ -14,10 +14,10 @@ import 'package:generation/BackendAndDatabaseManager/general_services/toast_mess
 class PreviewImageScreen extends StatefulWidget {
   final File imageFile;
   String purpose;
-  final List<String> allConnectionUserName;
+  List<String>? allConnectionUserName;
 
   PreviewImageScreen(
-      {@required this.imageFile,
+      {required this.imageFile,
       this.purpose = 'profile_pic',
       this.allConnectionUserName});
 
@@ -27,7 +27,7 @@ class PreviewImageScreen extends StatefulWidget {
 
 class _PreviewImageScreenState extends State<PreviewImageScreen> {
   bool _isLoading = false;
-  FToast fToast;
+  FToast fToast = FToast();
 
   final TextEditingController manuallyTextController = TextEditingController();
   final Management management = Management();
@@ -38,7 +38,6 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   void initState() {
     manuallyTextController.text = '';
     _isLoading = false;
-    fToast = FToast();
     fToast.init(context);
     super.initState();
   }
@@ -53,8 +52,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black12,
-      body: ModalProgressHUD(
-        inAsyncCall: _isLoading,
+      body: LoadingOverlay(
+        isLoading: _isLoading,
         child: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
@@ -120,7 +119,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                     radius: Radius.circular(30.0),
                     child: TextFormField(
                       validator: (inputValue) {
-                        if (inputValue.contains('++++++')) {
+                        if (inputValue!.contains('++++++')) {
                           return "'++++++' pattern not supported";
                         }
                         return null;
@@ -149,7 +148,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 icon: Icon(Icons.send_rounded,
                     size: 30.0, color: Colors.lightGreenAccent),
                 onPressed: () async {
-                  if (_imagePreviewKey.currentState.validate()) {
+                  if (_imagePreviewKey.currentState!.validate()) {
                     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
                     if (mounted) {
@@ -170,7 +169,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                         await management.mediaActivityToStorageAndFireStore(
                             widget.imageFile,
                             manuallyTextController.text,
-                            widget.allConnectionUserName,
+                            widget.allConnectionUserName!,
                             context);
 
                     if (response) {

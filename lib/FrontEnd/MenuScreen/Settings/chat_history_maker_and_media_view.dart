@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/FrontEnd/MenuScreen/Settings/connection_media_view.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share/share.dart';
 
@@ -19,7 +19,7 @@ import 'package:generation/FrontEnd/Services/multiple_message_send_connection_se
 class ChatHistoryMakerAndMediaViewer extends StatefulWidget {
   final HistoryOrMediaChoice historyOrMediaChoice;
 
-  ChatHistoryMakerAndMediaViewer({@required this.historyOrMediaChoice});
+  ChatHistoryMakerAndMediaViewer({required this.historyOrMediaChoice});
 
   @override
   _ChatHistoryMakerAndMediaViewerState createState() =>
@@ -35,7 +35,8 @@ class _ChatHistoryMakerAndMediaViewerState
   final String _noProfileImagePath = 'assets/logo/logo.jpg';
 
   bool _isLoading = false;
-  Map<String, dynamic> _allConnectionUserNameAndProfilePic;
+  Map<String, dynamic> _allConnectionUserNameAndProfilePic =
+      Map<String, dynamic>();
 
   void extractUserNameAndProFilePic() async {
     this._allConnectionUserNameAndProfilePic =
@@ -43,7 +44,7 @@ class _ChatHistoryMakerAndMediaViewerState
 
     final String _myUserName =
         await _localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
     this._allConnectionUserNameAndProfilePic.remove(_myUserName);
   }
@@ -72,8 +73,8 @@ class _ChatHistoryMakerAndMediaViewerState
           ),
         ),
       ),
-      body: ModalProgressHUD(
-        inAsyncCall: _isLoading,
+      body: LoadingOverlay(
+        isLoading: _isLoading,
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -147,20 +148,7 @@ class _ChatHistoryMakerAndMediaViewerState
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: this
-                                ._allConnectionUserNameAndProfilePic
-                                .entries
-                                .toList()[index]
-                                .value
-                                .toString() !=
-                            ''
-                        ? FileImage(File(this
-                            ._allConnectionUserNameAndProfilePic
-                            .entries
-                            .toList()[index]
-                            .value
-                            .toString()))
-                        : ExactAssetImage(this._noProfileImagePath),
+                    backgroundImage: _getImageWithProvider(index),
                   ),
                 ),
                 Expanded(
@@ -232,9 +220,9 @@ class _ChatHistoryMakerAndMediaViewerState
   }
 
   Widget _sharingOptionsWidget(
-      {@required String mainText,
-      @required bool firstOption,
-      @required File chatHistoryFile}) {
+      {required String mainText,
+      required bool firstOption,
+      required File chatHistoryFile}) {
     return TextButton(
       style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
@@ -279,7 +267,7 @@ class _ChatHistoryMakerAndMediaViewerState
         .key
         .toString();
 
-    final List<Map<String, Object>> extractedHistoryData =
+    final List<Map<String, Object?>> extractedHistoryData =
         await _localStorageHelper.fetchAllHistoryData(selectedUserName);
 
     if (extractedHistoryData.isNotEmpty) {
@@ -289,9 +277,9 @@ class _ChatHistoryMakerAndMediaViewerState
         });
       }
 
-      Directory directory = await getExternalStorageDirectory();
+      Directory? directory = await getExternalStorageDirectory();
 
-      directory = await Directory('${directory.path}/.chatExtractedHistory')
+      directory = await Directory('${directory!.path}/.chatExtractedHistory')
           .create(recursive: true);
 
       final File _chatHistoryFile = File(
@@ -302,14 +290,19 @@ class _ChatHistoryMakerAndMediaViewerState
       String _historyMaker = '';
 
       extractedHistoryData.forEach((everyChatData) {
-        String _extractedThatMessage = _encryptionMaker.decryptionMaker(everyChatData['Messages'].toString());
+        String _extractedThatMessage = _encryptionMaker
+            .decryptionMaker(everyChatData['Messages'].toString());
 
-        String _extractedThatTime = _encryptionMaker.decryptionMaker(everyChatData['Time']);
+        String _extractedThatTime =
+            _encryptionMaker.decryptionMaker(everyChatData['Time'].toString());
 
         if (everyChatData['Media'] == MediaTypes.Text.toString() &&
-            _encryptionMaker.decryptionMaker(everyChatData['Messages'].toString()).contains('[[[@]]]'))
-          _extractedThatMessage =
-              _encryptionMaker.decryptionMaker(everyChatData['Messages'].toString()).split('[[[@]]]')[1];
+            _encryptionMaker
+                .decryptionMaker(everyChatData['Messages'].toString())
+                .contains('[[[@]]]'))
+          _extractedThatMessage = _encryptionMaker
+              .decryptionMaker(everyChatData['Messages'].toString())
+              .split('[[[@]]]')[1];
         else if (everyChatData['Media'] == MediaTypes.Text.toString() &&
             _extractedThatMessage.contains('\n'))
           _extractedThatMessage = _extractedThatMessage.split('\n').join(' ');
@@ -333,5 +326,22 @@ class _ChatHistoryMakerAndMediaViewerState
 
       _differentSharingOptions(_chatHistoryFile);
     }
+  }
+
+  ImageProvider<Object>? _getImageWithProvider(int index) {
+    if (this
+            ._allConnectionUserNameAndProfilePic
+            .entries
+            .toList()[index]
+            .value
+            .toString() !=
+        '')
+      return FileImage(File(this
+          ._allConnectionUserNameAndProfilePic
+          .entries
+          .toList()[index]
+          .value
+          .toString()));
+    return ExactAssetImage(this._noProfileImagePath);
   }
 }

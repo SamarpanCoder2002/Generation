@@ -8,15 +8,15 @@ class AnimatedBar extends StatelessWidget {
   final int currentIndex;
 
   const AnimatedBar({
-    Key key,
-    @required this.animController,
-    @required this.position,
-    @required this.currentIndex,
+    Key? key,
+    required this.animController,
+    required this.position,
+    required this.currentIndex,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+
     return Flexible(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -50,8 +50,8 @@ class AnimatedBar extends StatelessWidget {
     );
   }
 
-  Container _buildLoadingContainer(double width, Color color,
-      {LinearGradient linearGradient}) {
+  Container _buildLoadingContainer(double width, Color? color,
+      {LinearGradient? linearGradient}) {
     return Container(
       height: 5.0,
       width: width,

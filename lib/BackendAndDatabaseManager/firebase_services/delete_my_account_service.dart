@@ -9,17 +9,18 @@ import 'google_auth.dart';
 Future<void> deleteMyGenerationAccount() async {
   final String _userName = await LocalStorageHelper()
       .extractImportantDataFromThatAccount(
-          userMail: FirebaseAuth.instance.currentUser.email);
+          userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
-  final String _profilePicUrl =
+  final String? _profilePicUrl =
       await LocalStorageHelper().extractProfilePicUrl(userName: _userName);
 
-  if (_profilePicUrl != null && _profilePicUrl != '')
+  if (_profilePicUrl != null && _profilePicUrl != '') {
     await Management(takeTotalUserName: false)
         .deleteFilesFromFirebaseStorage(_profilePicUrl);
+  }
 
   await FirebaseFirestore.instance
-      .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+      .doc('generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
       .delete();
 
   await LocalStorageHelper().deleteTheExistingDatabase();

@@ -19,18 +19,18 @@ class GeneralMessage {
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
   GeneralMessage(
-      {this.sendMessage,
-      this.storeMessage,
-      this.sendTime,
-      this.storeTime,
-      this.mediaType,
-      this.selectedUsersName,
+      {required this.sendMessage,
+      required this.storeMessage,
+      required this.sendTime,
+      required this.storeTime,
+      required this.mediaType,
+      required this.selectedUsersName,
       this.extraText = ''});
 
   Future<String> fetchAccountUserName() async {
     final String _accUserName =
         await _localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
     return _accUserName;
   }
 
@@ -53,7 +53,7 @@ class GeneralMessage {
       final String _userMail = await _localStorageHelper
           .extractImportantDataFromThatAccount(userName: everyUser);
 
-      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+      final DocumentSnapshot<Map<String, dynamic>> documentSnapShot = await FirebaseFirestore.instance
           .doc("generation_users/$_userMail")
           .get();
 
@@ -61,10 +61,8 @@ class GeneralMessage {
       List<dynamic> sendingMessages = [];
 
       /// Store Updated sending messages list
-      sendingMessages = documentSnapShot.data()['connections']
-          [FirebaseAuth.instance.currentUser.email.toString()];
-
-      if (sendingMessages == null) sendingMessages = [];
+      sendingMessages = documentSnapShot.data()!['connections']
+          [FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
       /// Add data to temporary Storage of Sending
       sendingMessages.add({
@@ -74,7 +72,7 @@ class GeneralMessage {
 
       /// Data Store in FireStore
       await _management.addConversationMessages(
-          _userMail, sendingMessages, documentSnapShot.data()['connections']);
+          _userMail, sendingMessages, documentSnapShot.data()!['connections']);
 
       /// For Send Notification to Connected User
       if (mediaType == MediaTypes.Text)

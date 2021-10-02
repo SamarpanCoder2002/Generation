@@ -195,12 +195,12 @@ class _ApplicationListState extends State<ApplicationList> {
   }
 
   void _imageOrVideoSend(
-      {@required ImageSource imageSource, String type = 'image'}) async {
-    PickedFile pickedFile;
+      {required ImageSource imageSource, String type = 'image'}) async {
+    XFile? pickedFile;
     type == 'image'
         ? pickedFile =
-            await picker.getImage(source: imageSource, imageQuality: 50)
-        : pickedFile = await picker.getVideo(
+            await picker.pickImage(source: imageSource, imageQuality: 50)
+        : pickedFile = await picker.pickVideo(
             source: imageSource, maxDuration: Duration(seconds: 15));
 
     if (pickedFile != null)
@@ -224,7 +224,7 @@ class _ApplicationListState extends State<ApplicationList> {
     ];
 
     try {
-      final FilePickerResult filePickerResult =
+      final FilePickerResult? filePickerResult =
           await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: _allowedExtensions,
@@ -236,8 +236,8 @@ class _ApplicationListState extends State<ApplicationList> {
           if (_allowedExtensions.contains(file.extension))
             _extraTextManagement(
               MediaTypes.Document,
-              extension: '.${file.path.split('/').last}',
-              file: File(file.path),
+              extension: '.${file.path!.split('/').last}',
+              file: File(file.path.toString()),
             );
           else {
             _showDiaLog(
@@ -319,7 +319,7 @@ class _ApplicationListState extends State<ApplicationList> {
       'ogg',
     ];
 
-    final FilePickerResult _audioFilePickerResult =
+    final FilePickerResult? _audioFilePickerResult =
         await FilePicker.platform.pickFiles(
       type: FileType.audio,
     );
@@ -334,7 +334,7 @@ class _ApplicationListState extends State<ApplicationList> {
             MaterialPageRoute(
                 builder: (_) => SelectConnection(
                       mediaType: MediaTypes.Voice,
-                      mediaFile: File(element.path),
+                      mediaFile: File(element.path.toString()),
                       extra: _allowedExtensions.contains(element.extension)
                           ? '.${element.extension}'
                           : '.mp3',
@@ -344,7 +344,7 @@ class _ApplicationListState extends State<ApplicationList> {
   }
 
   void _extraTextManagement(MediaTypes mediaTypes,
-      {String extension = '', File file}) {
+      {String extension = '', File? file}) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -417,7 +417,7 @@ class _ApplicationListState extends State<ApplicationList> {
     );
   }
 
-  void _showDiaLog({@required String titleText, String contentText = ''}) {
+  void _showDiaLog({required String titleText, String contentText = ''}) {
     showDialog(
         context: context,
         builder: (_) => AlertDialog(

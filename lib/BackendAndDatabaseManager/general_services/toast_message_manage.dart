@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 void showToast(String errorMsg, FToast errToast, {Color toastColor = Colors.green, int seconds = 2, ToastGravity toastGravity = ToastGravity.BOTTOM, double fontSize = 20.0, Color bgColor = Colors.black54}) {
-  if (errorMsg == null) return;
+
   Widget toast = Container(
     padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
     decoration: BoxDecoration(

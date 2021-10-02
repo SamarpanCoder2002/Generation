@@ -2,7 +2,7 @@ name: generation
 description: What You Seek is Seeking You
 
 # The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
@@ -18,73 +18,81 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
     sdk: flutter
 
   http: ^0.13.3
   intl: ^0.17.0
-  flutter_autolink_text: ^1.0.0+1
 
-  flutter_icons: ^1.1.0
-  modal_progress_hud: ^0.1.3
-  emoji_picker: ^0.1.0
-  animations: ^2.0.0
-  flutter_colorpicker: ^0.4.0
-  fluttertoast: ^8.0.4
+  flutter_icons:
+    git:
+      url: git://github.com/jibiel/flutter-icons.git
+      ref: master
+  loading_overlay: ^0.3.0
+  emoji_picker_flutter: ^1.0.7
+  animations: ^2.0.1
+  flutter_colorpicker: ^0.6.0
+  fluttertoast: ^8.0.8
   percent_indicator: ^3.0.1
-  just_audio: ^0.7.4
-  photo_view: ^0.11.1
-  flutter_local_notifications: ^5.0.0+4
-  workmanager: ^0.4.0
-  share: ^2.0.1
-  image_gallery_saver: ^1.6.9
+  just_audio: ^0.9.12
+  photo_view: ^0.12.0
+  flutter_local_notifications: ^8.2.0
+  workmanager: ^0.4.1
+  share: ^2.0.4
+  image_gallery_saver: ^1.7.0
   mobile_number: ^1.0.4
-  flutter_phone_direct_caller:
 
-  circle_list:
-  image_picker:
-  flutter_sound: ^8.1.1
-  path_provider:
-  permission_handler:
-  file_picker: ^3.0.1
-  open_file: ^3.2.0
-  pdf_viewer_plugin: ^1.1.1
-  thumbnails: ^1.0.1
-  swipe_to: ^0.0.1+8
+  circle_list: ^1.0.5
+  image_picker: ^0.8.4+2
+  flutter_sound: ^8.3.12
+  path_provider: ^2.0.5
+  permission_handler: ^8.1.6
+  file_picker: ^4.1.3
+  open_file: ^3.2.1
+  pdf_viewer_plugin:
+    git:
+      url: https://github.com/boskokg/Pdf_Viewer_Plugin/
+      ref: master
+  swipe_to: 0.1.0-nullsafety.1
 
-  firebase_core: ^1.0.2
-  firebase_auth: ^1.0.1
-  google_sign_in: ^5.0.1
-  cloud_firestore: ^1.0.3
-  firebase_storage:
-  firebase_messaging:
+  firebase_core: ^1.7.0
+  firebase_auth: ^3.1.2
+  google_sign_in: ^5.1.1
+  cloud_firestore: ^2.5.3
+  firebase_storage: ^10.0.4
+  firebase_messaging: ^10.0.8
 
-  dio: any
+  dio: ^4.0.0
 
-  sqflite: ^2.0.0+3
+  sqflite: ^2.0.0+4
 
-  google_maps_flutter: ^2.0.3
-  geolocator: ^7.0.3
-  url_launcher: ^6.0.3
+  google_maps_flutter: ^2.0.11
+  geolocator: ^7.6.2
+  url_launcher: ^6.0.12
 
-  encrypt:
+  encrypt: ^5.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-
-#flutter_icons:
-#  image_path: "assets/icons/generation_logo.jpg"
-#  android: true
-#  ios: true
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -101,19 +109,18 @@ flutter:
   assets:
     - assets/images/
     - assets/logo/
-    #   - images/a_dot_ham.jpeg
 
-    # An image asset can refer to one or more resolution-specific "variants", see
-    # https://flutter.dev/assets-and-images/#resolution-aware.
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
 
-    # For details regarding adding assets from package dependencies, see
-    # https://flutter.dev/assets-and-images/#from-packages
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
 
-    # To add custom fonts to your application, add a fonts section here,
-    # in this "flutter" section. Each entry in this list should have a
-    # "family" key with the font family name, and a "fonts" key with a
-    # list giving the asset and other descriptors for the font. For
-    # example:
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
   fonts:
     - family: Lora
       fonts:

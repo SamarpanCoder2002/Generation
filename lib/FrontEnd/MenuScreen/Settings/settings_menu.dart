@@ -90,9 +90,9 @@ class _SettingsWindowState extends State<SettingsWindow> {
   }
 
   Widget everySettingsItem(
-      {@required String mainText,
-      @required IconData icon,
-      @required String smallDescription}) {
+      {required String mainText,
+      required IconData icon,
+      required String smallDescription}) {
     return OpenContainer(
       closedElevation: 0.0,
       openColor: const Color.fromRGBO(34, 48, 60, 1),
@@ -104,21 +104,20 @@ class _SettingsWindowState extends State<SettingsWindow> {
         switch (mainText) {
           case 'Notification':
             return SettingsNotificationConfiguration();
-            break;
+
           case 'Chat Wallpaper':
             return ChatWallPaperMaker(allUpdatePermission: true, userName: '');
-            break;
+
           case 'Generation Direct Calling Setting':
             return PhoneNumberConfig();
-            break;
+
           case 'Chat History':
             return ChatHistoryMakerAndMediaViewer(
                 historyOrMediaChoice: HistoryOrMediaChoice.History);
-            break;
+
           case 'Storage':
             return ChatHistoryMakerAndMediaViewer(
                 historyOrMediaChoice: HistoryOrMediaChoice.Media);
-            break;
         }
         return Center(
           child: Text(

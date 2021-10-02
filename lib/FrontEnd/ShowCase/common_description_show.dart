@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 void notificationDescription(
-    {@required String title,
-    @required String content,
-    @required BuildContext context}) {
+    {required String title,
+    required String content,
+    required BuildContext context}) {
   showModalBottomSheet(
       backgroundColor: const Color.fromRGBO(34, 48, 60, 1),
       elevation: 5.0,

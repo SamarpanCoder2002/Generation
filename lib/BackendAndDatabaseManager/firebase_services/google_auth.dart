@@ -51,7 +51,7 @@ class GoogleAuth {
               await FirebaseAuth.instance.signInWithCredential(oAuthCredential);
 
           final DocumentSnapshot responseData = await FirebaseFirestore.instance
-              .doc("generation_users/${userCredential.user.email}")
+              .doc("generation_users/${userCredential.user!.email.toString()}")
               .get();
 
           if (!responseData.exists) {
@@ -60,13 +60,13 @@ class GoogleAuth {
             /// If Account Already Present, delete the previous account and made new one
             await FirebaseFirestore.instance
                 .doc(
-                    'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                    'generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
                 .delete()
                 .onError((e, stackTrace) => print(
                     'In Google Auth Delete User Old Profile from Database Error: ${e.toString()}'));
           }
 
-          await userNameChecking(context, userCredential.user.email);
+          await userNameChecking(context, userCredential.user!.email.toString());
         }
       } else {
         print("Already Logged In");
@@ -120,7 +120,7 @@ class GoogleAuth {
                         controller: _userName,
                         style: TextStyle(color: Colors.white),
                         validator: (inputUserName) {
-                          if (inputUserName.length < 6)
+                          if (inputUserName!.length < 6)
                             return "User Name At Least 6 Characters";
                           else if (inputUserName.contains(' ') ||
                               inputUserName.contains('@'))
@@ -146,7 +146,7 @@ class GoogleAuth {
                         controller: _about,
                         style: TextStyle(color: Colors.white),
                         validator: (inputUserName) {
-                          if (inputUserName.length < 6)
+                          if (inputUserName!.length < 6)
                             return "About Should be At Least 6 Characters";
                           return null;
                         },
@@ -191,7 +191,7 @@ class GoogleAuth {
 
   Future<void> _userValidationAndSetDataToFireStore(
       BuildContext context, String _email) async {
-    if (_userNameKey.currentState.validate()) {
+    if (_userNameKey.currentState!.validate()) {
       print("ok");
 
       /// Hide Keyboard
@@ -216,7 +216,7 @@ class GoogleAuth {
       if (querySnapShotForUserNameChecking.docs.isEmpty) {
         Navigator.pop(context);
 
-        final String _getToken = await FirebaseMessaging.instance.getToken();
+        final String? _getToken = await FirebaseMessaging.instance.getToken();
 
         final String currDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
 
@@ -235,7 +235,7 @@ class GoogleAuth {
           'connections': {},
           'total_connections': _encryptionMaker.encryptionMaker('0'),
           'activity': {},
-          'token': _encryptionMaker.encryptionMaker(_getToken),
+          'token': _encryptionMaker.encryptionMaker(_getToken!),
           'profile_pic': '',
           'phone_number': '',
         });
@@ -243,7 +243,7 @@ class GoogleAuth {
         await _localStorageHelper.createTableForStorePrimaryData();
 
         await _localStorageHelper.insertOrUpdateDataForThisAccount(
-          userMail: FirebaseAuth.instance.currentUser.email,
+          userMail: FirebaseAuth.instance.currentUser!.email.toString(),
           userName: this._userName.text,
           userToken: _getToken,
           userAbout: this._about.text,

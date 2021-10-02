@@ -12,8 +12,8 @@ import 'package:generation/FrontEnd/Activity/status_text_container.dart';
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 
 activityList(
-    {@required BuildContext context,
-    @required List<String> allConnectionsUserName}) {
+    {required BuildContext context,
+    required List<String> allConnectionsUserName}) {
   return showDialog(
     context: context,
     builder: (context) => activityListOptions(context, allConnectionsUserName),
@@ -105,7 +105,7 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                     color: Colors.lightGreen,
                   ),
                   onTap: () async {
-                    final PickedFile pickedFile = await picker.getImage(
+                    final XFile? pickedFile = await picker.pickImage(
                       source: ImageSource.camera,
                       imageQuality: 50,
                     );
@@ -128,7 +128,7 @@ activityListOptions(BuildContext context, List<String> allConnectionsUserName) {
                   onLongPress: () async {
                     print("Take Image");
 
-                    final PickedFile pickedFile = await picker.getImage(
+                    final XFile? pickedFile = await picker.pickImage(
                         source: ImageSource.gallery, imageQuality: 50);
 
                     if (pickedFile != null) {

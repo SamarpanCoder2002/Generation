@@ -2,9 +2,10 @@
 ![](https://img.shields.io/badge/Software_Development_Kit(SDK)-Flutter-gold.svg)
 ![](https://img.shields.io/badge/Platform-Android_Studio-green.svg)
 ![](https://img.shields.io/badge/App-Android-yellow.svg)
-![](https://img.shields.io/badge/Flutter_Version-2.2.1-brown.svg)
-![](https://img.shields.io/badge/Dart_Version-2.13.1-orange.svg)
-![](https://img.shields.io/badge/Status-Beta-green.svg)
+![](https://img.shields.io/badge/Flutter_Version-2.5.0-brown.svg)
+![](https://img.shields.io/badge/Dart_Version-2.14.0-orange.svg)
+![](https://img.shields.io/badge/Status-Stable-blue.svg)
+![](https://img.shields.io/badge/Null_Safety-Migrated-green.svg)
 
 
 # <p align="center">💙 Generation 💙</p>
@@ -116,6 +117,8 @@
 
 ### 🙋 For Any query related to this project(Generation), Please Raise an issue in that Repo.
 
+### 💥 This Project is Participating Under `Hacktoberfest 2021`
+
 ***
 
 <h3 align="center">Show 💘 by Starring This Repo</h3>
@@ -124,6 +127,6 @@
 
 - #### [LinkedIN Video](https://www.linkedin.com/posts/samarpan-dasgupta-4aa1061b0_connections-introducing-project-activity-6811146891833704448-FyrC)
 
-- #### [APK File Download Link](https://drive.google.com/file/d/1jH7vkMy_U28TFz_8YXbQw981Em7a_B5w/view?usp=sharing)
+- #### [APK File Download Link](https://drive.google.com/file/d/1bQO1QzQSrcY2k1FHgvkm29Qeo9gwmaZl/view?usp=sharing)
 
 <h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>

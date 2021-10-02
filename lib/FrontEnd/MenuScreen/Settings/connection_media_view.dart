@@ -11,9 +11,8 @@ class ParticularConnectionMediaView extends StatefulWidget {
   final String selectedConnectionUserName;
   final String profileImagePath;
 
-  ParticularConnectionMediaView(
-      {@required this.selectedConnectionUserName,
-      @required this.profileImagePath});
+  ParticularConnectionMediaView({required this.selectedConnectionUserName,
+    required this.profileImagePath});
 
   @override
   _ParticularConnectionMediaViewState createState() =>
@@ -31,9 +30,9 @@ class _ParticularConnectionMediaViewState
 
   void _extractImportantMediaTypes() async {
     final takeTempImages =
-        await _localStorageHelper.extractParticularChatMediaByRequirement(
-            tableName: widget.selectedConnectionUserName,
-            mediaType: MediaTypes.Image);
+    await _localStorageHelper.extractParticularChatMediaByRequirement(
+        tableName: widget.selectedConnectionUserName,
+        mediaType: MediaTypes.Image);
 
     print('Take it: $takeTempImages');
 
@@ -44,9 +43,9 @@ class _ParticularConnectionMediaViewState
     }
 
     final takeTempVideos =
-        await _localStorageHelper.extractParticularChatMediaByRequirement(
-            tableName: widget.selectedConnectionUserName,
-            mediaType: MediaTypes.Video);
+    await _localStorageHelper.extractParticularChatMediaByRequirement(
+        tableName: widget.selectedConnectionUserName,
+        mediaType: MediaTypes.Video);
 
     if (mounted) {
       setState(() {
@@ -55,9 +54,9 @@ class _ParticularConnectionMediaViewState
     }
 
     final takeTempAudios =
-        await _localStorageHelper.extractParticularChatMediaByRequirement(
-            tableName: widget.selectedConnectionUserName,
-            mediaType: MediaTypes.Voice);
+    await _localStorageHelper.extractParticularChatMediaByRequirement(
+        tableName: widget.selectedConnectionUserName,
+        mediaType: MediaTypes.Voice);
 
     if (mounted) {
       setState(() {
@@ -66,9 +65,9 @@ class _ParticularConnectionMediaViewState
     }
 
     final takeTempDocs =
-        await _localStorageHelper.extractParticularChatMediaByRequirement(
-            tableName: widget.selectedConnectionUserName,
-            mediaType: MediaTypes.Document);
+    await _localStorageHelper.extractParticularChatMediaByRequirement(
+        tableName: widget.selectedConnectionUserName,
+        mediaType: MediaTypes.Document);
 
     if (mounted) {
       setState(() {
@@ -103,17 +102,14 @@ class _ParticularConnectionMediaViewState
                 ),
                 child: CircleAvatar(
                   radius: 23.0,
-                  backgroundImage: widget.profileImagePath == ''
-                      ? ExactAssetImage(
-                          "assets/logo/logo.jpg",
-                        )
-                      : FileImage(File(widget.profileImagePath)),
+                  backgroundImage: _getImageWithProvider(),
                 ),
               ),
               Text(
                 widget.selectedConnectionUserName.length <= 16
                     ? widget.selectedConnectionUserName
-                    : '${widget.selectedConnectionUserName.replaceRange(16, widget.selectedConnectionUserName.length, '...')}',
+                    : '${widget.selectedConnectionUserName.replaceRange(
+                    16, widget.selectedConnectionUserName.length, '...')}',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20.0,
@@ -209,5 +205,13 @@ class _ParticularConnectionMediaViewState
         ),
       ),
     );
+  }
+
+  ImageProvider<Object>? _getImageWithProvider() {
+    if (widget.profileImagePath == '')
+      return ExactAssetImage(
+        "assets/logo/logo.jpg",
+      );
+    return FileImage(File(widget.profileImagePath));
   }
 }

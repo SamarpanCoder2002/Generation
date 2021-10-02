@@ -9,7 +9,7 @@ import 'package:generation/BackendAndDatabaseManager/general_services/toast_mess
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ChatWallPaperMaker extends StatefulWidget {
@@ -17,7 +17,7 @@ class ChatWallPaperMaker extends StatefulWidget {
   final String userName;
 
   ChatWallPaperMaker(
-      {@required this.allUpdatePermission, @required this.userName});
+      {required this.allUpdatePermission, required this.userName});
 
   @override
   _ChatWallPaperMakerState createState() => _ChatWallPaperMakerState();
@@ -42,10 +42,10 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
 
   /// Initially Take out Old Common Wallpaper Path
   void selectChatWallPaper() async {
-    final String wallpaperTempPath =
+    final String? wallpaperTempPath =
         await _localStorageHelper.extractImportantTableData(
       userMail: widget.allUpdatePermission
-          ? FirebaseAuth.instance.currentUser.email
+          ? FirebaseAuth.instance.currentUser!.email.toString()
           : '',
       userName: widget.allUpdatePermission ? '' : widget.userName,
       extraImportant: ExtraImportant.ChatWallpaper,
@@ -56,7 +56,7 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
     if (mounted) {
       setState(() {
         this._chatWallPaperPath =
-            wallpaperTempPath == null ? '' : wallpaperTempPath;
+            wallpaperTempPath == null ? '' : wallpaperTempPath.toString();
         if (this._chatWallPaperPath != '') {
           this._wallPaperAlreadyExist = true;
           this._oldWallPaperPath = this._chatWallPaperPath;
@@ -109,8 +109,8 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
           ),
         ),
       ),
-      body: ModalProgressHUD(
-        inAsyncCall: _isLoading,
+      body: LoadingOverlay(
+        isLoading: _isLoading,
         child: Container(
           margin: EdgeInsets.only(
               top: this._chatWallPaperPath == ''
@@ -337,8 +337,8 @@ class _ChatWallPaperMakerState extends State<ChatWallPaperMaker> {
 
   /// Common Function to select image from storage
   Future<void> _selectPictureFromStorage() async {
-    final PickedFile pickedFile =
-        await _imagePicker.getImage(source: ImageSource.gallery);
+    final XFile? pickedFile =
+        await _imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       if (mounted) {
         setState(() {

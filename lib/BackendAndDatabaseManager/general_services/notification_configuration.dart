@@ -11,8 +11,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class SendNotification {
   Future<void> messageNotificationClassifier(MediaTypes mediaTypes,
       {String textMsg = '',
-      @required String connectionToken,
-      @required String currAccountUserName}) async {
+      required String connectionToken,
+      required String currAccountUserName}) async {
     print('Token is: $connectionToken');
 
     switch (mediaTypes) {
@@ -78,13 +78,13 @@ class SendNotification {
   }
 
   Future<int> sendNotification(
-      {@required String token,
-      @required String title,
-      @required String body}) async {
+      {required String token,
+      required String title,
+      required String body}) async {
     try {
       print('Send');
 
-      final String _serverKey = 'SERVER-KEY';
+      final String _serverKey = 'SERVER-KEY(Generated from Firebase Project Settings Cloud Messaging)';
 
       final Response response = await post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
@@ -108,12 +108,12 @@ class SendNotification {
         }),
       );
 
-      print('Response is: ${response.statusCode}');
+      print('Response is: ${response.statusCode}    ${response.body}');
 
       return response.statusCode;
     } catch (e) {
       showDialog(
-          context: navigatorKey.currentContext,
+          context: navigatorKey!.currentContext!,
           builder: (_) => AlertDialog(
                 title: Text('Send Notification Error'),
                 content: Text(e.toString()),
@@ -142,13 +142,16 @@ class ForeGroundNotificationReceiveAndShow {
   initAll(InitializationSettings initializationSettings) async {
     var response = await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings,
-        onSelectNotification: notificationSelected);
+        onSelectNotification: (payload)async{
+          return 'On Select Notification Payload: $payload';
+        }
+    );
 
     print('Local Notification Initialization Status: $response');
   }
 
   Future<void> showNotification(
-      {@required String title, @required String body}) async {
+      {required String title, required String body}) async {
     try {
       final AndroidNotificationDetails androidDetails =
           AndroidNotificationDetails(
@@ -162,7 +165,7 @@ class ForeGroundNotificationReceiveAndShow {
           .show(0, title, body, generalNotificationDetails, payload: title);
     } catch (e) {
       showDialog(
-        context: navigatorKey.currentContext,
+        context: navigatorKey!.currentContext!,
         builder: (_) => AlertDialog(
           title: Text('Show Notification Error'),
           content: Text(e.toString()),
@@ -171,7 +174,4 @@ class ForeGroundNotificationReceiveAndShow {
     }
   }
 
-  Future notificationSelected(String payload) async {
-    print('On Select Notification Payload: $payload');
-  }
 }

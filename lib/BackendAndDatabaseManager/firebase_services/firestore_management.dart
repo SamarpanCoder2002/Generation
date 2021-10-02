@@ -15,12 +15,12 @@ class Management {
   final LocalStorageHelper localStorageHelper = LocalStorageHelper();
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
-  String _currAccountUserName;
+  late String _currAccountUserName;
 
   _userNameExtractFromLocalDatabase() async {
     _currAccountUserName =
         await localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
   }
 
   Management({bool takeTotalUserName = true}) {
@@ -29,7 +29,7 @@ class Management {
 
   Future<void> addConversationMessages(String _senderMail,
       List<dynamic> messageMap, dynamic messageCollection) async {
-    messageCollection[FirebaseAuth.instance.currentUser.email.toString()] =
+    messageCollection[FirebaseAuth.instance.currentUser!.email.toString().toString()] =
         messageMap;
 
     print('Message Collection is: $messageCollection');
@@ -41,10 +41,10 @@ class Management {
     });
   }
 
-  Stream<DocumentSnapshot> getDatabaseData() {
-    final Stream<DocumentSnapshot> streamDocumentSnapShot = FirebaseFirestore
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getDatabaseData() {
+    final Stream<DocumentSnapshot<Map<String, dynamic>>> streamDocumentSnapShot = FirebaseFirestore
         .instance
-        .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+        .doc('generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
         .snapshots();
 
     return streamDocumentSnapShot;
@@ -73,14 +73,14 @@ class Management {
               await localStorageHelper.extractImportantDataFromThatAccount(
                   userName: connectionUserName);
 
-          DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
               .get();
 
           Map<String, dynamic> activityCollection =
-              documentSnapshot.data()['activity'] as Map;
-          List<dynamic> currConnection = activityCollection[
-              FirebaseAuth.instance.currentUser.email.toString()];
+              documentSnapshot.data()!['activity'] as Map<String, dynamic>;
+          List<dynamic>? currConnection = activityCollection[
+              FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
           if (currConnection == null) currConnection = [];
 
@@ -90,7 +90,7 @@ class Management {
                     '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime'),
           });
 
-          activityCollection[FirebaseAuth.instance.currentUser.email
+          activityCollection[FirebaseAuth.instance.currentUser!.email.toString()
               .toString()] = currConnection;
 
           await FirebaseFirestore.instance
@@ -144,14 +144,14 @@ class Management {
               await localStorageHelper.extractImportantDataFromThatAccount(
                   userName: connectionUserName);
 
-          DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await FirebaseFirestore.instance
               .doc('generation_users/$_userMail')
               .get();
 
           Map<String, dynamic> activityCollection =
-              documentSnapshot.data()['activity'] as Map;
-          List<dynamic> currConnection = activityCollection[
-              FirebaseAuth.instance.currentUser.email.toString()];
+              documentSnapshot.data()!['activity'] as Map<String, dynamic>;
+          List<dynamic>? currConnection = activityCollection[
+              FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
           if (currConnection == null) currConnection = [];
 
@@ -161,7 +161,7 @@ class Management {
                     '$manuallyText++++++$mediaType++++++$_currTime'),
           });
 
-          activityCollection[FirebaseAuth.instance.currentUser.email
+          activityCollection[FirebaseAuth.instance.currentUser!.email.toString()
               .toString()] = currConnection;
 
           await FirebaseFirestore.instance
@@ -186,12 +186,12 @@ class Management {
   }
 
   Future<String> uploadMediaToStorage(File filePath, BuildContext context,
-      {@required String reference}) async {
+      {required String reference}) async {
     try {
-      String downLoadUrl;
+      String? downLoadUrl;
 
       final String fileName =
-          '${FirebaseAuth.instance.currentUser.uid}${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}${DateTime.now().millisecond}';
+          '${FirebaseAuth.instance.currentUser!.uid}${DateTime.now().day}${DateTime.now().month}${DateTime.now().year}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}${DateTime.now().millisecond}';
 
       final Reference firebaseStorageRef =
           FirebaseStorage.instance.ref(reference).child(fileName);
@@ -206,7 +206,7 @@ class Management {
         print("Download Url: $downLoadUrl}");
       });
 
-      return downLoadUrl;
+      return downLoadUrl!;
     } catch (e) {
       showDialog(
           context: context,
@@ -243,7 +243,7 @@ class Management {
   }
 
   Future<void> deleteParticularActivityLink(
-      {@required String fileName, @required String connectionMail}) async {
+      {required String fileName, required String connectionMail}) async {
     try {
       await FirebaseFirestore.instance
           .doc('generation_users/activity/$fileName')
@@ -253,7 +253,7 @@ class Management {
     }
   }
 
-  Future<String> uploadPollingOptionsToPollingStoreInFireStore(
+  Future<String?> uploadPollingOptionsToPollingStoreInFireStore(
       Map<String, dynamic> map) async {
     try {
       final DocumentReference documentReference = await FirebaseFirestore
@@ -270,7 +270,7 @@ class Management {
   Future<void> addPollIdInLocalAndFireStore(Map<String, dynamic> _pollMap,
       Map<String, dynamic> _pollMapPollOptions) async {
     try {
-      final String id = await uploadPollingOptionsToPollingStoreInFireStore(
+      final String? id = await uploadPollingOptionsToPollingStoreInFireStore(
           _pollMapPollOptions);
       final String _currTime = DateTime.now().toString();
 
@@ -300,26 +300,26 @@ class Management {
       );
 
       if (id != null) {
-        final DocumentSnapshot documentSnapshot = await FirebaseFirestore
+        final DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await FirebaseFirestore
             .instance
-            .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+            .doc('generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
             .get();
         final Map<String, dynamic> _connectionsMap =
-            documentSnapshot.data()['activity'];
+            documentSnapshot.data()!['activity'];
 
         print('Connection Map: $_connectionsMap');
 
         _connectionsMap
             .forEach((connectionUserName, connectionUserMessages) async {
-          final DocumentSnapshot documentSnapshot = await FirebaseFirestore
+          final DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await FirebaseFirestore
               .instance
               .doc('generation_users/$connectionUserName')
               .get();
           final Map<String, dynamic> activityCollection =
-              documentSnapshot.data()['activity'];
+              documentSnapshot.data()!['activity'];
 
-          List<dynamic> currConnection = activityCollection[
-              FirebaseAuth.instance.currentUser.email.toString()];
+          List<dynamic>? currConnection = activityCollection[
+              FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
           if (currConnection == null) currConnection = [];
 
@@ -329,7 +329,7 @@ class Management {
                 _encryptionMaker.encryptionMaker(_answerCollection),
           });
 
-          activityCollection[FirebaseAuth.instance.currentUser.email
+          activityCollection[FirebaseAuth.instance.currentUser!.email.toString()
               .toString()] = currConnection;
 
           print('Activity Collection: $activityCollection');
@@ -347,28 +347,28 @@ class Management {
   }
 
   Future<void> uploadNewProfilePicToFireStore(
-      {@required File file,
-      @required BuildContext context,
-      @required String userMail}) async {
+      {required File file,
+      required BuildContext context,
+      required String userMail}) async {
     try {
       final String _uploadedProfilePicUrl = await uploadMediaToStorage(
           file, context,
           reference: 'profilePictures/');
 
-      final DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+      final DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await FirebaseFirestore.instance
           .doc('generation_users/$userMail')
           .get();
 
-      if (documentSnapshot.data()['profile_pic'].toString() != '')
+      if (documentSnapshot.data()!['profile_pic'].toString() != '')
         await deleteFilesFromFirebaseStorage(
             _encryptionMaker.decryptionMaker(
-                documentSnapshot.data()['profile_pic'].toString()),
+                documentSnapshot.data()!['profile_pic'].toString()),
             specialPurpose: true);
 
       await localStorageHelper.insertProfilePictureInImportant(
           imagePath: file.path,
           imageUrl: _uploadedProfilePicUrl,
-          mail: FirebaseAuth.instance.currentUser.email);
+          mail: FirebaseAuth.instance.currentUser!.email.toString());
 
       await FirebaseFirestore.instance
           .doc('generation_users/$userMail')
@@ -380,7 +380,7 @@ class Management {
     }
   }
 
-  Future<String> phoneNumberExtractor(String _userName) async {
+  Future<String>? phoneNumberExtractor(String _userName) async {
     final String _userMail = await localStorageHelper
         .extractImportantDataFromThatAccount(userName: _userName);
 

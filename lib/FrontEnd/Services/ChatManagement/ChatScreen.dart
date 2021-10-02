@@ -6,13 +6,12 @@ import 'package:animations/animations.dart';
 import 'package:circle_list/circle_list.dart';
 import 'package:circle_list/radial_drag_gesture_detector.dart';
 import 'package:dio/dio.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:emoji_picker/emoji_picker.dart';
-import 'package:flutter_autolink_text/flutter_autolink_text.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -22,7 +21,7 @@ import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -30,9 +29,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share/share.dart';
-import 'package:thumbnails/thumbnails.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:swipe_to/swipe_to.dart';
 
 import 'package:generation/FrontEnd/Preview/images_preview_screen.dart';
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
@@ -45,6 +41,7 @@ import 'package:generation/BackendAndDatabaseManager/general_services/make_audio
 import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/this_account_important_data.dart';
 import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
+import 'package:swipe_to/swipe_to.dart';
 import 'connection_profile_view.dart';
 
 // ignore: must_be_immutable
@@ -70,8 +67,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   /// Some Integer Value Initialized
   double _audioDownloadProgress = 0;
-  double _currAudioPlayingTime;
-  int _lastAudioPlayingIndex;
+  double _currAudioPlayingTime = 0.0;
+  int _lastAudioPlayingIndex = 0;
   double _bottomRowDownPadding = 7.0;
   double _audioPlayingSpeed = 1.0;
 
@@ -82,7 +79,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   /// All Container List
   final List<Map<String, String>> _chatContainer = [];
-  final List<bool> _response = [];
+  final List<bool?> _response = [];
   final List<MediaTypes> _mediaTypes = [];
 
   /// For Controller Text in Field
@@ -108,17 +105,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   final RegExp _messageRegex = RegExp(r'[a-zA-Z0-9]');
 
   /// Chat List View Parent Height
-  double _chatBoxHeight;
+  double _chatBoxHeight = 0.0;
   double _bottomRowHeight = 80.0;
 
   /// Sound Recorder and Audio Obj Initialization
-  FlutterSoundRecorder _flutterSoundRecorder;
-  Directory _audioDirectory;
+  FlutterSoundRecorder? _flutterSoundRecorder = FlutterSoundRecorder();
+  late Directory _audioDirectory;
 
   /// Current User Some Details Containers Variables
-  String _senderMail;
-  String _connectionToken;
-  String _currAccountUserName;
+  late String _senderMail;
+  late String _connectionToken;
+  late String _currAccountUserName;
 
   /// For This Chat Specific Feature
   String _thisChatWallPaper = '';
@@ -131,7 +128,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   String _replyText = '';
 
   /// Text Writing Place Hint Text
-  String _hintText;
+  String _hintText = "Type Here";
 
   /// For Audio Player
   IconData _iconData = Icons.play_arrow_rounded;
@@ -158,7 +155,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
     _currAccountUserName =
         await _localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
   }
 
   _extractHistoryDataFromSqLite() async {
@@ -276,25 +273,25 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       final String _connectionMail = await _localStorageHelper
           .extractImportantDataFromThatAccount(userName: widget._userName);
 
-      final DocumentSnapshot connectionSnapShot = await FirebaseFirestore
-          .instance
-          .doc('generation_users/$_connectionMail')
-          .get();
+      final DocumentSnapshot<Map<String, dynamic>> connectionSnapShot =
+          await FirebaseFirestore.instance
+              .doc('generation_users/$_connectionMail')
+              .get();
 
-      String _profilePicFormattedUrl = '';
+      String? _profilePicFormattedUrl = '';
 
       if (connectionSnapShot.data() != null &&
-          connectionSnapShot.data()['profile_pic'] != '')
+          connectionSnapShot.data()!['profile_pic'] != '')
         _profilePicFormattedUrl = _encryptionMaker
-            .decryptionMaker(connectionSnapShot.data()['profile_pic']);
+            .decryptionMaker(connectionSnapShot.data()!['profile_pic']);
 
       /// Profile Picture Updation Check
       if (_profilePicFormattedUrl != _profilePicUrl) {
-        final Directory directory = await getExternalStorageDirectory();
+        final Directory? directory = await getExternalStorageDirectory();
 
         /// Create new Hidden Folder once in desired location
         final Directory profilePicDir =
-            await Directory('${directory.path}/.ProfilePictures/')
+            await Directory('${directory!.path}/.ProfilePictures/')
                 .create(recursive: true);
 
         String profilePicPath = '${profilePicDir.path}${DateTime.now()}';
@@ -302,8 +299,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         print('Profile Pic Formatted Url: $_profilePicFormattedUrl');
 
         /// If Updated ProfilePic not null and Empty String
-        if (_profilePicFormattedUrl.toString() != null &&
-            _profilePicFormattedUrl.toString() != '') {
+        if (_profilePicFormattedUrl.toString() != '') {
           print('Path: ${widget._connectionProfileImageLocalPath}');
 
           try {
@@ -361,9 +357,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         /// Update Local And Remote Profile Image Path
         await _localStorageHelper.insertProfilePictureInImportant(
             imagePath: profilePicPath,
-            imageUrl: _profilePicFormattedUrl != null
-                ? _profilePicFormattedUrl.toString()
-                : '',
+            imageUrl: _profilePicFormattedUrl.toString(),
             mail: _connectionMail);
       }
     } catch (e) {
@@ -391,22 +385,21 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       /// Fetch Updated Real Time Data from FireStore
       _management.getDatabaseData().listen((event) async {
-        if (event.data()['connections'].length < 0) {
+        if (event.data()!['connections'].length < 0) {
           print("No Connections Present");
         } else {
           /// Checking If Sender Mail Present or Not
-          if (event.data()['connections'].containsKey(this._senderMail)) {
+          if (event.data()!['connections'].containsKey(this._senderMail)) {
             /// Take Corresponding messages of that Contact
             List<dynamic> messages = [];
-            messages = event.data()['connections'][this._senderMail];
+            messages = event.data()!['connections'][this._senderMail];
 
             /// If messageContainer not Empty
             if (messages.isNotEmpty) {
               if (mounted) {
                 setState(() {
                   /// Take Map of Connections
-                  Map<String, dynamic> allConnections =
-                      event.data()['connections'] as Map;
+                  Map allConnections = event.data()!['connections'] as Map;
 
                   /// Particular connection messages set to Empty
                   allConnections[this._senderMail] = [];
@@ -422,7 +415,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   /// Update Data in FireStore
                   FirebaseFirestore.instance
                       .doc(
-                          'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                          'generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
                       .update({
                     'connections': allConnections,
                   });
@@ -584,8 +577,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
 
-        final Directory directory = await getExternalStorageDirectory();
-        print('Directory Path: ${directory.path}');
+        final Directory? directory = await getExternalStorageDirectory();
+        print('Directory Path: ${directory!.path}');
 
         final recordingStorage =
             await Directory(directory.path + '/Recordings/')
@@ -719,8 +712,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
 
-        final Directory directory = await getExternalStorageDirectory();
-        print('Directory Path: ${directory.path}');
+        final Directory? directory = await getExternalStorageDirectory();
+        print('Directory Path: ${directory!.path}');
 
         final Directory _newDirectory =
             await Directory('${directory.path}/Documents/')
@@ -799,8 +792,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           });
         }
 
-        final Directory directory = await getExternalStorageDirectory();
-        print('Directory Path: ${directory.path}');
+        final Directory? directory = await getExternalStorageDirectory();
+        print('Directory Path: ${directory!.path}');
 
         Directory _newDirectory;
 
@@ -821,7 +814,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 recursive:
                     true); // Create New Folder about the desire location;
 
-        String thumbNailPicturePath;
+        //String thumbNailPicturePath;
 
         String _filePathStore =
             _incomingInformationContainer[1] == MediaTypes.Image.toString()
@@ -902,8 +895,6 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                 print(
                     'Dio Video Thumbnail DownloadException: ${e.toString()} ');
               }
-
-              print('ThumbNail Path: $thumbNailPicturePath');
             }
           });
         } catch (e) {
@@ -974,7 +965,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       if (recordingPermissionStatus.isGranted) {
         _isMicrophonePermissionGranted = true;
         _flutterSoundRecorder = FlutterSoundRecorder(); // Initialize
-        await _flutterSoundRecorder.openAudioSession(); // Active Audio Session
+        await _flutterSoundRecorder!.openAudioSession(); // Active Audio Session
 
         /// Make Directory One Time
         await _makeDirectoryOnce();
@@ -990,23 +981,28 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Future<void> _makeDirectoryOnce() async {
-    final Directory directory = await getExternalStorageDirectory();
+    final Directory? directory = await getExternalStorageDirectory();
 
-    _audioDirectory = await Directory(directory.path + '/Recordings/')
+    _audioDirectory = await Directory(directory!.path + '/Recordings/')
         .create(); // This directory will create Once in whole Application
   }
 
   Future<void> _chatWallPaperManager() async {
-    final String _takeWallPaperPath =
+    final String? _takeWallPaperPath =
         await _localStorageHelper.extractImportantTableData(
             extraImportant: ExtraImportant.ChatWallpaper,
             userName: widget._userName);
 
-    if (await File(_takeWallPaperPath).exists()) {
+    if (await File(_takeWallPaperPath!).exists()) {
       if (mounted) {
         setState(() {
-          this._thisChatWallPaper =
-              _takeWallPaperPath == null ? '' : _takeWallPaperPath;
+          this._thisChatWallPaper = _takeWallPaperPath.toString();
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          this._thisChatWallPaper = '';
         });
       }
     }
@@ -1061,7 +1057,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   void disposeMicrophoneController() async {
     if (await Permission.microphone.isGranted)
-      _flutterSoundRecorder.closeAudioSession();
+      _flutterSoundRecorder!.closeAudioSession();
   }
 
   @override
@@ -1126,14 +1122,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                   closedBuilder: (_, __) {
                     return CircleAvatar(
                       radius: 23.0,
-                      backgroundImage: widget
-                                  ._connectionProfileImageLocalPath ==
-                              ''
-                          ? ExactAssetImage(
-                              "assets/logo/logo.jpg",
-                            )
-                          : FileImage(
-                              File(widget._connectionProfileImageLocalPath)),
+                      backgroundImage: _getImageWithProvider(),
                     );
                   },
                 ),
@@ -1183,12 +1172,12 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ),
           ],
         ),
-        body: ModalProgressHUD(
-          inAsyncCall: _isLoading,
+        body: LoadingOverlay(
           color: Color.fromRGBO(0, 0, 0, 0.5),
           progressIndicator: CircularProgressIndicator(
             backgroundColor: Colors.black87,
           ),
+          isLoading: _isLoading,
           child: mainBody(context),
         ),
       ),
@@ -1440,21 +1429,53 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ),
             _showEmojiPicker
                 ? EmojiPicker(
-                    rows: 3,
-                    columns: 7,
-                    buttonMode: ButtonMode.MATERIAL,
-                    bgColor: Color.fromRGBO(34, 48, 60, 1),
-                    indicatorColor: Color.fromRGBO(34, 48, 60, 1),
-                    onEmojiSelected: (item, category) {
+                    onEmojiSelected: (category, emoji) {
                       if (mounted) {
                         setState(() {
-                          _inputTextController.text += item.emoji;
+                          _inputTextController.text += emoji.emoji;
                           if (_iconChanger) _iconChanger = false;
                         });
                       }
                     },
+                    onBackspacePressed: () {
+                      // Backspace-Button tapped logic
+                      // Remove this line to also remove the button in the UI
+                    },
+                    config: Config(
+                        columns: 7,
+                        emojiSizeMax: 32.0,
+                        verticalSpacing: 0,
+                        horizontalSpacing: 0,
+                        initCategory: Category.RECENT,
+                        bgColor: Color(0xFFF2F2F2),
+                        indicatorColor: Colors.blue,
+                        iconColor: Colors.grey,
+                        iconColorSelected: Colors.blue,
+                        progressIndicatorColor: Colors.blue,
+                        showRecentsTab: true,
+                        recentsLimit: 28,
+                        noRecentsText: "No Recents",
+                        noRecentsStyle: const TextStyle(
+                            fontSize: 20, color: Colors.black26),
+                        categoryIcons: const CategoryIcons(),
+                        buttonMode: ButtonMode.MATERIAL),
                   )
                 : SizedBox(),
+            // EmojiPicker(
+            //   rows: 3,
+            //   columns: 7,
+            //   buttonMode: ButtonMode.MATERIAL,
+            //   bgColor: Color.fromRGBO(34, 48, 60, 1),
+            //   indicatorColor: Color.fromRGBO(34, 48, 60, 1),
+            //   onEmojiSelected: (item, category) {
+            //     if (mounted) {
+            //       setState(() {
+            //         _inputTextController.text += item.emoji;
+            //         if (_iconChanger) _iconChanger = false;
+            //       });
+            //     }
+            //   },
+            // )
           ],
         ),
       ),
@@ -1518,7 +1539,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   /// All Conversation List
 
   Widget textConversationList(
-      BuildContext context, int index, bool _responseValue) {
+      BuildContext context, int index, bool? _responseValue) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -1557,7 +1578,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             print(_replyText);
           },
           child: Container(
-            margin: _responseValue
+            margin: _responseValue!
                 ? EdgeInsets.only(
                     right: MediaQuery.of(context).size.width / 3,
                     left: 5.0,
@@ -1604,63 +1625,88 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       ),
                     ),
                   ),
-                  child: AutolinkText(
-                    text: _chatContainer[index].keys.first.contains('[[[@]]]')
+                  child: GestureDetector(
+                    onLongPress: () {
+                      print('Delete that message');
+                      showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(40.0),
+                                ),
+                                elevation: 0.3,
+                                backgroundColor:
+                                    Color.fromRGBO(34, 48, 60, 0.5),
+                                title: _multipleOptions(index,
+                                    bgColor: Color.fromRGBO(34, 48, 60, 0.0),
+                                    mediaTypes: _mediaTypes[index]),
+                              ));
+                    },
+                    child: Text(_chatContainer[index]
+                            .keys
+                            .first
+                            .contains('[[[@]]]')
                         ? _chatContainer[index].keys.first.split('[[[@]]]')[1]
-                        : _chatContainer[index].keys.first,
-                    humanize: false,
-                    textStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                    linkStyle: TextStyle(
-                      color: Colors.amber,
-                    ),
-                    onEmailTap: (matchText) async {
-                      try {
-                        final Uri params = Uri(
-                          scheme: 'mailto',
-                          path: '$matchText',
-                        );
-
-                        await launch(params.toString());
-                      } catch (e) {
-                        _showDiaLog(titleText: "Sorry, Can't Send Email");
-                      }
-                    },
-                    onPhoneTap: (matchText) async {
-                      try {
-                        final Uri params = Uri(
-                          scheme: 'tel',
-                          path: '$matchText',
-                        );
-
-                        await launch(params.toString());
-                      } catch (e) {
-                        _showDiaLog(titleText: "Sorry, Access this number");
-                      }
-                    },
-                    onWebLinkTap: (matchText) async {
-                      try {
-                        final String _recognize =
-                            matchText.contains('https') ? 'https' : 'http';
-                        final Uri params = Uri(
-                          scheme:
-                              matchText.contains('https') ? 'https' : 'http',
-                          path: '${matchText.split(_recognize)[1]}',
-                        );
-
-                        await launch(params.toString());
-                        showToast(
-                          'Wait For launch',
-                          fToast,
-                          fontSize: 16,
-                        );
-                      } catch (e) {
-                        print(e.toString);
-                        _showDiaLog(titleText: "Sorry, Can't Open This Url");
-                      }
-                    },
+                        : _chatContainer[index].keys.first),
                   ),
+
+                  // AutolinkText(
+                  //   text: _chatContainer[index].keys.first.contains('[[[@]]]')
+                  //       ? _chatContainer[index].keys.first.split('[[[@]]]')[1]
+                  //       : _chatContainer[index].keys.first,
+                  //   humanize: false,
+                  //   textStyle: TextStyle(
+                  //     color: Colors.white,
+                  //   ),
+                  //   linkStyle: TextStyle(
+                  //     color: Colors.amber,
+                  //   ),
+                  //   onEmailTap: (matchText) async {
+                  //     try {
+                  //       final Uri params = Uri(
+                  //         scheme: 'mailto',
+                  //         path: '$matchText',
+                  //       );
+                  //
+                  //       await launch(params.toString());
+                  //     } catch (e) {
+                  //       _showDiaLog(titleText: "Sorry, Can't Send Email");
+                  //     }
+                  //   },
+                  //   onPhoneTap: (matchText) async {
+                  //     try {
+                  //       final Uri params = Uri(
+                  //         scheme: 'tel',
+                  //         path: '$matchText',
+                  //       );
+                  //
+                  //       await launch(params.toString());
+                  //     } catch (e) {
+                  //       _showDiaLog(titleText: "Sorry, Access this number");
+                  //     }
+                  //   },
+                  //   onWebLinkTap: (matchText) async {
+                  //     try {
+                  //       final String _recognize =
+                  //       matchText.contains('https') ? 'https' : 'http';
+                  //       final Uri params = Uri(
+                  //         scheme:
+                  //         matchText.contains('https') ? 'https' : 'http',
+                  //         path: '${matchText.split(_recognize)[1]}',
+                  //       );
+                  //
+                  //       await launch(params.toString());
+                  //       showToast(
+                  //         'Wait For launch',
+                  //         fToast,
+                  //         fontSize: 16,
+                  //       );
+                  //     } catch (e) {
+                  //       print(e.toString);
+                  //       _showDiaLog(titleText: "Sorry, Can't Open This Url");
+                  //     }
+                  //   },
+                  // ),
                   onPressed: () {},
                   onLongPress: () {
                     print('Delete that message');
@@ -1692,7 +1738,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget voiceConversationList(
-      BuildContext context, int index, bool _responseValue) {
+      BuildContext context, int index, bool? _responseValue) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -1714,7 +1760,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       ));
           },
           child: Container(
-            margin: _responseValue
+            margin: _responseValue!
                 ? EdgeInsets.only(
                     right: MediaQuery.of(context).size.width / 3,
                     left: 5.0,
@@ -1798,7 +1844,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                   : _lastAudioPlayingIndex == index
                                       ? _currAudioPlayingTime /
                                           _justAudioPlayer
-                                              .duration.inMicroseconds
+                                              .duration!.inMicroseconds
                                               .ceilToDouble()
                                       : 0,
                               backgroundColor: Colors.black26,
@@ -1854,19 +1900,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                       child: _lastAudioPlayingIndex != index
                           ? CircleAvatar(
                               radius: 23.0,
-                              backgroundImage: (_responseValue
-                                          ? widget
-                                              ._connectionProfileImageLocalPath
-                                          : ImportantThings
-                                              .thisAccountProfileImagePath) ==
-                                      ''
-                                  ? ExactAssetImage(
-                                      "assets/logo/logo.jpg",
-                                    )
-                                  : FileImage(File(_responseValue
-                                      ? widget._connectionProfileImageLocalPath
-                                      : ImportantThings
-                                          .thisAccountProfileImagePath)),
+                              backgroundImage:
+                                  _getProviderWithImage(index, _responseValue),
                             )
                           : Text(
                               '${this._audioPlayingSpeed.toString().contains('.0') ? this._audioPlayingSpeed.toString().split('.')[0] : this._audioPlayingSpeed}x',
@@ -1899,7 +1934,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget _mediaConversationList(
-      BuildContext context, int index, bool _responseValue) {
+      BuildContext context, int index, bool? _responseValue) {
     print(
         'Media Extension: ${_chatContainer[index].keys.first.split('.')[_chatContainer[index].keys.first.split('.').length - 1]}');
 
@@ -1907,7 +1942,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       children: [
         Container(
             height: MediaQuery.of(context).size.height * 0.3,
-            margin: _responseValue
+            margin: _responseValue!
                 ? EdgeInsets.only(
                     right: MediaQuery.of(context).size.width / 3,
                     left: 5.0,
@@ -2011,7 +2046,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget _documentConversationList(
-      BuildContext context, int index, bool _responseValue) {
+      BuildContext context, int index, bool? _responseValue) {
     print(_chatContainer[index].values.first);
 
     return Column(
@@ -2024,7 +2059,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                     .contains('.pdf')
                 ? MediaQuery.of(context).size.height * 0.3
                 : 70.0,
-            margin: _responseValue
+            margin: _responseValue!
                 ? EdgeInsets.only(
                     right: MediaQuery.of(context).size.width / 3,
                     left: 5.0,
@@ -2189,14 +2224,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  Widget _locationConversationList(int index, bool _responseValue) {
+  Widget _locationConversationList(int index, bool? _responseValue) {
     return Column(children: [
       Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20.0),
         ),
         height: MediaQuery.of(context).size.height * 0.3,
-        margin: _responseValue
+        margin: _responseValue!
             ? EdgeInsets.only(
                 right: MediaQuery.of(context).size.width / 3,
                 left: 5.0,
@@ -2338,20 +2373,20 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       else {
         if (_inputTextController.text.isNotEmpty) {
           /// Take Document Data related to old messages
-          final DocumentSnapshot documentSnapShot = await FirebaseFirestore
-              .instance
-              .doc("generation_users/$_senderMail")
-              .get();
+          final DocumentSnapshot<Map<String, dynamic>> documentSnapShot =
+              await FirebaseFirestore.instance
+                  .doc("generation_users/$_senderMail")
+                  .get();
 
           /// Initialize Temporary List
           List<dynamic> sendingMessages = [];
 
           /// Store Updated sending messages list
-          sendingMessages = documentSnapShot.data()['connections']
-              [FirebaseAuth.instance.currentUser.email.toString()];
+          sendingMessages = documentSnapShot.data()!['connections']
+              [FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
           if (mounted) {
-            if (sendingMessages == null) sendingMessages = [];
+            // if (sendingMessages == null) sendingMessages = [];
 
             setState(() {
               /// Add data to temporary Storage of Sending
@@ -2404,7 +2439,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
           /// Data Store in Firestore
           await _management.addConversationMessages(this._senderMail,
-              sendingMessages, documentSnapShot.data()['connections']);
+              sendingMessages, documentSnapShot.data()!['connections']);
 
           final String _textToSend = _inputTextController.text;
 
@@ -2433,7 +2468,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       _permissionSetForRecording();
     } else {
       /// For Recording Action
-      if (_flutterSoundRecorder.isStopped) {
+      if (_flutterSoundRecorder!.isStopped) {
         if (mounted) {
           setState(() {
             _hintText = 'Recording....';
@@ -2444,7 +2479,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             await Permission.microphone.request();
 
         if (recordingPermissionStatus.isGranted) {
-          _flutterSoundRecorder
+          _flutterSoundRecorder!
               .startRecorder(
                 toFile: '${_audioDirectory.path}${DateTime.now()}.mp3',
               )
@@ -2457,10 +2492,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             _hintText = 'Type Here...';
           });
         }
-        final String recordedFilePath =
-            await _flutterSoundRecorder.stopRecorder();
+        final String? recordedFilePath =
+            await _flutterSoundRecorder!.stopRecorder();
 
-        _voiceSend(recordedFilePath);
+        _voiceSend(recordedFilePath.toString());
       }
     }
   }
@@ -2483,11 +2518,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
       await _justAudioPlayer.setFilePath(recordedFilePath);
 
-      if (_justAudioPlayer.duration.inMinutes > 20)
+      if (_justAudioPlayer.duration!.inMinutes > 20)
         _showDiaLog(
             titleText: "Longer Audio File",
             contentText:
-                "Audio File Duration Can't be greater than 20 minutes\n\nCurrent Audio Duration: ${_justAudioPlayer.duration.inMinutes > 59 ? _justAudioPlayer.duration.inMinutes % 60 : _justAudioPlayer.duration.inMinutes} minutes");
+                "Audio File Duration Can't be greater than 20 minutes\n\nCurrent Audio Duration: ${_justAudioPlayer.duration!.inMinutes > 59 ? _justAudioPlayer.duration!.inMinutes % 60 : _justAudioPlayer.duration!.inMinutes} minutes");
       else {
         if (mounted) {
           setState(() {
@@ -2507,20 +2542,20 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           print("End");
         }
 
-        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
-            .instance
-            .doc("generation_users/$_senderMail")
-            .get();
+        final DocumentSnapshot<Map<String, dynamic>> documentSnapShot =
+            await FirebaseFirestore.instance
+                .doc("generation_users/$_senderMail")
+                .get();
 
         // Initialize Temporary List
         List<dynamic> sendingMessages = [];
 
         // Store Updated sending messages list
-        sendingMessages = documentSnapShot.data()['connections']
-            [FirebaseAuth.instance.currentUser.email.toString()];
+        sendingMessages = documentSnapShot.data()!['connections']
+            [FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
         if (mounted) {
-          if (sendingMessages == null) sendingMessages = [];
+          // if (sendingMessages == null) sendingMessages = [];
 
           setState(() {
             /// Add data to temporary Storage of Sending
@@ -2556,7 +2591,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
           /// Data Store in FireStore
           await _management.addConversationMessages(this._senderMail,
-              sendingMessages, documentSnapShot.data()['connections']);
+              sendingMessages, documentSnapShot.data()!['connections']);
 
           if (mounted) {
             setState(() {
@@ -2597,31 +2632,35 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         });
       }
 
-      final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
-          .doc("generation_users/$_senderMail")
-          .get();
+      final DocumentSnapshot<Map<String, dynamic>> documentSnapShot =
+          await FirebaseFirestore.instance
+              .doc("generation_users/$_senderMail")
+              .get();
 
       // Initialize Temporary List
       List<dynamic> _sendingMessages = [];
 
       // Store Updated Sending Messages List
-      _sendingMessages = documentSnapShot.data()['connections']
-          [FirebaseAuth.instance.currentUser.email.toString()];
+      _sendingMessages = documentSnapShot.data()!['connections']
+          [FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
-      String thumbNailPicturePath, thumbNailPicturePathUrl;
+      String? thumbNailPicturePath, thumbNailPicturePathUrl;
 
       if (mediaTypesForSend == MediaTypes.Video) {
-        final Directory directory = await getExternalStorageDirectory();
+        // final Directory directory = await getExternalStorageDirectory();
+        //
+        // final Directory _newDirectory =
+        // await Directory('${directory!.path}/.ThumbNails/')
+        //     .create(); // Create New Folder about the desire location;
+        //
+        // thumbNailPicturePath = await Thumbnails.getThumbnail(
+        //     thumbnailFolder: _newDirectory.path,
+        //     videoFile: _takeImageFile!.path,
+        //     imageType: ThumbFormat.JPEG,
+        //     quality: 20);
 
-        final Directory _newDirectory =
-            await Directory('${directory.path}/.ThumbNails/')
-                .create(); // Create New Folder about the desire location;
-
-        thumbNailPicturePath = await Thumbnails.getThumbnail(
-            thumbnailFolder: _newDirectory.path,
-            videoFile: _takeImageFile.path,
-            imageType: ThumbFormat.JPEG,
-            quality: 20);
+        thumbNailPicturePath = await _nativeCallback.getTheVideoThumbnail(
+            videoPath: _takeImageFile.path);
 
         thumbNailPicturePathUrl = await _management.uploadMediaToStorage(
             File(thumbNailPicturePath), context,
@@ -2629,14 +2668,14 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
       }
 
       if (mounted) {
-        if (_sendingMessages == null) _sendingMessages = [];
+        //if (_sendingMessages == null) _sendingMessages = [];
 
         setState(() {
           if (mediaTypesForSend == MediaTypes.Video) {
             // Add data to temporary Storage of Sending
             _sendingMessages.add({
               _encryptionMaker.encryptionMaker(
-                      '$_imageDownLoadUrl+$thumbNailPicturePathUrl'):
+                      '$_imageDownLoadUrl+${thumbNailPicturePathUrl.toString()}'):
                   _encryptionMaker.encryptionMaker(
                       '${DateTime.now().hour}:${DateTime.now().minute}+$mediaTypesForSend+$extraText+${DateTime.now()}'),
             });
@@ -2644,7 +2683,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             // Add Data to the UI related all Chat Container
             _chatContainer.add({
               _takeImageFile.path:
-                  '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+$thumbNailPicturePath',
+                  '${DateTime.now().hour}:${DateTime.now().minute}+$extraText+${thumbNailPicturePath.toString()}',
             });
           } else if (mediaTypesForSend == MediaTypes.Image) {
             // Add data to temporary Storage of Sending
@@ -2695,7 +2734,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         // Data Store in Firestore
         await _management.addConversationMessages(this._senderMail,
-            _sendingMessages, documentSnapShot.data()['connections']);
+            _sendingMessages, documentSnapShot.data()!['connections']);
 
         if (mounted) {
           setState(() {
@@ -2728,7 +2767,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     }
   }
 
-  void _locationSend({double latitude, double longitude}) async {
+  void _locationSend(
+      {required double latitude, required double longitude}) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
     if (!await _nativeCallback.callToCheckNetworkConnectivity())
@@ -2739,17 +2779,17 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           _isLoading = true;
         });
 
-        final DocumentSnapshot documentSnapShot = await FirebaseFirestore
-            .instance
-            .doc("generation_users/$_senderMail")
-            .get();
+        final DocumentSnapshot<Map<String, dynamic>> documentSnapShot =
+            await FirebaseFirestore.instance
+                .doc("generation_users/$_senderMail")
+                .get();
 
         /// Initialize Temporary List
         List<dynamic> _sendingMessages = [];
 
         /// Store Updated Sending Messages List
-        _sendingMessages = documentSnapShot.data()['connections']
-            [FirebaseAuth.instance.currentUser.email.toString()];
+        _sendingMessages = documentSnapShot.data()!['connections']
+            [FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
         setState(() {
           // Add data to temporary Storage of Sending
@@ -2781,7 +2821,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
         // Data Store in Firestore
         await _management.addConversationMessages(this._senderMail,
-            _sendingMessages, documentSnapShot.data()['connections']);
+            _sendingMessages, documentSnapShot.data()!['connections']);
 
         setState(() {
           _isLoading = false;
@@ -2832,7 +2872,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
           setState(() {
             _lastAudioPlayingIndex = index;
             _totalDuration =
-                '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds > 59 ? _justAudioPlayer.duration.inSeconds % 60 : _justAudioPlayer.duration.inSeconds}';
+                '${_justAudioPlayer.duration!.inMinutes} : ${_justAudioPlayer.duration!.inSeconds > 59 ? _justAudioPlayer.duration!.inSeconds % 60 : _justAudioPlayer.duration!.inSeconds}';
             _iconData = Icons.pause;
             this._audioPlayingSpeed = 1.0;
             _justAudioPlayer.setSpeed(this._audioPlayingSpeed);
@@ -2849,7 +2889,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             setState(() {
               _lastAudioPlayingIndex = index;
               _totalDuration =
-                  '${_justAudioPlayer.duration.inMinutes} : ${_justAudioPlayer.duration.inSeconds}';
+                  '${_justAudioPlayer.duration!.inMinutes} : ${_justAudioPlayer.duration!.inSeconds}';
               _iconData = Icons.pause;
             });
           }
@@ -3030,7 +3070,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                               ];
 
                               try {
-                                final FilePickerResult filePickerResult =
+                                final FilePickerResult? filePickerResult =
                                     await FilePicker.platform.pickFiles(
                                   type: FileType.custom,
                                   allowedExtensions: _allowedExtensions,
@@ -3040,13 +3080,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                     filePickerResult.files.length > 0) {
                                   Navigator.pop(context);
                                   filePickerResult.files.forEach((file) async {
-                                    print(file.path);
+                                    print(file.path.toString());
                                     if (_allowedExtensions
                                         .contains(file.extension))
                                       _connectionExtraTextManagement(
                                           mediaTypesForExtraText:
                                               MediaTypes.Document,
-                                          file: File(file.path),
+                                          file: File(file.path.toString()),
                                           extension: '.${file.extension}');
                                     else {
                                       _showDiaLog(
@@ -3120,7 +3160,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                 'ogg',
                               ];
 
-                              final FilePickerResult _audioFilePickerResult =
+                              final FilePickerResult? _audioFilePickerResult =
                                   await FilePicker.platform.pickFiles(
                                 type: FileType.audio,
                               );
@@ -3133,11 +3173,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                   print('Extension: ${element.extension}');
                                   if (_allowedExtensions
                                       .contains(element.extension)) {
-                                    _voiceSend(element.path,
+                                    _voiceSend(element.path.toString(),
                                         audioExtension:
                                             '.${element.extension}');
                                   } else {
-                                    _voiceSend(element.path);
+                                    _voiceSend(element.path.toString());
                                   }
                                 });
                               }
@@ -3152,7 +3192,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
             ));
   }
 
-  void openFileResultStatus({@required OpenResult openResult}) {
+  void openFileResultStatus({required OpenResult openResult}) {
     if (openResult.type == ResultType.permissionDenied)
       _showDiaLog(titleText: 'Permission Denied to Open File');
     else if (openResult.type == ResultType.noAppToOpen)
@@ -3165,13 +3205,13 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
 
   Future<void> _connectionExtraTextManagement(
       {ImageSource imageSource = ImageSource.camera,
-      @required MediaTypes mediaTypesForExtraText,
+      required MediaTypes mediaTypesForExtraText,
       String extension = '',
-      File file}) async {
-    PickedFile _pickedFile;
+      File? file}) async {
+    XFile? _pickedFile;
 
     if (mediaTypesForExtraText == MediaTypes.Image) {
-      _pickedFile = await _picker.getImage(
+      _pickedFile = await _picker.pickImage(
         source: imageSource,
         imageQuality: 50,
       );
@@ -3179,10 +3219,11 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         Navigator.pop(context);
 
         _extraTextInputTakeInDialogForm(
-            fileLocation: _pickedFile.path, mediaTypesIS: MediaTypes.Image);
+            fileLocation: _pickedFile.path.toString(),
+            mediaTypesIS: MediaTypes.Image);
       }
     } else if (mediaTypesForExtraText == MediaTypes.Video) {
-      _pickedFile = await _picker.getVideo(
+      _pickedFile = await _picker.pickVideo(
         source: imageSource,
         maxDuration: Duration(seconds: 15),
       );
@@ -3190,7 +3231,8 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         Navigator.pop(context);
 
         _extraTextInputTakeInDialogForm(
-            fileLocation: _pickedFile.path, mediaTypesIS: MediaTypes.Video);
+            fileLocation: _pickedFile.path.toString(),
+            mediaTypesIS: MediaTypes.Video);
       }
     } else if (mediaTypesForExtraText == MediaTypes.Document) {
       _extraTextInputTakeInDialogForm(
@@ -3199,10 +3241,10 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   void _extraTextInputTakeInDialogForm(
-      {String fileLocation,
-      @required MediaTypes mediaTypesIS,
+      {String fileLocation = '',
+      required MediaTypes mediaTypesIS,
       String extension = '',
-      File file}) {
+      File? file}) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -3266,7 +3308,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                         mediaTypesForSend: MediaTypes.Video);
                   } else if (mediaTypesIS == MediaTypes.Document) {
                     _mediaSend(
-                      file,
+                      file!,
                       mediaTypesForSend: mediaTypesIS,
                       extension: extension,
                       extraText: _mediaTextController.text,
@@ -3285,7 +3327,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
     );
   }
 
-  void _showDiaLog({@required String titleText, String contentText = ''}) {
+  void _showDiaLog({required String titleText, String contentText = ''}) {
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -3379,7 +3421,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget _multipleOptions(int index,
-      {@required MediaTypes mediaTypes, Color bgColor = Colors.black38}) {
+      {required MediaTypes mediaTypes, Color bgColor = Colors.black38}) {
     return Container(
       alignment: mediaTypes != MediaTypes.Location
           ? Alignment.bottomCenter
@@ -3539,7 +3581,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
                                       if (mounted) {
                                         setState(() {
                                           this._deleteMediaFromInternalStorage =
-                                              response;
+                                              response!;
                                           Navigator.pop(context);
                                           _deleteForMe(index);
                                         });
@@ -3593,7 +3635,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
   }
 
   Widget _deleteForMeCommonPart(int index,
-      {@required String buttonLabel, @required Color buttonTextColor}) {
+      {required String buttonLabel, required Color buttonTextColor}) {
     return TextButton(
       child: Text(
         buttonLabel,
@@ -3613,7 +3655,7 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
               widget._userName,
               message: _chatContainer[index].keys.first,
               time: _chatContainer[index].values.first,
-              reference: _response[index] ? 1 : 0,
+              reference: _response[index]! ? 1 : 0,
               mediaType: _mediaTypes[index].toString());
 
           print('Chat Delete Response: $responseIs');
@@ -3708,5 +3750,46 @@ class _ChatScreenSetUpState extends State<ChatScreenSetUp>
         }
       },
     );
+  }
+
+  ImageProvider<Object>?  _getImageWithProvider() {
+    if (widget._connectionProfileImageLocalPath == '')
+      return ExactAssetImage(
+        "assets/logo/logo.png",
+      );
+    return FileImage(File(widget._connectionProfileImageLocalPath));
+  }
+
+  ImageProvider<Object>?  _getProviderWithImage(int index, bool? _responseValue) {
+    if (_responseValue!) {
+      if (widget._connectionProfileImageLocalPath == '')
+        return ExactAssetImage(
+          "assets/logo/logo.png",
+        );
+
+      return FileImage(File(widget._connectionProfileImageLocalPath));
+    } else {
+      if (ImportantThings.thisAccountProfileImagePath == '')
+        return ExactAssetImage(
+          "assets/logo/logo.png",
+        );
+
+      return FileImage(File(ImportantThings.thisAccountProfileImagePath));
+    }
+
+    // if(_responseValue!
+    //     ? widget
+    //     ._connectionProfileImageLocalPath
+    //     : ImportantThings
+    //     .thisAccountProfileImagePath) ==
+    //     ''
+    //     return ExactAssetImage(
+    //   "assets/logo/logo.png",
+    // );
+    //     return FileImage(File(_responseValue
+    //     ? widget._connectionProfileImageLocalPath
+    //     ? widget._connectionProfileImageLocalPath
+    //     : ImportantThings
+    //     .thisAccountProfileImagePath))
   }
 }

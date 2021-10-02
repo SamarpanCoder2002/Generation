@@ -7,7 +7,7 @@ class SupportInputTaker extends StatefulWidget {
   final String subject;
   final String appbarTitle;
 
-  SupportInputTaker({@required this.subject, @required this.appbarTitle});
+  SupportInputTaker({required this.subject, required this.appbarTitle});
 
   @override
   _SupportInputTakerState createState() => _SupportInputTakerState();
@@ -70,7 +70,7 @@ class _SupportInputTakerState extends State<SupportInputTaker> {
                     color: Colors.white,
                   ),
                   validator: (inputValue) {
-                    if (inputValue.length == 0)
+                    if (inputValue!.length == 0)
                       return 'Please Provide a Problem Title';
                     return null;
                   },
@@ -105,7 +105,7 @@ class _SupportInputTakerState extends State<SupportInputTaker> {
                     color: Colors.white,
                   ),
                   validator: (inputValue) {
-                    if (inputValue.length == 0)
+                    if (inputValue!.length == 0)
                       return 'Please Provide a Problem Description';
                     return null;
                   },
@@ -150,7 +150,7 @@ class _SupportInputTakerState extends State<SupportInputTaker> {
                     ),
                   ),
                   onPressed: () async {
-                    if (_globalKey.currentState.validate()) {
+                    if (_globalKey.currentState!.validate()) {
                       await _sendMail();
                     }
                   },

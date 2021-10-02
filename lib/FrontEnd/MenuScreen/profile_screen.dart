@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:generation/BackendAndDatabaseManager/firebase_services/delete_my_account_service.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/different_types.dart';
@@ -37,17 +37,17 @@ class _ProfileState extends State<Profile> {
     final String userTempAbout =
         await _localStorageHelper.extractImportantTableData(
             extraImportant: ExtraImportant.About,
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
     final String userTempAccCreationDate =
         await _localStorageHelper.extractImportantTableData(
             extraImportant: ExtraImportant.CreationDate,
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
     final String userTempAccCreationTime =
         await _localStorageHelper.extractImportantTableData(
             extraImportant: ExtraImportant.CreationTime,
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
     if (mounted) {
       setState(() {
@@ -72,8 +72,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    return ModalProgressHUD(
-      inAsyncCall: _isLoading,
+    return LoadingOverlay(
+      isLoading: _isLoading,
       child: Scaffold(
         backgroundColor: Color.fromRGBO(34, 48, 60, 1),
         body: ListView(
@@ -127,15 +127,7 @@ class _ProfileState extends State<Profile> {
                   },
                   closedBuilder: (context, closeWidget) {
                     return CircleAvatar(
-                      backgroundImage: ImportantThings
-                                  .thisAccountProfileImagePath ==
-                              ''
-                          ? const ExactAssetImage(
-                              "assets/logo/logo.jpg",
-                            )
-                          : FileImage(
-                              File(ImportantThings.thisAccountProfileImagePath),
-                            ),
+                      backgroundImage: _getImageWithProvider(),
                       radius: MediaQuery.of(context).orientation ==
                               Orientation.portrait
                           ? MediaQuery.of(context).size.height * (1.2 / 8) / 2.5
@@ -176,8 +168,8 @@ class _ProfileState extends State<Profile> {
                                   2,
                         ),
                         onTap: () async {
-                          final PickedFile _pickedFile =
-                              await _imagePicker.getImage(
+                          final XFile? _pickedFile =
+                              await _imagePicker.pickImage(
                             source: ImageSource.camera,
                             imageQuality: 50,
                           );
@@ -188,8 +180,8 @@ class _ProfileState extends State<Profile> {
                             await _manageTakeImageAsProfilePic(_pickedFile);
                         },
                         onLongPress: () async {
-                          final PickedFile _pickedFile =
-                              await _imagePicker.getImage(
+                          final XFile? _pickedFile =
+                              await _imagePicker.pickImage(
                             source: ImageSource.gallery,
                             imageQuality: 50,
                           );
@@ -269,7 +261,7 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-  Future<void> _manageTakeImageAsProfilePic(PickedFile _pickedFile) async {
+  Future<void> _manageTakeImageAsProfilePic(XFile _pickedFile) async {
     try {
       showToast(
         'Applying Changes',
@@ -287,7 +279,7 @@ class _ProfileState extends State<Profile> {
       await _management.uploadNewProfilePicToFireStore(
           file: File(_pickedFile.path),
           context: context,
-          userMail: FirebaseAuth.instance.currentUser.email);
+          userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
       if (ImportantThings.thisAccountProfileImagePath != '') {
         try {
@@ -457,5 +449,15 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
             ));
+  }
+
+  ImageProvider<Object>? _getImageWithProvider() {
+    if (ImportantThings.thisAccountProfileImagePath == '')
+      return const ExactAssetImage(
+        "assets/logo/logo.png",
+      );
+    return FileImage(
+      File(ImportantThings.thisAccountProfileImagePath),
+    );
   }
 }

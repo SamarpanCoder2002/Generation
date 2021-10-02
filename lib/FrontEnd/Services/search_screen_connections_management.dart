@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:generation/BackendAndDatabaseManager/general_services/notification_configuration.dart';
 import 'package:generation/BackendAndDatabaseManager/global_controller/connection_important_data.dart';
@@ -28,14 +28,14 @@ class _SearchState extends State<Search> {
   List<Map<String, String>> _userNameProfilePicCollection = [];
   List<Map<String, String>> _selectedUserNameAndProfilePicCollection = [];
 
-  String searchArgument;
+  String searchArgument = '';
 
   final SendNotification _sendNotification = SendNotification();
   final TextEditingController searchUser = TextEditingController();
   final LocalStorageHelper _localStorageHelper = LocalStorageHelper();
   final EncryptionMaker _encryptionMaker = EncryptionMaker();
 
-  QuerySnapshot searchResultSnapshot;
+  QuerySnapshot<Map<String, dynamic>>? searchResultSnapshot;
 
   bool isLoading = false;
   bool haveUserSearched = false;
@@ -51,7 +51,8 @@ class _SearchState extends State<Search> {
 
     final String _currAccUserName =
         await _localStorageHelper.extractImportantDataFromThatAccount(
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail:
+                FirebaseAuth.instance.currentUser!.email.toString().toString());
 
     if (mounted) {
       setState(() {
@@ -223,8 +224,8 @@ class _SearchState extends State<Search> {
   }
 
   Widget _internalChatConnectionCollections() {
-    return ModalProgressHUD(
-      inAsyncCall: this.isLoading,
+    return LoadingOverlay(
+      isLoading: this.isLoading,
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -275,18 +276,7 @@ class _SearchState extends State<Search> {
                   ),
                   child: CircleAvatar(
                     radius: 30.0,
-                    backgroundImage: this
-                                ._selectedUserNameAndProfilePicCollection[index]
-                                .values
-                                .first
-                                .toString() ==
-                            ''
-                        ? ExactAssetImage("assets/logo/logo.jpg")
-                        : FileImage(File(this
-                            ._selectedUserNameAndProfilePicCollection[index]
-                            .values
-                            .first
-                            .toString())),
+                    backgroundImage: getImageWithProvider(index),
                   ),
                 ),
                 Expanded(
@@ -324,7 +314,7 @@ class _SearchState extends State<Search> {
       : '${this._selectedUserNameAndProfilePicCollection[index].keys.first.toString().replaceRange(20, this._selectedUserNameAndProfilePicCollection[index].keys.first.toString().length, '...')}';
 
   void _getAllConnectionsFromLocalStorage() async {
-    final List<Map<String, Object>> _connectedUsersCollection =
+    final List<Map<String, Object?>> _connectedUsersCollection =
         await _localStorageHelper.extractAllUsersName();
 
     _connectedUsersCollection.forEach((element) {
@@ -347,7 +337,7 @@ class _SearchState extends State<Search> {
       });
     }
 
-    QuerySnapshot querySnapshot;
+    QuerySnapshot<Map<String, dynamic>>? querySnapshot;
 
     try {
       querySnapshot =
@@ -398,11 +388,13 @@ class _SearchState extends State<Search> {
                 shrinkWrap: true,
                 itemCount: searchResultSnapshot == null
                     ? 0
-                    : searchResultSnapshot.docs.length - 1,
+                    : searchResultSnapshot!.docs.length - 1,
                 itemBuilder: (context, index) {
-                  print(searchResultSnapshot.docs[index]);
-                  if (searchResultSnapshot.docs[index].id ==
-                      FirebaseAuth.instance.currentUser.email) {
+                  print(searchResultSnapshot!.docs[index]);
+                  if (searchResultSnapshot!.docs[index].id.toString() ==
+                      FirebaseAuth.instance.currentUser!.email
+                          .toString()
+                          .toString()) {
                     return Center();
                   }
                   return userTile(index);
@@ -431,7 +423,7 @@ class _SearchState extends State<Search> {
               children: [
                 Text(
                   _encryptionMaker.decryptionMaker(
-                      searchResultSnapshot.docs[index][searchArgument]),
+                      searchResultSnapshot!.docs[index][searchArgument]),
                   style: TextStyle(
                       color: Colors.orange,
                       fontSize: searchArgument != "about" ? 20 : 15),
@@ -441,7 +433,7 @@ class _SearchState extends State<Search> {
                 ),
                 Text(
                   _encryptionMaker.decryptionMaker(
-                      searchResultSnapshot.docs[index]
+                      searchResultSnapshot!.docs[index]
                           [searchArgument == "about" ? "user_name" : "about"]),
                   style: TextStyle(color: Colors.lightBlue, fontSize: 14),
                 ),
@@ -468,28 +460,32 @@ class _SearchState extends State<Search> {
               DocumentSnapshot documentSnapShotCurrUser =
                   await FirebaseFirestore.instance
                       .collection('generation_users')
-                      .doc(FirebaseAuth.instance.currentUser.email)
+                      .doc(FirebaseAuth.instance.currentUser!.email
+                          .toString()
+                          .toString())
                       .get();
 
               Map<String, dynamic> connectionRequestCollectionCurrUser =
                   documentSnapShotCurrUser.get('connection_request');
 
               Map<String, dynamic> connectionRequestCollectionRequestUser =
-                  searchResultSnapshot.docs[index]['connection_request'];
+                  searchResultSnapshot!.docs[index]['connection_request'];
 
               if (!connectionRequestCollectionCurrUser
-                  .containsKey(searchResultSnapshot.docs[index].id)) {
+                  .containsKey(searchResultSnapshot!.docs[index].id)) {
                 connectionRequestCollectionCurrUser[
-                    searchResultSnapshot.docs[index].id] = "Request Pending";
+                    searchResultSnapshot!.docs[index].id] = "Request Pending";
 
                 connectionRequestCollectionRequestUser[FirebaseAuth
-                    .instance.currentUser.email] = "Invitation Came";
+                    .instance.currentUser!.email
+                    .toString()
+                    .toString()] = "Invitation Came";
 
                 if (mounted) {
                   setState(() {
                     FirebaseFirestore.instance
                         .doc(
-                            'generation_users/${searchResultSnapshot.docs[index].id}')
+                            'generation_users/${searchResultSnapshot!.docs[index].id}')
                         .update({
                       'connection_request':
                           connectionRequestCollectionRequestUser,
@@ -497,7 +493,7 @@ class _SearchState extends State<Search> {
 
                     FirebaseFirestore.instance
                         .doc(
-                            'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                            'generation_users/${FirebaseAuth.instance.currentUser!.email.toString().toString()}')
                         .update({
                       'connection_request': connectionRequestCollectionCurrUser,
                     });
@@ -507,7 +503,7 @@ class _SearchState extends State<Search> {
                 /// Send Notification About the opponent Person About new notification
                 await _sendNotification.sendNotification(
                   token: _encryptionMaker.decryptionMaker(
-                      searchResultSnapshot.docs[index]['token']),
+                      searchResultSnapshot!.docs[index]['token']),
                   title: 'New Connection Request',
                   body:
                       '${_encryptionMaker.decryptionMaker(documentSnapShotCurrUser.get('user_name'))} Send You a Connection Request',
@@ -515,52 +511,59 @@ class _SearchState extends State<Search> {
 
                 print("Updated");
               } else {
-                if (searchResultSnapshot.docs[index]['connection_request']
-                        [FirebaseAuth.instance.currentUser.email] ==
+                if (searchResultSnapshot!.docs[index]['connection_request']
+                        [FirebaseAuth.instance.currentUser!.email.toString()] ==
                     "Request Pending") {
                   Map<String, dynamic> connectionsMapRequestUser =
-                      searchResultSnapshot.docs[index]['connections'];
+                      searchResultSnapshot!.docs[index]['connections'];
 
                   Map<String, dynamic> connectionsMapCurrUser =
                       documentSnapShotCurrUser.get('connections');
 
                   Map<String, dynamic> activityMapRequestUser =
-                      searchResultSnapshot.docs[index]['activity'];
+                      searchResultSnapshot!.docs[index]['activity'];
                   Map<String, dynamic> activityMapCurrUser =
                       documentSnapShotCurrUser.get('activity');
 
-                  connectionRequestCollectionCurrUser[searchResultSnapshot
+                  connectionRequestCollectionCurrUser[searchResultSnapshot!
                       .docs[index].id] = "Invitation Accepted";
 
                   connectionRequestCollectionRequestUser[FirebaseAuth
-                      .instance.currentUser.email] = "Request Accepted";
+                      .instance.currentUser!.email
+                      .toString()
+                      .toString()] = "Request Accepted";
                   print("Add Invited User Data to SQLite");
 
-                  connectionsMapRequestUser[
-                      FirebaseAuth.instance.currentUser.email] = [];
+                  connectionsMapRequestUser[FirebaseAuth
+                      .instance.currentUser!.email
+                      .toString()
+                      .toString()] = [];
 
-                  connectionsMapCurrUser[searchResultSnapshot.docs[index].id] =
+                  connectionsMapCurrUser[searchResultSnapshot!.docs[index].id] =
                       [];
 
-                  activityMapRequestUser[
-                      FirebaseAuth.instance.currentUser.email] = [];
+                  activityMapRequestUser[FirebaseAuth
+                      .instance.currentUser!.email
+                      .toString()
+                      .toString()] = [];
 
-                  activityMapCurrUser[searchResultSnapshot.docs[index].id] = [];
+                  activityMapCurrUser[searchResultSnapshot!.docs[index].id] =
+                      [];
 
                   if (mounted) {
                     setState(() {
                       print(
-                          'Request Connection Request: ${_encryptionMaker.decryptionMaker(searchResultSnapshot.docs[index]['total_connections'])}');
+                          'Request Connection Request: ${_encryptionMaker.decryptionMaker(searchResultSnapshot!.docs[index]['total_connections'])}');
 
                       FirebaseFirestore.instance
                           .doc(
-                              'generation_users/${searchResultSnapshot.docs[index].id}')
+                              'generation_users/${searchResultSnapshot!.docs[index].id}')
                           .update({
                         'connection_request':
                             connectionRequestCollectionRequestUser,
                         'connections': connectionsMapRequestUser,
                         'total_connections': _encryptionMaker.encryptionMaker(
-                            '${int.parse(_encryptionMaker.decryptionMaker(searchResultSnapshot.docs[index]['total_connections'])) + 1}'),
+                            '${int.parse(_encryptionMaker.decryptionMaker(searchResultSnapshot!.docs[index]['total_connections'])) + 1}'),
                         'activity': activityMapRequestUser,
                       });
 
@@ -569,7 +572,7 @@ class _SearchState extends State<Search> {
 
                       FirebaseFirestore.instance
                           .doc(
-                              'generation_users/${FirebaseAuth.instance.currentUser.email}')
+                              'generation_users/${FirebaseAuth.instance.currentUser!.email.toString().toString()}')
                           .update({
                         'connection_request':
                             connectionRequestCollectionCurrUser,
@@ -584,9 +587,9 @@ class _SearchState extends State<Search> {
                   /// If Same user Already Present, update their account info
                   if (this._allConnectedUserName.contains(
                       _encryptionMaker.decryptionMaker(
-                          searchResultSnapshot.docs[index]['user_name']))) {
+                          searchResultSnapshot!.docs[index]['user_name']))) {
                     final QueryDocumentSnapshot queryDocSs =
-                        searchResultSnapshot.docs[index];
+                        searchResultSnapshot!.docs[index];
 
                     print('Before Updating');
 
@@ -610,7 +613,7 @@ class _SearchState extends State<Search> {
                   /// Send Notification to Request Sender about Connection Accepted
                   await _sendNotification.sendNotification(
                     token: _encryptionMaker.decryptionMaker(
-                        searchResultSnapshot.docs[index]['token']),
+                        searchResultSnapshot!.docs[index]['token']),
                     title: 'Connection Request Accepted',
                     body:
                         '${_encryptionMaker.decryptionMaker(documentSnapShotCurrUser.get('user_name'))} Accept Your Connection Request',
@@ -695,8 +698,8 @@ class _SearchState extends State<Search> {
   }
 
   Widget requestIconController(int index) {
-    if (!searchResultSnapshot.docs[index]['connection_request']
-        .containsKey('${FirebaseAuth.instance.currentUser.email}')) {
+    if (!searchResultSnapshot!.docs[index]['connection_request'].containsKey(
+        '${FirebaseAuth.instance.currentUser!.email.toString().toString()}')) {
       return Text(
         'Connect',
         style: TextStyle(
@@ -705,11 +708,12 @@ class _SearchState extends State<Search> {
       );
     }
 
-    final String oppositeConnectionStatus = searchResultSnapshot.docs[index]
-        .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
+    final String oppositeConnectionStatus =
+        searchResultSnapshot!.docs[index].data()['connection_request']
+            [FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
     final String otherUserName = _encryptionMaker
-        .decryptionMaker(searchResultSnapshot.docs[index].data()['user_name']);
+        .decryptionMaker(searchResultSnapshot!.docs[index].data()['user_name']);
 
     if (oppositeConnectionStatus == 'Invitation Came') {
       return Text(
@@ -746,15 +750,16 @@ class _SearchState extends State<Search> {
   }
 
   Color _selectColor(index) {
-    if (!searchResultSnapshot.docs[index]['connection_request']
-        .containsKey('${FirebaseAuth.instance.currentUser.email}'))
+    if (!searchResultSnapshot!.docs[index]['connection_request']
+        .containsKey('${FirebaseAuth.instance.currentUser!.email.toString()}'))
       return Colors.lightBlue;
 
-    String oppositeConnectionStatus = searchResultSnapshot.docs[index]
-        .data()['connection_request'][FirebaseAuth.instance.currentUser.email];
+    String oppositeConnectionStatus =
+        searchResultSnapshot!.docs[index].data()['connection_request']
+            [FirebaseAuth.instance.currentUser!.email.toString()];
 
     final String otherUserName = _encryptionMaker
-        .decryptionMaker(searchResultSnapshot.docs[index].data()['user_name']);
+        .decryptionMaker(searchResultSnapshot!.docs[index].data()['user_name']);
 
     if (oppositeConnectionStatus == 'Invitation Came')
       return Colors.amber;
@@ -765,5 +770,33 @@ class _SearchState extends State<Search> {
         this._allConnectedUserName.contains(otherUserName)) return Colors.green;
 
     return Colors.lightBlue;
+  }
+
+  ImageProvider<Object>?  getImageWithProvider(int index) {
+    if (this
+            ._selectedUserNameAndProfilePicCollection[index]
+            .values
+            .first
+            .toString() ==
+        '') return ExactAssetImage("assets/logo/logo.png");
+
+    return FileImage(File(this
+        ._selectedUserNameAndProfilePicCollection[index]
+        .values
+        .first
+        .toString()));
+
+    // this
+    //           ._selectedUserNameAndProfilePicCollection[index]
+    //           .values
+    //           .first
+    //           .toString() ==
+    //       ''
+    //   ? ExactAssetImage("assets/logo/logo.png")
+    //   : FileImage(File(this
+    //       ._selectedUserNameAndProfilePicCollection[index]
+    //       .values
+    //       .first
+    //       .toString()));
   }
 }

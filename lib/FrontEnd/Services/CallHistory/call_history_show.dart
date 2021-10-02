@@ -33,7 +33,7 @@ class _ShowCallLogsDataState extends State<ShowCallLogsData> {
         setState(() {
           this._callHistoryCollection.add({
             '${everyHistoryMap['__callDate__']} $_time':
-                everyHistoryMap['__callType__'],
+                everyHistoryMap['__callType__'].toString(),
           });
         });
       }

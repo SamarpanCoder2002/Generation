@@ -16,10 +16,12 @@ import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_stora
 import 'package:generation/FrontEnd/Activity/animation_controller.dart';
 
 class ActivityView extends StatefulWidget {
-  final String takeParticularConnectionUserName;
+  final String? takeParticularConnectionUserName;
   final int activityStartIndex;
 
-  ActivityView({@required this.takeParticularConnectionUserName, @required this.activityStartIndex});
+  ActivityView(
+      {required this.takeParticularConnectionUserName,
+      required this.activityStartIndex});
 
   @override
   _ActivityViewState createState() => _ActivityViewState();
@@ -44,8 +46,8 @@ class _ActivityViewState extends State<ActivityView>
 
   // Important Controller for Activity View
   //VideoPlayerController _videoController;
-  PageController _activityPageViewController;
-  AnimationController _animationController;
+  PageController? _activityPageViewController;
+  late AnimationController _animationController;
 
   // Will Take all Activity Collection of Current User
   List<dynamic> _currUserActivityCollection = [];
@@ -76,16 +78,16 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   void _collectCurrUserActivity() async {
-    final List<Map<String, dynamic>> _activityDataCollect =
+    final List<Map<String, dynamic>>? _activityDataCollect =
         await _localStorageHelper.extractActivityForParticularUserName(
-            widget.takeParticularConnectionUserName);
+            widget.takeParticularConnectionUserName.toString());
 
     print('Current User Data Collect: $_activityDataCollect');
 
     if (_activityDataCollect == null || _activityDataCollect.length == 0) {
     } else {
       /// Android StatusBar Hide
-      await SystemChrome.setEnabledSystemUIOverlays([]);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
       if (mounted) {
         setState(() {
@@ -103,7 +105,7 @@ class _ActivityViewState extends State<ActivityView>
       _fToast.init(context);
 
       print('Starting index: ${widget.activityStartIndex}');
-      if(widget.activityStartIndex > 0)
+      if (widget.activityStartIndex > 0)
         this._activityCurrIndex = widget.activityStartIndex;
 
       _collectCurrUserActivity();
@@ -153,10 +155,10 @@ class _ActivityViewState extends State<ActivityView>
       // Some Controller Dispose else may give error after current context getting pop
       //_videoController?.dispose();
       _animationController.dispose();
-      _activityPageViewController.dispose();
+      _activityPageViewController!.dispose();
 
-      SystemChrome.setEnabledSystemUIOverlays(
-          SystemUiOverlay.values); // Android StatusBar Show
+      SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual, overlays: SystemUiOverlay.values); // Android StatusBar Show
     }
 
     super.dispose();
@@ -484,7 +486,6 @@ class _ActivityViewState extends State<ActivityView>
                         color: Colors.white,
                         fontSize: 16.0,
                         fontWeight: FontWeight.w500,
-
                       ),
                     ),
                   ),
@@ -538,7 +539,7 @@ class _ActivityViewState extends State<ActivityView>
     }
 
     if (animateToPage) {
-      _activityPageViewController.animateToPage(_activityCurrIndex,
+      _activityPageViewController!.animateToPage(_activityCurrIndex,
           duration: Duration(milliseconds: 1), curve: Curves.easeInOut);
     }
   }
@@ -551,7 +552,7 @@ class _ActivityViewState extends State<ActivityView>
         setState(() {
           this._showInformation = false;
 
-          if (details.primaryVelocity > 0) {
+          if (details.primaryVelocity! > 0) {
             if (_activityCurrIndex - 1 >= 0) {
               _activityCurrIndex -= 1;
 
@@ -798,7 +799,7 @@ class _ActivityViewState extends State<ActivityView>
                         print('Final: $_pollOptionsPercentageList');
 
                         await _localStorageHelper.updateTableActivity(
-                            tableName: widget.takeParticularConnectionUserName,
+                            tableName: widget.takeParticularConnectionUserName!,
                             oldActivity: _pollActivity,
                             newAddition: '$index');
 
@@ -878,13 +879,13 @@ class _ActivityViewState extends State<ActivityView>
   }
 
   static void _pollOptionPercentValueUpdated(String _pollActivity) async {
-    final DocumentSnapshot documentSnapShot = await FirebaseFirestore.instance
+    final DocumentSnapshot<Map<String, dynamic>> documentSnapShot = await FirebaseFirestore.instance
         .doc('polling_collection/${_pollActivity.split('[[[question]]]')[1]}')
         .get();
 
     print(documentSnapShot.data());
 
-    _options = documentSnapShot.data().values.toList();
+    _options = documentSnapShot.data()!.values.toList();
 
     for (int i = 0; i < _pollOptionsPercentageList.length; i++) {
       _pollOptionsPercentageList[i] = _options[i].toDouble();
@@ -920,14 +921,7 @@ class _ActivityViewState extends State<ActivityView>
             alignment: Alignment.centerLeft,
             child: CircleAvatar(
               radius: 23.0,
-              backgroundImage: ProfileImageManagement
-                              .allConnectionsProfilePicLocalPath[
-                          widget.takeParticularConnectionUserName] ==
-                      ''
-                  ? ExactAssetImage('assets/logo/logo.jpg')
-                  : FileImage(File(
-                      ProfileImageManagement.allConnectionsProfilePicLocalPath[
-                          widget.takeParticularConnectionUserName])),
+              backgroundImage: _getImageWithProvider(),
             ),
           ),
           SizedBox(
@@ -939,9 +933,9 @@ class _ActivityViewState extends State<ActivityView>
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  widget.takeParticularConnectionUserName.length <= 30
-                      ? widget.takeParticularConnectionUserName
-                      : '${widget.takeParticularConnectionUserName.replaceRange(30, widget.takeParticularConnectionUserName.length, '...')}',
+                  widget.takeParticularConnectionUserName!.length <= 30
+                      ? widget.takeParticularConnectionUserName!
+                      : '${widget.takeParticularConnectionUserName!.replaceRange(30, widget.takeParticularConnectionUserName!.length, '...')}',
                   style: TextStyle(color: Colors.white, fontSize: 18.0),
                 ),
               ),
@@ -959,5 +953,14 @@ class _ActivityViewState extends State<ActivityView>
         ],
       ),
     );
+  }
+
+  ImageProvider<Object>? _getImageWithProvider() {
+    if (ProfileImageManagement.allConnectionsProfilePicLocalPath[
+            widget.takeParticularConnectionUserName] ==
+        '') return const ExactAssetImage('assets/logo/logo.png');
+    return FileImage(File(
+        ProfileImageManagement.allConnectionsProfilePicLocalPath[
+            widget.takeParticularConnectionUserName]));
   }
 }

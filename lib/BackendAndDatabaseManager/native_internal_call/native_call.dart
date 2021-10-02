@@ -20,4 +20,15 @@ class NativeCallback {
 
     return result;
   }
+
+  Future<String> getTheVideoThumbnail({required String videoPath}) async {
+    print('Thumbnail Take');
+
+    final String thumbnailPath = await _platform
+        .invokeMethod('makeVideoThumbnail', {'videoPath': videoPath});
+
+    print("Thumbnail Path is: $thumbnailPath");
+
+    return thumbnailPath;
+  }
 }

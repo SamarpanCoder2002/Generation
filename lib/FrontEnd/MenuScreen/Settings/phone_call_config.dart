@@ -8,11 +8,11 @@ import 'package:generation/BackendAndDatabaseManager/global_controller/different
 import 'package:generation/BackendAndDatabaseManager/global_controller/encrytion_maker.dart';
 import 'package:generation/BackendAndDatabaseManager/sqlite_services/local_storage_controller.dart';
 import 'package:mobile_number/mobile_number.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PhoneNumberConfig extends StatefulWidget {
-  const PhoneNumberConfig({Key key}) : super(key: key);
+  const PhoneNumberConfig({Key? key}) : super(key: key);
 
   @override
   _PhoneNumberConfigState createState() => _PhoneNumberConfigState();
@@ -30,7 +30,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
     final String _savedNumber =
         await _localStorageHelper.extractImportantTableData(
             extraImportant: ExtraImportant.MobileNumber,
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
     if (mounted) {
       setState(() {
@@ -50,8 +50,8 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(34, 48, 60, 1),
-      body: ModalProgressHUD(
-        inAsyncCall: _isLoading,
+      body: LoadingOverlay(
+        isLoading: _isLoading,
         child: Center(
           child: this._registeredPhoneNumber != ''
               ? Column(
@@ -159,9 +159,9 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
     if (permissionStatus.isGranted) {
       print('Phone Permission Granted');
 
-      final List<SimCard> simCards = await MobileNumber.getSimCards;
+      final List<SimCard>? simCards = await MobileNumber.getSimCards;
 
-      _selectMobileNumberToRegister(simCards);
+      _selectMobileNumberToRegister(simCards!);
     } else
       print('Phone Permission Denied');
   }
@@ -191,8 +191,8 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
                       simCards[i].number != ''
                           ? TextButton(
                               child: Text(
-                                simCards[i].number.startsWith('+')
-                                    ? simCards[i].number
+                                simCards[i].number!.startsWith('+')
+                                    ? simCards[i].number.toString()
                                     : '+${simCards[i].number}',
                                 style: TextStyle(
                                   color: Colors.white70,
@@ -207,8 +207,8 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
                                 ),
                               )),
                               onPressed: () => _proceedWithSelectedNum(
-                                  simCards[i].number.startsWith('+')
-                                      ? simCards[i].number
+                                  simCards[i].number!.startsWith('+')
+                                      ? simCards[i].number.toString()
                                       : '+${simCards[i].number}'),
                             )
                           : Text(
@@ -234,7 +234,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
       }
 
       await FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .doc('generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
           .update({
         'phone_number': _encryptionMaker.encryptionMaker(selectedNum),
       });
@@ -242,7 +242,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
       await _localStorageHelper.updateImportantTableExtraData(
         extraImportant: ExtraImportant.MobileNumber,
         updatedVal: selectedNum,
-        userMail: FirebaseAuth.instance.currentUser.email,
+        userMail: FirebaseAuth.instance.currentUser!.email.toString(),
       );
 
       if (mounted) {
@@ -286,10 +286,10 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
       });
     }
 
-    final String mobileNum =
+    final String? mobileNum =
         await _localStorageHelper.extractImportantTableData(
             extraImportant: ExtraImportant.MobileNumber,
-            userMail: FirebaseAuth.instance.currentUser.email);
+            userMail: FirebaseAuth.instance.currentUser!.email.toString());
 
     if (mobileNum != null) {
       await _localStorageHelper.deleteParticularUpdatedImportantData(
@@ -297,7 +297,7 @@ class _PhoneNumberConfigState extends State<PhoneNumberConfig> {
           shouldBeDeleted: mobileNum);
 
       await FirebaseFirestore.instance
-          .doc('generation_users/${FirebaseAuth.instance.currentUser.email}')
+          .doc('generation_users/${FirebaseAuth.instance.currentUser!.email.toString()}')
           .update({
         'phone_number': '',
       });
