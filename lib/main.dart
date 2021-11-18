@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:generation/BackendAndDatabaseManager/native_internal_call/native_call.dart';
 
 import 'package:generation/FrontEnd/Introduction_Screen/intro_screen.dart';
 import 'package:generation/FrontEnd/MainScreen/main_window.dart';
@@ -109,6 +110,7 @@ Future<void> notificationInitialize() async {
 /// Background Message Show for Debugging
 Future<void> backgroundMsgAction(RemoteMessage message) async {
   await Firebase.initializeApp();
+  final NativeCallback nativeCallback = NativeCallback();
 
   print(
       'Background Message Data: ${message.notification!.body}   ${message.notification!.title}');
@@ -118,6 +120,8 @@ Future<void> backgroundMsgAction(RemoteMessage message) async {
           nConfigTypes: NConfigTypes.BgNotification);
 
   print('Background Notification Status: $_bgNotifyStatus');
+
+  await nativeCallback.callForCancelNotifications();
 
   if (_bgNotifyStatus) {
     if (message.notification!.title!.contains('Connection Request') ||

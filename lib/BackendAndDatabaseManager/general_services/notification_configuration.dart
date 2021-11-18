@@ -84,7 +84,7 @@ class SendNotification {
     try {
       print('Send');
 
-      final String _serverKey = 'SERVER-KEY(Generated from Firebase Project Settings Cloud Messaging)';
+      final String _serverKey = 'SERVER-KEY';
 
       final Response response = await post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
@@ -96,6 +96,10 @@ class SendNotification {
           'notification': <String, dynamic>{
             'body': body,
             'title': title,
+            "android_channel_id": "high_importance_channel",
+            "sound": "default",
+            "priority": "high",
+            "click_action": "FLUTTER_NOTIFICATION_CLICK",
           },
           'priority': 'high',
           'data': <String, dynamic>{
@@ -141,11 +145,9 @@ class ForeGroundNotificationReceiveAndShow {
 
   initAll(InitializationSettings initializationSettings) async {
     var response = await _flutterLocalNotificationsPlugin.initialize(
-        initializationSettings,
-        onSelectNotification: (payload)async{
-          return 'On Select Notification Payload: $payload';
-        }
-    );
+        initializationSettings, onSelectNotification: (payload) async {
+      return 'On Select Notification Payload: $payload';
+    });
 
     print('Local Notification Initialization Status: $response');
   }
@@ -173,5 +175,4 @@ class ForeGroundNotificationReceiveAndShow {
       );
     }
   }
-
 }

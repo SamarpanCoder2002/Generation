@@ -63,7 +63,7 @@ class Management {
       mediaTypes: MediaTypes.Text,
       activityTime: _currTime,
       bgInformation:
-          '${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize',
+          "${selectedBGColor.red} + ${selectedBGColor.green} + ${selectedBGColor.blue} + ${selectedBGColor.opacity}+$fontSize",
     );
 
     if (allConnectionUserName.isNotEmpty) {
@@ -74,29 +74,29 @@ class Management {
                   userName: connectionUserName);
 
           DocumentSnapshot<Map<String, dynamic>> documentSnapshot = await FirebaseFirestore.instance
-              .doc('generation_users/$_userMail')
+              .doc("generation_users/$_userMail")
               .get();
 
           Map<String, dynamic> activityCollection =
-              documentSnapshot.data()!['activity'] as Map<String, dynamic>;
+              documentSnapshot.data()!["activity"] as Map<String, dynamic>;
           List<dynamic>? currConnection = activityCollection[
               FirebaseAuth.instance.currentUser!.email.toString().toString()];
 
           if (currConnection == null) currConnection = [];
 
           currConnection.add({
-            _encryptionMaker.encryptionMaker('$activityText+MediaTypes.Text'):
+            _encryptionMaker.encryptionMaker("$activityText+MediaTypes.Text"):
                 _encryptionMaker.encryptionMaker(
-                    '${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime'),
+                    "${selectedBGColor.red}+${selectedBGColor.green}+${selectedBGColor.blue}+${selectedBGColor.opacity}+$fontSize+$_currTime"),
           });
 
           activityCollection[FirebaseAuth.instance.currentUser!.email.toString()
               .toString()] = currConnection;
 
           await FirebaseFirestore.instance
-              .doc('generation_users/$_userMail')
+              .doc("generation_users/$_userMail")
               .update({
-            'activity': activityCollection,
+            "activity": activityCollection,
           });
         });
 
@@ -114,7 +114,7 @@ class Management {
       String manuallyText,
       List<String> allConnectionUserName,
       BuildContext context,
-      {String mediaType = 'image'}) async {
+      {String mediaType = "image"}) async {
     if (allConnectionUserName.isEmpty) {
       await localStorageHelper.insertDataInUserActivityTable(
         tableName: _currAccountUserName,
@@ -127,13 +127,13 @@ class Management {
     } else {
       try {
         final String imageUrl = await uploadMediaToStorage(imgFile, context,
-            reference: 'ActivityMedia/');
+            reference: "ActivityMedia/");
 
         final String _currTime = DateTime.now().toString();
 
         await localStorageHelper.insertDataInUserActivityTable(
           tableName: _currAccountUserName,
-          statusLinkOrString: '${imgFile.path}+$imageUrl',
+          statusLinkOrString: "${imgFile.path}+$imageUrl",
           mediaTypes: MediaTypes.Image,
           activityTime: _currTime,
           extraText: manuallyText,
