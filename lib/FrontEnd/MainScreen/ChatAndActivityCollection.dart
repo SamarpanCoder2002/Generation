@@ -1544,8 +1544,6 @@ class _ChatsAndActivityCollectionState
 
   ImageProvider<Object>?  getProperImageProviderForConnectionActivity(int index) {
 
-    print('Probleming Here');
-
     if ((index == 0 && ImportantThings.thisAccountProfileImagePath == '') ||
         (index > 0 &&
             ProfileImageManagement.allConnectionsProfilePicLocalPath[

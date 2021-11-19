@@ -355,28 +355,6 @@ class _SearchState extends State<Search> {
     }
 
     print(this.searchResultSnapshot);
-
-    // await FirebaseFirestore.instance
-    //     .collection("generation_users")
-    //     .where(
-    //   searchArgument,
-    //
-    //   /// We know that, for both ASCII or Unicode, small letters came after capital letters....//So, search query always find the relevant result according to search
-    //   isGreaterThanOrEqualTo: searchUser.text.toUpperCase(),
-    // )
-    //     .get()
-    //     .catchError((e) {
-    //   print(e.toString());
-    // }).then((snapshot) {
-    //   searchResultSnapshot = snapshot;
-    //
-    //   if (mounted) {
-    //     setState(() {
-    //       isLoading = false;
-    //       haveUserSearched = true;
-    //     });
-    //   }
-    // });
   }
 
   Widget userList() {
@@ -772,7 +750,7 @@ class _SearchState extends State<Search> {
     return Colors.lightBlue;
   }
 
-  ImageProvider<Object>?  getImageWithProvider(int index) {
+  ImageProvider<Object>? getImageWithProvider(int index) {
     if (this
             ._selectedUserNameAndProfilePicCollection[index]
             .values
@@ -785,18 +763,5 @@ class _SearchState extends State<Search> {
         .values
         .first
         .toString()));
-
-    // this
-    //           ._selectedUserNameAndProfilePicCollection[index]
-    //           .values
-    //           .first
-    //           .toString() ==
-    //       ''
-    //   ? ExactAssetImage("assets/logo/logo.png")
-    //   : FileImage(File(this
-    //       ._selectedUserNameAndProfilePicCollection[index]
-    //       .values
-    //       .first
-    //       .toString()));
   }
 }
