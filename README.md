@@ -117,8 +117,6 @@
 
 ### 🙋 For Any query related to this project(Generation), Please Raise an issue in that Repo.
 
-### 💥 This Project is Participating Under `Hacktoberfest 2021`
-
 ***
 
 <h3 align="center">Show 💘 by Starring This Repo</h3>
