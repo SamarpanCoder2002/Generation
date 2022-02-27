@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/providers/status_collection_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:provider/provider.dart';
 import '../../config/text_collection.dart';
@@ -124,39 +126,51 @@ class _IntroScreenState extends State<IntroScreen> {
     return SizedBox(
       width: MediaQuery.of(context).size.width - 40,
       height: 115,
-      child: ListView.builder(
+      child: ListView(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
-        itemBuilder: (_, activityIndex) => Container(
-          margin: const EdgeInsets.only(right: 15),
-          child: Column(
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                    color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(
-                        color: AppColors.darkBorderGreenColor, width: 3),
-                    image: const DecorationImage(
-                        image: NetworkImage(
-                            "https://media.self.com/photos/618eb45bc4880cebf08c1a5b/4:3/w_2560%2Cc_limit/1236337133"),
-                        fit: BoxFit.cover)),
-              ),
-              Container(
-                margin: const EdgeInsets.only(top: 10),
-                child: const Text(
-                  "Samarpan",
-                  style: TextStyleCollection.activityTitleTextStyle,
-                ),
-              )
-            ],
-          ),
-        ),
+        children: [
+          ..._activityDataCollection(),
+        ],
       ),
     );
+  }
+
+  _activityDataCollection() {
+    final _activityData =
+        Provider.of<StatusCollectionProvider>(context).getData();
+
+    return _activityData.map((_currentActivityData) {
+      return Container(
+        margin: const EdgeInsets.only(right: 15),
+        child: Column(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                  color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                      color: _currentActivityData["isActive"]
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.imageDarkBgColor,
+                      width: 3),
+                  image: DecorationImage(
+                      image: NetworkImage(_currentActivityData["profilePic"]),
+                      fit: BoxFit.cover)),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 10),
+              child: Text(
+                _currentActivityData["connectionName"],
+                style: TextStyleCollection.activityTitleTextStyle,
+              ),
+            )
+          ],
+        ),
+      );
+    });
   }
 
   _messagesSection() {
@@ -180,20 +194,14 @@ class _IntroScreenState extends State<IntroScreen> {
         Provider.of<MessageScreenScrollingProvider>(context)
             .getScrollController();
 
-    final bool _isMainAppBarVisible =
-        Provider.of<MessageScreenScrollingProvider>(context)
-            .isMainAppBarVisible();
-
     return Container(
       width: double.maxFinite,
-      height: _isMainAppBarVisible
-          ? MediaQuery.of(context).size.height / 1.5
-          : MediaQuery.of(context).size.height - 100,
+      height: MediaQuery.of(context).size.height / 1.8,
       margin: const EdgeInsets.only(top: 20),
       child: ListView.builder(
         controller: _messageScreenScrollController,
         shrinkWrap: true,
-        itemCount: 20,
+        itemCount: Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
         itemBuilder: (_, connectionIndex) =>
             _particularChatConnection(connectionIndex),
       ),
@@ -260,7 +268,7 @@ class _IntroScreenState extends State<IntroScreen> {
         children: [
           _chatConnectionImage(connectionIndex),
           const SizedBox(
-            width: 20,
+            width: 15,
           ),
           _chatConnectionData(connectionIndex),
           const SizedBox(
@@ -273,6 +281,8 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   _chatConnectionImage(int connectionIndex) {
+    final _connectionData = Provider.of<ConnectionCollectionProvider>(context).getData()[connectionIndex];
+
     return Container(
       width: 60,
       height: 60,
@@ -280,14 +290,16 @@ class _IntroScreenState extends State<IntroScreen> {
           color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
           borderRadius: BorderRadius.circular(100),
           border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
-          image: const DecorationImage(
+          image: DecorationImage(
               image: NetworkImage(
-                  "https://media.self.com/photos/618eb45bc4880cebf08c1a5b/4:3/w_2560%2Cc_limit/1236337133"),
+                  _connectionData["profilePic"]),
               fit: BoxFit.cover)),
     );
   }
 
   _chatConnectionData(int connectionIndex) {
+    final _connectionData = Provider.of<ConnectionCollectionProvider>(context).getData()[connectionIndex];
+
     return SizedBox(
       width: MediaQuery.of(context).size.width - 200,
       child: Column(
@@ -296,29 +308,36 @@ class _IntroScreenState extends State<IntroScreen> {
           Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Samarpan",
+                _connectionData["connectionName"],
                 style: TextStyleCollection.activityTitleTextStyle
                     .copyWith(fontSize: 16),
               )),
+          if(_connectionData["latestMessage"] != null && _connectionData["latestMessage"].isNotEmpty)
+
           Flexible(
-              child: Text(
-            "A Private, Secure, End-to-End Encrypted Messaging app made in Flutter(With Firebase and SQLite) that helps you to connect with your connections without any Ads, promotion. No other third-party person, organization, or even Generation Team can't read your messages.",
-            style: TextStyleCollection.activityTitleTextStyle
-                .copyWith(fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
-          )),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _connectionData["latestMessage"]["message"],
+            style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                  fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
+          ),
+              )),
         ],
       ),
     );
   }
 
   _chatConnectionInformationData(int connectionIndex) {
+    final _connectionData = Provider.of<ConnectionCollectionProvider>(context).getData()[connectionIndex];
+
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Flexible(
             child: Text(
-              connectionIndex == 1 ? "01/12/2021" : "26 July",
+              _connectionData["lastMessageDate"],
               style: TextStyleCollection.activityTitleTextStyle
                   .copyWith(fontSize: 14),
             ),
@@ -332,9 +351,9 @@ class _IntroScreenState extends State<IntroScreen> {
             decoration: BoxDecoration(
                 color: AppColors.darkBorderGreenColor,
                 borderRadius: BorderRadius.circular(100)),
-            child: const Center(
+            child:  Center(
                 child: Text(
-              "5",
+              "${_connectionData["notSeenMsgCount"]}",
               style: TextStyleCollection.terminalTextStyle,
             )),
           ),
