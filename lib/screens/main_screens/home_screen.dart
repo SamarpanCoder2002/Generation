@@ -1,62 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
-import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/config/text_style_collection.dart';
-import 'package:generation/providers/connection_collection_provider.dart';
-import 'package:generation/providers/status_collection_provider.dart';
-import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:provider/provider.dart';
-import '../../config/text_collection.dart';
-import '../../providers/messages_screen_controller.dart';
-import '../../services/device_specific_operations.dart';
 
-class IntroScreen extends StatefulWidget {
-  const IntroScreen({Key? key}) : super(key: key);
+import '../../config/text_collection.dart';
+import '../../config/text_style_collection.dart';
+import '../../providers/connection_collection_provider.dart';
+import '../../providers/messages_screen_controller.dart';
+import '../../providers/status_collection_provider.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _IntroScreenState createState() => _IntroScreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _IntroScreenState extends State<IntroScreen> {
-  var activeSlideIndex = 0;
-
+class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-    showStatusAndNavigationBar();
-    makeStatusBarTransparent();
-    changeOnlyNavigationBarColor(
-        navigationBarColor: AppColors.backgroundDarkMode);
-
     Provider.of<MessageScreenScrollingProvider>(context, listen: false)
         .startListening();
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: AppColors.backgroundDarkMode,
-        bottomSheet: _bottomSheet(),
-        body: Container(
-            margin: const EdgeInsets.only(top: 2, left: 20, right: 20),
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.02,
-                ),
-                _headingSection(),
-                const SizedBox(height: 15),
-                _searchBar(),
-                const SizedBox(height: 25),
-                _activitiesSection(),
-                const SizedBox(height: 20),
-                _messagesSection(),
-              ],
-            )));
+      backgroundColor: AppColors.backgroundDarkMode,
+      body: Container(
+          margin: const EdgeInsets.only(top: 2, left: 20, right: 20),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.02,
+              ),
+              _headingSection(),
+              const SizedBox(height: 15),
+              _searchBar(),
+              const SizedBox(height: 25),
+              _activitiesSection(),
+              const SizedBox(height: 20),
+              _messagesSection(),
+            ],
+          )),
+    );
   }
 
   _headingSection() {
@@ -201,60 +191,10 @@ class _IntroScreenState extends State<IntroScreen> {
       child: ListView.builder(
         controller: _messageScreenScrollController,
         shrinkWrap: true,
-        itemCount: Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
+        itemCount:
+            Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
         itemBuilder: (_, connectionIndex) =>
             _particularChatConnection(connectionIndex),
-      ),
-    );
-  }
-
-  _bottomSheet() {
-    final ScrollController _messageScreenScrollController =
-        Provider.of<MessageScreenScrollingProvider>(context)
-            .getScrollController();
-
-    return ScrollToHideWidget(
-      scrollController: _messageScreenScrollController,
-      child: Container(
-        height: 60,
-        color: AppColors.backgroundDarkMode,
-        width: double.maxFinite,
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              color: AppColors.darkBorderGreenColor,
-              icon: Image.asset(IconImages.messageImagePath,
-                  height: 25, width: 25, color: AppColors.darkBorderGreenColor),
-              onPressed: () {},
-            ),
-            IconButton(
-              color: AppColors.darkInactiveIconColor,
-              icon: Image.asset(IconImages.callImagePath,
-                  height: 25,
-                  width: 25,
-                  color: AppColors.darkInactiveIconColor),
-              onPressed: () {},
-            ),
-            IconButton(
-              color: AppColors.darkInactiveIconColor,
-              icon: Image.asset(IconImages.cameraImagePath,
-                  height: 25,
-                  width: 25,
-                  color: AppColors.darkInactiveIconColor),
-              onPressed: () {},
-            ),
-            IconButton(
-              color: AppColors.darkInactiveIconColor,
-              icon: Image.asset(IconImages.settingsImagePath,
-                  height: 25,
-                  width: 25,
-                  color: AppColors.darkInactiveIconColor),
-              onPressed: () {},
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -281,7 +221,8 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   _chatConnectionImage(int connectionIndex) {
-    final _connectionData = Provider.of<ConnectionCollectionProvider>(context).getData()[connectionIndex];
+    final _connectionData = Provider.of<ConnectionCollectionProvider>(context)
+        .getData()[connectionIndex];
 
     return Container(
       width: 60,
@@ -291,14 +232,14 @@ class _IntroScreenState extends State<IntroScreen> {
           borderRadius: BorderRadius.circular(100),
           border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
           image: DecorationImage(
-              image: NetworkImage(
-                  _connectionData["profilePic"]),
+              image: NetworkImage(_connectionData["profilePic"]),
               fit: BoxFit.cover)),
     );
   }
 
   _chatConnectionData(int connectionIndex) {
-    final _connectionData = Provider.of<ConnectionCollectionProvider>(context).getData()[connectionIndex];
+    final _connectionData = Provider.of<ConnectionCollectionProvider>(context)
+        .getData()[connectionIndex];
 
     return SizedBox(
       width: MediaQuery.of(context).size.width - 200,
@@ -312,24 +253,26 @@ class _IntroScreenState extends State<IntroScreen> {
                 style: TextStyleCollection.activityTitleTextStyle
                     .copyWith(fontSize: 16),
               )),
-          if(_connectionData["latestMessage"] != null && _connectionData["latestMessage"].isNotEmpty)
-
-          Flexible(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  _connectionData["latestMessage"]["message"],
-            style: TextStyleCollection.activityTitleTextStyle.copyWith(
-                  fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
-          ),
-              )),
+          if (_connectionData["latestMessage"] != null &&
+              _connectionData["latestMessage"].isNotEmpty)
+            Flexible(
+                child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _connectionData["latestMessage"]["message"],
+                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                    fontSize: 12,
+                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+              ),
+            )),
         ],
       ),
     );
   }
 
   _chatConnectionInformationData(int connectionIndex) {
-    final _connectionData = Provider.of<ConnectionCollectionProvider>(context).getData()[connectionIndex];
+    final _connectionData = Provider.of<ConnectionCollectionProvider>(context)
+        .getData()[connectionIndex];
 
     return Expanded(
       child: Column(
@@ -351,7 +294,7 @@ class _IntroScreenState extends State<IntroScreen> {
             decoration: BoxDecoration(
                 color: AppColors.darkBorderGreenColor,
                 borderRadius: BorderRadius.circular(100)),
-            child:  Center(
+            child: Center(
                 child: Text(
               "${_connectionData["notSeenMsgCount"]}",
               style: TextStyleCollection.terminalTextStyle,
