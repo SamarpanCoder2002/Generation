@@ -19,4 +19,7 @@ class AppColors {
 
   static const Color darkInactiveIconColor = Colors.white60;
   static const Color lightInactiveIconColor = Color(0xffb4b5b4);
+
+  static const Color normalBlueColor = Colors.blue;
+  static const Color transparentColor = Colors.transparent;
 }

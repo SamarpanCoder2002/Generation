@@ -9,7 +9,7 @@ import 'package:generation/screens/main_screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/messages_screen_controller.dart';
 import '../../services/device_specific_operations.dart';
-import 'add_connection_screen.dart';
+import 'connection_management/connection_management.dart';
 import 'groups_screen.dart';
 
 class IntroScreen extends StatefulWidget {
@@ -29,7 +29,8 @@ class _IntroScreenState extends State<IntroScreen> {
     changeOnlyNavigationBarColor(
         navigationBarColor: AppColors.backgroundDarkMode);
 
-    print("Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
+    print(
+        "Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
 
     super.initState();
   }
@@ -70,9 +71,9 @@ class _IntroScreenState extends State<IntroScreen> {
                   color: _currentBottomIconIndex == 0
                       ? AppColors.darkBorderGreenColor
                       : AppColors.darkInactiveIconColor),
-              onPressed: ()  => Provider.of<MainScreenNavigationProvider>(
-                  context,
-                  listen: false)
+              onPressed: () => Provider.of<MainScreenNavigationProvider>(
+                      context,
+                      listen: false)
                   .setUpdatedIndex(0),
             ),
             IconButton(
@@ -85,9 +86,9 @@ class _IntroScreenState extends State<IntroScreen> {
                   color: _currentBottomIconIndex == 1
                       ? AppColors.darkBorderGreenColor
                       : AppColors.darkInactiveIconColor),
-              onPressed: ()  => Provider.of<MainScreenNavigationProvider>(
-                  context,
-                  listen: false)
+              onPressed: () => Provider.of<MainScreenNavigationProvider>(
+                      context,
+                      listen: false)
                   .setUpdatedIndex(1),
             ),
             IconButton(
@@ -100,9 +101,9 @@ class _IntroScreenState extends State<IntroScreen> {
                   color: _currentBottomIconIndex == 2
                       ? AppColors.darkBorderGreenColor
                       : AppColors.darkInactiveIconColor),
-              onPressed: ()  => Provider.of<MainScreenNavigationProvider>(
-                  context,
-                  listen: false)
+              onPressed: () => Provider.of<MainScreenNavigationProvider>(
+                      context,
+                      listen: false)
                   .setUpdatedIndex(2),
             ),
             IconButton(
@@ -127,15 +128,16 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   _currentScreenDetector() {
-    final _currentIndex = Provider.of<MainScreenNavigationProvider>(context).getUpdatedIndex();
+    final _currentIndex =
+        Provider.of<MainScreenNavigationProvider>(context).getUpdatedIndex();
 
-    switch(_currentIndex){
+    switch (_currentIndex) {
       case 0:
         return const HomeScreen();
       case 1:
         return const GroupsScreen();
       case 2:
-        return const AddConnectionScreen();
+        return const ConnectionManagementScreen();
       case 3:
         return const SettingsScreen();
     }

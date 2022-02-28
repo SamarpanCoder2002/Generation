@@ -7,7 +7,8 @@ enum ChatMessageType{
   location
 }
 
-enum ProviderType{
-  oneToOneChat,
-  groupChat
+enum ConnectionType{
+  available,
+  request,
+  send
 }

@@ -1,4 +1,7 @@
+import 'package:generation/providers/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/providers/connection_management_provider.dart';
+import 'package:generation/providers/group_collection_provider.dart';
 import 'package:generation/providers/messages_screen_controller.dart';
 import 'package:generation/providers/status_collection_provider.dart';
 import 'package:provider/provider.dart';
@@ -11,4 +14,7 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => StatusCollectionProvider()),
   ChangeNotifierProvider(create: (_) => ConnectionCollectionProvider()),
   ChangeNotifierProvider(create: (_) => MainScreenNavigationProvider()),
+  ChangeNotifierProvider(create: (_) => GroupCollectionProvider()),
+  ChangeNotifierProvider(create: (_) => ConnectionManagementProvider()),
+  ChangeNotifierProvider(create: (_) => AllAvailableConnectionsProvider()),
 ];

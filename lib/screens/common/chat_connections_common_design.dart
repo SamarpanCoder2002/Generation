@@ -1,42 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
-import '../../providers/connection_collection_provider.dart';
-import '../../types/types.dart';
 
-class CommonChatListLayout{
-  final ProviderType providerType;
+class CommonChatListLayout {
   final BuildContext context;
 
-  CommonChatListLayout({required this.providerType, required this.context});
+  CommonChatListLayout({required this.context});
 
-  particularChatConnection(int connectionIndex) {
+  particularChatConnection(
+      {required int currentIndex,
+      required String? photo,
+      required String heading,
+      required String? subheading,
+      required String? lastMsgTime,
+      required String? totalPendingMessages}) {
     return Container(
       height: 60,
       width: double.maxFinite,
       margin: const EdgeInsets.only(bottom: 20),
       child: Row(
         children: [
-          _chatConnectionImage(connectionIndex),
+          _chatConnectionImage(photo),
           const SizedBox(
             width: 15,
           ),
-          _chatConnectionData(connectionIndex),
-          const SizedBox(
-            width: 10,
-          ),
-          _chatConnectionInformationData(connectionIndex),
+          _chatConnectionData(heading, subheading),
+          if (lastMsgTime != null && totalPendingMessages != null)
+            const SizedBox(
+              width: 10,
+            ),
+          if (lastMsgTime != null && totalPendingMessages != null)
+            _chatConnectionInformationData(lastMsgTime, totalPendingMessages),
         ],
       ),
     );
   }
 
-  _chatConnectionImage(int connectionIndex) {
-    final _connectionData = Provider.of<ConnectionCollectionProvider>(context)
-        .getData()[connectionIndex];
-
+  _chatConnectionImage(String? photo) {
     return Container(
       width: 60,
       height: 60,
@@ -44,16 +44,13 @@ class CommonChatListLayout{
           color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
           borderRadius: BorderRadius.circular(100),
           border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
-          image: DecorationImage(
-              image: NetworkImage(_connectionData["profilePic"]),
-              fit: BoxFit.cover)),
+          image: photo == null
+              ? null
+              : DecorationImage(image: NetworkImage(photo), fit: BoxFit.cover)),
     );
   }
 
-  _chatConnectionData(int connectionIndex) {
-    final _connectionData = Provider.of<ConnectionCollectionProvider>(context)
-        .getData()[connectionIndex];
-
+  _chatConnectionData(String heading, String? subheading) {
     return SizedBox(
       width: MediaQuery.of(context).size.width - 200,
       child: Column(
@@ -62,57 +59,56 @@ class CommonChatListLayout{
           Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                _connectionData["connectionName"],
+                heading,
                 style: TextStyleCollection.activityTitleTextStyle
                     .copyWith(fontSize: 16),
               )),
-          if (_connectionData["latestMessage"] != null &&
-              _connectionData["latestMessage"].isNotEmpty)
+          if (subheading != null && subheading.isNotEmpty)
             Flexible(
                 child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    _connectionData["latestMessage"]["message"],
-                    style: TextStyleCollection.activityTitleTextStyle.copyWith(
-                        fontSize: 12,
-                        color: AppColors.pureWhiteColor.withOpacity(0.8)),
-                  ),
-                )),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                subheading,
+                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                    fontSize: 12,
+                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+              ),
+            )),
         ],
       ),
     );
   }
 
-  _chatConnectionInformationData(int connectionIndex) {
-    final _connectionData = Provider.of<ConnectionCollectionProvider>(context)
-        .getData()[connectionIndex];
-
+  _chatConnectionInformationData(
+      String? lastMsgTime, String? totalPendingMessages) {
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Flexible(
-            child: Text(
-              _connectionData["lastMessageDate"],
-              style: TextStyleCollection.activityTitleTextStyle
-                  .copyWith(fontSize: 14),
+          if (lastMsgTime != null)
+            Flexible(
+              child: Text(
+                lastMsgTime,
+                style: TextStyleCollection.activityTitleTextStyle
+                    .copyWith(fontSize: 14),
+              ),
             ),
-          ),
           const SizedBox(
             height: 10,
           ),
-          Container(
-            width: 25,
-            height: 25,
-            decoration: BoxDecoration(
-                color: AppColors.darkBorderGreenColor,
-                borderRadius: BorderRadius.circular(100)),
-            child: Center(
-                child: Text(
-                  "${_connectionData["notSeenMsgCount"]}",
-                  style: TextStyleCollection.terminalTextStyle,
-                )),
-          ),
+          if (totalPendingMessages != null)
+            Container(
+              width: 25,
+              height: 25,
+              decoration: BoxDecoration(
+                  color: AppColors.darkBorderGreenColor,
+                  borderRadius: BorderRadius.circular(100)),
+              child: Center(
+                  child: Text(
+                totalPendingMessages,
+                style: TextStyleCollection.terminalTextStyle,
+              )),
+            ),
         ],
       ),
     );

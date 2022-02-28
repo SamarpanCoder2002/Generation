@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
-import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
@@ -186,23 +185,31 @@ class _HomeScreenState extends State<HomeScreen> {
         Provider.of<MessageScreenScrollingProvider>(context)
             .getScrollController();
 
-    final _commonChatLayout = CommonChatListLayout(providerType: ProviderType.oneToOneChat, context: context);
+    final _commonChatLayout = CommonChatListLayout(context: context);
 
     return Container(
       width: double.maxFinite,
       height: MediaQuery.of(context).size.height / 1.8,
       margin: const EdgeInsets.only(top: 20),
       child: ListView.builder(
-        controller: _messageScreenScrollController,
-        shrinkWrap: true,
-        physics: const BouncingScrollPhysics(),
-        itemCount:
-            Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
-        itemBuilder: (_, connectionIndex) =>
-            _commonChatLayout.particularChatConnection(connectionIndex),
-      ),
+          controller: _messageScreenScrollController,
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount: Provider.of<ConnectionCollectionProvider>(context)
+              .getDataLength(),
+          itemBuilder: (_, connectionIndex) {
+            final _connectionData =
+                Provider.of<ConnectionCollectionProvider>(context)
+                    .getData()[connectionIndex];
+
+            return _commonChatLayout.particularChatConnection(
+                photo: _connectionData["profilePic"],
+                heading: _connectionData["connectionName"],
+                subheading: _connectionData["latestMessage"]["message"],
+                lastMsgTime: _connectionData["latestMessage"]["time"],
+                currentIndex: connectionIndex,
+                totalPendingMessages: _connectionData["notSeenMsgCount"].toString());
+          }),
     );
   }
-
-
 }
