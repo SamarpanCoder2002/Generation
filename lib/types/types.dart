@@ -6,3 +6,8 @@ enum ChatMessageType{
   document,
   location
 }
+
+enum ProviderType{
+  oneToOneChat,
+  groupChat
+}
