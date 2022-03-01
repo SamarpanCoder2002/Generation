@@ -42,3 +42,10 @@ void makeStatusBarTransparent(){
     statusBarColor: Colors.transparent, // status bar color
   ));
 }
+
+void makeScreenCleanView(){
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: AppColors.splashScreenColor,
+    statusBarColor: Colors.transparent, // status bar color
+  ));
+}

@@ -19,11 +19,12 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    _switchToNextScreen();
+    // makeStatusBarTransparent();
+    // changeOnlyNavigationBarColor();
+    // onlyShowStatusBar();
 
-    changeOnlyNavigationBarColor();
-    makeStatusBarTransparent();
-    onlyShowStatusBar();
+    makeScreenCleanView();
+    _switchToNextScreen();
 
     super.initState();
   }
@@ -61,10 +62,13 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  void _switchToNextScreen() async{
-    await Future.delayed(
-        const Duration(seconds: 3),
-        () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const IntroScreen())));
+  void _switchToNextScreen() {
+
+    Timer(const Duration(seconds: 3), (){
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const IntroScreen()),
+              (route) => false);
+    });
   }
 }
