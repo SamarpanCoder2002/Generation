@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:generation/types/types.dart';
 
 class GroupCollectionProvider extends ChangeNotifier {
+  List<dynamic> _searchedData = [];
   List<dynamic> _groupDataCollection = [
     {
       "id": 1,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "CSR",
       "notSeenMsgCount": 5,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -39,7 +40,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 3,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "India",
       "notSeenMsgCount": 1,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -55,7 +56,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 4,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Sukannya",
       "notSeenMsgCount": 3,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -71,7 +72,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 5,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Samarpan",
       "notSeenMsgCount": 10,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -87,7 +88,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 6,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "India",
       "notSeenMsgCount": 150,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -103,7 +104,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 7,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Usa",
       "notSeenMsgCount": 225,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -119,7 +120,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 8,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Modern",
       "notSeenMsgCount": 214,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -135,7 +136,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 9,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "State Management",
       "notSeenMsgCount": 214,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -151,7 +152,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 10,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Rabri",
       "notSeenMsgCount": 217,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -167,7 +168,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 11,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Futuristics",
       "notSeenMsgCount": 125,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -183,7 +184,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 12,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Mocking Now",
       "notSeenMsgCount": 178,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -199,7 +200,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 13,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Amitava",
       "notSeenMsgCount": 14,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -215,7 +216,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 14,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Paulomi",
       "notSeenMsgCount": 78,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -231,7 +232,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 15,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Prounce",
       "notSeenMsgCount": 95,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -247,7 +248,7 @@ class GroupCollectionProvider extends ChangeNotifier {
       "id": 16,
       "profilePic":
       "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "groupName": "Rock Life",
+      "groupName": "Pinkours",
       "notSeenMsgCount": 17,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -261,10 +262,38 @@ class GroupCollectionProvider extends ChangeNotifier {
     },
   ];
 
+  initialize(){
+    _searchedData = _groupDataCollection;
+  }
+
+
+  operateOnSearch(searchKeyword) {
+    List<dynamic> _tempSearchedCollection = [];
+
+    if (searchKeyword == "" || searchKeyword == null) {
+      _searchedData = _groupDataCollection;
+      notifyListeners();
+      return;
+    }
+
+    for (final connection in _groupDataCollection) {
+      if (connection["groupName"]
+          .toString()
+          .toLowerCase()
+          .contains(searchKeyword.toString().toLowerCase())) {
+        _tempSearchedCollection.add(connection);
+      }
+    }
+
+    _searchedData = _tempSearchedCollection;
+    notifyListeners();
+  }
+
   setFreshData(incomingData) {
     if (incomingData == null) return;
 
     _groupDataCollection = incomingData;
+    _searchedData = incomingData;
     notifyListeners();
   }
 
@@ -278,7 +307,7 @@ class GroupCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  getData() => _groupDataCollection;
+  getData() => _searchedData;
 
-  getDataLength() => _groupDataCollection.length;
+  getDataLength() => _searchedData.length;
 }

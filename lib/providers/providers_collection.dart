@@ -2,7 +2,7 @@ import 'package:generation/providers/connection_management_provider_collection/a
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider.dart';
 import 'package:generation/providers/group_collection_provider.dart';
-import 'package:generation/providers/messages_screen_controller.dart';
+import 'package:generation/providers/common_scroll_controller_provider.dart';
 import 'package:generation/providers/status_collection_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';

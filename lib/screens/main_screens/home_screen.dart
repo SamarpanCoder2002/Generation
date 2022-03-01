@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../config/text_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/connection_collection_provider.dart';
-import '../../providers/messages_screen_controller.dart';
+import '../../providers/common_scroll_controller_provider.dart';
 import '../../providers/status_collection_provider.dart';
 
 class HomeScreen extends StatefulWidget {

@@ -5,8 +5,7 @@ import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_collection.dart';
 import '../../config/text_style_collection.dart';
-import '../../providers/connection_collection_provider.dart';
-import '../../providers/messages_screen_controller.dart';
+import '../../providers/common_scroll_controller_provider.dart';
 import '../common/chat_connections_common_design.dart';
 
 class GroupsScreen extends StatefulWidget {
@@ -19,6 +18,7 @@ class GroupsScreen extends StatefulWidget {
 class _GroupsScreenState extends State<GroupsScreen> {
   @override
   void initState() {
+    Provider.of<GroupCollectionProvider>(context, listen: false).initialize();
     Provider.of<MessageScreenScrollingProvider>(context, listen: false)
         .startListening();
     super.initState();
@@ -79,6 +79,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
             child: TextField(
               cursorColor: AppColors.pureWhiteColor,
               style: TextStyleCollection.searchTextStyle,
+              onChanged: (inputVal) => Provider.of<GroupCollectionProvider>(context, listen: false).operateOnSearch(inputVal),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
@@ -118,7 +119,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
         controller: _groupScreenController,
         physics: const BouncingScrollPhysics(),
         itemCount:
-            Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
+            Provider.of<GroupCollectionProvider>(context).getDataLength(),
         itemBuilder: (_, groupIndex) {
           final _groupData = Provider.of<GroupCollectionProvider>(context)
               .getData()[groupIndex];

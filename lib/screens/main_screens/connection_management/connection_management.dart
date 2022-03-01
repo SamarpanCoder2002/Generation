@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../config/colors_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
-import '../../../providers/messages_screen_controller.dart';
+import '../../../providers/common_scroll_controller_provider.dart';
 import '../../common/chat_connections_common_design.dart';
 
 class ConnectionManagementScreen extends StatefulWidget {
@@ -89,7 +89,7 @@ class _ConnectionManagementScreenState
       return GestureDetector(
         onTap: () {
           Provider.of<ConnectionManagementProvider>(context, listen: false)
-              .setUpdatedIndex(correspondingIndex, movePageView: true);
+              .setUpdatedIndex(correspondingIndex, context, movePageView: true);
         },
         child: SizedBox(
           width: _width /
@@ -130,7 +130,7 @@ class _ConnectionManagementScreenState
       return GestureDetector(
         onTap: () {
           Provider.of<ConnectionManagementProvider>(context, listen: false)
-              .setUpdatedIndex(particularIndex, movePageView: true);
+              .setUpdatedIndex(particularIndex, context, movePageView: true);
         },
         child: Container(
           width: _width /
@@ -207,7 +207,7 @@ class _ConnectionManagementScreenState
             androidOverscrollIndicator: AndroidOverscrollIndicator.glow),
         onPageChanged: (changedPageIndex) =>
             Provider.of<ConnectionManagementProvider>(context, listen: false)
-                .setUpdatedIndex(changedPageIndex),
+                .setUpdatedIndex(changedPageIndex, context),
         itemCount: Provider.of<ConnectionManagementProvider>(context)
             .getTabsCollectionLength(),
         itemBuilder: (_, pageViewIndex) => ListView.builder(

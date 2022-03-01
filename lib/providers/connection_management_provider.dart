@@ -17,7 +17,7 @@ class ConnectionManagementProvider extends ChangeNotifier{
 
   getTabsCollectionLength() => _tabsCollection.length;
 
-  setUpdatedIndex(incomingIndex, {bool movePageView = false}){
+  setUpdatedIndex(incomingIndex, context, {bool movePageView = false}){
     _currentIndex = incomingIndex;
     notifyListeners();
 
