@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/types/types.dart';
 
 class ConnectionCollectionProvider extends ChangeNotifier {
+  List<dynamic> _searchedChatConnectionsDataCollection = [];
   List<dynamic> _chatConnectionsDataCollection = [
     {
       "id": 1,
@@ -21,7 +22,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 2,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Dasgupta",
       "notSeenMsgCount": 6,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -34,7 +35,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 3,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Raktim",
       "notSeenMsgCount": 1,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -47,7 +48,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 4,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Laravel",
       "notSeenMsgCount": 3,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -60,7 +61,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 5,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "PHP",
       "notSeenMsgCount": 10,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -73,7 +74,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 6,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Dude",
       "notSeenMsgCount": 150,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -86,7 +87,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 7,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Sukannya",
       "notSeenMsgCount": 225,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -99,7 +100,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 8,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Problem",
       "notSeenMsgCount": 214,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -126,7 +127,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 10,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Duke",
       "notSeenMsgCount": 217,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -140,7 +141,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 11,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Rasia",
       "notSeenMsgCount": 125,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -153,7 +154,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 12,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "USA",
       "notSeenMsgCount": 178,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -166,7 +167,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 13,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Ping",
       "notSeenMsgCount": 14,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -180,7 +181,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 14,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "LandOfMard",
       "notSeenMsgCount": 78,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -193,7 +194,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 15,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Jimken",
       "notSeenMsgCount": 95,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -207,7 +208,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       "id": 16,
       "profilePic":
           "https://upload.wikimedia.org/wikipedia/commons/1/1f/Dwayne_Johnson_2014_%28cropped%29.jpg",
-      "connectionName": "Samarpan",
+      "connectionName": "Amitava",
       "notSeenMsgCount": 17,
       "latestMessage": {
         "id": "profileId_${DateTime.now()}",
@@ -218,10 +219,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     },
   ];
 
+  initialize(){
+    _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
+  }
+
   setFreshData(incomingData) {
     if (incomingData == null) return;
 
     _chatConnectionsDataCollection = incomingData;
+    _searchedChatConnectionsDataCollection = incomingData;
     notifyListeners();
   }
 
@@ -235,7 +241,29 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  getData() => _chatConnectionsDataCollection;
+  operateOnSearch(searchKeyword) {
+    List<dynamic> _tempSearchedCollection = [];
 
-  getDataLength() => _chatConnectionsDataCollection.length;
+    if (searchKeyword == "" || searchKeyword == null) {
+      _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
+      notifyListeners();
+      return;
+    }
+
+    for (final connection in _chatConnectionsDataCollection) {
+      if (connection["connectionName"]
+          .toString()
+          .toLowerCase()
+          .contains(searchKeyword.toString().toLowerCase())) {
+        _tempSearchedCollection.add(connection);
+      }
+    }
+
+    _searchedChatConnectionsDataCollection = _tempSearchedCollection;
+    notifyListeners();
+  }
+
+  getData() => _searchedChatConnectionsDataCollection;
+
+  getDataLength() => _searchedChatConnectionsDataCollection.length;
 }

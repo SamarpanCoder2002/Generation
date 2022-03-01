@@ -19,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
+    Provider.of<ConnectionCollectionProvider>(context, listen: false)
+        .initialize();
     Provider.of<MessageScreenScrollingProvider>(context, listen: false)
         .startListening();
     super.initState();
@@ -81,6 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: TextField(
               cursorColor: AppColors.pureWhiteColor,
               style: TextStyleCollection.searchTextStyle,
+              onChanged: (inputVal) =>
+                  Provider.of<ConnectionCollectionProvider>(context,
+                          listen: false)
+                      .operateOnSearch(inputVal),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
@@ -181,6 +187,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _messagesCollectionSection() {
+
+    if( Provider.of<ConnectionCollectionProvider>(context).getDataLength() == 0){
+      return Container(
+          width: double.maxFinite,
+          height: MediaQuery.of(context).size.height / 1.8,
+        alignment: Alignment.center,
+        child: Text("No Connection Found", style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(fontSize: 16),)
+      );
+    }
+
+
     final ScrollController _messageScreenScrollController =
         Provider.of<MessageScreenScrollingProvider>(context)
             .getScrollController();
@@ -208,7 +225,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 subheading: _connectionData["latestMessage"]["message"],
                 lastMsgTime: _connectionData["latestMessage"]["time"],
                 currentIndex: connectionIndex,
-                totalPendingMessages: _connectionData["notSeenMsgCount"].toString());
+                totalPendingMessages:
+                    _connectionData["notSeenMsgCount"].toString());
           }),
     );
   }
