@@ -22,4 +22,6 @@ class AppColors {
 
   static const Color normalBlueColor = Colors.blue;
   static const Color transparentColor = Colors.transparent;
+
+  static const Color lightRedColor = Colors.redAccent;
 }

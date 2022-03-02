@@ -1,103 +1,140 @@
 import 'package:flutter/material.dart';
 
-class RequestConnectionsProvider extends ChangeNotifier{
+class RequestConnectionsProvider extends ChangeNotifier {
+  List<dynamic> _searchedConnections = [];
   List<dynamic> _requestConnections = [
     {
       "id": 1,
       "name": "Amitava Garai",
-      "description": "When Music Mixed With Passion",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "description": "When Music Mixed With Passion, heart will spread love automatically",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 2,
       "name": "Samarpan Dasgupta",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 3,
-      "name": "Samarpan Dasgupta",
+      "name": "Mintu Roy",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 4,
-      "name": "Samarpan Dasgupta",
+      "name": "Publiky Roy",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 5,
-      "name": "Samarpan Dasgupta",
+      "name": "Pura Vadito",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 6,
-      "name": "Samarpan Dasgupta",
+      "name": "Kuby Cis",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 7,
-      "name": "Samarpan Dasgupta",
+      "name": "Monte Karlo",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 8,
-      "name": "Samarpan Dasgupta",
+      "name": "Pura Vadica",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 9,
-      "name": "Samarpan Dasgupta",
+      "name": "Syntha Mond",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 10,
-      "name": "Samarpan Dasgupta",
+      "name": "Piyush Bansal",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
-
-
-
-
     {
-      "id":11,
-      "name": "Samarpan Dasgupta",
+      "id": 11,
+      "name": "Replica Mysis",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 12,
-      "name": "Samarpan Dasgupta",
+      "name": "Mio da More",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 13,
-      "name": "Samarpan Dasgupta",
+      "name": "Oberoy Bant",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
     {
       "id": 14,
-      "name": "Samarpan Dasgupta",
+      "name": "Anupam Mittal",
       "description": "What you seek is seeking you",
-      "photo": "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
+      "photo":
+          "https://static.wikia.nocookie.net/prowrestling/images/a/ad/Wwe_the_rock_png_by_double_a1698_day9ylt-pre_%281%29.png/revision/latest?cb=20190225014047",
     },
   ];
 
-  setConnections(incomingConnections){
+  initialize(){
+    _searchedConnections = _requestConnections;
+  }
+
+  operateOnSearch(searchKeyword) {
+    List<dynamic> _tempSearchedCollection = [];
+
+    if (searchKeyword == "" || searchKeyword == null) {
+      _searchedConnections = _requestConnections;
+      notifyListeners();
+      return;
+    }
+
+    for (final connection in _requestConnections) {
+      if (connection["name"]
+          .toString()
+          .toLowerCase()
+          .contains(searchKeyword.toString().toLowerCase())) {
+        _tempSearchedCollection.add(connection);
+      }
+    }
+
+    _searchedConnections = _tempSearchedCollection;
+    notifyListeners();
+  }
+
+  setConnections(incomingConnections) {
     _requestConnections = incomingConnections;
     notifyListeners();
   }
 
-  getConnections() => _requestConnections;
+  getConnections() => _searchedConnections;
 
-  getConnectionsLength() => _requestConnections.length;
+  getConnectionsLength() => _searchedConnections.length;
 }

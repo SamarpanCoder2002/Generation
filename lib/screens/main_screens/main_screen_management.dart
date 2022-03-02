@@ -11,6 +11,7 @@ import '../../providers/common_scroll_controller_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
 import 'groups_screen.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({Key? key}) : super(key: key);
@@ -37,10 +38,15 @@ class _IntroScreenState extends State<IntroScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: AppColors.backgroundDarkMode,
-        bottomSheet: _bottomSheet(),
-        body: _currentScreenDetector());
+    timeDilation = 1.0;
+
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+          backgroundColor: AppColors.backgroundDarkMode,
+          bottomSheet: _bottomSheet(),
+          body: _currentScreenDetector()),
+    );
   }
 
   _bottomSheet() {
@@ -141,5 +147,20 @@ class _IntroScreenState extends State<IntroScreen> {
       case 3:
         return const SettingsScreen();
     }
+  }
+
+  Future<bool> _onWillPop() async {
+    final int _currentBottomIconIndex =
+        Provider.of<MainScreenNavigationProvider>(context, listen: false)
+            .getUpdatedIndex();
+
+    if (_currentBottomIconIndex > 0) {
+      Provider.of<MainScreenNavigationProvider>(context, listen: false)
+          .setUpdatedIndex(0);
+
+      return false;
+    }
+
+    return true;
   }
 }

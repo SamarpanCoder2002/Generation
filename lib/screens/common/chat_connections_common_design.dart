@@ -13,9 +13,11 @@ class CommonChatListLayout {
       required String heading,
       required String? subheading,
       required String? lastMsgTime,
-      required String? totalPendingMessages}) {
+      required String? totalPendingMessages,
+      Widget? trailingWidget,
+      double height = 60.0, double? middleWidth}) {
     return Container(
-      height: 60,
+      height: height,
       width: double.maxFinite,
       margin: const EdgeInsets.only(bottom: 20),
       child: Row(
@@ -24,13 +26,16 @@ class CommonChatListLayout {
           const SizedBox(
             width: 15,
           ),
-          _chatConnectionData(heading, subheading),
+          _chatConnectionData(heading, subheading, middleWidth),
           if (lastMsgTime != null && totalPendingMessages != null)
             const SizedBox(
               width: 10,
             ),
-          if (lastMsgTime != null && totalPendingMessages != null)
+          if (trailingWidget == null &&
+              lastMsgTime != null &&
+              totalPendingMessages != null)
             _chatConnectionInformationData(lastMsgTime, totalPendingMessages),
+          if (trailingWidget != null) Expanded(child: trailingWidget)
         ],
       ),
     );
@@ -50,9 +55,9 @@ class CommonChatListLayout {
     );
   }
 
-  _chatConnectionData(String heading, String? subheading) {
+  _chatConnectionData(String heading, String? subheading, double? middleWidth) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width - 200,
+      width: middleWidth ?? MediaQuery.of(context).size.width - 200,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -69,6 +74,8 @@ class CommonChatListLayout {
               alignment: Alignment.centerLeft,
               child: Text(
                 subheading,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     fontSize: 12,
                     color: AppColors.pureWhiteColor.withOpacity(0.8)),

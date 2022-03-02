@@ -12,3 +12,9 @@ enum ConnectionType{
   request,
   send
 }
+
+enum ThemeModeTypes{
+  systemMode,
+  lightMode,
+  darkMode
+}

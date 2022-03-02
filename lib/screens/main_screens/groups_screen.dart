@@ -79,7 +79,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
             child: TextField(
               cursorColor: AppColors.pureWhiteColor,
               style: TextStyleCollection.searchTextStyle,
-              onChanged: (inputVal) => Provider.of<GroupCollectionProvider>(context, listen: false).operateOnSearch(inputVal),
+              onChanged: (inputVal) =>
+                  Provider.of<GroupCollectionProvider>(context, listen: false)
+                      .operateOnSearch(inputVal),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
@@ -104,6 +106,18 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   _groupCollection() {
+    if (Provider.of<GroupCollectionProvider>(context).getDataLength() == 0) {
+      return Container(
+          width: double.maxFinite,
+          height: MediaQuery.of(context).size.height / 1.8,
+          alignment: Alignment.center,
+          child: Text(
+            "No Groups Found",
+            style: TextStyleCollection.secondaryHeadingTextStyle
+                .copyWith(fontSize: 16),
+          ));
+    }
+
     final ScrollController _groupScreenController =
         Provider.of<MessageScreenScrollingProvider>(context)
             .getScrollController();

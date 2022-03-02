@@ -23,6 +23,11 @@ class _ConnectionManagementScreenState
     extends State<ConnectionManagementScreen> {
   @override
   void initState() {
+    Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+        .initialize();
+    Provider.of<RequestConnectionsProvider>(context, listen: false)
+        .initialize();
+    Provider.of<SentConnectionsProvider>(context, listen: false).initialize();
     Provider.of<MessageScreenScrollingProvider>(context, listen: false)
         .startListening();
     super.initState();
@@ -179,6 +184,7 @@ class _ConnectionManagementScreenState
             child: TextField(
               cursorColor: AppColors.pureWhiteColor,
               style: TextStyleCollection.searchTextStyle,
+              onChanged: _onSearch,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
@@ -193,6 +199,25 @@ class _ConnectionManagementScreenState
   }
 
   _collectionsSection() {
+    if (Provider.of<AllAvailableConnectionsProvider>(context)
+                .getConnectionsLength() ==
+            0 ||
+        Provider.of<RequestConnectionsProvider>(context)
+                .getConnectionsLength() ==
+            0 ||
+        Provider.of<SentConnectionsProvider>(context).getConnectionsLength() ==
+            0) {
+      return Container(
+          width: double.maxFinite,
+          height: MediaQuery.of(context).size.height / 1.8,
+          alignment: Alignment.center,
+          child: Text(
+            "Not Found",
+            style: TextStyleCollection.secondaryHeadingTextStyle
+                .copyWith(fontSize: 16),
+          ));
+    }
+
     final ScrollController _scrollController =
         Provider.of<MessageScreenScrollingProvider>(context)
             .getScrollController();
@@ -214,8 +239,7 @@ class _ConnectionManagementScreenState
           shrinkWrap: true,
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
-          itemCount: Provider.of<AllAvailableConnectionsProvider>(context)
-              .getConnectionsLength(),
+          itemCount: _getItemCount(),
           itemBuilder: (_, availableIndex) =>
               _getConnectionsList(availableIndex),
         ),
@@ -234,12 +258,14 @@ class _ConnectionManagementScreenState
               .getConnections()[availableIndex];
 
       return _commonChatLayout.particularChatConnection(
-          currentIndex: availableIndex,
-          photo: _particularData["photo"],
-          heading: _particularData["name"],
-          subheading: _particularData["description"],
-          lastMsgTime: null,
-          totalPendingMessages: null);
+        currentIndex: availableIndex,
+        photo: _particularData["photo"],
+        heading: _particularData["name"],
+        subheading: _particularData["description"],
+        lastMsgTime: null,
+        totalPendingMessages: null,
+        trailingWidget: connectButton(),
+      );
     } else if (_currentIndex == 1) {
       final _particularData = Provider.of<RequestConnectionsProvider>(context)
           .getConnections()[availableIndex];
@@ -250,7 +276,9 @@ class _ConnectionManagementScreenState
           heading: _particularData["name"],
           subheading: _particularData["description"],
           lastMsgTime: null,
-          totalPendingMessages: null);
+          totalPendingMessages: null,
+          middleWidth: MediaQuery.of(context).size.width-240,
+          trailingWidget: incomingRequestButtonCollection());
     } else if (_currentIndex == 2) {
       final _particularData = Provider.of<SentConnectionsProvider>(context)
           .getConnections()[availableIndex];
@@ -261,9 +289,106 @@ class _ConnectionManagementScreenState
           heading: _particularData["name"],
           subheading: _particularData["description"],
           lastMsgTime: null,
-          totalPendingMessages: null);
+          totalPendingMessages: null,
+          trailingWidget: withdrawButton());
     }
 
     return const Center(child: Text("Not Implemented till now"));
+  }
+
+  _getItemCount() {
+    final _currentIndex =
+        Provider.of<ConnectionManagementProvider>(context, listen: false)
+            .getCurrentIndex();
+
+    if (_currentIndex == 0) {
+      return Provider.of<AllAvailableConnectionsProvider>(context)
+          .getConnectionsLength();
+    } else if (_currentIndex == 1) {
+      return Provider.of<RequestConnectionsProvider>(context)
+          .getConnectionsLength();
+    } else if (_currentIndex == 2) {
+      return Provider.of<SentConnectionsProvider>(context)
+          .getConnectionsLength();
+    }
+  }
+
+  void _onSearch(String inputVal) {
+    final _currentIndex =
+        Provider.of<ConnectionManagementProvider>(context, listen: false)
+            .getCurrentIndex();
+
+    if (_currentIndex == 0) {
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+          .operateOnSearch(inputVal);
+    } else if (_currentIndex == 1) {
+      Provider.of<RequestConnectionsProvider>(context, listen: false)
+          .operateOnSearch(inputVal);
+    } else if (_currentIndex == 2) {
+      Provider.of<SentConnectionsProvider>(context, listen: false)
+          .operateOnSearch(inputVal);
+    }
+  }
+
+  connectButton() {
+    return TextButton(
+      child: Text(
+        "Connect",
+        style: TextStyleCollection.terminalTextStyle
+            .copyWith(color: AppColors.normalBlueColor, fontSize: 14),
+      ),
+      onPressed: () {
+        /// Write Logic for Connect To A User
+      },
+    );
+  }
+
+  withdrawButton() {
+    return TextButton(
+      child: Text(
+        "Withdraw",
+        style: TextStyleCollection.terminalTextStyle.copyWith(
+            color: AppColors.lightRedColor,
+            fontSize: 14,
+            fontWeight: FontWeight.normal),
+      ),
+      onPressed: () {
+        /// Write Logic for Connect To A User
+      },
+    );
+  }
+
+  incomingRequestButtonCollection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TextButton(
+          child: Text(
+            "Accept",
+            style: TextStyleCollection.terminalTextStyle.copyWith(
+                color: AppColors.normalBlueColor,
+                fontSize: 14,
+                fontWeight: FontWeight.normal),
+          ),
+          onPressed: () {
+            /// Write Logic for Connect To A User
+          },
+        ),
+        Expanded(
+          child: TextButton(
+            child: Text(
+              "Reject",
+              style: TextStyleCollection.terminalTextStyle.copyWith(
+                  color: AppColors.lightRedColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal),
+            ),
+            onPressed: () {
+              /// Write Logic for Connect To A User
+            },
+          ),
+        )
+      ],
+    );
   }
 }
