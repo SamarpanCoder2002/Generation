@@ -29,4 +29,7 @@ class AppColors {
   static const Color chatLightBackgroundColor = Color(0xffF3F7FC);
 
   static const Color messageWritingSectionColor = Color(0xff484850);
+
+  static const Color myMsgDarkModeColor = Color(0xff6145D2);
+  static const Color oppositeMsgDarkModeColor = Color(0xff7878A3);
 }

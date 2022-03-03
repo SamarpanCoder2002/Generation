@@ -28,9 +28,9 @@ class MessageCreationSection extends StatelessWidget {
           decoration: InputDecoration(
             contentPadding: EdgeInsets.only(bottom: 10),
             border: InputBorder.none,
-            hintText: "Search",
+            hintText: "Write Something Here",
             hintStyle: TextStyleCollection.searchTextStyle
-                .copyWith(color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                .copyWith(color: AppColors.pureWhiteColor.withOpacity(0.8), fontSize: 14),
           ),
         ),
       ),

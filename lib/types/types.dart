@@ -18,3 +18,8 @@ enum ThemeModeTypes{
   lightMode,
   darkMode
 }
+
+enum MessageHolderType{
+  me,
+  other
+}

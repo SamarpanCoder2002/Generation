@@ -25,10 +25,11 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         backgroundColor: AppColors.chatDarkBackgroundColor,
         automaticallyImplyLeading: false,
-        title:  ChatBoxHeaderSection(
+        title: ChatBoxHeaderSection(
             connectionData: widget.connectionData, context: context),
       ),
       bottomSheet: BottomSheet(
+          enableDrag: false,
           onClosing: () {},
           backgroundColor: AppColors.chatDarkBackgroundColor,
           elevation: 0,
@@ -42,11 +43,9 @@ class _ChatScreenState extends State<ChatScreen> {
         child: ListView(
           shrinkWrap: true,
           children: [
-
-            //
-            // const SizedBox(
-            //   height: 10,
-            // ),
+            const SizedBox(
+              height: 10,
+            ),
             MessagingSection(context: context),
             const SizedBox(
               height: 10,
