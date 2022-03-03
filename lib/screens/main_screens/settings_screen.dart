@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
-import '../../config/text_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../providers/common_scroll_controller_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
 
@@ -15,25 +15,23 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+
+  @override
+  void initState() {
+    Provider.of<MessageScreenScrollingProvider>(context, listen: false)
+        .startListening();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundDarkMode,
       body: Container(
-          margin: const EdgeInsets.only(top: 2, left: 20, right: 20),
-          height: MediaQuery.of(context).size.height,
+          margin: const EdgeInsets.only(top: 30, left: 20, right: 20),
+          height: MediaQuery.of(context).size.height * 0.9,
           width: MediaQuery.of(context).size.width,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.02,
-              ),
-              _headingSection(),
-              const SizedBox(height: 15),
-              _settingsCollection(),
-            ],
-          )),
+          child: _settingsBody()),
     );
   }
 
@@ -47,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ));
   }
 
-  _settingsCollection() {
+  _themeManager() {
     return Theme(
       data: ThemeData().copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
@@ -106,5 +104,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: TextStyleCollection.secondaryHeadingTextStyle,
           ),
         ));
+  }
+
+  _commonOption(
+      {required IconData leadingIconData,
+      required String title,
+      required IconData? terminalIconData,
+      required VoidCallback onPressed}) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        height: 60,
+        width: double.maxFinite,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  leadingIconData,
+                  color: AppColors.pureWhiteColor,
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                Text(
+                  title,
+                  style: TextStyleCollection.secondaryHeadingTextStyle
+                      .copyWith(fontSize: 16, fontWeight: FontWeight.normal),
+                )
+              ],
+            ),
+            if(terminalIconData != null)
+            Icon(
+              terminalIconData,
+              color: AppColors.pureWhiteColor,
+              size: 15,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _settingsBody() {
+    final ScrollController _settingsScrollController =
+    Provider.of<MessageScreenScrollingProvider>(context)
+        .getScrollController();
+
+    return ListView(
+      shrinkWrap: true,
+      controller: _settingsScrollController,
+      children: [
+        _headingSection(),
+        const SizedBox(height: 15),
+        _themeManager(),
+        _commonOption(
+            leadingIconData: Icons.perm_identity_outlined,
+            title: "Profile",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.notification_important_outlined,
+            title: "Notification",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.wallpaper_outlined,
+            title: "Chat WallPaper",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.history_edu_outlined,
+            title: "Chat History",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.backup_outlined,
+            title: "Chat Backup",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.storage,
+            title: "Storage",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.support_agent_outlined,
+            title: "Support",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.info_outlined,
+            title: "About",
+            terminalIconData: Icons.arrow_forward_ios_outlined,
+            onPressed: () {}),
+        _commonOption(
+            leadingIconData: Icons.people_outline_outlined,
+            title: "Invite a Friend",
+            terminalIconData: null,
+            onPressed: () {}),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.08,
+        ),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Created By ", style: TextStyleCollection.secondaryHeadingTextStyle),
+              Text("Samarpan Dasgupta", style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(color: AppColors.normalBlueColor),)
+            ],
+          ),
+        )
+      ],
+    );
   }
 }

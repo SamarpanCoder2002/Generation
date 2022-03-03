@@ -1,5 +1,7 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:provider/provider.dart';
 
@@ -187,16 +189,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _messagesCollectionSection() {
-
-    if( Provider.of<ConnectionCollectionProvider>(context).getDataLength() == 0){
+    if (Provider.of<ConnectionCollectionProvider>(context).getDataLength() ==
+        0) {
       return Container(
           width: double.maxFinite,
           height: MediaQuery.of(context).size.height / 1.8,
-        alignment: Alignment.center,
-        child: Text("No Connection Found", style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(fontSize: 16),)
-      );
+          alignment: Alignment.center,
+          child: Text(
+            "No Connection Found",
+            style: TextStyleCollection.secondaryHeadingTextStyle
+                .copyWith(fontSize: 16),
+          ));
     }
-
 
     final ScrollController _messageScreenScrollController =
         Provider.of<MessageScreenScrollingProvider>(context)
@@ -219,14 +223,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 Provider.of<ConnectionCollectionProvider>(context)
                     .getData()[connectionIndex];
 
-            return _commonChatLayout.particularChatConnection(
-                photo: _connectionData["profilePic"],
-                heading: _connectionData["connectionName"],
-                subheading: _connectionData["latestMessage"]["message"],
-                lastMsgTime: _connectionData["latestMessage"]["time"],
-                currentIndex: connectionIndex,
-                totalPendingMessages:
-                    _connectionData["notSeenMsgCount"].toString());
+            return OpenContainer(
+                closedElevation: 0.0,
+                transitionType: ContainerTransitionType.fadeThrough,
+                transitionDuration: const Duration(milliseconds: 500),
+                closedColor: AppColors.backgroundDarkMode,
+                middleColor: AppColors.backgroundDarkMode,
+                openColor: AppColors.backgroundDarkMode,
+                openBuilder: (_, __) => ChatScreen(connectionData: _connectionData,),
+                closedBuilder: (_, __) =>
+                    _commonChatLayout.particularChatConnection(
+                        photo: _connectionData["profilePic"],
+                        heading: _connectionData["connectionName"],
+                        subheading: _connectionData["latestMessage"]["message"],
+                        lastMsgTime: _connectionData["latestMessage"]["time"],
+                        currentIndex: connectionIndex,
+                        totalPendingMessages:
+                            _connectionData["notSeenMsgCount"].toString()));
           }),
     );
   }

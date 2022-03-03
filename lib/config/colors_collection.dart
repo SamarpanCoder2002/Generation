@@ -24,4 +24,9 @@ class AppColors {
   static const Color transparentColor = Colors.transparent;
 
   static const Color lightRedColor = Colors.redAccent;
+
+  static const Color chatDarkBackgroundColor = Color(0xff14172D);
+  static const Color chatLightBackgroundColor = Color(0xffF3F7FC);
+
+  static const Color messageWritingSectionColor = Color(0xff484850);
 }
