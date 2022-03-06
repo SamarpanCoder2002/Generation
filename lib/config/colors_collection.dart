@@ -31,5 +31,8 @@ class AppColors {
   static const Color messageWritingSectionColor = Color(0xff484850);
 
   static const Color myMsgDarkModeColor = Color(0xff6145D2);
-  static const Color oppositeMsgDarkModeColor = Color(0xff7878A3);
+  //static const Color myMsgDarkModeColor = Color.fromRGBO(37, 137, 224, 1);
+  static const Color oppositeMsgDarkModeColor = Color(0xff303250);
+
+  static const Color lightBlueColor = Colors.lightBlue;
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/screens/chat_screens/data/data.dart';
 import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
-
-import '../../config/text_collection.dart';
-import '../../config/text_style_collection.dart';
+import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final Map<String, dynamic> connectionData;
@@ -17,6 +17,19 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+
+  @override
+  void initState() {
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).clearMessageData();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setMessageData(allChatMessages);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        margin: const EdgeInsets.only(top: 2, left: 20, right: 20),
+        margin: const EdgeInsets.only(top: 2, left: 10, right: 10),
         child: ListView(
           shrinkWrap: true,
           children: [

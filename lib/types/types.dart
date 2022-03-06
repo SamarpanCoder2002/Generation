@@ -1,8 +1,8 @@
 enum ChatMessageType{
   text,
   image,
-  video,
   audio,
+  video,
   document,
   location
 }
