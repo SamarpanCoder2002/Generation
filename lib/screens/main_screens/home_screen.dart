@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../config/text_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/connection_collection_provider.dart';
-import '../../providers/common_scroll_controller_provider.dart';
+import '../../providers/main_scrolling_provider.dart';
 import '../../providers/status_collection_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .initialize();
-    Provider.of<MessageScreenScrollingProvider>(context, listen: false)
+    Provider.of<MainScrollingProvider>(context, listen: false)
         .startListening();
     super.initState();
   }
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final ScrollController _messageScreenScrollController =
-        Provider.of<MessageScreenScrollingProvider>(context)
+        Provider.of<MainScrollingProvider>(context)
             .getScrollController();
 
     final _commonChatLayout = CommonChatListLayout(context: context);

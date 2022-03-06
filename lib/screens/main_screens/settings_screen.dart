@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
-import '../../providers/common_scroll_controller_provider.dart';
+import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
 
@@ -18,7 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void initState() {
-    Provider.of<MessageScreenScrollingProvider>(context, listen: false)
+    Provider.of<MainScrollingProvider>(context, listen: false)
         .startListening();
     super.initState();
   }
@@ -150,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   _settingsBody() {
     final ScrollController _settingsScrollController =
-    Provider.of<MessageScreenScrollingProvider>(context)
+    Provider.of<MainScrollingProvider>(context)
         .getScrollController();
 
     return ListView(

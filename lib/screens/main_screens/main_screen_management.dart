@@ -7,7 +7,7 @@ import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
 import 'package:provider/provider.dart';
-import '../../providers/common_scroll_controller_provider.dart';
+import '../../providers/main_scrolling_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
 import 'groups_screen.dart';
@@ -51,7 +51,7 @@ class _IntroScreenState extends State<IntroScreen> {
 
   _bottomSheet() {
     final ScrollController _messageScreenScrollController =
-        Provider.of<MessageScreenScrollingProvider>(context)
+        Provider.of<MainScrollingProvider>(context)
             .getScrollController();
 
     final int _currentBottomIconIndex =

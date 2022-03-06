@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../config/colors_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
-import '../../../providers/common_scroll_controller_provider.dart';
+import '../../../providers/main_scrolling_provider.dart';
 import '../../common/chat_connections_common_design.dart';
 
 class ConnectionManagementScreen extends StatefulWidget {
@@ -28,7 +28,7 @@ class _ConnectionManagementScreenState
     Provider.of<RequestConnectionsProvider>(context, listen: false)
         .initialize();
     Provider.of<SentConnectionsProvider>(context, listen: false).initialize();
-    Provider.of<MessageScreenScrollingProvider>(context, listen: false)
+    Provider.of<MainScrollingProvider>(context, listen: false)
         .startListening();
     super.initState();
   }
@@ -219,7 +219,7 @@ class _ConnectionManagementScreenState
     }
 
     final ScrollController _scrollController =
-        Provider.of<MessageScreenScrollingProvider>(context)
+        Provider.of<MainScrollingProvider>(context)
             .getScrollController();
 
     return SizedBox(

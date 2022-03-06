@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-class MessageScreenScrollingProvider extends ChangeNotifier {
+class MainScrollingProvider extends ChangeNotifier {
   final ScrollController? _scrollController = ScrollController();
   bool _isMainAppBarVisible = true;
 

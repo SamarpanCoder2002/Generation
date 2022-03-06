@@ -1,8 +1,9 @@
+import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider.dart';
 import 'package:generation/providers/group_collection_provider.dart';
-import 'package:generation/providers/common_scroll_controller_provider.dart';
+import 'package:generation/providers/main_scrolling_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/providers/sound_provider.dart';
 import 'package:generation/providers/status_collection_provider.dart';
@@ -15,7 +16,7 @@ import 'connection_management_provider_collection/sent_request_provider.dart';
 import 'main_screen_provider.dart';
 
 List<SingleChildWidget> providersCollection = [
-  ChangeNotifierProvider(create: (_) => MessageScreenScrollingProvider()),
+  ChangeNotifierProvider(create: (_) => MainScrollingProvider()),
   ChangeNotifierProvider(create: (_) => StatusCollectionProvider()),
   ChangeNotifierProvider(create: (_) => ConnectionCollectionProvider()),
   ChangeNotifierProvider(create: (_) => MainScreenNavigationProvider()),
@@ -27,4 +28,5 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => ThemeProvider()),
   ChangeNotifierProvider(create: (_) => SongManagementProvider()),
   ChangeNotifierProvider(create: (_) => ChatBoxMessagingProvider()),
+  ChangeNotifierProvider(create: (_) => ChatScrollProvider()),
 ];

@@ -8,14 +8,16 @@ class ScrollToHideWidget extends StatefulWidget {
   final ScrollController scrollController;
   final Duration duration;
   final double height;
+  final bool hideWhenScrollToBottom;
 
-  const ScrollToHideWidget(
-      {Key? key,
-      required this.child,
-      required this.scrollController,
-      this.height = SizeCollection.kBottomNavigationBarHeight,
-      this.duration = const Duration(milliseconds: 200)})
-      : super(key: key);
+  const ScrollToHideWidget({
+    Key? key,
+    required this.child,
+    required this.scrollController,
+    this.height = SizeCollection.kBottomNavigationBarHeight,
+    this.duration = const Duration(milliseconds: 200),
+    this.hideWhenScrollToBottom = true,
+  }) : super(key: key);
 
   @override
   _ScrollToHideWidgetState createState() => _ScrollToHideWidgetState();
@@ -40,9 +42,9 @@ class _ScrollToHideWidgetState extends State<ScrollToHideWidget> {
     final scrollDirection =
         widget.scrollController.position.userScrollDirection;
     if (scrollDirection == ScrollDirection.forward) {
-      show();
+      widget.hideWhenScrollToBottom?show():hide();
     } else if (scrollDirection == ScrollDirection.reverse) {
-      hide();
+      widget.hideWhenScrollToBottom?hide():show();
     }
   }
 

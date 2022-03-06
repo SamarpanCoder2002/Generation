@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/types/types.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -16,30 +18,12 @@ class MessagingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        width: double.maxFinite,
-        height: MediaQuery.of(context).size.height / 1.2,
-        child: ListView.separated(
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          itemCount:
-              Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages(),
-          itemBuilder: (_, index) {
-            final messageData =
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getParticularMessage(index);
+    final int _totalChatMessages =
+        Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages();
 
-            return _commonMessageLayout(
-                messageId: messageData.keys.toList()[0].toString(),
-                messageData: messageData.values.toList()[0],
-                index: index);
-          },
-          separatorBuilder: (BuildContext context, int index) {
-            return const SizedBox(
-              height: 10,
-            );
-          },
-        ));
+    return _totalChatMessages > 0
+        ? _chatBoxContainingMessages()
+        : _noChatBoxMessagesSection();
   }
 
   _commonMessageLayout(
@@ -51,13 +35,12 @@ class MessagingSection extends StatelessWidget {
           ? Alignment.centerLeft
           : Alignment.centerRight,
       child: ConstrainedBox(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 45),
+        constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width - 45, minWidth: 100),
         child: Card(
           elevation: 0,
           shadowColor: AppColors.pureWhiteColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           color: messageData["holder"] == MessageHolderType.other.toString()
               ? AppColors.oppositeMsgDarkModeColor
               : AppColors.myMsgDarkModeColor,
@@ -137,7 +120,7 @@ class MessagingSection extends StatelessWidget {
         constraints: BoxConstraints(
             maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(8.0),
           child: PhotoView(
             backgroundDecoration:
                 const BoxDecoration(color: AppColors.pureWhiteColor),
@@ -201,7 +184,7 @@ class MessagingSection extends StatelessWidget {
         height: 50,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
         child: Row(
           children: [
             _controllingButton(),
@@ -228,6 +211,77 @@ class MessagingSection extends StatelessWidget {
             : "00:00",
         style: TextStyle(
             fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
+      ),
+    );
+  }
+
+  _chatBoxContainingMessages() {
+    final bool _isFocused = Provider.of<ChatBoxMessagingProvider>(context)
+        .hasTextFieldFocus(context);
+
+    Provider.of<ChatScrollProvider>(context).animateToBottom(scrollDuration: 1);
+
+    return SizedBox(
+        width: double.maxFinite,
+        height: _isFocused
+            ? MediaQuery.of(context).size.height / 2.1
+            : MediaQuery.of(context).size.height / 1.22,
+        child: ListView.separated(
+          controller: Provider.of<ChatScrollProvider>(context).getController(),
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemCount:
+              Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages(),
+          itemBuilder: (_, index) {
+            final messageData =
+                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                    .getParticularMessage(index);
+
+            return _commonMessageLayout(
+                messageId: messageData.keys.toList()[0].toString(),
+                messageData: messageData.values.toList()[0],
+                index: index);
+          },
+          separatorBuilder: (BuildContext context, int index) {
+            return const SizedBox(
+              height: 10,
+            );
+          },
+        ));
+  }
+
+  _noChatBoxMessagesSection() {
+    return Container(
+      width: double.maxFinite,
+      height: MediaQuery.of(context).size.height / 2,
+      alignment: Alignment.bottomRight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                color: AppColors.oppositeMsgDarkModeColor,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(offset: Offset(0, 1), blurRadius: 5)
+                ]),
+            child: Text(
+              "Messages are End-to-End Encrypted.\nNo other Third Party Person, Organization or even Generation Team can't read your messages",
+              textAlign: TextAlign.center,
+              style:
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+            ),
+          ),
+          Center(
+            child: Text(
+              "Start Your Messaging 👇",
+              style:
+                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 18),
+            ),
+          ),
+        ],
       ),
     );
   }
