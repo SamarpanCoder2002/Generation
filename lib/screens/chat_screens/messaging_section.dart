@@ -219,7 +219,7 @@ class MessagingSection extends StatelessWidget {
     final bool _isFocused = Provider.of<ChatBoxMessagingProvider>(context)
         .hasTextFieldFocus(context);
 
-    Provider.of<ChatScrollProvider>(context).animateToBottom(scrollDuration: 1);
+    // Provider.of<ChatScrollProvider>(context).animateToBottom(scrollDuration: 1);
 
     return SizedBox(
         width: double.maxFinite,
