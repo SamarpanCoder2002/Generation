@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/config/time_collection.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:provider/provider.dart';
@@ -50,58 +51,63 @@ class MessageCreationSection extends StatelessWidget {
   }
 
   _recordingModeContainer() {
-    final List<Color> colors = [
-      Colors.red[900]!,
-      Colors.green[900]!,
-      Colors.blue[900]!,
-      Colors.brown[900]!
-    ];
-
-    final List<int> duration = [900, 700, 600, 800, 500];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
+    _deleteRecording() => IconButton(
           icon: const Icon(
             Icons.delete_outline_outlined,
             color: AppColors.pureWhiteColor,
           ),
           onPressed: () {
-            Provider.of<SoundRecorderProvider>(context, listen: false).stopRecording();
+            Provider.of<SoundRecorderProvider>(context, listen: false)
+                .stopRecording();
+            Provider.of<ChatScrollProvider>(context, listen: false)
+                .animateToBottom();
           },
-        ),
-        SizedBox(
+        );
+
+    _recordingWaveForm() => SizedBox(
           width: MediaQuery.of(context).size.width - 120,
           child: MusicVisualizer(
             barCount: 30,
-            colors: colors,
-            duration: duration,
+            colors: WaveForm.colors,
+            duration: Timings.waveFormDuration,
           ),
-        ),
-        IconButton(
+        );
+
+    _recordingVoiceSending() => IconButton(
           icon: Image.asset(
             IconImages.sendImagePath,
             width: 25,
           ),
-          onPressed: () async{
-            final _voiceRecordPath = await Provider.of<SoundRecorderProvider>(context, listen: false).stopRecording();
+          onPressed: () async {
+            final _voiceRecordPath =
+                await Provider.of<SoundRecorderProvider>(context, listen: false)
+                    .stopRecording();
             print("Voice Record Path: $_voiceRecordPath");
 
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                 .setSingleNewMessage({
               DateTime.now().toString(): {
                 "type": ChatMessageType.audio.toString(),
-                "holder":
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                "holder": Provider.of<ChatBoxMessagingProvider>(context,
+                        listen: false)
                     .getMessageHolderType()
                     .toString(),
                 "message": _voiceRecordPath,
                 "time": "20:40"
               }
             });
+
+            Provider.of<ChatScrollProvider>(context, listen: false)
+                .animateToBottom();
           },
-        )
+        );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _deleteRecording(),
+        _recordingWaveForm(),
+        _recordingVoiceSending(),
       ],
     );
   }
@@ -175,7 +181,8 @@ class MessageCreationSection extends StatelessWidget {
             ),
       onPressed: () async {
         if (_showVoiceIcon) {
-          Provider.of<SoundRecorderProvider>(context, listen: false).startRecording();
+          Provider.of<SoundRecorderProvider>(context, listen: false)
+              .startRecording();
         } else {
           final TextEditingController? _messageController =
               Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -203,8 +210,6 @@ class MessageCreationSection extends StatelessWidget {
 
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
               .setShowVoiceIcon(true);
-
-          //Provider.of<ChatBoxMessagingProvider>(context, listen: false).unFocusNode();
         }
       },
     );

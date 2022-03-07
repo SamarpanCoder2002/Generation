@@ -36,3 +36,12 @@ class AppColors {
 
   static const Color lightBlueColor = Colors.lightBlue;
 }
+
+class WaveForm{
+  static List<Color> colors = [
+    Colors.red[900]!,
+    Colors.green[900]!,
+    Colors.blue[900]!,
+    Colors.brown[900]!
+  ];
+}
