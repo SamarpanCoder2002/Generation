@@ -8,4 +8,6 @@ class IconImages{
   static const String connectImagePath = "assets/images/connect-people.png";
   static const String settingsImagePath = "assets/images/settings.png";
 
+  static const String sendImagePath = "assets/images/send.png";
+
 }

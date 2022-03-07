@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/providers/sound_record_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:music_visualizer/music_visualizer.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
@@ -15,6 +18,9 @@ class MessageCreationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _isRecording =
+        Provider.of<SoundRecorderProvider>(context).getRecordingStatus();
+
     return Container(
       width: double.maxFinite,
       height: 60,
@@ -26,14 +32,77 @@ class MessageCreationSection extends StatelessWidget {
           )),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _containerToInput(),
-            _messageAndVoiceSendButton(),
-          ],
-        ),
+        child: _isRecording
+            ? _recordingModeContainer()
+            : _normalTextModeContainer(),
       ),
+    );
+  }
+
+  _normalTextModeContainer() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _containerToInput(),
+        _messageAndVoiceSendButton(),
+      ],
+    );
+  }
+
+  _recordingModeContainer() {
+    final List<Color> colors = [
+      Colors.red[900]!,
+      Colors.green[900]!,
+      Colors.blue[900]!,
+      Colors.brown[900]!
+    ];
+
+    final List<int> duration = [900, 700, 600, 800, 500];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: const Icon(
+            Icons.delete_outline_outlined,
+            color: AppColors.pureWhiteColor,
+          ),
+          onPressed: () {
+            Provider.of<SoundRecorderProvider>(context, listen: false).stopRecording();
+          },
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width - 120,
+          child: MusicVisualizer(
+            barCount: 30,
+            colors: colors,
+            duration: duration,
+          ),
+        ),
+        IconButton(
+          icon: Image.asset(
+            IconImages.sendImagePath,
+            width: 25,
+          ),
+          onPressed: () async{
+            final _voiceRecordPath = await Provider.of<SoundRecorderProvider>(context, listen: false).stopRecording();
+            print("Voice Record Path: $_voiceRecordPath");
+
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .setSingleNewMessage({
+              DateTime.now().toString(): {
+                "type": ChatMessageType.audio.toString(),
+                "holder":
+                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                    .getMessageHolderType()
+                    .toString(),
+                "message": _voiceRecordPath,
+                "time": "20:40"
+              }
+            });
+          },
+        )
+      ],
     );
   }
 
@@ -51,6 +120,10 @@ class MessageCreationSection extends StatelessWidget {
         controller:
             Provider.of<ChatBoxMessagingProvider>(context).getTextController(),
         style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+        maxLines: null,
+        onChanged: (inputVal) =>
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .setShowVoiceIcon(inputVal.isEmpty),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(bottom: 10),
           border: InputBorder.none,
@@ -87,38 +160,52 @@ class MessageCreationSection extends StatelessWidget {
   }
 
   _messageAndVoiceSendButton() {
-
+    final bool _showVoiceIcon =
+        Provider.of<ChatBoxMessagingProvider>(context).showVoiceIcon();
 
     return IconButton(
-      icon: Image.asset(
-        "assets/images/send.png",
-        width: 25,
-      ),
-      onPressed: () {
-        final TextEditingController? _messageController =
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getTextController();
+      icon: !_showVoiceIcon
+          ? Image.asset(
+              IconImages.sendImagePath,
+              width: 25,
+            )
+          : const Icon(
+              Icons.keyboard_voice_outlined,
+              color: AppColors.pureWhiteColor,
+            ),
+      onPressed: () async {
+        if (_showVoiceIcon) {
+          Provider.of<SoundRecorderProvider>(context, listen: false).startRecording();
+        } else {
+          final TextEditingController? _messageController =
+              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                  .getTextController();
 
-        if(_messageController!.text.isEmpty) return;
+          if (_messageController!.text.isEmpty) return;
 
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .setSingleNewMessage({
-          DateTime.now().toString(): {
-            "type": ChatMessageType.text.toString(),
-            "holder":
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getMessageHolderType()
-                    .toString(),
-            "message": _messageController.text,
-            "time": "20:40"
-          }
-        });
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .clearTextFromMessageInputSection();
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .setSingleNewMessage({
+            DateTime.now().toString(): {
+              "type": ChatMessageType.text.toString(),
+              "holder":
+                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                      .getMessageHolderType()
+                      .toString(),
+              "message": _messageController.text,
+              "time": "20:40"
+            }
+          });
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .clearTextFromMessageInputSection();
 
-        Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
+          Provider.of<ChatScrollProvider>(context, listen: false)
+              .animateToBottom();
 
-        //Provider.of<ChatBoxMessagingProvider>(context, listen: false).unFocusNode();
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .setShowVoiceIcon(true);
+
+          //Provider.of<ChatBoxMessagingProvider>(context, listen: false).unFocusNode();
+        }
       },
     );
   }

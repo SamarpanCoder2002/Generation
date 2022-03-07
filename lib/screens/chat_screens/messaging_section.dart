@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
@@ -7,7 +8,7 @@ import 'package:generation/types/types.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
-import 'package:readmore/readmore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/sound_provider.dart';
 
@@ -60,22 +61,16 @@ class MessagingSection extends StatelessWidget {
   _textMessageSection({required dynamic messageData}) {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 15, top: 8, bottom: 28),
-      child: ReadMoreText(
-        messageData["message"],
-        trimLines: 5,
-        trimMode: TrimMode.Line,
-        trimCollapsedText: 'Show more',
-        trimExpandedText: 'Show less',
-        moreStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.pureWhiteColor,
-            decoration: TextDecoration.underline),
-        lessStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.pureWhiteColor,
-            decoration: TextDecoration.underline),
+      child: Linkify(
+        text: messageData["message"],
+        onOpen: (link) async {
+          try {
+            await launch(link.url);
+          } catch (e) {
+            throw 'Could not launch $link';
+          }
+        },
+        linkStyle: const TextStyle(color: AppColors.lightBlueColor),
         style: const TextStyle(fontSize: 14, color: AppColors.pureWhiteColor),
       ),
     );
@@ -157,7 +152,7 @@ class MessagingSection extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: LinearPercentIndicator(
                 percent: _getCurrentSongPath == messageData["message"]
-                    ? _currentLoadingTime ?? 1.0
+                    ? _currentLoadingTime ??1.0
                     : 0.0,
                 backgroundColor: Colors.black26,
                 progressColor: AppColors.lightBlueColor),

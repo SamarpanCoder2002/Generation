@@ -58,8 +58,8 @@ class SongManagementProvider extends ChangeNotifier {
       });
 
       if (_currentSongPath != playingSongPath) {
-        /// await _justAudioPlayer.setFilePath(playingSongPath);/// use this for local storage file
-        await _justAudioPlayer.setUrl(playingSongPath);
+        await _justAudioPlayer.setFilePath(playingSongPath);/// use this for local storage file
+        /// await _justAudioPlayer.setUrl(playingSongPath);/// Use fo Url
 
         _currentSongPath = playingSongPath;
         setSongPlaying();

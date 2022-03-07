@@ -7,6 +7,9 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   TextEditingController? _messageController;
   FocusNode _focus = FocusNode();
   MessageHolderType _messageHolderType = MessageHolderType.me;
+  bool _showVoiceIcon = true;
+
+  showVoiceIcon() => _showVoiceIcon;
 
   getMessageHolderType() {
     if (_messageHolderType == MessageHolderType.me) {
@@ -41,6 +44,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _messageController = TextEditingController();
     _focus = FocusNode();
     _focus.addListener(_onFocusChange);
+  }
+
+  setShowVoiceIcon(bool status) {
+    _showVoiceIcon = status;
+    notifyListeners();
   }
 
   setMessageData(incomingMessageData) {

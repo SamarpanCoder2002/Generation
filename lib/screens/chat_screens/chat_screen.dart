@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
@@ -25,11 +26,13 @@ class _ChatScreenState extends State<ChatScreen> {
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
+    Provider.of<SoundRecorderProvider>(context, listen: false).initialize();
     super.initState();
   }
 
   @override
   void dispose() {
+    Provider.of<SoundRecorderProvider>(context, listen: false).dispose();
     super.dispose();
   }
 

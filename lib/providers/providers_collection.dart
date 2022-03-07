@@ -6,6 +6,7 @@ import 'package:generation/providers/group_collection_provider.dart';
 import 'package:generation/providers/main_scrolling_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/providers/sound_provider.dart';
+import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/status_collection_provider.dart';
 import 'package:generation/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -29,4 +30,5 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => SongManagementProvider()),
   ChangeNotifierProvider(create: (_) => ChatBoxMessagingProvider()),
   ChangeNotifierProvider(create: (_) => ChatScrollProvider()),
+  ChangeNotifierProvider(create: (_) => SoundRecorderProvider()),
 ];
