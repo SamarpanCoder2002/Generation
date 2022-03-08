@@ -35,6 +35,15 @@ class AppColors {
   static const Color oppositeMsgDarkModeColor = Color(0xff303250);
 
   static const Color lightBlueColor = Colors.lightBlue;
+
+
+  static const Color cameraIconBgColor = Color(0xffB45BE7);
+  static const Color galleryIconBgColor = Color(0xff3160F5);
+  static const Color videoIconBgColor = Color(0xff35C2EE);
+  static const Color documentIconBgColor = Color(0xffEF458D);
+  static const Color audioIconBgColor = Color(0xffEFBF40);
+  static const Color locationIconBgColor = Color(0xff3FBC6C);
+  static const Color personIconBgColor = Color(0xffF26109);
 }
 
 class WaveForm{

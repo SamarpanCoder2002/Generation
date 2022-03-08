@@ -11,10 +11,6 @@ class SoundRecorderProvider extends ChangeNotifier {
   String? _voiceStoreDirPath;
   bool _isRecording = false;
 
-  initialize() {
-
-  }
-
   Future<bool> startRecording() async {
     //if (_flutterSoundRecorder.isRecording) return false;
 
@@ -75,9 +71,7 @@ class SoundRecorderProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // stopRecording().then((value) {
-    //   _flutterSoundRecorder.closeRecorder();
-    // });
+    _record.stop();
     super.dispose();
   }
 }

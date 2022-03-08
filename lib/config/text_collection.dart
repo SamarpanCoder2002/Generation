@@ -7,3 +7,11 @@ class AppText{
 class DirectoryName{
   static const String voiceRecordDir = "recordings";
 }
+
+class MessageData{
+  static const String type = "type";
+  static const String holder = "holder";
+  static const String message = "message";
+  static const String time = "time";
+  static const String thumbnail = "thumbnail";
+}

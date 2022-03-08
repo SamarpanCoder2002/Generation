@@ -1,10 +1,11 @@
 enum ChatMessageType{
   text,
-  image,
   audio,
+  image,
   video,
   document,
-  location
+  location,
+  contact,
 }
 
 enum ConnectionType{
@@ -22,4 +23,10 @@ enum ThemeModeTypes{
 enum MessageHolderType{
   me,
   other
+}
+
+enum ImageType{
+  file,
+  network,
+  asset
 }

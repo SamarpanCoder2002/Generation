@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/types/types.dart';
+import 'package:open_file/open_file.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -32,9 +36,10 @@ class MessagingSection extends StatelessWidget {
       required dynamic messageData,
       required int index}) {
     return Align(
-      alignment: messageData["holder"] == MessageHolderType.other.toString()
-          ? Alignment.centerLeft
-          : Alignment.centerRight,
+      alignment:
+          messageData[MessageData.holder] == MessageHolderType.other.toString()
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
       child: ConstrainedBox(
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width - 45, minWidth: 100),
@@ -42,7 +47,8 @@ class MessagingSection extends StatelessWidget {
           elevation: 0,
           shadowColor: AppColors.pureWhiteColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: messageData["holder"] == MessageHolderType.other.toString()
+          color: messageData[MessageData.holder] ==
+                  MessageHolderType.other.toString()
               ? AppColors.oppositeMsgDarkModeColor
               : AppColors.myMsgDarkModeColor,
           child: Stack(
@@ -62,7 +68,7 @@ class MessagingSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 15, top: 8, bottom: 28),
       child: Linkify(
-        text: messageData["message"],
+        text: messageData[MessageData.message],
         onOpen: (link) async {
           try {
             await launch(link.url);
@@ -83,7 +89,7 @@ class MessagingSection extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            "20:58",
+            messageData[MessageData.time],
             style: TextStyle(
                 fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
           ),
@@ -101,34 +107,58 @@ class MessagingSection extends StatelessWidget {
   }
 
   _getPerfectMessageContainer({required dynamic messageData}) {
-    if (messageData["type"] == ChatMessageType.text.toString()) {
+    if (messageData[MessageData.type] == ChatMessageType.text.toString()) {
       return _textMessageSection(messageData: messageData);
-    } else if (messageData["type"] == ChatMessageType.image.toString()) {
+    } else if (messageData[MessageData.type] ==
+        ChatMessageType.image.toString()) {
       return _imageMessageSection(messageData: messageData);
-    } else if (messageData["type"] == ChatMessageType.audio.toString()) {
+    } else if (messageData[MessageData.type] ==
+        ChatMessageType.audio.toString()) {
       return _audioMessageSection(messageData: messageData);
+    } else if (messageData[MessageData.type] ==
+        ChatMessageType.video.toString()) {
+      return _videoMessageSection(messageData: messageData);
     }
   }
 
-  _imageMessageSection({messageData}) {
-    return ConstrainedBox(
-        constraints: BoxConstraints(
-            maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: PhotoView(
-            backgroundDecoration:
-                const BoxDecoration(color: AppColors.pureWhiteColor),
-            imageProvider: NetworkImage(messageData["message"]),
-            minScale: PhotoViewComputedScale.covered,
-            errorBuilder: (_, __, ___) => const Center(
-              child: Text(
-                "Image Not Found... 😔",
-                style: TextStyle(fontSize: 20, color: AppColors.pureWhiteColor),
+  _imageMessageSection({messageData, bool fromVideo = false}) {
+    return InkWell(
+      onTap: () async {
+        await OpenFile.open(messageData[MessageData.message]!);
+      },
+      child: ConstrainedBox(
+          constraints: BoxConstraints(
+              maxHeight: 300,
+              maxWidth: MediaQuery.of(context).size.width - 110),
+          child: Card(
+            elevation: 2,
+            shadowColor: AppColors.pureWhiteColor,
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: PhotoView(
+                enableRotation: false,
+                backgroundDecoration:
+                    const BoxDecoration(color: AppColors.pureWhiteColor),
+                imageProvider: FileImage(File(fromVideo
+                    ? messageData[MessageData.thumbnail]!
+                    : messageData[MessageData.message]!)),
+                minScale: PhotoViewComputedScale.covered,
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Text(
+                    "Image Not Found... 😔",
+                    style: TextStyle(
+                        fontSize: 20, color: AppColors.pureWhiteColor),
+                  ),
+                ),
               ),
             ),
-          ),
-        ));
+          )),
+    );
   }
 
   _audioMessageSection({messageData}) {
@@ -143,7 +173,7 @@ class MessagingSection extends StatelessWidget {
 
     _songPlayManagement() async {
       await Provider.of<SongManagementProvider>(context, listen: false)
-          .audioPlaying(messageData["message"]);
+          .audioPlaying(messageData[MessageData.message]);
     }
 
     _loadingProgress() => Expanded(
@@ -151,8 +181,8 @@ class MessagingSection extends StatelessWidget {
             width: double.maxFinite,
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: LinearPercentIndicator(
-                percent: _getCurrentSongPath == messageData["message"]
-                    ? _currentLoadingTime ??1.0
+                percent: _getCurrentSongPath == messageData[MessageData.message]
+                    ? _currentLoadingTime ?? 1.0
                     : 0.0,
                 backgroundColor: Colors.black26,
                 progressColor: AppColors.lightBlueColor),
@@ -163,7 +193,8 @@ class MessagingSection extends StatelessWidget {
       return IconButton(
           onPressed: _songPlayManagement,
           icon: Icon(
-            isSongPlaying && _getCurrentSongPath == messageData["message"]
+            isSongPlaying &&
+                    _getCurrentSongPath == messageData[MessageData.message]
                 ? Icons.pause
                 : Icons.play_arrow,
             color: AppColors.pureWhiteColor,
@@ -201,7 +232,7 @@ class MessagingSection extends StatelessWidget {
       bottom: 6,
       right: MediaQuery.of(context).size.width / 2 - 12,
       child: Text(
-        _getCurrentSongPath == messageData["message"]
+        _getCurrentSongPath == messageData[MessageData.message]
             ? _currentLoadingTime.toString()
             : "00:00",
         style: TextStyle(
@@ -274,6 +305,39 @@ class MessagingSection extends StatelessWidget {
               "Start Your Messaging 👇",
               style:
                   TextStyleCollection.headingTextStyle.copyWith(fontSize: 18),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _videoMessageSection({messageData}) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+          maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
+      child: Stack(
+        children: [
+          _imageMessageSection(messageData: messageData, fromVideo: true),
+          InkWell(
+            onTap: () async {
+              print("Ok Video");
+              await OpenFile.open(messageData[MessageData.message]);
+            },
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width - 110,
+              height: 300,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.play_circle_outline_outlined,
+                  size: 60,
+                  color: AppColors.darkBorderGreenColor,
+                ),
+                onPressed: () async {
+                  print("Message Data: ${messageData[MessageData.message]}");
+                  await OpenFile.open(messageData[MessageData.message]);
+                },
+              ),
             ),
           ),
         ],

@@ -1,8 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:generation/config/icon_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/time_collection.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
+import 'package:generation/services/input_system_services.dart';
 import 'package:provider/provider.dart';
 import 'package:music_visualizer/music_visualizer.dart';
 
@@ -82,18 +86,20 @@ class MessageCreationSection extends StatelessWidget {
             final _voiceRecordPath =
                 await Provider.of<SoundRecorderProvider>(context, listen: false)
                     .stopRecording();
-            print("Voice Record Path: $_voiceRecordPath");
 
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                 .setSingleNewMessage({
               DateTime.now().toString(): {
-                "type": ChatMessageType.audio.toString(),
-                "holder": Provider.of<ChatBoxMessagingProvider>(context,
+                MessageData.type: ChatMessageType.audio.toString(),
+                MessageData.holder: Provider.of<ChatBoxMessagingProvider>(
+                        context,
                         listen: false)
                     .getMessageHolderType()
                     .toString(),
-                "message": _voiceRecordPath,
-                "time": "20:40"
+                MessageData.message: _voiceRecordPath,
+                MessageData.time: Provider.of<ChatBoxMessagingProvider>(context,
+                        listen: false)
+                    .getCurrentTime()
               }
             });
 
@@ -142,9 +148,94 @@ class MessageCreationSection extends StatelessWidget {
   }
 
   _moreMessageOptions() {
+    final InputOption _inputOption = InputOption(context);
+
+    _videoTakingOption() {
+      showModalBottomSheet(
+          context: context,
+          elevation: 5,
+          builder: (_) => Container(
+                color: AppColors.backgroundDarkMode,
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _inputOption.pickVideoFromCameraAndGallery();
+                      },
+                      child: const Text("Camera"),
+                      style: ElevatedButton.styleFrom(
+                          primary: AppColors.oppositeMsgDarkModeColor),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _inputOption.pickVideoFromCameraAndGallery(fromCamera: false);
+                      },
+                      child: const Text("Gallery"),
+                      style: ElevatedButton.styleFrom(
+                          primary: AppColors.oppositeMsgDarkModeColor),
+                    ),
+                  ],
+                ),
+              ));
+    }
+
+    _particularOption(index) {
+      return InkWell(
+        onTap: () async {
+          if (index == 0) {
+            _inputOption.takeImageFromCamera();
+          } else if (index == 1) {
+            _inputOption.pickImageFromGallery();
+          } else if (index == 2) {
+            _videoTakingOption();
+          }
+        },
+        child: Column(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: IconCollection.iconsCollection[index][2]),
+              child: IconCollection.iconsCollection[index][0],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Center(
+              child: Text(
+                IconCollection.iconsCollection[index][1],
+                style: TextStyleCollection.terminalTextStyle
+                    .copyWith(fontSize: 14),
+              ),
+            )
+          ],
+        ),
+      );
+    }
+
+    _showMoreOptions() {
+      showModalBottomSheet(
+          context: context,
+          builder: (_) => Container(
+              height: 450,
+              color: AppColors.oppositeMsgDarkModeColor,
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+              child: GridView.count(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 6,
+                children: List.generate(IconCollection.iconsCollection.length,
+                    (index) => _particularOption(index)),
+              )));
+    }
+
     return IconButton(
         color: AppColors.pureWhiteColor.withOpacity(0.8),
-        onPressed: () {},
+        onPressed: _showMoreOptions,
         icon: const Icon(Icons.attachment_outlined));
   }
 
@@ -169,6 +260,42 @@ class MessageCreationSection extends StatelessWidget {
     final bool _showVoiceIcon =
         Provider.of<ChatBoxMessagingProvider>(context).showVoiceIcon();
 
+    _voiceOrSendIconPressed() async {
+      if (_showVoiceIcon) {
+        Provider.of<SoundRecorderProvider>(context, listen: false)
+            .startRecording();
+      } else {
+        final TextEditingController? _messageController =
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getTextController();
+
+        if (_messageController!.text.isEmpty) return;
+
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .setSingleNewMessage({
+          DateTime.now().toString(): {
+            MessageData.type: ChatMessageType.text.toString(),
+            MessageData.holder:
+                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                    .getMessageHolderType()
+                    .toString(),
+            MessageData.message: _messageController.text,
+            MessageData.time:
+                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                    .getCurrentTime()
+          }
+        });
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .clearTextFromMessageInputSection();
+
+        Provider.of<ChatScrollProvider>(context, listen: false)
+            .animateToBottom();
+
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .setShowVoiceIcon(true);
+      }
+    }
+
     return IconButton(
       icon: !_showVoiceIcon
           ? Image.asset(
@@ -179,39 +306,7 @@ class MessageCreationSection extends StatelessWidget {
               Icons.keyboard_voice_outlined,
               color: AppColors.pureWhiteColor,
             ),
-      onPressed: () async {
-        if (_showVoiceIcon) {
-          Provider.of<SoundRecorderProvider>(context, listen: false)
-              .startRecording();
-        } else {
-          final TextEditingController? _messageController =
-              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                  .getTextController();
-
-          if (_messageController!.text.isEmpty) return;
-
-          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .setSingleNewMessage({
-            DateTime.now().toString(): {
-              "type": ChatMessageType.text.toString(),
-              "holder":
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getMessageHolderType()
-                      .toString(),
-              "message": _messageController.text,
-              "time": "20:40"
-            }
-          });
-          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .clearTextFromMessageInputSection();
-
-          Provider.of<ChatScrollProvider>(context, listen: false)
-              .animateToBottom();
-
-          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .setShowVoiceIcon(true);
-        }
-      },
+      onPressed: _voiceOrSendIconPressed,
     );
   }
 }

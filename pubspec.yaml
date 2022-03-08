@@ -43,6 +43,13 @@ dependencies:
   path_provider: ^2.0.9
   music_visualizer: ^1.0.2
   record: ^3.0.3
+  intl: ^0.17.0
+  flutter_icons:
+    git:
+      url: git://github.com/jibiel/flutter-icons.git
+      ref: master
+  image_picker: ^0.8.4+10
+  open_file: ^3.2.1
 
 
   # The following adds the Cupertino Icons font to your application.

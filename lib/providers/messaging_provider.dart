@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../types/types.dart';
 
@@ -46,6 +47,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _focus.addListener(_onFocusChange);
   }
 
+  disposeMethod(){
+    _messageController!.dispose();
+  }
+
   setShowVoiceIcon(bool status) {
     _showVoiceIcon = status;
     notifyListeners();
@@ -78,4 +83,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _messageController?.clear();
     notifyListeners();
   }
+
+  getCurrentTime() => DateFormat('hh:mm a').format(DateTime.now());
+
 }

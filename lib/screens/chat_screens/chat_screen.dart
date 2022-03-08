@@ -26,13 +26,16 @@ class _ChatScreenState extends State<ChatScreen> {
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
-    Provider.of<SoundRecorderProvider>(context, listen: false).initialize();
     super.initState();
   }
 
   @override
   void dispose() {
-    Provider.of<SoundRecorderProvider>(context, listen: false).dispose();
+
+      //Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
+      // Provider.of<SoundRecorderProvider>(context, listen: false).dispose();
+      // Provider.of<ChatBoxMessagingProvider>(context, listen: false).disposeMethod();
+
     super.dispose();
   }
 
