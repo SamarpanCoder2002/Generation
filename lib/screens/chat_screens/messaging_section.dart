@@ -9,9 +9,11 @@ import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/types/types.dart';
 import 'package:open_file/open_file.dart';
+import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/sound_provider.dart';
@@ -118,6 +120,9 @@ class MessagingSection extends StatelessWidget {
     } else if (messageData[MessageData.type] ==
         ChatMessageType.video.toString()) {
       return _videoMessageSection(messageData: messageData);
+    } else if (messageData[MessageData.type] ==
+        ChatMessageType.document.toString()) {
+      return _documentMessageSection(messageData: messageData);
     }
   }
 
@@ -343,5 +348,81 @@ class MessagingSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _documentMessageSection({messageData}) {
+    _pdfMaintainerWidget() => Stack(
+          children: [
+            PdfView(
+              path: messageData[MessageData.message],
+            ),
+            Center(
+              child: GestureDetector(
+                child: const Icon(
+                  Icons.open_in_new_rounded,
+                  size: 40.0,
+                  color: Colors.blue,
+                ),
+                onTap: () async {
+                  final openResult =
+                      await OpenFile.open(messageData[MessageData.message]);
+
+                  /// Make Toast Here to Show message if file not open
+                },
+              ),
+            ),
+          ],
+        );
+
+    _otherDocumentMaintainerWidget() => Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                messageData[MessageData.message].split("/").last,
+                style: TextStyleCollection.terminalTextStyle
+                    .copyWith(fontSize: 14),
+              ),
+              IconButton(
+                  onPressed: () async {
+                    final openResult =
+                        await OpenFile.open(messageData[MessageData.message]);
+
+                    /// Make Toast Here to Show message if file not open
+                  },
+                  icon: const Icon(
+                    Icons.open_in_new,
+                    color: AppColors.pureWhiteColor,
+                  ))
+            ],
+          ),
+        );
+
+    return ConstrainedBox(
+        constraints: BoxConstraints(
+            maxHeight: messageData[MessageData.extensionForDocument] == 'pdf'
+                ? 300
+                : 100,
+            maxWidth: MediaQuery.of(context).size.width - 110),
+        child: Card(
+          elevation: 2,
+          color: messageData[MessageData.holder] ==
+                  MessageHolderType.other.toString()
+              ? AppColors.oppositeMsgDarkModeColor
+              : AppColors.myMsgDarkModeColor,
+          shadowColor: AppColors.pureWhiteColor,
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: messageData[MessageData.extensionForDocument] == 'pdf'
+                ? _pdfMaintainerWidget()
+                : _otherDocumentMaintainerWidget(),
+          ),
+        ));
   }
 }

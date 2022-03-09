@@ -14,4 +14,5 @@ class MessageData{
   static const String message = "message";
   static const String time = "time";
   static const String thumbnail = "thumbnail";
+  static const String extensionForDocument = "extension-for-document";
 }

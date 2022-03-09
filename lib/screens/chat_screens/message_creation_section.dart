@@ -170,7 +170,8 @@ class MessageCreationSection extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        _inputOption.pickVideoFromCameraAndGallery(fromCamera: false);
+                        _inputOption.pickVideoFromCameraAndGallery(
+                            fromCamera: false);
                       },
                       child: const Text("Gallery"),
                       style: ElevatedButton.styleFrom(
@@ -190,6 +191,10 @@ class MessageCreationSection extends StatelessWidget {
             _inputOption.pickImageFromGallery();
           } else if (index == 2) {
             _videoTakingOption();
+          } else if (index == 3) {
+            _inputOption.documentPickFromDevice();
+          } else if(index == 4){
+            _inputOption.audioPickFromDevice();
           }
         },
         child: Column(
