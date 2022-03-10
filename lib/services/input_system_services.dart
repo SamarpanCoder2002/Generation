@@ -1,13 +1,15 @@
 import 'dart:io';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
+import 'package:generation/providers/contacts_provider.dart';
+import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
 import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +20,8 @@ class InputOption {
   final BuildContext context;
 
   InputOption(this.context);
+
+  final PermissionManagement _permissionManagement = PermissionManagement();
 
   pickImageFromGallery() async {
     final List<XFile>? _pickedImagesCollection =
@@ -141,7 +145,8 @@ class InputOption {
   _commonFilePickingSection(
       List<String> _allowedExtensions, ChatMessageType chatMessageType) async {
     try {
-      final storagePermissionResponse = await storagePermission();
+      final storagePermissionResponse =
+          await _permissionManagement.storagePermission();
       if (!storagePermissionResponse) {
         Navigator.pop(context);
         return;
@@ -208,7 +213,8 @@ class InputOption {
       return {};
     }
 
-    final bool _locationActivationStatus = await locationPermission();
+    final bool _locationActivationStatus =
+        await _permissionManagement.locationPermission();
 
     if (!_locationActivationStatus) return {};
 
@@ -237,5 +243,25 @@ class InputOption {
                 .getCurrentTime(),
       }
     });
+  }
+
+  getContacts() async {
+    final isPermissionGiven = await _permissionManagement.contactPermission();
+
+    if (!isPermissionGiven) {
+      return;
+    }
+
+    final List<Contact> contacts =
+        await ContactsService.getContacts(withThumbnails: false);
+
+    Provider.of<ContactsProvider>(context, listen: false).setPhoneContacts(contacts);
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => ContactsCollection(
+
+                )));
   }
 }

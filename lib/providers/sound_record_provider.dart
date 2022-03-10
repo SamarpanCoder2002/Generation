@@ -11,11 +11,13 @@ class SoundRecorderProvider extends ChangeNotifier {
   String? _voiceStoreDirPath;
   bool _isRecording = false;
 
+  final PermissionManagement _permissionManagement = PermissionManagement();
+
   Future<bool> startRecording() async {
     //if (_flutterSoundRecorder.isRecording) return false;
 
     final _permissionForRecording =
-        (await recordingPermission()) && (await storagePermission());
+        (await _permissionManagement.recordingPermission()) && (await _permissionManagement.storagePermission());
     if (!_permissionForRecording) return false;
 
     if (_voiceStoreDirPath == null) {

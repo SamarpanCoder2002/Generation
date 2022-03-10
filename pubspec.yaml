@@ -52,6 +52,7 @@ dependencies:
   pdf_viewer_plugin: ^2.0.1
   geolocator: ^8.2.0
   google_maps_flutter: ^2.1.2
+  contacts_service: ^0.6.3
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -196,7 +196,9 @@ class MessageCreationSection extends StatelessWidget {
           } else if(index == 4){
             _inputOption.audioPickFromDevice();
           } else if(index == 5){
-            _inputOption.showCurrentLocationInGoogleMaps();
+            await _inputOption.showCurrentLocationInGoogleMaps();
+          } else if(index == 6){
+            await _inputOption.getContacts();
           }
         },
         child: Column(
