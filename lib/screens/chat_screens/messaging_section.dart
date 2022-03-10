@@ -7,6 +7,7 @@ import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/services/show_google_map.dart';
 import 'package:generation/types/types.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
@@ -123,6 +124,9 @@ class MessagingSection extends StatelessWidget {
     } else if (messageData[MessageData.type] ==
         ChatMessageType.document.toString()) {
       return _documentMessageSection(messageData: messageData);
+    } else if (messageData[MessageData.type] ==
+        ChatMessageType.location.toString()) {
+      return _locationMessageSection(messageData: messageData);
     }
   }
 
@@ -422,6 +426,31 @@ class MessagingSection extends StatelessWidget {
             child: messageData[MessageData.extensionForDocument] == 'pdf'
                 ? _pdfMaintainerWidget()
                 : _otherDocumentMaintainerWidget(),
+          ),
+        ));
+  }
+
+  _locationMessageSection({messageData}) {
+    return ConstrainedBox(
+        constraints: BoxConstraints(
+            maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
+        child: Card(
+          elevation: 2,
+          color: messageData[MessageData.holder] ==
+                  MessageHolderType.other.toString()
+              ? AppColors.oppositeMsgDarkModeColor
+              : AppColors.myMsgDarkModeColor,
+          shadowColor: AppColors.pureWhiteColor,
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: showMapSection(
+                latitude: messageData["message"]["latitude"],
+                longitude: messageData["message"]["longitude"]),
           ),
         ));
   }

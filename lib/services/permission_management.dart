@@ -9,3 +9,8 @@ Future<bool> storagePermission() async{
   final status = await Permission.storage.request();
   return status == PermissionStatus.granted;
 }
+
+Future<bool> locationPermission() async{
+  final status = await Permission.location.request();
+  return status == PermissionStatus.granted;
+}

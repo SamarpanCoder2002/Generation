@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
+import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
 import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/types/types.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -180,5 +183,59 @@ class InputOption {
     } catch (e) {
       print("Error in Document File Picking: $e");
     }
+  }
+
+  showCurrentLocationInGoogleMaps() async {
+    final _locationData = await _getCurrentLocation();
+
+    if (_locationData.isEmpty) {
+      return;
+    }
+
+    /// Show Toast About Opening Your Location in Map
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => ShowMapInLargeForm(locationData: _locationData)));
+  }
+
+  Future<Map<String, dynamic>> _getCurrentLocation() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      print("Enable Location Service");
+
+      /// Show Toast Message To Enable Location Service
+      return {};
+    }
+
+    final bool _locationActivationStatus = await locationPermission();
+
+    if (!_locationActivationStatus) return {};
+
+    final _locationData = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best,
+        forceAndroidLocationManager: true);
+
+    final Map<String, dynamic> _coordinate = {};
+    _coordinate["latitude"] = _locationData.latitude;
+    _coordinate["longitude"] = _locationData.longitude;
+    return _coordinate;
+  }
+
+  sendLocationService(double _latitude, double _longitude) {
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setSingleNewMessage({
+      DateTime.now().toString(): {
+        MessageData.type: ChatMessageType.location.toString(),
+        MessageData.message: {"latitude": _latitude, "longitude": _longitude},
+        MessageData.holder:
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getMessageHolderType()
+                .toString(),
+        MessageData.time:
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getCurrentTime(),
+      }
+    });
   }
 }
