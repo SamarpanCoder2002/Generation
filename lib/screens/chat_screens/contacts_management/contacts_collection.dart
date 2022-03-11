@@ -1,3 +1,4 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/contacts_provider.dart';
@@ -7,6 +8,9 @@ import 'package:provider/provider.dart';
 import '../../../config/images_path_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
+import '../../../providers/chat_scroll_provider.dart';
+import '../../../providers/messaging_provider.dart';
+import '../../../types/types.dart';
 
 class ContactsCollection extends StatefulWidget {
   const ContactsCollection({Key? key}) : super(key: key);
@@ -56,13 +60,33 @@ class _ContactsCollectionState extends State<ContactsCollection> {
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 23),
-        child: Text(
-          Provider.of<ContactsProvider>(context)
-                      .getLengthOfTotalFilteredContacts() ==
-                  0
-              ? AppText.appName
-              : "Filtered Contacts",
-          style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              Provider.of<ContactsProvider>(context)
+                          .getLengthOfTotalFilteredContacts() ==
+                      0
+                  ? AppText.appName
+                  : "Filtered Contacts",
+              style:
+                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+            ),
+            if (Provider.of<ContactsProvider>(context)
+                    .getLengthOfTotalFilteredContacts() >
+                0)
+              TextButton(
+                child: Text(
+                  "Clear Filter",
+                  style: TextStyleCollection.headingTextStyle
+                      .copyWith(fontSize: 14),
+                ),
+                onPressed: () {
+                  Provider.of<ContactsProvider>(context, listen: false)
+                      .resetData();
+                },
+              )
+          ],
         ));
   }
 
@@ -119,7 +143,7 @@ class _ContactsCollectionState extends State<ContactsCollection> {
       height: Provider.of<ContactsProvider>(context)
                   .getLengthOfTotalFilteredContacts() ==
               0
-          ? MediaQuery.of(context).size.height / 1.2
+          ? MediaQuery.of(context).size.height / 1.25
           : MediaQuery.of(context).size.height / 1.8,
       margin: const EdgeInsets.only(top: 5),
       child: Provider.of<ContactsProvider>(context)
@@ -160,7 +184,6 @@ class _ContactsCollectionState extends State<ContactsCollection> {
 
   _sendButton() {
     return FloatingActionButton(
-      heroTag: '2',
       tooltip: 'Send Selected Contacts',
       shape: const CircleBorder(
           side: BorderSide(color: AppColors.pureWhiteColor, width: 1)),
@@ -170,7 +193,43 @@ class _ContactsCollectionState extends State<ContactsCollection> {
         IconImages.sendImagePath,
         width: 28,
       ),
-      onPressed: () {},
+      onPressed: () {
+        final List<Contact> _filteredContacts =
+            Provider.of<ContactsProvider>(context, listen: false)
+                .getFilteredContacts();
+
+        Provider.of<ContactsProvider>(context, listen: false).resetData();
+
+        for (final filterContact in _filteredContacts) {
+          final _phoneNumbersCollection = filterContact.phones;
+
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .setSingleNewMessage({
+            DateTime.now().toString(): {
+              MessageData.type: ChatMessageType.contact.toString(),
+              MessageData.message: {
+                PhoneNumberData.number: _phoneNumbersCollection!.isNotEmpty
+                    ? _phoneNumbersCollection[0].value ?? ""
+                    : "",
+                PhoneNumberData.name: filterContact.displayName,
+                PhoneNumberData.numberLabel: _phoneNumbersCollection[0].label
+              },
+              MessageData.holder:
+                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                      .getMessageHolderType()
+                      .toString(),
+              MessageData.time:
+                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                      .getCurrentTime(),
+            }
+          });
+        }
+
+        Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
+
+        Navigator.pop(context);
+        Navigator.pop(context);
+      },
     );
   }
 

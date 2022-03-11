@@ -16,3 +16,9 @@ class MessageData{
   static const String thumbnail = "thumbnail";
   static const String extensionForDocument = "extension-for-document";
 }
+
+class PhoneNumberData{
+  static const String number = "number";
+  static const String name = "name";
+  static const String numberLabel = "label";
+}

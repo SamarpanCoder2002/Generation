@@ -65,4 +65,12 @@ class ContactsProvider extends ChangeNotifier {
     }
     setPhoneContacts(contacts);
   }
+
+  resetData()async{
+    _phoneContacts = await ContactsService.getContacts(
+        withThumbnails: false);
+
+    _filteredPhoneContacts.clear();
+    notifyListeners();
+  }
 }

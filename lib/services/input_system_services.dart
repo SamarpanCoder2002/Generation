@@ -2,16 +2,20 @@ import 'dart:io';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
+import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
+import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/chat_scroll_provider.dart';
 import '../providers/messaging_provider.dart';
@@ -255,13 +259,147 @@ class InputOption {
     final List<Contact> contacts =
         await ContactsService.getContacts(withThumbnails: false);
 
-    Provider.of<ContactsProvider>(context, listen: false).setPhoneContacts(contacts);
+    Provider.of<ContactsProvider>(context, listen: false)
+        .setPhoneContacts(contacts);
 
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => ContactsCollection(
+        context, MaterialPageRoute(builder: (_) => const ContactsCollection()));
+  }
 
-                )));
+  takeInputForContactName(
+      {required TextEditingController contactNameController,
+      required String phoneNumber,
+      required String phoneNumberLabel}) {
+    _heading() => Center(
+          child: Text(
+            "Contact Name",
+            style: TextStyleCollection.secondaryHeadingTextStyle
+                .copyWith(fontSize: 18),
+          ),
+        );
+
+    _contactNameInputSection() => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextField(
+            style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+            controller: contactNameController,
+            autofocus: true,
+            cursorColor: AppColors.pureWhiteColor,
+            decoration: InputDecoration(
+              hintText: "Enter Contact Name",
+              hintStyle: TextStyleCollection.terminalTextStyle.copyWith(
+                  color: AppColors.pureWhiteColor.withOpacity(0.6),
+                  fontSize: 14),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+              ),
+            ),
+          ),
+        );
+
+    _onSaveButtonPressed() async {
+      if (contactNameController.text.isEmpty) {
+        print("Please Give a Contact Name");
+
+        /// Show That Message Toast
+        return;
+      }
+
+      await _addNumberInContact(
+          phoneNumber, contactNameController.text, phoneNumberLabel);
+      Navigator.pop(context);
+    }
+
+    showModalBottomSheet(
+        context: context,
+        elevation: 5,
+        builder: (_) => Container(
+            color: AppColors.oppositeMsgDarkModeColor,
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                _heading(),
+                const SizedBox(
+                  height: 20,
+                ),
+                _contactNameInputSection(),
+                const SizedBox(
+                  height: 20,
+                ),
+                commonElevatedButton(
+                    btnText: "Save",
+                    onPressed: _onSaveButtonPressed,
+                    bgColor: AppColors.darkBorderGreenColor),
+              ],
+            )));
+  }
+
+  phoneNumberOpeningOptions(context, {required String phoneNumber}) {
+    openSms() async {
+      try {
+        await launch("sms:$phoneNumber");
+        Navigator.pop(context);
+      } catch (e) {
+        /// Show Error Toast
+      }
+    }
+
+    callToNumber() async {
+      try {
+        await launch("tel:$phoneNumber");
+        Navigator.pop(context);
+      } catch (e) {
+        /// Show Error Toast
+      }
+    }
+
+    openInWhatsapp() async {
+      try {
+        await launch("whatsapp://send?phone=$phoneNumber");
+        Navigator.pop(context);
+      } catch (e) {
+        /// Show Error Toast
+      }
+    }
+
+    showModalBottomSheet(
+        context: context,
+        elevation: 5,
+        builder: (_) => Container(
+              color: AppColors.backgroundDarkMode,
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  commonElevatedButton(btnText: "Sms", onPressed: openSms),
+                  commonElevatedButton(
+                      btnText: "Call", onPressed: callToNumber),
+                  commonElevatedButton(
+                      btnText: "Whatsapp", onPressed: openInWhatsapp),
+                ],
+              ),
+            ));
+  }
+
+  _addNumberInContact(
+      String phoneNumber, String name, String numberLabel) async {
+    final isPermissionGiven = await _permissionManagement.contactPermission();
+
+    if (!isPermissionGiven) {
+      return;
+    }
+
+    final Contact contact = Contact();
+    contact.givenName = name;
+    contact.familyName = "";
+    contact.phones = [Item(label: numberLabel, value: phoneNumber)];
+    await ContactsService.addContact(contact);
+
+    /// Show Success toast Message
   }
 }

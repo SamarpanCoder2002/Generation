@@ -91,12 +91,14 @@ class ChatBoxHeaderSection extends StatelessWidget {
 
   _backButton() {
     return InkWell(
-      child: Icon(
+      child: const Icon(
         Icons.arrow_back_outlined,
         size: 20,
         color: AppColors.pureWhiteColor,
       ),
-      onTap: () {},
+      onTap: () {
+        Navigator.pop(context);
+      },
     );
   }
 }

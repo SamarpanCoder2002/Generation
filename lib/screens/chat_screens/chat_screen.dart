@@ -30,16 +30,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
-  void dispose() {
-
-      //Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
-      // Provider.of<SoundRecorderProvider>(context, listen: false).dispose();
-      // Provider.of<ChatBoxMessagingProvider>(context, listen: false).disposeMethod();
-
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.chatDarkBackgroundColor,

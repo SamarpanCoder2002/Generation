@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
@@ -7,6 +6,8 @@ import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/screens/common/button.dart';
+import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/show_google_map.dart';
 import 'package:generation/types/types.dart';
 import 'package:open_file/open_file.dart';
@@ -81,6 +82,7 @@ class MessagingSection extends StatelessWidget {
         },
         linkStyle: const TextStyle(color: AppColors.lightBlueColor),
         style: const TextStyle(fontSize: 14, color: AppColors.pureWhiteColor),
+        options: const LinkifyOptions(humanize: false),
       ),
     );
   }
@@ -127,7 +129,12 @@ class MessagingSection extends StatelessWidget {
     } else if (messageData[MessageData.type] ==
         ChatMessageType.location.toString()) {
       return _locationMessageSection(messageData: messageData);
+    } else if (messageData[MessageData.type] ==
+        ChatMessageType.contact.toString()) {
+      return _contactMessageSection(messageData: messageData);
     }
+
+    return const Center();
   }
 
   _imageMessageSection({messageData, bool fromVideo = false}) {
@@ -453,5 +460,87 @@ class MessagingSection extends StatelessWidget {
                 longitude: messageData["message"]["longitude"]),
           ),
         ));
+  }
+
+  _contactMessageSection({messageData}) {
+    final contact = messageData["message"];
+
+    return ConstrainedBox(
+        constraints: BoxConstraints(
+            maxHeight: 150, maxWidth: MediaQuery.of(context).size.width - 160),
+        child: Card(
+          elevation: 2,
+          color: messageData[MessageData.holder] ==
+                  MessageHolderType.other.toString()
+              ? AppColors.oppositeMsgDarkModeColor
+              : AppColors.myMsgDarkModeColor,
+          shadowColor: AppColors.pureWhiteColor,
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(
+                    contact[PhoneNumberData.name],
+                    style: TextStyleCollection.activityTitleTextStyle
+                        .copyWith(fontSize: 16),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    contact[PhoneNumberData.number],
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyleCollection.terminalTextStyle
+                        .copyWith(fontSize: 14, fontWeight: FontWeight.normal),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  _phoneNumberManagementSection(
+                      phoneNumber: contact[PhoneNumberData.number],
+                      name: contact[PhoneNumberData.name],
+                      label: contact[PhoneNumberData.numberLabel]),
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+
+  _phoneNumberManagementSection(
+      {required String phoneNumber, String? name, String? label}) {
+    final InputOption _inputOption = InputOption(context);
+
+    _addContactButtonPressed() {
+      final TextEditingController _contactNameController =
+          TextEditingController();
+      _contactNameController.text = name ?? "";
+
+      _inputOption.takeInputForContactName(
+          contactNameController: _contactNameController,
+          phoneNumber: phoneNumber,
+          phoneNumberLabel: label ?? "mobile");
+    }
+
+    _messageOrCallButtonPressed() => _inputOption
+        .phoneNumberOpeningOptions(context, phoneNumber: phoneNumber);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        commonTextButton(
+            btnText: "Add Contact", onPressed: _addContactButtonPressed),
+        commonTextButton(
+            btnText: "Message/Call", onPressed: _messageOrCallButtonPressed),
+      ],
+    );
   }
 }
