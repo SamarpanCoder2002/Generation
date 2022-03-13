@@ -4,6 +4,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/providers/chat_creation_section_provider.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/screens/common/button.dart';
@@ -260,14 +261,15 @@ class MessagingSection extends StatelessWidget {
   _chatBoxContainingMessages() {
     final bool _isFocused = Provider.of<ChatBoxMessagingProvider>(context)
         .hasTextFieldFocus(context);
-
-    // Provider.of<ChatScrollProvider>(context).animateToBottom(scrollDuration: 1);
+    final bool _isEmojiSectionActivated =
+        Provider.of<ChatCreationSectionProvider>(context)
+            .getEmojiActivationState();
 
     return SizedBox(
         width: double.maxFinite,
-        height: _isFocused
-            ? MediaQuery.of(context).size.height / 2.1
-            : MediaQuery.of(context).size.height / 1.22,
+        height: Provider.of<ChatBoxMessagingProvider>(context)
+            .getChatMessagingSectionHeight(
+                _isFocused || _isEmojiSectionActivated, context),
         child: ListView.separated(
           controller: Provider.of<ChatScrollProvider>(context).getController(),
           shrinkWrap: true,

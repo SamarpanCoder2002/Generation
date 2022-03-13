@@ -85,6 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  emoji_picker_flutter:
+    dependency: "direct main"
+    description:
+      name: emoji_picker_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.2"
   fake_async:
     dependency: transitive
     description:

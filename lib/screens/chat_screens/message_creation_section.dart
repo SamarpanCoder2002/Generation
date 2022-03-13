@@ -1,11 +1,13 @@
-import 'package:flutter/cupertino.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/icon_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/time_collection.dart';
+import 'package:generation/providers/chat_creation_section_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
+import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:provider/provider.dart';
 import 'package:music_visualizer/music_visualizer.dart';
@@ -28,7 +30,8 @@ class MessageCreationSection extends StatelessWidget {
 
     return Container(
       width: double.maxFinite,
-      height: 60,
+      height:
+          Provider.of<ChatCreationSectionProvider>(context).getSectionHeight(),
       decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(
@@ -45,11 +48,21 @@ class MessageCreationSection extends StatelessWidget {
   }
 
   _normalTextModeContainer() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final bool _isEmojiSectionShowing =
+    Provider.of<ChatCreationSectionProvider>(context)
+        .getEmojiActivationState();
+
+    return Column(
       children: [
-        _containerToInput(),
-        _messageAndVoiceSendButton(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _containerToInput(),
+            _messageAndVoiceSendButton(),
+          ],
+        ),
+        if(_isEmojiSectionShowing)
+        _emojiCollectionWidget(),
       ],
     );
   }
@@ -118,10 +131,24 @@ class MessageCreationSection extends StatelessWidget {
     );
   }
 
-  _emojiSection() => IconButton(
-      onPressed: () {},
-      color: AppColors.pureWhiteColor.withOpacity(0.9),
-      icon: const Icon(Icons.emoji_emotions_outlined));
+  _emojiSection() {
+    final bool _isEmojiSectionShowing =
+        Provider.of<ChatCreationSectionProvider>(context)
+            .getEmojiActivationState();
+
+    return IconButton(
+        onPressed: () {
+          if (_isEmojiSectionShowing) {
+            Provider.of<ChatCreationSectionProvider>(context, listen: false)
+                .backToNormalHeight();
+          } else {
+            Provider.of<ChatCreationSectionProvider>(context, listen: false)
+                .setSectionHeight();
+          }
+        },
+        color: AppColors.pureWhiteColor.withOpacity(0.9),
+        icon: const Icon(Icons.emoji_emotions_outlined));
+  }
 
   _textMessageWritingSection() {
     return SizedBox(
@@ -133,9 +160,15 @@ class MessageCreationSection extends StatelessWidget {
             Provider.of<ChatBoxMessagingProvider>(context).getTextController(),
         style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
         maxLines: null,
-        onChanged: (inputVal) =>
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .setShowVoiceIcon(inputVal.isEmpty),
+        cursorColor: AppColors.pureWhiteColor,
+        onTap: (){
+          Provider.of<ChatCreationSectionProvider>(context, listen: false)
+              .backToNormalHeight();
+        },
+        onChanged: (inputVal){
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .setShowVoiceIcon(inputVal.isEmpty);
+        },
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(bottom: 10),
           border: InputBorder.none,
@@ -185,6 +218,7 @@ class MessageCreationSection extends StatelessWidget {
     _particularOption(index) {
       return InkWell(
         onTap: () async {
+          hideKeyboard();
           if (index == 0) {
             _inputOption.takeImageFromCamera();
           } else if (index == 1) {
@@ -193,11 +227,11 @@ class MessageCreationSection extends StatelessWidget {
             _videoTakingOption();
           } else if (index == 3) {
             _inputOption.documentPickFromDevice();
-          } else if(index == 4){
+          } else if (index == 4) {
             _inputOption.audioPickFromDevice();
-          } else if(index == 5){
+          } else if (index == 5) {
             await _inputOption.showCurrentLocationInGoogleMaps();
-          } else if(index == 6){
+          } else if (index == 6) {
             await _inputOption.getContacts();
           }
         },
@@ -316,6 +350,45 @@ class MessageCreationSection extends StatelessWidget {
               color: AppColors.pureWhiteColor,
             ),
       onPressed: _voiceOrSendIconPressed,
+    );
+  }
+
+  Widget _emojiCollectionWidget() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 250,
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false).insertEmoji(emoji.emoji);
+        },
+        onBackspacePressed: () {
+          // Backspace-Button tapped logic
+          // Remove this line to also remove the button in the UI
+        },
+        config: const Config(
+            columns: 7,
+            emojiSizeMax: 32,
+            // Issue: https://github.com/flutter/flutter/issues/28894
+            verticalSpacing: 0,
+            horizontalSpacing: 0,
+            initCategory: Category.RECENT,
+            bgColor: AppColors.chatDarkBackgroundColor,
+            indicatorColor: Colors.blue,
+            iconColor: Colors.grey,
+            iconColorSelected: Colors.blue,
+            progressIndicatorColor: Colors.blue,
+            backspaceColor: Colors.blue,
+            skinToneDialogBgColor: Colors.white,
+            skinToneIndicatorColor: Colors.grey,
+            enableSkinTones: true,
+            showRecentsTab: true,
+            recentsLimit: 28,
+            noRecentsText: "No Recents",
+            noRecentsStyle: TextStyle(fontSize: 20, color: Colors.black26),
+            tabIndicatorAnimDuration: kTabScrollDuration,
+            categoryIcons: CategoryIcons(),
+            buttonMode: ButtonMode.MATERIAL),
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:generation/screens/chat_screens/messaging_section.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/chat_creation_section_provider.dart';
 import '../../providers/chat_scroll_provider.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -47,19 +48,23 @@ class _ChatScreenState extends State<ChatScreen> {
             connectionData: widget.connectionData, context: context),
       );
 
-  _messageCreationSection() => ScrollToHideWidget(
-        scrollController:
-            Provider.of<ChatScrollProvider>(context).getController(),
-        hideWhenScrollToBottom: false,
-        child: BottomSheet(
-            enableDrag: false,
-            onClosing: () {},
-            backgroundColor: AppColors.chatDarkBackgroundColor,
-            elevation: 0,
-            builder: (_) => MessageCreationSection(
-                  context: context,
-                )),
-      );
+  _messageCreationSection(){
+
+    return ScrollToHideWidget(
+      scrollController:
+      Provider.of<ChatScrollProvider>(context).getController(),
+      hideWhenScrollToBottom: false,
+      height: Provider.of<ChatCreationSectionProvider>(context).getSectionHeight(),
+      child: BottomSheet(
+          enableDrag: false,
+          onClosing: () {},
+          backgroundColor: AppColors.chatDarkBackgroundColor,
+          elevation: 0,
+          builder: (_) => MessageCreationSection(
+            context: context,
+          )),
+    );
+  }
 
   _chatCollectionSection() => Container(
         width: MediaQuery.of(context).size.width,

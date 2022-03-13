@@ -82,8 +82,6 @@ class _ShowMapInLargeFormState extends State<ShowMapInLargeForm> {
         onPressed: () {
           final InputOption _inputOption = InputOption(context);
           _inputOption.sendLocationService(_latitude!, _longitude!);
-          Navigator.pop(context);
-          Navigator.pop(context);
         },
       ),
     );

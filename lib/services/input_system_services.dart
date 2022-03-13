@@ -233,6 +233,8 @@ class InputOption {
   }
 
   sendLocationService(double _latitude, double _longitude) {
+    Navigator.pop(context);
+
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setSingleNewMessage({
       DateTime.now().toString(): {
@@ -247,6 +249,9 @@ class InputOption {
                 .getCurrentTime(),
       }
     });
+
+    Navigator.pop(context);
+    Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
 
   getContacts() async {

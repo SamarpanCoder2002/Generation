@@ -10,7 +10,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   MessageHolderType _messageHolderType = MessageHolderType.me;
   bool _showVoiceIcon = true;
 
-  showVoiceIcon() => _showVoiceIcon;
+  showVoiceIcon() => _showVoiceIcon && _messageController!.text.isEmpty;
 
   getMessageHolderType() {
     if (_messageHolderType == MessageHolderType.me) {
@@ -47,7 +47,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _focus.addListener(_onFocusChange);
   }
 
-  disposeMethod(){
+  disposeMethod() {
     _messageController!.dispose();
   }
 
@@ -86,4 +86,13 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   getCurrentTime() => DateFormat('hh:mm a').format(DateTime.now());
 
+  getChatMessagingSectionHeight(bool isKeyboardShowing, BuildContext context) =>
+      isKeyboardShowing
+          ? MediaQuery.of(context).size.height / 2.1
+          : MediaQuery.of(context).size.height / 1.22;
+
+  insertEmoji(String incomingEmojiData){
+    _messageController!.text += incomingEmojiData;
+    notifyListeners();
+  }
 }

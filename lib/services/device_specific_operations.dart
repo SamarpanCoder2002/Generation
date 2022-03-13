@@ -49,3 +49,11 @@ void makeScreenCleanView(){
     statusBarColor: Colors.transparent, // status bar color
   ));
 }
+
+void hideKeyboard()=>
+  SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+void showKeyboard()=>
+    SystemChannels.textInput.invokeMethod('TextInput.show');
+
+
