@@ -30,3 +30,10 @@ enum ImageType{
   network,
   asset
 }
+
+enum ActivityType{
+  text,
+  image,
+  video,
+  poll
+}

@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:provider/provider.dart';
@@ -23,8 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .initialize();
-    Provider.of<MainScrollingProvider>(context, listen: false)
-        .startListening();
+    Provider.of<MainScrollingProvider>(context, listen: false).startListening();
     super.initState();
   }
 
@@ -125,22 +125,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return SizedBox(
       width: MediaQuery.of(context).size.width - 40,
       height: 115,
-      child: ListView(
+      child: ListView.builder(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        children: [
-          ..._activityDataCollection(),
-        ],
+        itemCount:
+            Provider.of<StatusCollectionProvider>(context).getDataLength(),
+        itemBuilder: (_, index) => _activityParticularData(index),
       ),
     );
   }
 
-  _activityDataCollection() {
-    final _activityData =
-        Provider.of<StatusCollectionProvider>(context).getData();
+  _activityParticularData(int index) {
+    final _currentActivityData =
+        Provider.of<StatusCollectionProvider>(context).getData()[index];
 
-    return _activityData.map((_currentActivityData) {
-      return Container(
+    return OpenContainer(
+      closedElevation: 0.0,
+      transitionType: ContainerTransitionType.fadeThrough,
+      transitionDuration: const Duration(milliseconds: 500),
+      closedColor: AppColors.backgroundDarkMode,
+      middleColor: AppColors.backgroundDarkMode,
+      openColor: AppColors.backgroundDarkMode,
+      openBuilder: (_, __) => const ActivityController(),
+      closedBuilder: (_, __) => Container(
         margin: const EdgeInsets.only(right: 15),
         child: Column(
           children: [
@@ -168,8 +175,8 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   _messagesSection() {
@@ -203,8 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final ScrollController _messageScreenScrollController =
-        Provider.of<MainScrollingProvider>(context)
-            .getScrollController();
+        Provider.of<MainScrollingProvider>(context).getScrollController();
 
     final _commonChatLayout = CommonChatListLayout(context: context);
 
@@ -230,7 +236,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 closedColor: AppColors.backgroundDarkMode,
                 middleColor: AppColors.backgroundDarkMode,
                 openColor: AppColors.backgroundDarkMode,
-                openBuilder: (_, __) => ChatScreen(connectionData: _connectionData,),
+                openBuilder: (_, __) => ChatScreen(
+                      connectionData: _connectionData,
+                    ),
                 closedBuilder: (_, __) =>
                     _commonChatLayout.particularChatConnection(
                         photo: _connectionData["profilePic"],

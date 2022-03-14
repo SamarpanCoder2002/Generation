@@ -1,3 +1,4 @@
+import 'package:generation/providers/activity/activity_screen_provider.dart';
 import 'package:generation/providers/chat_creation_section_provider.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
@@ -35,4 +36,5 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => SoundRecorderProvider()),
   ChangeNotifierProvider(create: (_) => ContactsProvider()),
   ChangeNotifierProvider(create: (_) => ChatCreationSectionProvider()),
+  ChangeNotifierProvider(create: (_) => ActivityProvider()),
 ];

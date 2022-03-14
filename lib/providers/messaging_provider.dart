@@ -26,6 +26,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   getMessagesData() => _messageData;
 
+  // getParticularMessage(index){
+  //   final _particularData = _messageData[index];
+  //   return ChatMessageModel.toJson(type: _particularData["type"], message: _particularData["message"], time: _particularData["time"], holder: _particularData["holder"], additionalData: _particularData["additionalData"]);
+  // }
+
   getParticularMessage(index) => _messageData[index];
 
   getTotalMessages() => _messageData.length;

@@ -28,8 +28,7 @@ class _ConnectionManagementScreenState
     Provider.of<RequestConnectionsProvider>(context, listen: false)
         .initialize();
     Provider.of<SentConnectionsProvider>(context, listen: false).initialize();
-    Provider.of<MainScrollingProvider>(context, listen: false)
-        .startListening();
+    Provider.of<MainScrollingProvider>(context, listen: false).startListening();
     super.initState();
   }
 
@@ -219,8 +218,7 @@ class _ConnectionManagementScreenState
     }
 
     final ScrollController _scrollController =
-        Provider.of<MainScrollingProvider>(context)
-            .getScrollController();
+        Provider.of<MainScrollingProvider>(context).getScrollController();
 
     return SizedBox(
       width: double.maxFinite,
@@ -277,7 +275,7 @@ class _ConnectionManagementScreenState
           subheading: _particularData["description"],
           lastMsgTime: null,
           totalPendingMessages: null,
-          middleWidth: MediaQuery.of(context).size.width-240,
+          middleWidth: MediaQuery.of(context).size.width - 240,
           trailingWidget: incomingRequestButtonCollection());
     } else if (_currentIndex == 2) {
       final _particularData = Provider.of<SentConnectionsProvider>(context)

@@ -1,14 +1,14 @@
-class AppText{
+class AppText {
   static const String appName = "Generation";
   static const String activityHeading = "Activities";
   static const String messagesHeading = "Messages";
 }
 
-class DirectoryName{
+class DirectoryName {
   static const String voiceRecordDir = "recordings";
 }
 
-class MessageData{
+class MessageData {
   static const String type = "type";
   static const String holder = "holder";
   static const String message = "message";
@@ -17,7 +17,7 @@ class MessageData{
   static const String extensionForDocument = "extension-for-document";
 }
 
-class PhoneNumberData{
+class PhoneNumberData {
   static const String number = "number";
   static const String name = "name";
   static const String numberLabel = "label";
