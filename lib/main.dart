@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const GolfersGuild());
+  runApp(const GenerationEntry());
 }
 
-class GolfersGuild extends StatelessWidget {
-  const GolfersGuild({Key? key}) : super(key: key);
+class GenerationEntry extends StatelessWidget {
+  const GenerationEntry({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -77,7 +77,7 @@ class _ContactsCollectionState extends State<ContactsCollection> {
                 0)
               TextButton(
                 child: Text(
-                  "Clear Filter",
+                  "Clear Selection",
                   style: TextStyleCollection.headingTextStyle
                       .copyWith(fontSize: 14),
                 ),
@@ -225,7 +225,8 @@ class _ContactsCollectionState extends State<ContactsCollection> {
           });
         }
 
-        Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
+        Provider.of<ChatScrollProvider>(context, listen: false)
+            .animateToBottom();
 
         Navigator.pop(context);
         Navigator.pop(context);

@@ -110,7 +110,7 @@ class InputOption {
         MessageData.time:
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                 .getCurrentTime(),
-        MessageData.thumbnail: thumbnailImage
+        MessageData.additionalData: {"thumbnail": thumbnailImage}
       }
     });
 
@@ -182,7 +182,9 @@ class InputOption {
               MessageData.time:
                   Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                       .getCurrentTime(),
-              MessageData.extensionForDocument: pickedFile.extension.toString()
+              MessageData.additionalData: {
+                "extension-for-document": pickedFile.extension.toString()
+              }
             }
           });
         }

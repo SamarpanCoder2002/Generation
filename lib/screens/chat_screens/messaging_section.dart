@@ -4,6 +4,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/chat_creation_section_provider.dart';
 import 'package:generation/providers/chat_scroll_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
@@ -38,13 +39,12 @@ class MessagingSection extends StatelessWidget {
 
   _commonMessageLayout(
       {required String messageId,
-      required dynamic messageData,
+      required ChatMessageModel messageData,
       required int index}) {
     return Align(
-      alignment:
-          messageData[MessageData.holder] == MessageHolderType.other.toString()
-              ? Alignment.centerLeft
-              : Alignment.centerRight,
+      alignment: messageData.holder == MessageHolderType.other.toString()
+          ? Alignment.centerLeft
+          : Alignment.centerRight,
       child: ConstrainedBox(
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width - 45, minWidth: 100),
@@ -52,15 +52,14 @@ class MessagingSection extends StatelessWidget {
           elevation: 0,
           shadowColor: AppColors.pureWhiteColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: messageData[MessageData.holder] ==
-                  MessageHolderType.other.toString()
+          color: messageData.holder == MessageHolderType.other.toString()
               ? AppColors.oppositeMsgDarkModeColor
               : AppColors.myMsgDarkModeColor,
           child: Stack(
             children: [
               _getPerfectMessageContainer(messageData: messageData),
               _messageTimingAndStatus(messageData: messageData),
-              if (messageData["type"] == ChatMessageType.audio.toString())
+              if (messageData.type == ChatMessageType.audio.toString())
                 _audioPlayingLoadingTime(messageData: messageData),
             ],
           ),
@@ -69,11 +68,11 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _textMessageSection({required dynamic messageData}) {
+  _textMessageSection({required ChatMessageModel messageData}) {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 15, top: 8, bottom: 28),
       child: Linkify(
-        text: messageData[MessageData.message],
+        text: messageData.message,
         onOpen: (link) async {
           try {
             await launch(link.url);
@@ -88,14 +87,14 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _messageTimingAndStatus({messageData}) {
+  _messageTimingAndStatus({required ChatMessageModel messageData}) {
     return Positioned(
       bottom: 3,
       right: 10,
       child: Row(
         children: [
           Text(
-            messageData[MessageData.time],
+            messageData.time,
             style: TextStyle(
                 fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
           ),
@@ -112,36 +111,31 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _getPerfectMessageContainer({required dynamic messageData}) {
-    if (messageData[MessageData.type] == ChatMessageType.text.toString()) {
+  _getPerfectMessageContainer({required ChatMessageModel messageData}) {
+    if (messageData.type == ChatMessageType.text.toString()) {
       return _textMessageSection(messageData: messageData);
-    } else if (messageData[MessageData.type] ==
-        ChatMessageType.image.toString()) {
+    } else if (messageData.type == ChatMessageType.image.toString()) {
       return _imageMessageSection(messageData: messageData);
-    } else if (messageData[MessageData.type] ==
-        ChatMessageType.audio.toString()) {
+    } else if (messageData.type == ChatMessageType.audio.toString()) {
       return _audioMessageSection(messageData: messageData);
-    } else if (messageData[MessageData.type] ==
-        ChatMessageType.video.toString()) {
+    } else if (messageData.type == ChatMessageType.video.toString()) {
       return _videoMessageSection(messageData: messageData);
-    } else if (messageData[MessageData.type] ==
-        ChatMessageType.document.toString()) {
+    } else if (messageData.type == ChatMessageType.document.toString()) {
       return _documentMessageSection(messageData: messageData);
-    } else if (messageData[MessageData.type] ==
-        ChatMessageType.location.toString()) {
+    } else if (messageData.type == ChatMessageType.location.toString()) {
       return _locationMessageSection(messageData: messageData);
-    } else if (messageData[MessageData.type] ==
-        ChatMessageType.contact.toString()) {
+    } else if (messageData.type == ChatMessageType.contact.toString()) {
       return _contactMessageSection(messageData: messageData);
     }
 
     return const Center();
   }
 
-  _imageMessageSection({messageData, bool fromVideo = false}) {
+  _imageMessageSection(
+      {required ChatMessageModel messageData, bool fromVideo = false}) {
     return InkWell(
       onTap: () async {
-        await OpenFile.open(messageData[MessageData.message]!);
+        await OpenFile.open(messageData.message);
       },
       child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -162,8 +156,8 @@ class MessagingSection extends StatelessWidget {
                 backgroundDecoration:
                     const BoxDecoration(color: AppColors.pureWhiteColor),
                 imageProvider: FileImage(File(fromVideo
-                    ? messageData[MessageData.thumbnail]!
-                    : messageData[MessageData.message]!)),
+                    ? messageData.additionalData["thumbnail"]!
+                    : messageData.message)),
                 minScale: PhotoViewComputedScale.covered,
                 errorBuilder: (_, __, ___) => const Center(
                   child: Text(
@@ -178,7 +172,7 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _audioMessageSection({messageData}) {
+  _audioMessageSection({required ChatMessageModel messageData}) {
     final bool isSongPlaying =
         Provider.of<SongManagementProvider>(context).isSongPlaying();
 
@@ -190,7 +184,7 @@ class MessagingSection extends StatelessWidget {
 
     _songPlayManagement() async {
       await Provider.of<SongManagementProvider>(context, listen: false)
-          .audioPlaying(messageData[MessageData.message]);
+          .audioPlaying(messageData.message);
     }
 
     _loadingProgress() => Expanded(
@@ -198,7 +192,7 @@ class MessagingSection extends StatelessWidget {
             width: double.maxFinite,
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: LinearPercentIndicator(
-                percent: _getCurrentSongPath == messageData[MessageData.message]
+                percent: _getCurrentSongPath == messageData.message
                     ? _currentLoadingTime ?? 1.0
                     : 0.0,
                 backgroundColor: Colors.black26,
@@ -210,8 +204,7 @@ class MessagingSection extends StatelessWidget {
       return IconButton(
           onPressed: _songPlayManagement,
           icon: Icon(
-            isSongPlaying &&
-                    _getCurrentSongPath == messageData[MessageData.message]
+            isSongPlaying && _getCurrentSongPath == messageData.message
                 ? Icons.pause
                 : Icons.play_arrow,
             color: AppColors.pureWhiteColor,
@@ -238,7 +231,7 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _audioPlayingLoadingTime({messageData}) {
+  _audioPlayingLoadingTime({required ChatMessageModel messageData}) {
     final _currentLoadingTime =
         Provider.of<SongManagementProvider>(context).getShowingTiming();
 
@@ -249,7 +242,7 @@ class MessagingSection extends StatelessWidget {
       bottom: 6,
       right: MediaQuery.of(context).size.width / 2 - 12,
       child: Text(
-        _getCurrentSongPath == messageData[MessageData.message]
+        _getCurrentSongPath == messageData.message
             ? _currentLoadingTime.toString()
             : "00:00",
         style: TextStyle(
@@ -281,9 +274,18 @@ class MessagingSection extends StatelessWidget {
                 Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                     .getParticularMessage(index);
 
+            final realMsg = messageData.values.toList()[0];
+
+            final chatMsgObj = ChatMessageModel.toJson(
+                type: realMsg["type"],
+                message: realMsg["message"],
+                time: realMsg["time"],
+                holder: realMsg["holder"],
+                additionalData: realMsg["additionalData"]);
+
             return _commonMessageLayout(
                 messageId: messageData.keys.toList()[0].toString(),
-                messageData: messageData.values.toList()[0],
+                messageData: chatMsgObj,
                 index: index);
           },
           separatorBuilder: (BuildContext context, int index) {
@@ -330,7 +332,7 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _videoMessageSection({messageData}) {
+  _videoMessageSection({required ChatMessageModel messageData}) {
     return ConstrainedBox(
       constraints: BoxConstraints(
           maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
@@ -340,7 +342,7 @@ class MessagingSection extends StatelessWidget {
           InkWell(
             onTap: () async {
               print("Ok Video");
-              await OpenFile.open(messageData[MessageData.message]);
+              await OpenFile.open(messageData.message);
             },
             child: SizedBox(
               width: MediaQuery.of(context).size.width - 110,
@@ -352,8 +354,8 @@ class MessagingSection extends StatelessWidget {
                   color: AppColors.darkBorderGreenColor,
                 ),
                 onPressed: () async {
-                  print("Message Data: ${messageData[MessageData.message]}");
-                  await OpenFile.open(messageData[MessageData.message]);
+                  print("Message Data: ${messageData.message}");
+                  await OpenFile.open(messageData.message);
                 },
               ),
             ),
@@ -363,11 +365,11 @@ class MessagingSection extends StatelessWidget {
     );
   }
 
-  _documentMessageSection({messageData}) {
+  _documentMessageSection({required ChatMessageModel messageData}) {
     _pdfMaintainerWidget() => Stack(
           children: [
             PdfView(
-              path: messageData[MessageData.message],
+              path: messageData.message,
             ),
             Center(
               child: GestureDetector(
@@ -377,8 +379,7 @@ class MessagingSection extends StatelessWidget {
                   color: Colors.blue,
                 ),
                 onTap: () async {
-                  final openResult =
-                      await OpenFile.open(messageData[MessageData.message]);
+                  final openResult = await OpenFile.open(messageData.message);
 
                   /// Make Toast Here to Show message if file not open
                 },
@@ -393,14 +394,13 @@ class MessagingSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                messageData[MessageData.message].split("/").last,
+                messageData.message.split("/").last,
                 style: TextStyleCollection.terminalTextStyle
                     .copyWith(fontSize: 14),
               ),
               IconButton(
                   onPressed: () async {
-                    final openResult =
-                        await OpenFile.open(messageData[MessageData.message]);
+                    final openResult = await OpenFile.open(messageData.message);
 
                     /// Make Toast Here to Show message if file not open
                   },
@@ -414,14 +414,14 @@ class MessagingSection extends StatelessWidget {
 
     return ConstrainedBox(
         constraints: BoxConstraints(
-            maxHeight: messageData[MessageData.extensionForDocument] == 'pdf'
-                ? 300
-                : 100,
+            maxHeight:
+                messageData.additionalData["extension-for-document"] == 'pdf'
+                    ? 300
+                    : 100,
             maxWidth: MediaQuery.of(context).size.width - 110),
         child: Card(
           elevation: 2,
-          color: messageData[MessageData.holder] ==
-                  MessageHolderType.other.toString()
+          color: messageData.holder == MessageHolderType.other.toString()
               ? AppColors.oppositeMsgDarkModeColor
               : AppColors.myMsgDarkModeColor,
           shadowColor: AppColors.pureWhiteColor,
@@ -432,21 +432,20 @@ class MessagingSection extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: messageData[MessageData.extensionForDocument] == 'pdf'
+            child: messageData.additionalData["extension-for-document"] == 'pdf'
                 ? _pdfMaintainerWidget()
                 : _otherDocumentMaintainerWidget(),
           ),
         ));
   }
 
-  _locationMessageSection({messageData}) {
+  _locationMessageSection({required ChatMessageModel messageData}) {
     return ConstrainedBox(
         constraints: BoxConstraints(
             maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
         child: Card(
           elevation: 2,
-          color: messageData[MessageData.holder] ==
-                  MessageHolderType.other.toString()
+          color: messageData.holder == MessageHolderType.other.toString()
               ? AppColors.oppositeMsgDarkModeColor
               : AppColors.myMsgDarkModeColor,
           shadowColor: AppColors.pureWhiteColor,
@@ -458,22 +457,21 @@ class MessagingSection extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
             child: showMapSection(
-                latitude: messageData["message"]["latitude"],
-                longitude: messageData["message"]["longitude"]),
+                latitude: messageData.message["latitude"],
+                longitude: messageData.message["longitude"]),
           ),
         ));
   }
 
-  _contactMessageSection({messageData}) {
-    final contact = messageData["message"];
+  _contactMessageSection({required ChatMessageModel messageData}) {
+    final contact = messageData.message;
 
     return ConstrainedBox(
         constraints: BoxConstraints(
             maxHeight: 150, maxWidth: MediaQuery.of(context).size.width - 160),
         child: Card(
           elevation: 2,
-          color: messageData[MessageData.holder] ==
-                  MessageHolderType.other.toString()
+          color: messageData.holder == MessageHolderType.other.toString()
               ? AppColors.oppositeMsgDarkModeColor
               : AppColors.myMsgDarkModeColor,
           shadowColor: AppColors.pureWhiteColor,

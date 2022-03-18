@@ -1,7 +1,7 @@
 class ChatMessageModel {
   final String type;
   final String holder;
-  final String message;
+  final dynamic message;
   final String time;
   final dynamic additionalData;
 
@@ -10,7 +10,7 @@ class ChatMessageModel {
 
   factory ChatMessageModel.toJson(
           {required String type,
-          required String message,
+          required dynamic message,
           required String time,
           required String holder,
           required dynamic additionalData}) =>

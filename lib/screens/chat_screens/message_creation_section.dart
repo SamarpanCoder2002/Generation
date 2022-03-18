@@ -49,8 +49,8 @@ class MessageCreationSection extends StatelessWidget {
 
   _normalTextModeContainer() {
     final bool _isEmojiSectionShowing =
-    Provider.of<ChatCreationSectionProvider>(context)
-        .getEmojiActivationState();
+        Provider.of<ChatCreationSectionProvider>(context)
+            .getEmojiActivationState();
 
     return Column(
       children: [
@@ -61,8 +61,7 @@ class MessageCreationSection extends StatelessWidget {
             _messageAndVoiceSendButton(),
           ],
         ),
-        if(_isEmojiSectionShowing)
-        _emojiCollectionWidget(),
+        if (_isEmojiSectionShowing) _emojiCollectionWidget(),
       ],
     );
   }
@@ -161,11 +160,11 @@ class MessageCreationSection extends StatelessWidget {
         style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
         maxLines: null,
         cursorColor: AppColors.pureWhiteColor,
-        onTap: (){
+        onTap: () {
           Provider.of<ChatCreationSectionProvider>(context, listen: false)
               .backToNormalHeight();
         },
-        onChanged: (inputVal){
+        onChanged: (inputVal) {
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
               .setShowVoiceIcon(inputVal.isEmpty);
         },
@@ -359,7 +358,8 @@ class MessageCreationSection extends StatelessWidget {
       height: 250,
       child: EmojiPicker(
         onEmojiSelected: (category, emoji) {
-          Provider.of<ChatBoxMessagingProvider>(context, listen: false).insertEmoji(emoji.emoji);
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .insertEmoji(emoji.emoji);
         },
         onBackspacePressed: () {
           // Backspace-Button tapped logic
