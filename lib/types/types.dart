@@ -37,3 +37,10 @@ enum ActivityType{
   video,
   poll
 }
+
+enum ToastIconType{
+  info,
+  success,
+  error,
+  warning
+}

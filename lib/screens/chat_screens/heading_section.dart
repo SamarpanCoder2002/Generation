@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../services/toast_message_show.dart';
+import '../../types/types.dart';
 
 class ChatBoxHeaderSection extends StatelessWidget {
   final Map<String, dynamic> connectionData;
@@ -85,6 +87,11 @@ class ChatBoxHeaderSection extends StatelessWidget {
       ),
       onTap: () {
         print("Video clickjed");
+
+        showToast(context,
+            title: "Map will show within few seconds",
+            toastIconType: ToastIconType.info,
+            toastDuration: 12);
       },
     );
   }

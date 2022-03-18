@@ -36,6 +36,8 @@ class AppColors {
 
   static const Color lightBlueColor = Colors.lightBlue;
 
+  static const Color toastBlueColor = Color(0xff3b80f7);
+
 
   static const Color cameraIconBgColor = Color(0xffB45BE7);
   static const Color galleryIconBgColor = Color(0xff3160F5);

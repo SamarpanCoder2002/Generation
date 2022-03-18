@@ -54,6 +54,7 @@ dependencies:
   google_maps_flutter: ^2.1.2
   contacts_service: ^0.6.3
   emoji_picker_flutter: ^1.1.2
+  fluttertoast: ^8.0.9
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -11,6 +11,7 @@ import 'package:generation/screens/chat_screens/maps_support/map_large_showing_d
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -196,14 +197,12 @@ class InputOption {
     }
   }
 
-  showCurrentLocationInGoogleMaps() async {
-    final _locationData = await _getCurrentLocation();
+  showCurrentLocationInGoogleMaps(BuildContext oldStackContext) async {
+    final _locationData = await _getCurrentLocation(oldStackContext);
 
     if (_locationData.isEmpty) {
       return;
     }
-
-    /// Show Toast About Opening Your Location in Map
 
     Navigator.push(
         context,
@@ -211,18 +210,30 @@ class InputOption {
             builder: (_) => ShowMapInLargeForm(locationData: _locationData)));
   }
 
-  Future<Map<String, dynamic>> _getCurrentLocation() async {
+  Future<Map<String, dynamic>> _getCurrentLocation(
+      BuildContext oldStackContext) async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-      print("Enable Location Service");
-
-      /// Show Toast Message To Enable Location Service
+      showToast(oldStackContext,
+          title: "Location Service is not Enabled",
+          toastIconType: ToastIconType.error);
       return {};
     }
 
     final bool _locationActivationStatus =
         await _permissionManagement.locationPermission();
 
-    if (!_locationActivationStatus) return {};
+    if (!_locationActivationStatus) {
+      showToast(oldStackContext,
+          title: "Location Permission not granted",
+          toastIconType: ToastIconType.error);
+
+      return {};
+    }
+
+    showToast(oldStackContext,
+        title: "Map will show within few seconds",
+        toastIconType: ToastIconType.info,
+        toastDuration: 12);
 
     final _locationData = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.best,
@@ -311,15 +322,22 @@ class InputOption {
 
     _onSaveButtonPressed() async {
       if (contactNameController.text.isEmpty) {
-        print("Please Give a Contact Name");
-
-        /// Show That Message Toast
+        showToast(context,
+            height: 50,
+            title: "Please Give a Contact Name",
+            toastIconType: ToastIconType.info);
         return;
       }
 
       await _addNumberInContact(
           phoneNumber, contactNameController.text, phoneNumberLabel);
       Navigator.pop(context);
+
+      /// Show Success toast Message
+      showToast(context,
+          title: "Contact Saved Successfully",
+          height: 50,
+          toastIconType: ToastIconType.success);
     }
 
     showModalBottomSheet(
@@ -406,7 +424,6 @@ class InputOption {
     contact.familyName = "";
     contact.phones = [Item(label: numberLabel, value: phoneNumber)];
     await ContactsService.addContact(contact);
-
-    /// Show Success toast Message
+    print("Here");
   }
 }
