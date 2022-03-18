@@ -6,6 +6,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
+import '../settings/profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -164,7 +165,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leadingIconData: Icons.perm_identity_outlined,
             title: "Profile",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            }),
         _commonOption(
             leadingIconData: Icons.notification_important_outlined,
             title: "Notification",

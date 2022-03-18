@@ -22,14 +22,14 @@ commonTextButton(
   );
 }
 
-commonElevatedButton({required String btnText, required VoidCallback onPressed, Color? bgColor}){
+commonElevatedButton({required String btnText, required VoidCallback onPressed, Color? bgColor, double? fontSize}){
   return ElevatedButton(
     onPressed: onPressed,
     child: Text(btnText),
     style: ElevatedButton.styleFrom(
         primary: bgColor ?? AppColors.oppositeMsgDarkModeColor,
         textStyle: TextStyleCollection.terminalTextStyle
-            .copyWith(fontSize: 16)
+            .copyWith(fontSize: fontSize ?? 16)
     ),
   );
 }
