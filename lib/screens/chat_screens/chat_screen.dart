@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/messaging_provider.dart';
-import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
-import 'package:generation/services/device_specific_operations.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/chat_creation_section_provider.dart';
@@ -71,7 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         padding: const EdgeInsets.only(top: 2, left: 10, right: 10),
-        /// Don't Remove that following code
+        // // Don't Remove that following code
         // decoration: BoxDecoration(
         //     image: DecorationImage(
         //         fit: BoxFit.cover,
