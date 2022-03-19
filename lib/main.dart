@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/providers_collection.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,7 @@ class GenerationEntry extends StatelessWidget {
         title: 'Generation',
         theme: ThemeData(
           fontFamily: 'Poppins',
+            bottomSheetTheme: const BottomSheetThemeData(backgroundColor: AppColors.transparentColor)
         ),
         builder: (context, child) => MediaQuery(
           child: child!,

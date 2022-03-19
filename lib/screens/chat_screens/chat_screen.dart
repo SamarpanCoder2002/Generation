@@ -6,6 +6,7 @@ import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
+import 'package:generation/services/device_specific_operations.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/chat_creation_section_provider.dart';
@@ -48,28 +49,34 @@ class _ChatScreenState extends State<ChatScreen> {
             connectionData: widget.connectionData, context: context),
       );
 
-  _messageCreationSection(){
-
+  _messageCreationSection() {
     return ScrollToHideWidget(
       scrollController:
-      Provider.of<ChatScrollProvider>(context).getController(),
+          Provider.of<ChatScrollProvider>(context).getController(),
       hideWhenScrollToBottom: false,
-      height: Provider.of<ChatCreationSectionProvider>(context).getSectionHeight(),
+      height:
+          Provider.of<ChatCreationSectionProvider>(context).getSectionHeight(),
       child: BottomSheet(
           enableDrag: false,
           onClosing: () {},
-          backgroundColor: AppColors.chatDarkBackgroundColor,
+          backgroundColor: AppColors.transparentColor,
           elevation: 0,
           builder: (_) => MessageCreationSection(
-            context: context,
-          )),
+                context: context,
+              )),
     );
   }
 
   _chatCollectionSection() => Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        margin: const EdgeInsets.only(top: 2, left: 10, right: 10),
+        padding: const EdgeInsets.only(top: 2, left: 10, right: 10),
+        /// Don't Remove that following code
+        // decoration: BoxDecoration(
+        //     image: DecorationImage(
+        //         fit: BoxFit.cover,
+        //         image: NetworkImage(
+        //             "https://images.pexels.com/photos/1612461/pexels-photo-1612461.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"))),
         child: ListView(
           shrinkWrap: true,
           children: [

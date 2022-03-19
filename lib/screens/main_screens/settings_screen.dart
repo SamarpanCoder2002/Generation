@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/screens/settings/notification_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
@@ -172,7 +173,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leadingIconData: Icons.notification_important_outlined,
             title: "Notification",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationOptionsScreen()));
+            }),
         _commonOption(
             leadingIconData: Icons.wallpaper_outlined,
             title: "Chat WallPaper",

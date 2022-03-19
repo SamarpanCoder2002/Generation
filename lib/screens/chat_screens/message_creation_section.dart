@@ -36,7 +36,7 @@ class MessageCreationSection extends StatelessWidget {
           color: Colors.transparent,
           border: Border.all(
             width: 0,
-            color: AppColors.chatDarkBackgroundColor,
+            color: AppColors.transparentColor,
           )),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
