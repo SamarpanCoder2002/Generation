@@ -58,7 +58,20 @@ class InputOption {
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
 
-  takeImageFromCamera() async {
+  pickSingleImageFromGallery()async{
+    final XFile? _pickedImage =
+        await ImagePicker().pickImage(imageQuality: 70, source: ImageSource.gallery);
+
+    if (_pickedImage == null) {
+      return;
+    }
+
+    Navigator.pop(context);
+
+    return File(_pickedImage.path).path;
+  }
+
+  takeImageFromCamera({bool forChat = true}) async {
     final XFile? pickedImage = await ImagePicker()
         .pickImage(source: ImageSource.camera, imageQuality: 70);
 
@@ -67,6 +80,11 @@ class InputOption {
     }
 
     Navigator.pop(context);
+
+    if(!forChat){
+      return File(pickedImage.path).path;
+    }
+
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setSingleNewMessage({
       DateTime.now().toString(): {

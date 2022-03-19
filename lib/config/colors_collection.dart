@@ -10,6 +10,7 @@ class AppColors {
   static const Color searchBarBgLightMode = Color(0xffeaeaeb);
 
   static const Color pureWhiteColor = Colors.white;
+  static const Color pureBlackColor = Colors.black;
 
   static const Color imageDarkBgColor = Color(0xffB2B2BC);
   static const Color imageLightBgColor = Color(0xffF5F5F5);

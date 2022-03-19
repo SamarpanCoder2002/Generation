@@ -7,7 +7,7 @@ void showToast(BuildContext context,
     {required String title,
     int? toastDuration,
     double? height,
-    required ToastIconType toastIconType}) async {
+    required ToastIconType toastIconType, bool showFromTop = true}) async {
   Fluttertoast.showToast(
     msg: title,
     toastLength: toastDuration == null
@@ -15,7 +15,7 @@ void showToast(BuildContext context,
         : toastDuration < 5
             ? Toast.LENGTH_SHORT
             : Toast.LENGTH_LONG,
-    gravity: ToastGravity.TOP,
+    gravity: showFromTop?ToastGravity.TOP:ToastGravity.BOTTOM,
     backgroundColor: _getColor(toastIconType),
     textColor: AppColors.pureWhiteColor,
     fontSize: 16.0,
