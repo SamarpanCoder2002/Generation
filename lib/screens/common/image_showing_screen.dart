@@ -10,23 +10,36 @@ import 'package:photo_view/photo_view.dart';
 class ImageShowingScreen extends StatefulWidget {
   final String imgPath;
   final ImageType imageType;
-  const ImageShowingScreen({Key? key, required this.imgPath, required this.imageType}) : super(key: key);
+  final bool isCovered;
+
+  const ImageShowingScreen(
+      {Key? key,
+      required this.imgPath,
+      required this.imageType,
+      this.isCovered = false})
+      : super(key: key);
 
   @override
   State<ImageShowingScreen> createState() => _ImageShowingScreenState();
 }
 
 class _ImageShowingScreenState extends State<ImageShowingScreen> {
-
   @override
   void initState() {
-    changeOnlyNavigationBarColor(navigationBarColor: AppColors.pureBlackColor);
+    widget.isCovered
+        ? onlyShowStatusBar()
+        : changeOnlyNavigationBarColor(
+            navigationBarColor: AppColors.pureBlackColor);
+
     super.initState();
   }
 
   @override
   void dispose() {
-    changeOnlyNavigationBarColor(navigationBarColor: AppColors.backgroundDarkMode);
+    widget.isCovered
+        ? showStatusAndNavigationBar()
+        : changeOnlyNavigationBarColor(
+            navigationBarColor: AppColors.backgroundDarkMode);
     super.dispose();
   }
 
@@ -40,15 +53,28 @@ class _ImageShowingScreenState extends State<ImageShowingScreen> {
         child: PhotoView(
           imageProvider: _getPerfectImage(),
           enableRotation: false,
-          loadingBuilder: (_,__) => Center(child: Text("Loading...", style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 18),),),
-          errorBuilder: (_,__,___) => Center(child: Text("Error...", style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 18),),),
+          minScale: !widget.isCovered ? null : PhotoViewComputedScale.covered,
+          loadingBuilder: (_, __) => Center(
+            child: Text(
+              "Loading...",
+              style:
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 18),
+            ),
+          ),
+          errorBuilder: (_, __, ___) => Center(
+            child: Text(
+              "Error...",
+              style:
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 18),
+            ),
+          ),
         ),
       ),
     );
   }
 
   _getPerfectImage() {
-    switch(widget.imageType){
+    switch (widget.imageType) {
       case ImageType.file:
         return FileImage(File(widget.imgPath));
       case ImageType.network:

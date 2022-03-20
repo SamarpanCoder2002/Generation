@@ -11,7 +11,6 @@ import '../../providers/main_scrolling_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
 import 'groups_screen.dart';
-import 'package:flutter/scheduler.dart' show timeDilation;
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({Key? key}) : super(key: key);
@@ -30,8 +29,7 @@ class _IntroScreenState extends State<IntroScreen> {
     changeOnlyNavigationBarColor(
         navigationBarColor: AppColors.backgroundDarkMode);
 
-    print(
-        "Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
+    debugPrint("Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
 
     super.initState();
   }
