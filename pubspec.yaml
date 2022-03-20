@@ -55,6 +55,7 @@ dependencies:
   contacts_service: ^0.6.3
   emoji_picker_flutter: ^1.1.2
   fluttertoast: ^8.0.9
+  cached_network_image: ^3.2.0
 
 
   # The following adds the Cupertino Icons font to your application.

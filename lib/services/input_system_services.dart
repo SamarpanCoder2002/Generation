@@ -28,9 +28,9 @@ class InputOption {
 
   final PermissionManagement _permissionManagement = PermissionManagement();
 
-  pickImageFromGallery() async {
+  pickImageFromGallery({int imageQuality = 50}) async {
     final List<XFile>? _pickedImagesCollection =
-        await ImagePicker().pickMultiImage(imageQuality: 70);
+        await ImagePicker().pickMultiImage(imageQuality: imageQuality);
 
     if (_pickedImagesCollection == null || _pickedImagesCollection.isEmpty) {
       return;
@@ -58,22 +58,22 @@ class InputOption {
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
 
-  pickSingleImageFromGallery()async{
+  pickSingleImageFromGallery({int imageQuality = 50, bool popUpScreen = true})async{
     final XFile? _pickedImage =
-        await ImagePicker().pickImage(imageQuality: 70, source: ImageSource.gallery);
+        await ImagePicker().pickImage(imageQuality: imageQuality, source: ImageSource.gallery);
 
     if (_pickedImage == null) {
       return;
     }
 
-    Navigator.pop(context);
+    if(popUpScreen) Navigator.pop(context);
 
     return File(_pickedImage.path).path;
   }
 
-  takeImageFromCamera({bool forChat = true}) async {
+  takeImageFromCamera({bool forChat = true, int imageQuality = 50}) async {
     final XFile? pickedImage = await ImagePicker()
-        .pickImage(source: ImageSource.camera, imageQuality: 70);
+        .pickImage(source: ImageSource.camera, imageQuality: imageQuality);
 
     if (pickedImage == null) {
       return;

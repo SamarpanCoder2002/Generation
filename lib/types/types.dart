@@ -44,3 +44,16 @@ enum ToastIconType{
   error,
   warning
 }
+
+enum WallpaperType{
+  bright,
+  dark,
+  solidColor,
+  myPhotos
+}
+
+enum CommonRequirement{
+  chatHistory,
+  normal,
+  localDataStorage
+}

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/types/types.dart';
+import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 
@@ -14,24 +17,34 @@ class CommonChatListLayout {
       required String? subheading,
       required String? lastMsgTime,
       required String? totalPendingMessages,
+      CommonRequirement commonRequirement = CommonRequirement.normal,
+      dynamic connectionData,
       Widget? trailingWidget,
-      double height = 60.0, double? middleWidth}) {
+      bool isSelected = false,
+      double height = 60.0,
+      double? middleWidth}) {
     return Container(
       height: height,
       width: double.maxFinite,
       margin: const EdgeInsets.only(bottom: 20),
       child: Row(
         children: [
+          if (commonRequirement == CommonRequirement.chatHistory)
+            _selectionButton(isSelected, connectionData, currentIndex),
+          if (commonRequirement != CommonRequirement.normal) const SizedBox(width: 20),
           _chatConnectionImage(photo),
           const SizedBox(
             width: 15,
           ),
           _chatConnectionData(heading, subheading, middleWidth),
-          if (lastMsgTime != null && totalPendingMessages != null)
+          if (commonRequirement == CommonRequirement.normal &&
+              lastMsgTime != null &&
+              totalPendingMessages != null)
             const SizedBox(
               width: 10,
             ),
-          if (trailingWidget == null &&
+          if (commonRequirement == CommonRequirement.normal &&
+              trailingWidget == null &&
               lastMsgTime != null &&
               totalPendingMessages != null)
             _chatConnectionInformationData(lastMsgTime, totalPendingMessages),
@@ -120,4 +133,22 @@ class CommonChatListLayout {
       ),
     );
   }
+
+  _selectionButton(
+          bool _isSelected, dynamic connectionData, int currentIndex) =>
+      IconButton(
+          onPressed: () {
+            connectionData["isSelected"] = !connectionData["isSelected"];
+            Provider.of<ConnectionCollectionProvider>(context, listen: false)
+                .updateParticularSelectionData(connectionData, currentIndex);
+          },
+          icon: _isSelected
+              ? const Icon(
+                  Icons.circle,
+                  color: AppColors.pureWhiteColor,
+                )
+              : const Icon(
+                  Icons.circle_outlined,
+                  color: AppColors.pureWhiteColor,
+                ));
 }

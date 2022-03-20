@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:generation/screens/settings/chat_backup.dart';
+import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
 import 'package:generation/screens/settings/notification_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +9,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
+import '../settings/common_settings_screen.dart';
 import '../settings/profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -180,22 +183,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leadingIconData: Icons.wallpaper_outlined,
             title: "Chat WallPaper",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatWallpaperScreen()))),
         _commonOption(
             leadingIconData: Icons.history_edu_outlined,
             title: "Chat History",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommonSettingScreen(commonRequirement: CommonRequirement.chatHistory,)))),
         _commonOption(
             leadingIconData: Icons.backup_outlined,
             title: "Chat Backup",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatBackupSettingsScreen()))),
         _commonOption(
             leadingIconData: Icons.storage,
             title: "Storage",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommonSettingScreen(commonRequirement: CommonRequirement.localDataStorage)))),
         _commonOption(
             leadingIconData: Icons.support_agent_outlined,
             title: "Support",

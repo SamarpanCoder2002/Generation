@@ -3,6 +3,7 @@ import 'package:generation/types/types.dart';
 
 class ConnectionCollectionProvider extends ChangeNotifier {
   List<dynamic> _searchedChatConnectionsDataCollection = [];
+  List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   List<dynamic> _chatConnectionsDataCollection = [
     {
       "id": 1,
@@ -222,6 +223,27 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   initialize(){
     _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
   }
+
+  setForSelection(){
+    for(final connection in _chatConnectionsDataCollection){
+      _selectedSearchedChatConnectionsDataCollection.add({...connection,"isSelected": false});
+    }
+  }
+
+  updateParticularSelectionData(incoming, index){
+    resetSelectionData();
+    setForSelection();
+    _selectedSearchedChatConnectionsDataCollection[index] = incoming;
+    notifyListeners();
+  }
+
+  resetSelectionData(){
+    _selectedSearchedChatConnectionsDataCollection.clear();
+  }
+
+  getWillSelectData() => _selectedSearchedChatConnectionsDataCollection;
+
+  getWillSelectDataLength() => _selectedSearchedChatConnectionsDataCollection.length;
 
   setFreshData(incomingData) {
     if (incomingData == null) return;
