@@ -11,6 +11,7 @@ import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/providers/sound_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/status_collection_provider.dart';
+import 'package:generation/providers/storage/storage_provider.dart';
 import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/providers/wallpaper/wallpaper_provider.dart';
 import 'package:provider/provider.dart';
@@ -39,4 +40,5 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => ChatCreationSectionProvider()),
   ChangeNotifierProvider(create: (_) => ActivityProvider()),
   ChangeNotifierProvider(create: (_) => WallpaperProvider()),
+  ChangeNotifierProvider(create: (_) => StorageProvider()),
 ];

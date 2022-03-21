@@ -20,6 +20,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/chat_scroll_provider.dart';
 import '../providers/messaging_provider.dart';
+import 'local_data_management.dart';
 
 class InputOption {
   final BuildContext context;
@@ -58,15 +59,16 @@ class InputOption {
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
 
-  pickSingleImageFromGallery({int imageQuality = 50, bool popUpScreen = true})async{
-    final XFile? _pickedImage =
-        await ImagePicker().pickImage(imageQuality: imageQuality, source: ImageSource.gallery);
+  pickSingleImageFromGallery(
+      {int imageQuality = 50, bool popUpScreen = true}) async {
+    final XFile? _pickedImage = await ImagePicker()
+        .pickImage(imageQuality: imageQuality, source: ImageSource.gallery);
 
     if (_pickedImage == null) {
       return;
     }
 
-    if(popUpScreen) Navigator.pop(context);
+    if (popUpScreen) Navigator.pop(context);
 
     return File(_pickedImage.path).path;
   }
@@ -81,7 +83,7 @@ class InputOption {
 
     Navigator.pop(context);
 
-    if(!forChat){
+    if (!forChat) {
       return File(pickedImage.path).path;
     }
 
@@ -443,5 +445,24 @@ class InputOption {
     contact.phones = [Item(label: numberLabel, value: phoneNumber)];
     await ContactsService.addContact(contact);
     print("Here");
+  }
+
+  Future sendSupportMail(String subject, String body) async {
+    final supportMail = DataManagement.getEnvData(EnvFileKey.supportMail);
+
+    print("Support Mail: $supportMail");
+
+    final Uri params = Uri(
+      scheme: 'mailto',
+      path: supportMail,
+      query: 'subject=$subject&body=$body',
+    );
+
+    final String url = params.toString();
+    try {
+      await launch(url);
+    } catch (e) {
+      debugPrint('Support Mail Sending Error: ${e.toString()}');
+    }
   }
 }

@@ -11,8 +11,8 @@ import 'package:generation/providers/messaging_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/show_google_map.dart';
+import 'package:generation/services/system_file_management.dart';
 import 'package:generation/types/types.dart';
-import 'package:open_file/open_file.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
@@ -135,7 +135,7 @@ class MessagingSection extends StatelessWidget {
       {required ChatMessageModel messageData, bool fromVideo = false}) {
     return InkWell(
       onTap: () async {
-        await OpenFile.open(messageData.message);
+        await SystemFileManagement.openFile(messageData.message);
       },
       child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -342,7 +342,7 @@ class MessagingSection extends StatelessWidget {
           InkWell(
             onTap: () async {
               print("Ok Video");
-              await OpenFile.open(messageData.message);
+              await SystemFileManagement.openFile(messageData.message);
             },
             child: SizedBox(
               width: MediaQuery.of(context).size.width - 110,
@@ -355,7 +355,7 @@ class MessagingSection extends StatelessWidget {
                 ),
                 onPressed: () async {
                   print("Message Data: ${messageData.message}");
-                  await OpenFile.open(messageData.message);
+                  await SystemFileManagement.openFile(messageData.message);
                 },
               ),
             ),
@@ -379,7 +379,7 @@ class MessagingSection extends StatelessWidget {
                   color: Colors.blue,
                 ),
                 onTap: () async {
-                  final openResult = await OpenFile.open(messageData.message);
+                  await SystemFileManagement.openFile(messageData.message);
 
                   /// Make Toast Here to Show message if file not open
                 },
@@ -400,7 +400,7 @@ class MessagingSection extends StatelessWidget {
               ),
               IconButton(
                   onPressed: () async {
-                    final openResult = await OpenFile.open(messageData.message);
+                    await SystemFileManagement.openFile(messageData.message);
 
                     /// Make Toast Here to Show message if file not open
                   },

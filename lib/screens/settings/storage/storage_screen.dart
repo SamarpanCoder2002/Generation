@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/screens/settings/storage/storage_audio_document_collection.dart';
 import 'package:generation/screens/settings/storage/storage_image_video_collection.dart';
 
 class LocalStorageScreen extends StatefulWidget {
@@ -87,17 +88,7 @@ class _LocalStorageScreenState extends State<LocalStorageScreen> {
         StorageImageAndVideoCollection(
           showVideoPlayIcon: true,
         ),
-        Center(
-          child: Text(
-            "Audio",
-            style: TextStyleCollection.terminalTextStyle,
-          ),
-        ),
-        Center(
-          child: Text(
-            "Document",
-            style: TextStyleCollection.terminalTextStyle,
-          ),
-        ),
+        StorageAudioAndDocumentCollectionScreen(),
+        StorageAudioAndDocumentCollectionScreen(isAudio: false),
       ]);
 }

@@ -21,3 +21,8 @@ class PhoneNumberData {
   static const String name = "name";
   static const String numberLabel = "label";
 }
+
+class EnvFileKey{
+  static const supportMail = "SUPPORT_MAIL";
+  static const rzpAPIKEY = "RZP_API_KEY";
+}

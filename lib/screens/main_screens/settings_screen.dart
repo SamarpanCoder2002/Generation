@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:generation/screens/settings/chat_backup.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
 import 'package:generation/screens/settings/notification_screen.dart';
+import 'package:generation/screens/settings/support/support_management.dart';
+import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
@@ -9,6 +11,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
+import '../settings/about.dart';
 import '../settings/common_settings_screen.dart';
 import '../settings/profile_screen.dart';
 
@@ -20,11 +23,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-
   @override
   void initState() {
-    Provider.of<MainScrollingProvider>(context, listen: false)
-        .startListening();
+    Provider.of<MainScrollingProvider>(context, listen: false).startListening();
     super.initState();
   }
 
@@ -141,12 +142,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )
               ],
             ),
-            if(terminalIconData != null)
-            Icon(
-              terminalIconData,
-              color: AppColors.pureWhiteColor,
-              size: 15,
-            ),
+            if (terminalIconData != null)
+              Icon(
+                terminalIconData,
+                color: AppColors.pureWhiteColor,
+                size: 15,
+              ),
           ],
         ),
       ),
@@ -155,8 +156,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   _settingsBody() {
     final ScrollController _settingsScrollController =
-    Provider.of<MainScrollingProvider>(context)
-        .getScrollController();
+        Provider.of<MainScrollingProvider>(context).getScrollController();
 
     return ListView(
       shrinkWrap: true,
@@ -169,46 +169,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leadingIconData: Icons.perm_identity_outlined,
             title: "Profile",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
-            }),
+            onPressed: () => Navigation.intent(context, const ProfileScreen())),
         _commonOption(
             leadingIconData: Icons.notification_important_outlined,
             title: "Notification",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationOptionsScreen()));
-            }),
+            onPressed: () =>
+                Navigation.intent(context, const NotificationOptionsScreen())),
         _commonOption(
             leadingIconData: Icons.wallpaper_outlined,
             title: "Chat WallPaper",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatWallpaperScreen()))),
+            onPressed: () =>
+                Navigation.intent(context, const ChatWallpaperScreen())),
         _commonOption(
             leadingIconData: Icons.history_edu_outlined,
             title: "Chat History",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommonSettingScreen(commonRequirement: CommonRequirement.chatHistory,)))),
+            onPressed: () => Navigation.intent(
+                context,
+                const CommonSettingScreen(
+                  commonRequirement: CommonRequirement.chatHistory,
+                ))),
         _commonOption(
             leadingIconData: Icons.backup_outlined,
             title: "Chat Backup",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatBackupSettingsScreen()))),
+            onPressed: () =>
+                Navigation.intent(context, const ChatBackupSettingsScreen())),
         _commonOption(
             leadingIconData: Icons.storage,
             title: "Storage",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CommonSettingScreen(commonRequirement: CommonRequirement.localDataStorage)))),
+            onPressed: () => Navigation.intent(
+                context,
+                const CommonSettingScreen(
+                    commonRequirement: CommonRequirement.localDataStorage))),
         _commonOption(
             leadingIconData: Icons.support_agent_outlined,
             title: "Support",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () => Navigation.intent(context, const SupportScreen())),
         _commonOption(
             leadingIconData: Icons.info_outlined,
             title: "About",
             terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () {}),
+            onPressed: () => Navigation.intent(context, const AboutScreen())),
         _commonOption(
             leadingIconData: Icons.people_outline_outlined,
             title: "Invite a Friend",
@@ -221,8 +227,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Created By ", style: TextStyleCollection.secondaryHeadingTextStyle),
-              Text("Samarpan Dasgupta", style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(color: AppColors.normalBlueColor),)
+              const Text("Created By ",
+                  style: TextStyleCollection.secondaryHeadingTextStyle),
+              Text(
+                "Samarpan Dasgupta",
+                style: TextStyleCollection.secondaryHeadingTextStyle
+                    .copyWith(color: AppColors.normalBlueColor),
+              )
             ],
           ),
         )

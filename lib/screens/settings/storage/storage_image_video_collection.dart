@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/providers/storage/storage_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/types/types.dart';
-import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/wallpaper/wallpaper_provider.dart';
@@ -26,8 +26,8 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3, mainAxisSpacing: 20, crossAxisSpacing: 20),
-          itemCount: Provider.of<WallpaperProvider>(context)
-              .getBrightImagesCollection()
+          itemCount: Provider.of<StorageProvider>(context)
+              .getImagesCollection()
               .length,
           itemBuilder: (_, index) => _particularImage(index, context),
         ),
@@ -36,8 +36,8 @@ class StorageImageAndVideoCollection extends StatelessWidget {
   }
 
   _particularImage(int index, BuildContext context) {
-    final _extractedData = Provider.of<WallpaperProvider>(context)
-        .getBrightImagesCollection()[index];
+    final _extractedData = Provider.of<StorageProvider>(context)
+        .getImagesCollection()[index];
 
     _onTapped() async {
       if (showVideoPlayIcon) {
