@@ -6,6 +6,10 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/types/types.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/chat_creation_section_provider.dart';
+import '../../providers/size_management_provider.dart';
 
 class ImageShowingScreen extends StatefulWidget {
   final String imgPath;
@@ -26,27 +30,19 @@ class ImageShowingScreen extends StatefulWidget {
 class _ImageShowingScreenState extends State<ImageShowingScreen> {
   @override
   void initState() {
-    widget.isCovered
-        ? onlyShowStatusBar()
-        : changeOnlyNavigationBarColor(
-            navigationBarColor: AppColors.pureBlackColor);
+    onlyShowStatusBar();
+    Provider.of<SizeManagementProvider>(context, listen: false)
+        .increaseBottomNavigationBarHeight();
+    Provider.of<ChatCreationSectionProvider>(context, listen: false).increaseHeightDueBehindHideProblem();
 
+    makeNavigationBarTransparent();
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    widget.isCovered
-        ? showStatusAndNavigationBar()
-        : changeOnlyNavigationBarColor(
-            navigationBarColor: AppColors.backgroundDarkMode);
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.pureBlackColor,
+      backgroundColor: AppColors.transparentColor,
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,

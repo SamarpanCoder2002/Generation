@@ -58,6 +58,7 @@ dependencies:
   cached_network_image: ^3.2.0
   flutter_dotenv: ^5.0.2
   razorpay_flutter: ^1.2.9
+  share_plus: ^4.0.2
 
 
   # The following adds the Cupertino Icons font to your application.

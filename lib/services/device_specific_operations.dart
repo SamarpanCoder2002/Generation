@@ -34,7 +34,7 @@ void changeOnlyStatusBarColor(
 void changeOnlyNavigationBarColor(
         {Color navigationBarColor = AppColors.splashScreenColor}) =>
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: navigationBarColor, // status bar color
+      systemNavigationBarColor: navigationBarColor, // navigation bar color
     ));
 
 void makeStatusBarTransparent(){
@@ -55,5 +55,15 @@ void hideKeyboard()=>
 
 void showKeyboard()=>
     SystemChannels.textInput.invokeMethod('TextInput.show');
+
+makeNavigationBarTransparent() => SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.light)
+);
+
+makeFullScreen() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+closeFullScreen() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
 

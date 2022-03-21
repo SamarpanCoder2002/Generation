@@ -22,10 +22,21 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/sound_provider.dart';
 
-class MessagingSection extends StatelessWidget {
+class MessagingSection extends StatefulWidget {
   final BuildContext context;
 
   const MessagingSection({Key? key, required this.context}) : super(key: key);
+
+  @override
+  State<MessagingSection> createState() => _MessagingSectionState();
+}
+
+class _MessagingSectionState extends State<MessagingSection> {
+  @override
+  void didChangeDependencies() {
+    Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom(scrollDuration: 900);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +58,8 @@ class MessagingSection extends StatelessWidget {
           : Alignment.centerRight,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width - 45, minWidth: 100),
+            maxWidth: MediaQuery.of(widget.context).size.width - 45,
+            minWidth: 100),
         child: Card(
           elevation: 0,
           shadowColor: AppColors.pureWhiteColor,
@@ -140,7 +152,7 @@ class MessagingSection extends StatelessWidget {
       child: ConstrainedBox(
           constraints: BoxConstraints(
               maxHeight: 300,
-              maxWidth: MediaQuery.of(context).size.width - 110),
+              maxWidth: MediaQuery.of(widget.context).size.width - 110),
           child: Card(
             elevation: 2,
             shadowColor: AppColors.pureWhiteColor,
@@ -174,16 +186,17 @@ class MessagingSection extends StatelessWidget {
 
   _audioMessageSection({required ChatMessageModel messageData}) {
     final bool isSongPlaying =
-        Provider.of<SongManagementProvider>(context).isSongPlaying();
+        Provider.of<SongManagementProvider>(widget.context).isSongPlaying();
 
     final String _getCurrentSongPath =
-        Provider.of<SongManagementProvider>(context).getSongPath();
+        Provider.of<SongManagementProvider>(widget.context).getSongPath();
 
     final double? _currentLoadingTime =
-        Provider.of<SongManagementProvider>(context).getCurrentLoadingTime();
+        Provider.of<SongManagementProvider>(widget.context)
+            .getCurrentLoadingTime();
 
     _songPlayManagement() async {
-      await Provider.of<SongManagementProvider>(context, listen: false)
+      await Provider.of<SongManagementProvider>(widget.context, listen: false)
           .audioPlaying(messageData.message);
     }
 
@@ -213,8 +226,8 @@ class MessagingSection extends StatelessWidget {
     }
 
     return ConstrainedBox(
-      constraints:
-          BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 110),
+      constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(widget.context).size.width - 110),
       child: Container(
         width: double.maxFinite,
         height: 50,
@@ -233,14 +246,14 @@ class MessagingSection extends StatelessWidget {
 
   _audioPlayingLoadingTime({required ChatMessageModel messageData}) {
     final _currentLoadingTime =
-        Provider.of<SongManagementProvider>(context).getShowingTiming();
+        Provider.of<SongManagementProvider>(widget.context).getShowingTiming();
 
     final String _getCurrentSongPath =
-        Provider.of<SongManagementProvider>(context).getSongPath();
+        Provider.of<SongManagementProvider>(widget.context).getSongPath();
 
     return Positioned(
       bottom: 6,
-      right: MediaQuery.of(context).size.width / 2 - 12,
+      right: MediaQuery.of(widget.context).size.width / 2 - 12,
       child: Text(
         _getCurrentSongPath == messageData.message
             ? _currentLoadingTime.toString()
@@ -252,27 +265,30 @@ class MessagingSection extends StatelessWidget {
   }
 
   _chatBoxContainingMessages() {
-    final bool _isFocused = Provider.of<ChatBoxMessagingProvider>(context)
-        .hasTextFieldFocus(context);
+    final bool _isFocused =
+        Provider.of<ChatBoxMessagingProvider>(widget.context)
+            .hasTextFieldFocus(widget.context);
     final bool _isEmojiSectionActivated =
-        Provider.of<ChatCreationSectionProvider>(context)
+        Provider.of<ChatCreationSectionProvider>(widget.context)
             .getEmojiActivationState();
 
     return SizedBox(
         width: double.maxFinite,
-        height: Provider.of<ChatBoxMessagingProvider>(context)
+        height: Provider.of<ChatBoxMessagingProvider>(widget.context)
             .getChatMessagingSectionHeight(
-                _isFocused || _isEmojiSectionActivated, context),
+                _isFocused || _isEmojiSectionActivated, widget.context),
         child: ListView.separated(
-          controller: Provider.of<ChatScrollProvider>(context).getController(),
+          controller:
+              Provider.of<ChatScrollProvider>(widget.context).getController(),
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount:
-              Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages(),
+          itemCount: Provider.of<ChatBoxMessagingProvider>(widget.context)
+              .getTotalMessages(),
           itemBuilder: (_, index) {
-            final messageData =
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getParticularMessage(index);
+            final messageData = Provider.of<ChatBoxMessagingProvider>(
+                    widget.context,
+                    listen: false)
+                .getParticularMessage(index);
 
             final realMsg = messageData.values.toList()[0];
 
@@ -299,7 +315,7 @@ class MessagingSection extends StatelessWidget {
   _noChatBoxMessagesSection() {
     return Container(
       width: double.maxFinite,
-      height: MediaQuery.of(context).size.height / 2,
+      height: MediaQuery.of(widget.context).size.height / 2,
       alignment: Alignment.bottomRight,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -335,7 +351,8 @@ class MessagingSection extends StatelessWidget {
   _videoMessageSection({required ChatMessageModel messageData}) {
     return ConstrainedBox(
       constraints: BoxConstraints(
-          maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
+          maxHeight: 300,
+          maxWidth: MediaQuery.of(widget.context).size.width - 110),
       child: Stack(
         children: [
           _imageMessageSection(messageData: messageData, fromVideo: true),
@@ -345,7 +362,7 @@ class MessagingSection extends StatelessWidget {
               await SystemFileManagement.openFile(messageData.message);
             },
             child: SizedBox(
-              width: MediaQuery.of(context).size.width - 110,
+              width: MediaQuery.of(widget.context).size.width - 110,
               height: 300,
               child: IconButton(
                 icon: const Icon(
@@ -418,7 +435,7 @@ class MessagingSection extends StatelessWidget {
                 messageData.additionalData["extension-for-document"] == 'pdf'
                     ? 300
                     : 100,
-            maxWidth: MediaQuery.of(context).size.width - 110),
+            maxWidth: MediaQuery.of(widget.context).size.width - 110),
         child: Card(
           elevation: 2,
           color: messageData.holder == MessageHolderType.other.toString()
@@ -442,7 +459,8 @@ class MessagingSection extends StatelessWidget {
   _locationMessageSection({required ChatMessageModel messageData}) {
     return ConstrainedBox(
         constraints: BoxConstraints(
-            maxHeight: 300, maxWidth: MediaQuery.of(context).size.width - 110),
+            maxHeight: 300,
+            maxWidth: MediaQuery.of(widget.context).size.width - 110),
         child: Card(
           elevation: 2,
           color: messageData.holder == MessageHolderType.other.toString()
@@ -468,7 +486,8 @@ class MessagingSection extends StatelessWidget {
 
     return ConstrainedBox(
         constraints: BoxConstraints(
-            maxHeight: 150, maxWidth: MediaQuery.of(context).size.width - 160),
+            maxHeight: 150,
+            maxWidth: MediaQuery.of(widget.context).size.width - 160),
         child: Card(
           elevation: 2,
           color: messageData.holder == MessageHolderType.other.toString()
@@ -517,7 +536,7 @@ class MessagingSection extends StatelessWidget {
 
   _phoneNumberManagementSection(
       {required String phoneNumber, String? name, String? label}) {
-    final InputOption _inputOption = InputOption(context);
+    final InputOption _inputOption = InputOption(widget.context);
 
     _addContactButtonPressed() {
       final TextEditingController _contactNameController =
@@ -531,7 +550,7 @@ class MessagingSection extends StatelessWidget {
     }
 
     _messageOrCallButtonPressed() => _inputOption
-        .phoneNumberOpeningOptions(context, phoneNumber: phoneNumber);
+        .phoneNumberOpeningOptions(widget.context, phoneNumber: phoneNumber);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:generation/config/text_collection.dart';
 import 'package:generation/screens/settings/chat_backup.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
 import 'package:generation/screens/settings/notification_screen.dart';
 import 'package:generation/screens/settings/support/support_management.dart';
+import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 
@@ -158,6 +160,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final ScrollController _settingsScrollController =
         Provider.of<MainScrollingProvider>(context).getScrollController();
 
+    final InputOption _inputOption = InputOption(context);
+
     return ListView(
       shrinkWrap: true,
       controller: _settingsScrollController,
@@ -219,7 +223,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leadingIconData: Icons.people_outline_outlined,
             title: "Invite a Friend",
             terminalIconData: null,
-            onPressed: () {}),
+            onPressed: () =>
+                _inputOption.shareTextContent(ShareCommonText.appShareData)),
         SizedBox(
           height: MediaQuery.of(context).size.height * 0.08,
         ),

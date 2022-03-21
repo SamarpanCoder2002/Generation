@@ -16,6 +16,7 @@ import 'package:generation/types/types.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/chat_scroll_provider.dart';
@@ -465,4 +466,6 @@ class InputOption {
       debugPrint('Support Mail Sending Error: ${e.toString()}');
     }
   }
+
+  Future<void> shareTextContent(String textToShare) async => await Share.share(textToShare);
 }

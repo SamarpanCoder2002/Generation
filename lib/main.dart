@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/providers_collection.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
 
-Future<void> main() async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DataManagement.loadEnvData();
   runApp(const GenerationEntry());
@@ -23,9 +22,9 @@ class GenerationEntry extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Generation',
         theme: ThemeData(
-          fontFamily: 'Poppins',
-            bottomSheetTheme: const BottomSheetThemeData(backgroundColor: AppColors.transparentColor)
-        ),
+            fontFamily: 'Poppins',
+            bottomSheetTheme: const BottomSheetThemeData(
+                backgroundColor: AppColors.transparentColor)),
         builder: (context, child) => MediaQuery(
           child: child!,
           data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),

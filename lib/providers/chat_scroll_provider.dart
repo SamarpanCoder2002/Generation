@@ -8,7 +8,7 @@ class ChatScrollProvider extends ChangeNotifier {
 
   getController() => _scrollController;
 
-  animateToBottom({scrollDuration = 750}) {
+  animateToBottom({scrollDuration = 750, bool shouldNotify = true}) {
     if(!_scrollController.hasClients || !_scrollController.hasListeners) return;
 
     Timer(const Duration(milliseconds: 100), () {
@@ -19,7 +19,7 @@ class ChatScrollProvider extends ChangeNotifier {
         duration: Duration(milliseconds: scrollDuration),
       )
           .whenComplete(() {
-        notifyListeners();
+       if(shouldNotify) notifyListeners();
       });
     });
   }
