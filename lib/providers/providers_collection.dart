@@ -8,7 +8,6 @@ import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/providers/group_collection_provider.dart';
 import 'package:generation/providers/main_scrolling_provider.dart';
 import 'package:generation/providers/messaging_provider.dart';
-import 'package:generation/providers/size_management_provider.dart';
 import 'package:generation/providers/sound_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/status_collection_provider.dart';
@@ -42,5 +41,4 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => ActivityProvider()),
   ChangeNotifierProvider(create: (_) => WallpaperProvider()),
   ChangeNotifierProvider(create: (_) => StorageProvider()),
-  ChangeNotifierProvider(create: (_) => SizeManagementProvider()),
 ];

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../types/types.dart';
-import 'chat_creation_section_provider.dart';
 
 class ChatBoxMessagingProvider extends ChangeNotifier {
   List<dynamic> _messageData = [];
@@ -95,16 +93,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   getChatMessagingSectionHeight(bool isKeyboardShowing, BuildContext context) =>
       isKeyboardShowing
-          ? Provider.of<ChatCreationSectionProvider>(context, listen: false)
-                      .getSectionHeight() >
-                  60
-              ? MediaQuery.of(context).size.height / 2.5
-              : MediaQuery.of(context).size.height / 2.1
-          : Provider.of<ChatCreationSectionProvider>(context, listen: false)
-                      .getSectionHeight() >
-                  60
-              ? MediaQuery.of(context).size.height / 1.3
-              : MediaQuery.of(context).size.height / 1.22;
+          ? MediaQuery.of(context).size.height / 2.1
+          : MediaQuery.of(context).size.height / 1.22;
 
   insertEmoji(String incomingEmojiData) {
     _messageController!.text += incomingEmojiData;

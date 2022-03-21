@@ -6,10 +6,6 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/types/types.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:provider/provider.dart';
-
-import '../../providers/chat_creation_section_provider.dart';
-import '../../providers/size_management_provider.dart';
 
 class ImageShowingScreen extends StatefulWidget {
   final String imgPath;
@@ -31,11 +27,8 @@ class _ImageShowingScreenState extends State<ImageShowingScreen> {
   @override
   void initState() {
     onlyShowStatusBar();
-    Provider.of<SizeManagementProvider>(context, listen: false)
-        .increaseBottomNavigationBarHeight();
-    Provider.of<ChatCreationSectionProvider>(context, listen: false).increaseHeightDueBehindHideProblem();
 
-    makeNavigationBarTransparent();
+    //makeNavigationBarTransparent();
     super.initState();
   }
 

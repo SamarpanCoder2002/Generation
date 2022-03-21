@@ -12,7 +12,8 @@ class ChatCreationSectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  getSectionHeight() => _sectionHeight;
+  getSectionHeight(context)=> _sectionHeight;
+
 
   setSectionHeight() {
     if (_sectionHeight > 60) return;
@@ -30,7 +31,7 @@ class ChatCreationSectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  increaseHeightDueBehindHideProblem() {
-    if (_sectionHeight < 100) _sectionHeight += 45;
-  }
+  // increaseHeightDueBehindHideProblem() {
+  //   if (_sectionHeight < 100) _sectionHeight += 45;
+  // }
 }

@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:generation/providers/size_management_provider.dart';
-import 'package:provider/provider.dart';
 
 class ScrollToHideWidget extends StatefulWidget {
   final Widget child;
   final ScrollController scrollController;
   final Duration duration;
-  final double? height;
+  final double height;
   final bool hideWhenScrollToBottom;
 
   const ScrollToHideWidget({
     Key? key,
     required this.child,
     required this.scrollController,
-    this.height,
+    this.height = 60.0,
     this.duration = const Duration(milliseconds: 200),
     this.hideWhenScrollToBottom = true,
   }) : super(key: key);
@@ -65,10 +63,6 @@ class _ScrollToHideWidgetState extends State<ScrollToHideWidget> {
   Widget build(BuildContext context) => AnimatedContainer(
         duration: widget.duration,
         child: Wrap(children: [widget.child]),
-        height: _isVisible
-            ? widget.height ??
-                Provider.of<SizeManagementProvider>(context)
-                    .getBottomNavigationBarHeight()
-            : 0,
+        height: _isVisible ? widget.height : 0,
       );
 }

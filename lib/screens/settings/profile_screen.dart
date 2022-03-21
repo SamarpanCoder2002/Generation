@@ -135,6 +135,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             .startsWith("https")
                         ? ImageType.network
                         : ImageType.file))).then((value) {
+          showStatusAndNavigationBar();
+
           changeOnlyNavigationBarColor(
               navigationBarColor: AppColors.backgroundDarkMode);
         });

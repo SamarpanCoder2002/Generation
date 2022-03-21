@@ -52,8 +52,8 @@ class _ChatScreenState extends State<ChatScreen> {
       scrollController:
           Provider.of<ChatScrollProvider>(context).getController(),
       hideWhenScrollToBottom: false,
-      height:
-          Provider.of<ChatCreationSectionProvider>(context).getSectionHeight(),
+      height: Provider.of<ChatCreationSectionProvider>(context)
+          .getSectionHeight(context),
       child: BottomSheet(
           enableDrag: false,
           onClosing: () {},

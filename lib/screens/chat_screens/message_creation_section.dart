@@ -30,8 +30,8 @@ class MessageCreationSection extends StatelessWidget {
 
     return Container(
       width: double.maxFinite,
-      height:
-          Provider.of<ChatCreationSectionProvider>(context).getSectionHeight(),
+      height: Provider.of<ChatCreationSectionProvider>(context)
+          .getSectionHeight(context),
       decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border.all(

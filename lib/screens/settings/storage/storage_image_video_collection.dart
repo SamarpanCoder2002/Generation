@@ -7,6 +7,7 @@ import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/wallpaper/wallpaper_provider.dart';
+import '../../../services/device_specific_operations.dart';
 
 class StorageImageAndVideoCollection extends StatelessWidget {
   final bool showVideoPlayIcon;
@@ -51,7 +52,7 @@ class StorageImageAndVideoCollection extends StatelessWidget {
                       imgPath: _extractedData,
                       imageType: ImageType.network,
                       isCovered: true,
-                    )));
+                    ))).then((value) => showStatusAndNavigationBar());
       }
     }
 
