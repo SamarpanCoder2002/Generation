@@ -33,7 +33,7 @@ class _CreateActivityState extends State<CreateActivity> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back_outlined)),
         Text(
-          "Wallpaper Management",
+          "Create Your Activity",
           style:
           TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
         ),

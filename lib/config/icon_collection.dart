@@ -69,3 +69,53 @@ class IconCollection {
     ],
   ];
 }
+
+class ActivityIconCollection{
+  static List<dynamic> iconsCollection = [
+    [
+      const Icon(
+        Icons.camera_alt_outlined,
+        color: AppColors.pureWhiteColor,
+        size: 30,
+      ),
+      "Camera",
+      AppColors.cameraIconBgColor,
+    ],
+    [
+      const Icon(
+        Icons.photo,
+        color: AppColors.pureWhiteColor,
+        size: 30,
+      ),
+      "Gallery",
+      AppColors.galleryIconBgColor,
+    ],
+    [
+      const Icon(
+        Icons.video_collection_outlined,
+        color: AppColors.pureWhiteColor,
+        size: 30,
+      ),
+      "Video",
+      AppColors.videoIconBgColor
+    ],
+    [
+      const Icon(
+        Icons.music_note_outlined,
+        color: AppColors.pureWhiteColor,
+        size: 30,
+      ),
+      "Audio",
+      AppColors.audioIconBgColor
+    ],
+    [
+      const Icon(
+        Icons.poll_outlined,
+        color: AppColors.pureWhiteColor,
+        size: 30,
+      ),
+      "Poll",
+      AppColors.personIconBgColor
+    ],
+  ];
+}

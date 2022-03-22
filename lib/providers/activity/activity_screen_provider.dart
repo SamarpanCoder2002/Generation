@@ -188,4 +188,6 @@ class ActivityProvider extends ChangeNotifier {
     _animationController.forward();
     notifyListeners();
   }
+
+  
 }

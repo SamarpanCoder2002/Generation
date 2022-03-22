@@ -1,11 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
-import 'package:generation/screens/activity/create/create_activity.dart';
+import 'package:generation/config/icon_collection.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
-import 'package:generation/services/navigation_management.dart';
+import 'package:generation/services/input_system_services.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
@@ -22,6 +22,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late InputOption _inputOption;
+
   @override
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
@@ -32,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _inputOption = InputOption(context);
     return Scaffold(
       backgroundColor: AppColors.backgroundDarkMode,
       body: Container(
@@ -268,10 +271,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getData()[3];
 
-    _addActivityIcon(){
+    _addActivityIcon() {
       return InkWell(
-        onTap: (){
-          Navigation.intent(context, const CreateActivity());
+        onTap: () {
+          // Navigation.intent(context, const CreateActivity());
+          _showActivityCategoryOptions();
         },
         child: Container(
           width: 25,
@@ -318,5 +322,98 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  _showActivityCategoryOptions() {
+    showModalBottomSheet(
+        context: context,
+        builder: (_) => Container(
+            height: 300,
+            color: AppColors.oppositeMsgDarkModeColor,
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+            child: GridView.count(
+              crossAxisCount: 3,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 6,
+              children: List.generate(
+                  ActivityIconCollection.iconsCollection.length,
+                  (index) => _particularOption(index)),
+            )));
+  }
+
+  _particularOption(index) {
+    return InkWell(
+      onTap: () async {
+        if (index == 0) {
+          _inputOption.takeImageFromCamera();
+        } else if (index == 1) {
+          _inputOption.pickImageFromGallery();
+        } else if (index == 2) {
+          _videoTakingOption();
+        } else if (index == 3) {
+          _inputOption.documentPickFromDevice();
+        } else if (index == 4) {
+          _inputOption.audioPickFromDevice();
+        } else if (index == 5) {
+          await _inputOption.showCurrentLocationInGoogleMaps(context);
+        } else if (index == 6) {
+          await _inputOption.getContacts();
+        }
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: ActivityIconCollection.iconsCollection[index][2]),
+            child: ActivityIconCollection.iconsCollection[index][0],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: Text(
+              ActivityIconCollection.iconsCollection[index][1],
+              style:
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  _videoTakingOption() {
+    showModalBottomSheet(
+        context: context,
+        elevation: 5,
+        builder: (_) => Container(
+              color: AppColors.backgroundDarkMode,
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _inputOption.pickVideoFromCameraAndGallery();
+                    },
+                    child: const Text("Camera"),
+                    style: ElevatedButton.styleFrom(
+                        primary: AppColors.oppositeMsgDarkModeColor),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _inputOption.pickVideoFromCameraAndGallery(
+                          fromCamera: false);
+                    },
+                    child: const Text("Gallery"),
+                    style: ElevatedButton.styleFrom(
+                        primary: AppColors.oppositeMsgDarkModeColor),
+                  ),
+                ],
+              ),
+            ));
   }
 }
