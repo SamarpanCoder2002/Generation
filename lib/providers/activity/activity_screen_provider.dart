@@ -50,7 +50,7 @@ class ActivityProvider extends ChangeNotifier {
 
   getAnimationController() => _animationController;
 
-  final List<Map<String, dynamic>> _activityCollection = [
+  List<dynamic> _activityCollection = [
     {
       "type": ActivityType.text.toString(),
       "message": "Samarpan Dasgupta is a Passionate Programmer.",
@@ -128,6 +128,16 @@ class ActivityProvider extends ChangeNotifier {
       "holderId": "8"
     },
   ];
+
+  setActivityCollection(List<dynamic> incoming){
+    _activityCollection = incoming;
+    notifyListeners();
+  }
+
+  addNewActivity(incoming){
+    _activityCollection.add(incoming);
+    notifyListeners();
+  }
 
   getPageController() => _pageController;
 

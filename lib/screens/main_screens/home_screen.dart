@@ -1,9 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/screens/activity/create/create_activity.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
+import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
@@ -115,22 +117,31 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyleCollection.secondaryHeadingTextStyle,
             ),
           ),
-          _horizontalActivitySection(),
+          _horizontalActivitySection()
         ],
       ),
     );
   }
 
   _horizontalActivitySection() {
+    final _activityHolderCollection =
+        Provider.of<StatusCollectionProvider>(context).getData();
+
     return SizedBox(
       width: MediaQuery.of(context).size.width - 40,
       height: 115,
-      child: ListView.builder(
+      child: ListView(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
-        itemCount:
-            Provider.of<StatusCollectionProvider>(context).getDataLength(),
-        itemBuilder: (_, index) => _activityParticularData(index),
+        children: [
+          _myActivity(),
+          ..._activityHolderCollection.map((activityHolder) =>
+              _activityParticularData(
+                  _activityHolderCollection.indexOf(activityHolder))),
+        ],
+        // itemCount:
+        //     Provider.of<StatusCollectionProvider>(context).getDataLength(),
+        // itemBuilder: (_, index) => _activityParticularData(index),
       ),
     );
   }
@@ -170,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
               margin: const EdgeInsets.only(top: 10),
               child: Text(
                 _currentActivityData["connectionName"],
+                overflow: TextOverflow.ellipsis,
                 style: TextStyleCollection.activityTitleTextStyle,
               ),
             )
@@ -249,6 +261,62 @@ class _HomeScreenState extends State<HomeScreen> {
                         totalPendingMessages:
                             _connectionData["notSeenMsgCount"].toString()));
           }),
+    );
+  }
+
+  _myActivity() {
+    final _currentActivityData =
+        Provider.of<StatusCollectionProvider>(context).getData()[3];
+
+    _addActivityIcon(){
+      return InkWell(
+        onTap: (){
+          Navigation.intent(context, const CreateActivity());
+        },
+        child: Container(
+          width: 25,
+          height: 25,
+          child: const Icon(
+            Icons.add_outlined,
+            color: AppColors.pureWhiteColor,
+          ),
+          decoration: BoxDecoration(
+              color: AppColors.darkBorderGreenColor,
+              borderRadius: BorderRadius.circular(100)),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(right: 15),
+      child: Column(
+        children: [
+          Container(
+              width: 80,
+              height: 80,
+              alignment: Alignment.bottomRight,
+              decoration: BoxDecoration(
+                  color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                      color: _currentActivityData["isActive"]
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.imageDarkBgColor,
+                      width: 3),
+                  image: DecorationImage(
+                      image: NetworkImage(_currentActivityData["profilePic"]),
+                      fit: BoxFit.cover)),
+              child: _addActivityIcon()),
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: const Text(
+              "Daefon",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyleCollection.activityTitleTextStyle,
+            ),
+          )
+        ],
+      ),
     );
   }
 }

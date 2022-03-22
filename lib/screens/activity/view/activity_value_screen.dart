@@ -3,10 +3,6 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/types/types.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:provider/provider.dart';
-
-import '../../../providers/activity/activity_screen_provider.dart';
-import '../animation_controller.dart';
 
 class ActivityViewer extends StatefulWidget {
   final ActivityModel activityData;
