@@ -74,6 +74,15 @@ class ActivityIconCollection{
   static List<dynamic> iconsCollection = [
     [
       const Icon(
+        Icons.create_rounded,
+        color: AppColors.pureWhiteColor,
+        size: 30,
+      ),
+      "Text",
+      AppColors.normalBlueColor,
+    ],
+    [
+      const Icon(
         Icons.camera_alt_outlined,
         color: AppColors.pureWhiteColor,
         size: 30,

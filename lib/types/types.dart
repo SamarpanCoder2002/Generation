@@ -35,7 +35,8 @@ enum ActivityType{
   text,
   image,
   video,
-  poll
+  audio,
+  poll,
 }
 
 enum ToastIconType{

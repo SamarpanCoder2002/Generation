@@ -2,10 +2,13 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/icon_collection.dart';
+import 'package:generation/screens/activity/create/create_activity.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
+import 'package:generation/services/navigation_management.dart';
+import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
@@ -295,22 +298,31 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(right: 15),
       child: Column(
         children: [
-          Container(
-              width: 80,
-              height: 80,
-              alignment: Alignment.bottomRight,
-              decoration: BoxDecoration(
-                  color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(
-                      color: _currentActivityData["isActive"]
-                          ? AppColors.darkBorderGreenColor
-                          : AppColors.imageDarkBgColor,
-                      width: 3),
-                  image: DecorationImage(
-                      image: NetworkImage(_currentActivityData["profilePic"]),
-                      fit: BoxFit.cover)),
-              child: _addActivityIcon()),
+          OpenContainer(
+            closedElevation: 0.0,
+            transitionType: ContainerTransitionType.fadeThrough,
+            transitionDuration: const Duration(milliseconds: 500),
+            closedColor: AppColors.backgroundDarkMode,
+            middleColor: AppColors.backgroundDarkMode,
+            openColor: AppColors.backgroundDarkMode,
+            openBuilder: (_, __) => const ActivityController(),
+            closedBuilder: (_, __) => Container(
+                width: 80,
+                height: 80,
+                alignment: Alignment.bottomRight,
+                decoration: BoxDecoration(
+                    color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
+                        color: _currentActivityData["isActive"]
+                            ? AppColors.darkBorderGreenColor
+                            : AppColors.imageDarkBgColor,
+                        width: 3),
+                    image: DecorationImage(
+                        image: NetworkImage(_currentActivityData["profilePic"]),
+                        fit: BoxFit.cover)),
+                child: _addActivityIcon()),
+          ),
           Container(
             margin: const EdgeInsets.only(top: 10),
             child: const Text(
@@ -345,11 +357,34 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () async {
         if (index == 0) {
-          _inputOption.takeImageFromCamera();
+          Navigation.intent(
+              context, const CreateActivity(activityType: ActivityType.text));
+          //_inputOption.takeImageFromCamera();
         } else if (index == 1) {
-          _inputOption.pickImageFromGallery();
+          final _imagePath =
+              await _inputOption.takeImageFromCamera(forChat: false);
+
+          if(_imagePath == null) return;
+
+          Navigation.intent(
+              context,
+              CreateActivity(
+                activityType: ActivityType.image,
+                data: {"path": _imagePath, "type": ImageType.file},
+              ));
         } else if (index == 2) {
-          _videoTakingOption();
+          //_videoTakingOption();
+          final _imagePath =
+              await _inputOption.pickSingleImageFromGallery();
+
+          if(_imagePath == null) return;
+
+          Navigation.intent(
+              context,
+              CreateActivity(
+                activityType: ActivityType.image,
+                data: {"path": _imagePath, "type": ImageType.file},
+              ));
         } else if (index == 3) {
           _inputOption.documentPickFromDevice();
         } else if (index == 4) {

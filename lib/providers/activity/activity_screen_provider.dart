@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:generation/config/colors_collection.dart';
 import 'package:generation/model/activity_model.dart';
-import 'package:generation/types/types.dart';
 
 class ActivityProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   int _animationBarCurrentIndex = 0;
   final PageController _pageController = PageController();
   late AnimationController _animationController;
+  final List<String> _monthCollection = ["Jan", "Feb", "March", "April", "May", "June", "July","August", "Sept", "Oct", "Nov", "Dec"];
+
+  getParticularMonth(index) => _monthCollection[index];
 
   getAnimationBarCurrentIndex() => _animationBarCurrentIndex;
 
@@ -51,82 +52,85 @@ class ActivityProvider extends ChangeNotifier {
   getAnimationController() => _animationController;
 
   List<dynamic> _activityCollection = [
-    {
-      "type": ActivityType.text.toString(),
-      "message": "Samarpan Dasgupta is a Passionate Programmer.",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "1",
-      "additionalThings": {
-        "backgroundColor": Colors.blueAccent,
-        "textColor": AppColors.pureWhiteColor
-      }
-    },
-    {
-      "type": ActivityType.image.toString(),
-      "message":
-          "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "2"
-    },
-    {
-      "type": ActivityType.text.toString(),
-      "message": "Samarpan Dasgupta is a Passionate Programmer.",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "3",
-      "additionalThings": {
-        "backgroundColor": Colors.lightBlue,
-        "textColor": Colors.black
-      }
-    },
-    {
-      "type": ActivityType.image.toString(),
-      "message":
-          "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "4"
-    },
-    {
-      "type": ActivityType.text.toString(),
-      "message": "Samarpan Dasgupta is a Passionate Programmer.",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "5",
-      "additionalThings": {
-        "backgroundColor": Colors.blueAccent,
-        "textColor": AppColors.pureWhiteColor
-      }
-    },
-    {
-      "type": ActivityType.image.toString(),
-      "message":
-          "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "6"
-    },
-    {
-      "type": ActivityType.text.toString(),
-      "message": "Samarpan Dasgupta is a Passionate Programmer.",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "7",
-      "additionalThings": {
-        "backgroundColor": Colors.lightBlue,
-        "textColor": Colors.black
-      }
-    },
-    {
-      "type": ActivityType.image.toString(),
-      "message":
-          "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-      "date": "21 March, 2022",
-      "time": "08:10 PM",
-      "holderId": "8"
-    },
+    // {
+    //   "type": ActivityType.text.toString(),
+    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "1",
+    //   "additionalThings": {
+    //     "backgroundColor": Colors.blueAccent,
+    //     "textColor": AppColors.pureWhiteColor
+    //   }
+    // },
+    // {
+    //   "type": ActivityType.image.toString(),
+    //   "message":
+    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "2"
+    // },
+    // {
+    //   "type": ActivityType.text.toString(),
+    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "3",
+    //   "additionalThings": {
+    //     "backgroundColor": Colors.lightBlue,
+    //     "textColor": Colors.black
+    //   }
+    // },
+    // {
+    //   "type": ActivityType.image.toString(),
+    //   "message":
+    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "4"
+    // },
+    // {
+    //   "type": ActivityType.text.toString(),
+    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "5",
+    //   "additionalThings": {
+    //     "backgroundColor": Colors.blueAccent,
+    //     "textColor": AppColors.pureWhiteColor
+    //   }
+    // },
+    // {
+    //   "type": ActivityType.image.toString(),
+    //   "message":
+    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "6"
+    // },
+    // {
+    //   "type": ActivityType.text.toString(),
+    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "7",
+    //   "additionalThings": {
+    //     "backgroundColor": Colors.lightBlue,
+    //     "textColor": Colors.black
+    //   }
+    // },
+    // {
+    //   "type": ActivityType.image.toString(),
+    //   "message":
+    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
+    //   "date": "21 March, 2022",
+    //   "time": "08:10 PM",
+    //   "holderId": "8",
+    //   "additionalThings": {
+    //     "text": "Samarpan Dasgupta",
+    //   }
+    // },
   ];
 
   setActivityCollection(List<dynamic> incoming){

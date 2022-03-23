@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
+import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
 import '../animation_controller.dart';
@@ -54,10 +56,30 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _activityPagination() {
+    final int _totalActivityData =
+        Provider.of<ActivityProvider>(context).getLengthOfActivityCollection();
+
+    if (_totalActivityData == 0) {
+      changeOnlyNavigationBarColor(
+          navigationBarColor: AppColors.backgroundDarkMode);
+      return Container(
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height,
+        color: AppColors.backgroundDarkMode,
+        alignment: Alignment.center,
+        child: Text(
+          "No Activity Found",
+          style: TextStyleCollection.terminalTextStyle
+              .copyWith(fontSize: 20, color: AppColors.lightRedColor),
+        ),
+      );
+    }
+
     return SizedBox(
       width: double.maxFinite,
       height: MediaQuery.of(context).size.height,
       child: PageView.builder(
+        physics: const NeverScrollableScrollPhysics(),
         controller: Provider.of<ActivityProvider>(context).getPageController(),
         scrollBehavior: const ScrollBehavior(
             androidOverscrollIndicator: AndroidOverscrollIndicator.glow),
@@ -71,10 +93,11 @@ class _ActivityControllerState extends State<ActivityController>
               .getParticularActivity(pageViewIndex);
 
           return Stack(
+            clipBehavior: Clip.none,
             children: [
               ActivityViewer(activityData: _currentActivityData),
               _activityAnimation(),
-              _transparentNavigatingWidget(),
+              _transparentNavigatingWidget(_currentActivityData),
             ],
           );
         },
@@ -103,9 +126,11 @@ class _ActivityControllerState extends State<ActivityController>
     );
   }
 
-  _transparentNavigatingWidget() => Container(
+  _transparentNavigatingWidget(activityModel) => Container(
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
+        height: activityModel.type != ActivityType.text.toString()
+            ? MediaQuery.of(context).size.height - 150
+            : MediaQuery.of(context).size.height,
         color: AppColors.transparentColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

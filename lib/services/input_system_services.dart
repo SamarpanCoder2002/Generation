@@ -106,9 +106,11 @@ class InputOption {
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
 
-  pickVideoFromCameraAndGallery({bool fromCamera = true}) async {
+  pickVideoFromCameraAndGallery(
+      {bool fromCamera = true, int maxDurationInSec = 180}) async {
     final XFile? pickedVideo = await ImagePicker().pickVideo(
-        source: fromCamera ? ImageSource.camera : ImageSource.gallery);
+        source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+        maxDuration: Duration(seconds: maxDurationInSec));
 
     if (pickedVideo == null) {
       return;
@@ -467,5 +469,6 @@ class InputOption {
     }
   }
 
-  Future<void> shareTextContent(String textToShare) async => await Share.share(textToShare);
+  Future<void> shareTextContent(String textToShare) async =>
+      await Share.share(textToShare);
 }
