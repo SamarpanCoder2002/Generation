@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/screens/common/video_editor_common.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
-import '../../../config/images_path_collection.dart';
 import '../../../config/text_style_collection.dart';
 import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/messaging_provider.dart';
@@ -56,8 +56,8 @@ class _CreateActivityState extends State<CreateActivity> {
       case ActivityType.image:
         return _imageActivityCreationSection();
       case ActivityType.video:
-        // TODO: Handle this case.
-        break;
+        return VideoEditingScreen(path: widget.data["path"], videoType: widget.data["type"]);
+        return _videoActivityCreationSection();
       case ActivityType.audio:
         // TODO: Handle this case.
         break;
@@ -247,5 +247,9 @@ class _CreateActivityState extends State<CreateActivity> {
         toastIconType: ToastIconType.success,
         toastDuration: 10);
     Navigator.pop(context);
+  }
+
+  _videoActivityCreationSection() {
+    return Center();
   }
 }

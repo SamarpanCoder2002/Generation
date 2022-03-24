@@ -31,6 +31,12 @@ enum ImageType{
   asset
 }
 
+enum VideoType{
+  file,
+  network,
+  asset,
+}
+
 enum ActivityType{
   text,
   image,

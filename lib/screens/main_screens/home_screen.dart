@@ -386,7 +386,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 data: {"path": _imagePath, "type": ImageType.file},
               ));
         } else if (index == 3) {
-          _inputOption.documentPickFromDevice();
+          _videoTakingOption();
+          //_inputOption.documentPickFromDevice();
         } else if (index == 4) {
           _inputOption.audioPickFromDevice();
         } else if (index == 5) {
@@ -431,17 +432,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-                      _inputOption.pickVideoFromCameraAndGallery();
+                    onPressed: () async{
+                      final data = await _inputOption.pickVideoFromCameraAndGallery(forChat: false);
+
+                      if(data == null) return;
+
+                      Navigation.intent(
+                          context,
+                          CreateActivity(
+                            activityType: ActivityType.video,
+                            data: {"path": data["videoPath"], "thumbnail": data["thumbnail"], "type": VideoType.file},
+                          ));
                     },
                     child: const Text("Camera"),
                     style: ElevatedButton.styleFrom(
                         primary: AppColors.oppositeMsgDarkModeColor),
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      _inputOption.pickVideoFromCameraAndGallery(
-                          fromCamera: false);
+                    onPressed: () async{
+                      final data = await _inputOption.pickVideoFromCameraAndGallery(
+                          fromCamera: false, forChat: false);
+
+                      if(data == null) return;
+
+                      Navigation.intent(
+                          context,
+                          CreateActivity(
+                            activityType: ActivityType.video,
+                            data: {"path": data["videoPath"], "thumbnail": data["thumbnail"], "type": VideoType.file},
+                          ));
                     },
                     child: const Text("Gallery"),
                     style: ElevatedButton.styleFrom(

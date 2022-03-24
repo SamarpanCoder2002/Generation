@@ -60,6 +60,8 @@ dependencies:
   razorpay_flutter: ^1.2.9
   share_plus: ^4.0.2
   flutter_colorpicker: ^1.0.3
+  video_editor: ^1.2.4
+  helpers: ^1.1.4
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -67,8 +69,8 @@ dependencies:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+#  flutter_test:
+#    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

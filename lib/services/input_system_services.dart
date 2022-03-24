@@ -107,10 +107,9 @@ class InputOption {
   }
 
   pickVideoFromCameraAndGallery(
-      {bool fromCamera = true, int maxDurationInSec = 180}) async {
+      {bool fromCamera = true, bool forChat = true}) async {
     final XFile? pickedVideo = await ImagePicker().pickVideo(
-        source: fromCamera ? ImageSource.camera : ImageSource.gallery,
-        maxDuration: Duration(seconds: maxDurationInSec));
+        source: fromCamera ? ImageSource.camera : ImageSource.gallery);
 
     if (pickedVideo == null) {
       return;
@@ -121,6 +120,13 @@ class InputOption {
 
     final thumbnailImage = await NativeCallback()
         .getTheVideoThumbnail(videoPath: File(pickedVideo.path).path);
+
+    if(!forChat){
+      final Map<String,dynamic> data = {};
+      data["thumbnail"] = thumbnailImage;
+      data["videoPath"] =  File(pickedVideo.path).path;
+      return data;
+    }
 
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setSingleNewMessage({
