@@ -6,6 +6,7 @@ import 'package:generation/screens/activity/create/create_activity.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
+import 'package:generation/screens/common/video_editor_common.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/types/types.dart';
@@ -364,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final _imagePath =
               await _inputOption.takeImageFromCamera(forChat: false);
 
-          if(_imagePath == null) return;
+          if (_imagePath == null) return;
 
           Navigation.intent(
               context,
@@ -374,10 +375,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ));
         } else if (index == 2) {
           //_videoTakingOption();
-          final _imagePath =
-              await _inputOption.pickSingleImageFromGallery();
+          final _imagePath = await _inputOption.pickSingleImageFromGallery();
 
-          if(_imagePath == null) return;
+          if (_imagePath == null) return;
 
           Navigation.intent(
               context,
@@ -432,35 +432,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: () async{
-                      final data = await _inputOption.pickVideoFromCameraAndGallery(forChat: false);
+                    onPressed: () async {
+                      final data = await _inputOption
+                          .pickVideoFromCameraAndGallery(forChat: false);
 
-                      if(data == null) return;
+                      if (data == null) return;
 
                       Navigation.intent(
                           context,
-                          CreateActivity(
-                            activityType: ActivityType.video,
-                            data: {"path": data["videoPath"], "thumbnail": data["thumbnail"], "type": VideoType.file},
-                          ));
+                          VideoEditingScreen(
+                              path: data["videoPath"],
+                              videoType: VideoType.file,
+                              thumbnailPath: data["thumbnail"]));
                     },
                     child: const Text("Camera"),
                     style: ElevatedButton.styleFrom(
                         primary: AppColors.oppositeMsgDarkModeColor),
                   ),
                   ElevatedButton(
-                    onPressed: () async{
-                      final data = await _inputOption.pickVideoFromCameraAndGallery(
-                          fromCamera: false, forChat: false);
+                    onPressed: () async {
+                      final data =
+                          await _inputOption.pickVideoFromCameraAndGallery(
+                              fromCamera: false, forChat: false);
 
-                      if(data == null) return;
+                      if (data == null) return;
 
                       Navigation.intent(
                           context,
-                          CreateActivity(
-                            activityType: ActivityType.video,
-                            data: {"path": data["videoPath"], "thumbnail": data["thumbnail"], "type": VideoType.file},
-                          ));
+                          VideoEditingScreen(
+                              path: data["videoPath"],
+                              videoType: VideoType.file,
+                              thumbnailPath: data["thumbnail"]));
                     },
                     child: const Text("Gallery"),
                     style: ElevatedButton.styleFrom(

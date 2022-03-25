@@ -193,5 +193,4 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  
 }

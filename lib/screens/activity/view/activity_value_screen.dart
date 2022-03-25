@@ -2,12 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
+import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/types/types.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../providers/activity/activity_screen_provider.dart';
 
@@ -59,9 +62,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
     } else if (widget.activityData.type == ActivityType.image.toString()) {
       return _imageActivityShow();
     } else if (widget.activityData.type == ActivityType.video.toString()) {
-      return const Center(
-        child: Text("Video"),
-      );
+      return _videoActivityShow();
     } else if (widget.activityData.type == ActivityType.poll.toString()) {
       return const Center(
         child: Text("Poll"),
@@ -122,6 +123,8 @@ class _ActivityViewerState extends State<ActivityViewer> {
   }
 
   _bottomExtraTextSection() {
+    if(widget.activityData.additionalThings["text"] == "") return const Center();
+
     return Align(
         alignment: Alignment.bottomCenter,
         child: Container(
@@ -133,12 +136,30 @@ class _ActivityViewerState extends State<ActivityViewer> {
           child: SingleChildScrollView(
             controller: _scrollController,
             scrollDirection: Axis.vertical,
-            child: Text(
-              widget.activityData.additionalThings["text"],
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
-            ),
+            child: Linkify(
+              text: widget.activityData.additionalThings["text"],
+              onOpen: (link) async {
+                try {
+                  await launch(link.url);
+                } catch (e) {
+                  throw 'Could not launch $link';
+                }
+              },
+              linkStyle: const TextStyle(color: AppColors.lightBlueColor),
+              style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
+              options: const LinkifyOptions(humanize: false),
+            )
           ),
         ));
+  }
+
+  _videoActivityShow() {
+
+    return Stack(
+      children: [
+        VideoShowScreen(file: File(widget.activityData.message)),
+        _bottomExtraTextSection(),
+      ],
+    );
   }
 }

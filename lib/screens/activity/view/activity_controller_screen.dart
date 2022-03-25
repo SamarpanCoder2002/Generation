@@ -92,6 +92,15 @@ class _ActivityControllerState extends State<ActivityController>
           final _currentActivityData = Provider.of<ActivityProvider>(context)
               .getParticularActivity(pageViewIndex);
 
+          // print("First Error: ${_currentActivityData.type ==
+          //     ActivityType.video.toString()}");
+
+          // Provider.of<ActivityProvider>(context, listen: false)
+          //     .changeDurationInSec(_currentActivityData.type ==
+          //             ActivityType.video.toString()
+          //         ? int.parse(_currentActivityData.additionalThings["duration"])
+          //         : 5);
+
           return Stack(
             clipBehavior: Clip.none,
             children: [

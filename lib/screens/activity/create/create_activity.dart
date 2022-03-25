@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:generation/config/colors_collection.dart';
-import 'package:generation/screens/common/video_editor_common.dart';
+
+import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +57,6 @@ class _CreateActivityState extends State<CreateActivity> {
       case ActivityType.image:
         return _imageActivityCreationSection();
       case ActivityType.video:
-        return VideoEditingScreen(path: widget.data["path"], videoType: widget.data["type"]);
         return _videoActivityCreationSection();
       case ActivityType.audio:
         // TODO: Handle this case.
@@ -231,7 +231,12 @@ class _CreateActivityState extends State<CreateActivity> {
         };
         break;
       case ActivityType.video:
-        // TODO: Handle this case.
+        map["message"] = widget.data["file"].path;
+        map["additionalThings"] = {
+          "text": _textActivityController.text,
+          "thumbnail": widget.data["thumbnail"],
+          "duration": widget.data["duration"]
+        };
         break;
       case ActivityType.audio:
         // TODO: Handle this case.
@@ -247,9 +252,16 @@ class _CreateActivityState extends State<CreateActivity> {
         toastIconType: ToastIconType.success,
         toastDuration: 10);
     Navigator.pop(context);
+
+    if(widget.activityType == ActivityType.video) Navigator.pop(context);
   }
 
   _videoActivityCreationSection() {
-    return Center();
+    return Stack(
+      children: [
+        VideoShowScreen(file: widget.data["file"]),
+        _bottomSection(),
+      ],
+    );
   }
 }

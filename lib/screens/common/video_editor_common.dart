@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/video_management/video_editing_provider.dart';
-import 'package:generation/screens/common/video_show_screen.dart';
+import 'package:generation/screens/activity/create/create_activity.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 import 'package:video_editor/video_editor.dart';
@@ -13,6 +13,7 @@ import '../../types/types.dart';
 
 class VideoEditingScreen extends StatefulWidget {
   final String path;
+  final String thumbnailPath;
   final VideoType videoType;
   final int durationInSecond;
 
@@ -20,6 +21,7 @@ class VideoEditingScreen extends StatefulWidget {
       {Key? key,
       required this.path,
       required this.videoType,
+      required this.thumbnailPath,
       this.durationInSecond = 30})
       : super(key: key);
 
@@ -103,7 +105,8 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
                     _controller.rotate90Degrees(RotateDirection.right)),
             _commonOption(iconData: Icons.crop, onTap: _openCropScreen),
             //_commonOption(iconData: Icons.save_alt, onTap: _exportCover),
-            _commonOption(iconData: Icons.save, onTap: _exportVideo),
+            _commonOption(
+                iconData: Icons.done_outline_outlined, onTap: _exportVideo),
           ],
         ),
       ),
@@ -128,21 +131,33 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
 
     await _controller.exportVideo(
       onProgress: (statics) {
+        print("First: ${statics.getTime()}");
         if (_firstStat) {
           _firstStat = false;
         } else {
+          print("Get Time: ${statics.getTime()}");
           Provider.of<VideoEditingProvider>(context, listen: false)
               .updateExportingProgress(statics.getTime() /
                   _controller.video.value.duration.inMilliseconds);
         }
       },
-      onCompleted: (file) {
+      onCompleted: (file) async {
         Provider.of<VideoEditingProvider>(context, listen: false)
             .updateIsExportingValue(false);
 
         if (!mounted) return;
         if (file != null) {
-          Navigation.intent(context, VideoShowScreen(file: file));
+          final _getVideoDuration =
+              await Provider.of<VideoEditingProvider>(context, listen: false)
+                  .getVideoDuration(file);
+
+          Navigation.intent(
+              context,
+              CreateActivity(activityType: ActivityType.video, data: {
+                "file": file,
+                "thumbnail": widget.thumbnailPath,
+                "duration": _getVideoDuration.inSeconds.ceil().toString()
+              }));
 
           Provider.of<VideoEditingProvider>(context, listen: false)
               .updatedExportedText("Video Successfully Exported!");
@@ -218,42 +233,6 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
             )
           ];
   }
-
-  Widget _coverSelection() {
-    final _controller =
-        Provider.of<VideoEditingProvider>(context).getController();
-
-    return _controller == null
-        ? const Center()
-        : Container(
-            margin: EdgeInsets.symmetric(horizontal: height / 4),
-            child: CoverSelection(
-              controller: _controller,
-              height: height,
-              nbSelection: 8,
-            ));
-  }
-
-  // Widget _customSnackBar() {
-  //   return Align(
-  //     alignment: Alignment.bottomCenter,
-  //     child: SwipeTransition(
-  //       visible: Provider.of<VideoEditingProvider>(context).isExported(),
-  //       axisAlignment: 1.0,
-  //       child: Container(
-  //         height: height,
-  //         width: double.infinity,
-  //         color: AppColors.pureBlackColor.withOpacity(0.8),
-  //         child: Center(
-  //           child: Text(
-  //               Provider.of<VideoEditingProvider>(context).getExportedText(),
-  //               style: TextStyleCollection.terminalTextStyle
-  //                   .copyWith(fontSize: 16)),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   _realVideoViewWithTabBarView() {
     final _controller =

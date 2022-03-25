@@ -107,9 +107,9 @@ class InputOption {
   }
 
   pickVideoFromCameraAndGallery(
-      {bool fromCamera = true, bool forChat = true}) async {
+      {bool fromCamera = true, bool forChat = true, Duration maxDuration = const Duration(seconds: 30)}) async {
     final XFile? pickedVideo = await ImagePicker().pickVideo(
-        source: fromCamera ? ImageSource.camera : ImageSource.gallery);
+        source: fromCamera ? ImageSource.camera : ImageSource.gallery, maxDuration: fromCamera?maxDuration:null);
 
     if (pickedVideo == null) {
       return;
