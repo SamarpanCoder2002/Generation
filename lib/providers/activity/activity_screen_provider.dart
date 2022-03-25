@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:generation/model/activity_model.dart';
+import 'package:generation/providers/time_provider.dart';
+import 'package:provider/provider.dart';
+
+import '../../types/types.dart';
 
 class ActivityProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   int _animationBarCurrentIndex = 0;
   final PageController _pageController = PageController();
   late AnimationController _animationController;
-  final List<String> _monthCollection = ["Jan", "Feb", "March", "April", "May", "June", "July","August", "Sept", "Oct", "Nov", "Dec"];
+  late BuildContext context;
+
+  final List<String> _monthCollection = [
+    "Jan",
+    "Feb",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "Sept",
+    "Oct",
+    "Nov",
+    "Dec"
+  ];
 
   getParticularMonth(index) => _monthCollection[index];
 
@@ -23,13 +42,27 @@ class ActivityProvider extends ChangeNotifier {
     _animationController.stop();
     _animationController.reset();
 
-    _animationController.duration = const Duration(seconds: 5);
+    final _currentActivityData =
+        Provider.of<ActivityProvider>(context, listen: false)
+            .getParticularActivity(_currentPageIndex);
+
+    int durationInSec = 5;
+
+    if (_currentActivityData != null) {
+      durationInSec = _currentActivityData.type == ActivityContentType.video.toString()
+          ? int.parse(_currentActivityData.additionalThings["duration"])
+          : 5;
+    }
+
+    _animationController.duration = Duration(seconds: durationInSec);
     _animationController.forward();
   }
 
   initializeAnimationController(
       TickerProvider tickerProvider, BuildContext context) {
     _animationController = AnimationController(vsync: tickerProvider);
+
+    this.context = context;
 
     if (_animationBarCurrentIndex == 0) _loadActivity();
 
@@ -51,94 +84,14 @@ class ActivityProvider extends ChangeNotifier {
 
   getAnimationController() => _animationController;
 
-  List<dynamic> _activityCollection = [
-    // {
-    //   "type": ActivityType.text.toString(),
-    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "1",
-    //   "additionalThings": {
-    //     "backgroundColor": Colors.blueAccent,
-    //     "textColor": AppColors.pureWhiteColor
-    //   }
-    // },
-    // {
-    //   "type": ActivityType.image.toString(),
-    //   "message":
-    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "2"
-    // },
-    // {
-    //   "type": ActivityType.text.toString(),
-    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "3",
-    //   "additionalThings": {
-    //     "backgroundColor": Colors.lightBlue,
-    //     "textColor": Colors.black
-    //   }
-    // },
-    // {
-    //   "type": ActivityType.image.toString(),
-    //   "message":
-    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "4"
-    // },
-    // {
-    //   "type": ActivityType.text.toString(),
-    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "5",
-    //   "additionalThings": {
-    //     "backgroundColor": Colors.blueAccent,
-    //     "textColor": AppColors.pureWhiteColor
-    //   }
-    // },
-    // {
-    //   "type": ActivityType.image.toString(),
-    //   "message":
-    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "6"
-    // },
-    // {
-    //   "type": ActivityType.text.toString(),
-    //   "message": "Samarpan Dasgupta is a Passionate Programmer.",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "7",
-    //   "additionalThings": {
-    //     "backgroundColor": Colors.lightBlue,
-    //     "textColor": Colors.black
-    //   }
-    // },
-    // {
-    //   "type": ActivityType.image.toString(),
-    //   "message":
-    //       "https://pbs.twimg.com/profile_images/1278494917174587392/TKQueGE7_400x400.jpg",
-    //   "date": "21 March, 2022",
-    //   "time": "08:10 PM",
-    //   "holderId": "8",
-    //   "additionalThings": {
-    //     "text": "Samarpan Dasgupta",
-    //   }
-    // },
-  ];
+  List<dynamic> _activityCollection = [];
 
-  setActivityCollection(List<dynamic> incoming){
+  setActivityCollection(List<dynamic> incoming) {
     _activityCollection = incoming;
     notifyListeners();
   }
 
-  addNewActivity(incoming){
+  addNewActivity(incoming) {
     _activityCollection.add(incoming);
     notifyListeners();
   }
@@ -172,7 +125,9 @@ class ActivityProvider extends ChangeNotifier {
 
   getLengthOfActivityCollection() => _activityCollection.length;
 
-  ActivityModel getParticularActivity(index) {
+  ActivityModel? getParticularActivity(index) {
+    if (index > _activityCollection.length - 1) return null;
+
     final _activityData = _activityCollection[index];
     return ActivityModel.getJson(
         type: _activityData["type"],
@@ -192,5 +147,4 @@ class ActivityProvider extends ChangeNotifier {
     _animationController.forward();
     notifyListeners();
   }
-
 }

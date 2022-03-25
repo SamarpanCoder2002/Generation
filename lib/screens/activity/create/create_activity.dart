@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/time_collection.dart';
 
 import 'package:generation/screens/common/video_show_screen.dart';
+import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
@@ -14,11 +16,11 @@ import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/messaging_provider.dart';
 
 class CreateActivity extends StatefulWidget {
-  final ActivityType activityType;
+  final ActivityContentType activityContentType;
   final Map<String, dynamic> data;
 
   const CreateActivity(
-      {Key? key, required this.activityType, this.data = const {}})
+      {Key? key, required this.activityContentType, this.data = const {}})
       : super(key: key);
 
   @override
@@ -30,16 +32,23 @@ class _CreateActivityState extends State<CreateActivity> {
   final TextEditingController _textActivityController = TextEditingController();
 
   @override
+  void initState() {
+    changeOnlyNavigationBarColor(navigationBarColor: AppColors.pureBlackColor);
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _textActivityController.dispose();
+    changeOnlyNavigationBarColor(navigationBarColor: AppColors.backgroundDarkMode);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
-      floatingActionButton: widget.activityType == ActivityType.text
+      backgroundColor: AppColors.pureBlackColor,
+      floatingActionButton: widget.activityContentType == ActivityContentType.text
           ? _textActivityMakeButton()
           : null,
       body: SizedBox(
@@ -51,17 +60,17 @@ class _CreateActivityState extends State<CreateActivity> {
   }
 
   _getRealBody() {
-    switch (widget.activityType) {
-      case ActivityType.text:
+    switch (widget.activityContentType) {
+      case ActivityContentType.text:
         return _textActivityCreationSection();
-      case ActivityType.image:
+      case ActivityContentType.image:
         return _imageActivityCreationSection();
-      case ActivityType.video:
+      case ActivityContentType.video:
         return _videoActivityCreationSection();
-      case ActivityType.audio:
+      case ActivityContentType.audio:
         // TODO: Handle this case.
         break;
-      case ActivityType.poll:
+      case ActivityContentType.poll:
         // TODO: Handle this case.
         break;
     }
@@ -173,7 +182,7 @@ class _CreateActivityState extends State<CreateActivity> {
   _sendButton({Color bgColor = AppColors.darkBorderGreenColor}) {
     return Container(
       margin: EdgeInsets.only(
-          bottom: widget.activityType == ActivityType.text ? 100 : 10),
+          bottom: widget.activityContentType == ActivityContentType.text ? 100 : 10),
       child: FloatingActionButton(
         backgroundColor: bgColor,
         child: Image.asset(
@@ -193,7 +202,7 @@ class _CreateActivityState extends State<CreateActivity> {
           height: MediaQuery.of(context).size.height,
           child: Image.file(
             File(widget.data["path"]),
-            fit: BoxFit.cover,
+            //fit: BoxFit.cover,
           ),
         ),
         _bottomSection()
@@ -209,28 +218,28 @@ class _CreateActivityState extends State<CreateActivity> {
   void _onSendButtonPressed() {
     final Map<String, dynamic> map = {};
     final DateTime _dateTime = DateTime.now();
-    map["type"] = widget.activityType.toString();
+    map["type"] = widget.activityContentType.toString();
     map["date"] =
         "${_dateTime.day} ${Provider.of<ActivityProvider>(context, listen: false).getParticularMonth(_dateTime.month)}, ${_dateTime.year}";
     map["time"] = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .getCurrentTime(dateTime: _dateTime);
     map["holderId"] = _dateTime.toString();
 
-    switch (widget.activityType) {
-      case ActivityType.text:
+    switch (widget.activityContentType) {
+      case ActivityContentType.text:
         map["message"] = _textActivityController.text;
         map["additionalThings"] = {
           "backgroundColor": pickColor,
           "textColor": AppColors.pureWhiteColor
         };
         break;
-      case ActivityType.image:
+      case ActivityContentType.image:
         map["message"] = widget.data["path"];
         map["additionalThings"] = {
           "text": _textActivityController.text,
         };
         break;
-      case ActivityType.video:
+      case ActivityContentType.video:
         map["message"] = widget.data["file"].path;
         map["additionalThings"] = {
           "text": _textActivityController.text,
@@ -238,10 +247,10 @@ class _CreateActivityState extends State<CreateActivity> {
           "duration": widget.data["duration"]
         };
         break;
-      case ActivityType.audio:
+      case ActivityContentType.audio:
         // TODO: Handle this case.
         break;
-      case ActivityType.poll:
+      case ActivityContentType.poll:
         // TODO: Handle this case.
         break;
     }
@@ -253,7 +262,7 @@ class _CreateActivityState extends State<CreateActivity> {
         toastDuration: 10);
     Navigator.pop(context);
 
-    if(widget.activityType == ActivityType.video) Navigator.pop(context);
+    if(widget.activityContentType == ActivityContentType.video && int.parse(widget.data["duration"])>Timings.videoDurationInSec) Navigator.pop(context);
   }
 
   _videoActivityCreationSection() {

@@ -57,13 +57,13 @@ class _ActivityViewerState extends State<ActivityViewer> {
   }
 
   _getCurrentActivity() {
-    if (widget.activityData.type == ActivityType.text.toString()) {
+    if (widget.activityData.type == ActivityContentType.text.toString()) {
       return _textActivityShow();
-    } else if (widget.activityData.type == ActivityType.image.toString()) {
+    } else if (widget.activityData.type == ActivityContentType.image.toString()) {
       return _imageActivityShow();
-    } else if (widget.activityData.type == ActivityType.video.toString()) {
+    } else if (widget.activityData.type == ActivityContentType.video.toString()) {
       return _videoActivityShow();
-    } else if (widget.activityData.type == ActivityType.poll.toString()) {
+    } else if (widget.activityData.type == ActivityContentType.poll.toString()) {
       return const Center(
         child: Text("Poll"),
       );
@@ -99,7 +99,6 @@ class _ActivityViewerState extends State<ActivityViewer> {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: PhotoView(
-            minScale: PhotoViewComputedScale.covered,
             imageProvider: FileImage(File(widget.activityData.message)),
             loadingBuilder: (_, __) => Center(
               child: Text(
@@ -145,7 +144,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
                   throw 'Could not launch $link';
                 }
               },
-              linkStyle: const TextStyle(color: AppColors.lightBlueColor),
+              linkStyle: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
               style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
               options: const LinkifyOptions(humanize: false),
             )

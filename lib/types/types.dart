@@ -37,7 +37,7 @@ enum VideoType{
   asset,
 }
 
-enum ActivityType{
+enum ActivityContentType{
   text,
   image,
   video,

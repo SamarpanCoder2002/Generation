@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/config/time_collection.dart';
 import 'package:generation/providers/video_management/video_editing_provider.dart';
 import 'package:generation/screens/activity/create/create_activity.dart';
 import 'package:generation/services/navigation_management.dart';
@@ -22,7 +23,7 @@ class VideoEditingScreen extends StatefulWidget {
       required this.path,
       required this.videoType,
       required this.thumbnailPath,
-      this.durationInSecond = 30})
+      this.durationInSecond = Timings.videoDurationInSec})
       : super(key: key);
 
   @override
@@ -153,7 +154,7 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
 
           Navigation.intent(
               context,
-              CreateActivity(activityType: ActivityType.video, data: {
+              CreateActivity(activityContentType: ActivityContentType.video, data: {
                 "file": file,
                 "thumbnail": widget.thumbnailPath,
                 "duration": _getVideoDuration.inSeconds.ceil().toString()

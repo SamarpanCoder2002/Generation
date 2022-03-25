@@ -6,7 +6,7 @@ import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
-
+import '../../../providers/video_management/video_show_provider.dart';
 import '../animation_controller.dart';
 
 class ActivityController extends StatefulWidget {
@@ -25,6 +25,10 @@ class _ActivityControllerState extends State<ActivityController>
         navigationBarColor: Colors.black12.withOpacity(0));
     Provider.of<ActivityProvider>(context, listen: false)
         .initializeAnimationController(this, context);
+
+    changeOnlyNavigationBarColor(
+        navigationBarColor: AppColors.pureBlackColor.withOpacity(0.1));
+
     super.initState();
   }
 
@@ -92,14 +96,7 @@ class _ActivityControllerState extends State<ActivityController>
           final _currentActivityData = Provider.of<ActivityProvider>(context)
               .getParticularActivity(pageViewIndex);
 
-          // print("First Error: ${_currentActivityData.type ==
-          //     ActivityType.video.toString()}");
-
-          // Provider.of<ActivityProvider>(context, listen: false)
-          //     .changeDurationInSec(_currentActivityData.type ==
-          //             ActivityType.video.toString()
-          //         ? int.parse(_currentActivityData.additionalThings["duration"])
-          //         : 5);
+          if (_currentActivityData == null) return const Center();
 
           return Stack(
             clipBehavior: Clip.none,
@@ -137,7 +134,7 @@ class _ActivityControllerState extends State<ActivityController>
 
   _transparentNavigatingWidget(activityModel) => Container(
         width: MediaQuery.of(context).size.width,
-        height: activityModel.type != ActivityType.text.toString()
+        height: activityModel.type != ActivityContentType.text.toString()
             ? MediaQuery.of(context).size.height - 150
             : MediaQuery.of(context).size.height,
         color: AppColors.transparentColor,
@@ -160,10 +157,20 @@ class _ActivityControllerState extends State<ActivityController>
                 onTapDown: (details) {
                   Provider.of<ActivityProvider>(context, listen: false)
                       .pauseActivityAnimation();
+
+                  if (activityModel.type == ActivityContentType.video.toString()) {
+                    Provider.of<VideoShowProvider>(context, listen: false)
+                        .pauseVideo();
+                  }
                 },
                 onTapUp: (details) {
                   Provider.of<ActivityProvider>(context, listen: false)
                       .resumeActivityAnimation();
+
+                  if (activityModel.type == ActivityContentType.video.toString()) {
+                    Provider.of<VideoShowProvider>(context, listen: false)
+                        .playVideo();
+                  }
                 },
                 child: Container(
                   color: AppColors.transparentColor,

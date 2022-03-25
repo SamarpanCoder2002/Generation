@@ -2,13 +2,10 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/icon_collection.dart';
-import 'package:generation/screens/activity/create/create_activity.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
-import 'package:generation/screens/common/video_editor_common.dart';
 import 'package:generation/services/input_system_services.dart';
-import 'package:generation/services/navigation_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
@@ -358,42 +355,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () async {
         if (index == 0) {
-          Navigation.intent(
-              context, const CreateActivity(activityType: ActivityType.text));
-          //_inputOption.takeImageFromCamera();
+          _inputOption.commonCreateActivityNavigation(ActivityContentType.text, data: {});
         } else if (index == 1) {
-          final _imagePath =
-              await _inputOption.takeImageFromCamera(forChat: false);
-
-          if (_imagePath == null) return;
-
-          Navigation.intent(
-              context,
-              CreateActivity(
-                activityType: ActivityType.image,
-                data: {"path": _imagePath, "type": ImageType.file},
-              ));
+          _inputOption.activityImageFromCamera();
         } else if (index == 2) {
-          //_videoTakingOption();
-          final _imagePath = await _inputOption.pickSingleImageFromGallery();
-
-          if (_imagePath == null) return;
-
-          Navigation.intent(
-              context,
-              CreateActivity(
-                activityType: ActivityType.image,
-                data: {"path": _imagePath, "type": ImageType.file},
-              ));
+          _inputOption.activityImageFromGallery();
         } else if (index == 3) {
-          _videoTakingOption();
-          //_inputOption.documentPickFromDevice();
+          _inputOption.makeVideoActivity();
         } else if (index == 4) {
-          _inputOption.audioPickFromDevice();
+          //_inputOption.audioPickFromDevice();
         } else if (index == 5) {
-          await _inputOption.showCurrentLocationInGoogleMaps(context);
+          //await _inputOption.showCurrentLocationInGoogleMaps(context);
         } else if (index == 6) {
-          await _inputOption.getContacts();
+          //await _inputOption.getContacts();
         }
       },
       child: Column(
@@ -419,57 +393,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  _videoTakingOption() {
-    showModalBottomSheet(
-        context: context,
-        elevation: 5,
-        builder: (_) => Container(
-              color: AppColors.backgroundDarkMode,
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      final data = await _inputOption
-                          .pickVideoFromCameraAndGallery(forChat: false);
-
-                      if (data == null) return;
-
-                      Navigation.intent(
-                          context,
-                          VideoEditingScreen(
-                              path: data["videoPath"],
-                              videoType: VideoType.file,
-                              thumbnailPath: data["thumbnail"]));
-                    },
-                    child: const Text("Camera"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final data =
-                          await _inputOption.pickVideoFromCameraAndGallery(
-                              fromCamera: false, forChat: false);
-
-                      if (data == null) return;
-
-                      Navigation.intent(
-                          context,
-                          VideoEditingScreen(
-                              path: data["videoPath"],
-                              videoType: VideoType.file,
-                              thumbnailPath: data["thumbnail"]));
-                    },
-                    child: const Text("Gallery"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
-                ],
-              ),
-            ));
   }
 }

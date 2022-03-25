@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/config/time_collection.dart';
 import 'package:generation/providers/contacts_provider.dart';
+import 'package:generation/providers/video_management/video_editing_provider.dart';
 import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
 import 'package:generation/screens/common/button.dart';
@@ -21,7 +23,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/chat_scroll_provider.dart';
 import '../providers/messaging_provider.dart';
+import '../screens/activity/create/create_activity.dart';
+import '../screens/common/video_editor_common.dart';
 import 'local_data_management.dart';
+import 'navigation_management.dart';
+import '../types/types.dart';
 
 class InputOption {
   final BuildContext context;
@@ -107,9 +113,12 @@ class InputOption {
   }
 
   pickVideoFromCameraAndGallery(
-      {bool fromCamera = true, bool forChat = true, Duration maxDuration = const Duration(seconds: 30)}) async {
+      {bool fromCamera = true,
+      bool forChat = true,
+      Duration maxDuration = const Duration(seconds: 30)}) async {
     final XFile? pickedVideo = await ImagePicker().pickVideo(
-        source: fromCamera ? ImageSource.camera : ImageSource.gallery, maxDuration: fromCamera?maxDuration:null);
+        source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+        maxDuration: fromCamera ? maxDuration : null);
 
     if (pickedVideo == null) {
       return;
@@ -121,10 +130,10 @@ class InputOption {
     final thumbnailImage = await NativeCallback()
         .getTheVideoThumbnail(videoPath: File(pickedVideo.path).path);
 
-    if(!forChat){
-      final Map<String,dynamic> data = {};
+    if (!forChat) {
+      final Map<String, dynamic> data = {};
       data["thumbnail"] = thumbnailImage;
-      data["videoPath"] =  File(pickedVideo.path).path;
+      data["videoPath"] = File(pickedVideo.path).path;
       return data;
     }
 
@@ -477,4 +486,94 @@ class InputOption {
 
   Future<void> shareTextContent(String textToShare) async =>
       await Share.share(textToShare);
+
+  makeVideoActivity() {
+    showModalBottomSheet(
+        context: context,
+        elevation: 5,
+        builder: (_) => Container(
+              color: AppColors.backgroundDarkMode,
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      final data =
+                          await pickVideoFromCameraAndGallery(forChat: false);
+
+                      if (data == null) return;
+                      _commonVideoNavigationForActivity(data, VideoType.file);
+                    },
+                    child: const Text("Camera"),
+                    style: ElevatedButton.styleFrom(
+                        primary: AppColors.oppositeMsgDarkModeColor),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final data = await pickVideoFromCameraAndGallery(
+                          fromCamera: false, forChat: false);
+
+                      if (data == null) return;
+                      _commonVideoNavigationForActivity(data, VideoType.file);
+                    },
+                    child: const Text("Gallery"),
+                    style: ElevatedButton.styleFrom(
+                        primary: AppColors.oppositeMsgDarkModeColor),
+                  ),
+                ],
+              ),
+            ));
+  }
+
+  _commonVideoNavigationForActivity(dynamic data, VideoType videoType) async {
+    final duration =
+        await Provider.of<VideoEditingProvider>(context, listen: false)
+            .getVideoDuration(File(data["videoPath"]));
+
+    if (duration.inSeconds <= Timings.videoDurationInSec) {
+      Navigation.intent(
+          context,
+          CreateActivity(activityContentType: ActivityContentType.video, data: {
+            "file": File(data["videoPath"]),
+            "thumbnail": data["thumbnail"],
+            "duration": duration.inSeconds.ceil().toString()
+          }));
+    } else {
+      Navigation.intent(
+          context,
+          VideoEditingScreen(
+              path: data["videoPath"],
+              videoType: videoType,
+              thumbnailPath: data["thumbnail"]));
+    }
+  }
+
+  activityImageFromCamera() async {
+    final _imagePath = await takeImageFromCamera(forChat: false);
+
+    if (_imagePath == null) return;
+
+    commonCreateActivityNavigation(ActivityContentType.image,
+        data: {"path": _imagePath, "type": ImageType.file});
+  }
+
+  activityImageFromGallery() async {
+    final _imagePath = await pickSingleImageFromGallery();
+
+    if (_imagePath == null) return;
+
+    commonCreateActivityNavigation(ActivityContentType.image,
+        data: {"path": _imagePath, "type": ImageType.file});
+  }
+
+  commonCreateActivityNavigation(ActivityContentType activityContentType,
+      {required Map<String, dynamic> data}) {
+    Navigation.intent(
+        context,
+        CreateActivity(
+          activityContentType: activityContentType,
+          data: data,
+        ));
+  }
 }
