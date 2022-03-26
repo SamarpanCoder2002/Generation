@@ -123,13 +123,13 @@ class ActivityProvider extends ChangeNotifier {
   forwardOrBackwardActivity(bool isForward, BuildContext context) {
     if (isForward && _currentPageIndex == _activityCollection.length - 1) {
       disposeAnimationController();
+      _stopCurrentPlayingActivitySong();
       Navigator.pop(context);
       return;
     }
     if (!isForward && _currentPageIndex == 0) return;
 
     _stopCurrentPlayingActivitySong();
-
     setUpdatedIndex(isForward ? _currentPageIndex + 1 : _currentPageIndex - 1);
   }
 
