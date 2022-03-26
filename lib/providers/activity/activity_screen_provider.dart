@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/model/activity_model.dart';
-import 'package:generation/providers/time_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../types/types.dart';

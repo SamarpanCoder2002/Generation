@@ -278,16 +278,17 @@ class _CreateActivityState extends State<CreateActivity> {
         title: "Activity Added",
         toastIconType: ToastIconType.success,
         toastDuration: 10);
+
+    if (widget.activityContentType == ActivityContentType.audio) {
+      print("At Here");
+      Provider.of<SongManagementProvider>(context, listen: false).stopSong(update: false);
+    }
+
     Navigator.pop(context);
 
     if (widget.activityContentType == ActivityContentType.video &&
         int.parse(widget.data["duration"]) > Timings.videoDurationInSec) {
       Navigator.pop(context);
-    }
-
-    if (widget.activityContentType == ActivityContentType.audio) {
-      print("At Here");
-     Provider.of<SongManagementProvider>(context, listen: false).stopSong();
     }
   }
 
