@@ -363,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
         } else if (index == 3) {
           _inputOption.makeVideoActivity();
         } else if (index == 4) {
-          //_inputOption.audioPickFromDevice();
+          _inputOption.makeAudioActivity();
         } else if (index == 5) {
           //await _inputOption.showCurrentLocationInGoogleMaps(context);
         } else if (index == 6) {

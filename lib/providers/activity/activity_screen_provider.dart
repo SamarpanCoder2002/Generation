@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/time_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../types/types.dart';
+import '../sound_provider.dart';
 
 class ActivityProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
@@ -49,9 +51,15 @@ class ActivityProvider extends ChangeNotifier {
     int durationInSec = 5;
 
     if (_currentActivityData != null) {
-      durationInSec = _currentActivityData.type == ActivityContentType.video.toString()
-          ? int.parse(_currentActivityData.additionalThings["duration"])
-          : 5;
+      if (_currentActivityData.type == ActivityContentType.video.toString() ||
+          _currentActivityData.type == ActivityContentType.audio.toString()) {
+        durationInSec =
+            int.parse(_currentActivityData.additionalThings["duration"]);
+
+        if (_currentActivityData.type == ActivityContentType.audio.toString()) {
+          durationInSec += 1;
+        }
+      }
     }
 
     _animationController.duration = Duration(seconds: durationInSec);
@@ -70,6 +78,8 @@ class ActivityProvider extends ChangeNotifier {
       if (status == AnimationStatus.completed) {
         _animationController.stop();
         _animationController.reset();
+
+        _stopCurrentPlayingActivitySong();
 
         if (_animationBarCurrentIndex == _activityCollection.length - 1) {
           disposeAnimationController();
@@ -118,6 +128,8 @@ class ActivityProvider extends ChangeNotifier {
     }
     if (!isForward && _currentPageIndex == 0) return;
 
+    _stopCurrentPlayingActivitySong();
+
     setUpdatedIndex(isForward ? _currentPageIndex + 1 : _currentPageIndex - 1);
   }
 
@@ -146,5 +158,14 @@ class ActivityProvider extends ChangeNotifier {
   resumeActivityAnimation() {
     _animationController.forward();
     notifyListeners();
+  }
+
+  void _stopCurrentPlayingActivitySong() {
+    final _isPlaying =
+        Provider.of<SongManagementProvider>(context, listen: false)
+            .isSongPlaying();
+    if (_isPlaying) {
+      Provider.of<SongManagementProvider>(context, listen: false).stopSong(update: false);
+    }
   }
 }

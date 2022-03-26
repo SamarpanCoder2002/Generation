@@ -155,19 +155,27 @@ class _ActivityControllerState extends State<ActivityController>
             Expanded(
               child: GestureDetector(
                 onTapDown: (details) {
-                  Provider.of<ActivityProvider>(context, listen: false)
-                      .pauseActivityAnimation();
+                  if (activityModel.type !=
+                      ActivityContentType.audio.toString()) {
+                    Provider.of<ActivityProvider>(context, listen: false)
+                        .pauseActivityAnimation();
+                  }
 
-                  if (activityModel.type == ActivityContentType.video.toString()) {
+                  if (activityModel.type ==
+                      ActivityContentType.video.toString()) {
                     Provider.of<VideoShowProvider>(context, listen: false)
                         .pauseVideo();
                   }
                 },
                 onTapUp: (details) {
-                  Provider.of<ActivityProvider>(context, listen: false)
-                      .resumeActivityAnimation();
+                  if (activityModel.type !=
+                      ActivityContentType.audio.toString()) {
+                    Provider.of<ActivityProvider>(context, listen: false)
+                        .resumeActivityAnimation();
+                  }
 
-                  if (activityModel.type == ActivityContentType.video.toString()) {
+                  if (activityModel.type ==
+                      ActivityContentType.video.toString()) {
                     Provider.of<VideoShowProvider>(context, listen: false)
                         .playVideo();
                   }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:record/record.dart';
@@ -10,14 +8,12 @@ class SoundRecorderProvider extends ChangeNotifier {
   final _record = Record();
   String? _voiceStoreDirPath;
   bool _isRecording = false;
-
   final PermissionManagement _permissionManagement = PermissionManagement();
 
   Future<bool> startRecording() async {
-    //if (_flutterSoundRecorder.isRecording) return false;
-
     final _permissionForRecording =
-        (await _permissionManagement.recordingPermission()) && (await _permissionManagement.storagePermission());
+        (await _permissionManagement.recordingPermission()) &&
+            (await _permissionManagement.storagePermission());
     if (!_permissionForRecording) return false;
 
     if (_voiceStoreDirPath == null) {
@@ -33,7 +29,7 @@ class SoundRecorderProvider extends ChangeNotifier {
 
     bool result = await _record.hasPermission();
 
-    if(!result) return false;
+    if (!result) return false;
 
     // Start recording
     await _record.start(
@@ -42,19 +38,6 @@ class SoundRecorderProvider extends ChangeNotifier {
       bitRate: 128000, // by default
       samplingRate: 44100, // by default
     );
-
-
-
-    //print("Encoder Status: ${status}");
-
-    ///return false;
-    ///
-     ///_flutterSoundRecorder.openRecorder();
-
-    //print("Check null: ${_flutterSoundRecorder == null}");
-
-    //_flutterSoundRecorder.openRecorderCompleted(1, true);
-
 
     _isRecording = true;
     notifyListeners();

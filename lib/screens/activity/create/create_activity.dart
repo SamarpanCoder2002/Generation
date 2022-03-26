@@ -9,11 +9,13 @@ import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
+import 'package:music_visualizer/music_visualizer.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/text_style_collection.dart';
 import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/messaging_provider.dart';
+import '../../../providers/sound_provider.dart';
 
 class CreateActivity extends StatefulWidget {
   final ActivityContentType activityContentType;
@@ -40,21 +42,32 @@ class _CreateActivityState extends State<CreateActivity> {
   @override
   void dispose() {
     _textActivityController.dispose();
-    changeOnlyNavigationBarColor(navigationBarColor: AppColors.backgroundDarkMode);
+    changeOnlyNavigationBarColor(
+        navigationBarColor: AppColors.backgroundDarkMode);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.pureBlackColor,
-      floatingActionButton: widget.activityContentType == ActivityContentType.text
-          ? _textActivityMakeButton()
-          : null,
-      body: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: _getRealBody(),
+    return WillPopScope(
+      onWillPop: () async{
+        if (widget.activityContentType == ActivityContentType.audio) {
+          print("At Here on Will Pop");
+          Provider.of<SongManagementProvider>(context, listen: false).stopSong();
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.pureBlackColor,
+        floatingActionButton:
+            widget.activityContentType == ActivityContentType.text
+                ? _textActivityMakeButton()
+                : null,
+        body: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: _getRealBody(),
+        ),
       ),
     );
   }
@@ -68,8 +81,7 @@ class _CreateActivityState extends State<CreateActivity> {
       case ActivityContentType.video:
         return _videoActivityCreationSection();
       case ActivityContentType.audio:
-        // TODO: Handle this case.
-        break;
+        return _audioActivityCreationSection();
       case ActivityContentType.poll:
         // TODO: Handle this case.
         break;
@@ -182,7 +194,9 @@ class _CreateActivityState extends State<CreateActivity> {
   _sendButton({Color bgColor = AppColors.darkBorderGreenColor}) {
     return Container(
       margin: EdgeInsets.only(
-          bottom: widget.activityContentType == ActivityContentType.text ? 100 : 10),
+          bottom: widget.activityContentType == ActivityContentType.text
+              ? 100
+              : 10),
       child: FloatingActionButton(
         backgroundColor: bgColor,
         child: Image.asset(
@@ -211,9 +225,9 @@ class _CreateActivityState extends State<CreateActivity> {
   }
 
   _bottomSection() => Align(
-    alignment: Alignment.bottomCenter,
-    child: _otherActivityMakeSection(),
-  );
+        alignment: Alignment.bottomCenter,
+        child: _otherActivityMakeSection(),
+      );
 
   void _onSendButtonPressed() {
     final Map<String, dynamic> map = {};
@@ -248,7 +262,11 @@ class _CreateActivityState extends State<CreateActivity> {
         };
         break;
       case ActivityContentType.audio:
-        // TODO: Handle this case.
+        map["message"] = widget.data["path"];
+        map["additionalThings"] = {
+          "text": _textActivityController.text,
+          "duration": widget.data["duration"]
+        };
         break;
       case ActivityContentType.poll:
         // TODO: Handle this case.
@@ -262,13 +280,45 @@ class _CreateActivityState extends State<CreateActivity> {
         toastDuration: 10);
     Navigator.pop(context);
 
-    if(widget.activityContentType == ActivityContentType.video && int.parse(widget.data["duration"])>Timings.videoDurationInSec) Navigator.pop(context);
+    if (widget.activityContentType == ActivityContentType.video &&
+        int.parse(widget.data["duration"]) > Timings.videoDurationInSec) {
+      Navigator.pop(context);
+    }
+
+    if (widget.activityContentType == ActivityContentType.audio) {
+      print("At Here");
+     Provider.of<SongManagementProvider>(context, listen: false).stopSong();
+    }
   }
 
   _videoActivityCreationSection() {
     return Stack(
       children: [
         VideoShowScreen(file: widget.data["file"]),
+        _bottomSection(),
+      ],
+    );
+  }
+
+  _audioActivityCreationSection() {
+    Provider.of<SongManagementProvider>(context, listen: false)
+        .audioPlaying(widget.data["path"], update: false);
+
+    return Stack(
+      children: [
+        //_isPlaying?
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          alignment: Alignment.center,
+          child: MusicVisualizer(
+            barCount: 30,
+            colors: WaveForm.colors,
+            duration: Timings.waveFormDuration,
+          ),
+        ),
+        //:const Center(child: Text("Song Playing Completed", style: TextStyleCollection.secondaryHeadingTextStyle,),),
         _bottomSection(),
       ],
     );

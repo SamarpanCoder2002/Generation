@@ -7,6 +7,7 @@ import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/config/time_collection.dart';
 import 'package:generation/providers/contacts_provider.dart';
+import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/video_management/video_editing_provider.dart';
 import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
@@ -17,12 +18,15 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:music_visualizer/music_visualizer.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../config/images_path_collection.dart';
 import '../providers/chat_scroll_provider.dart';
 import '../providers/messaging_provider.dart';
+import '../providers/sound_provider.dart';
 import '../screens/activity/create/create_activity.dart';
 import '../screens/common/video_editor_common.dart';
 import 'local_data_management.dart';
@@ -174,7 +178,7 @@ class InputOption {
         _allowedExtensions, ChatMessageType.document);
   }
 
-  audioPickFromDevice() async {
+  audioPickFromDevice({bool forChat = true}) async {
     final List<String> _allowedExtensions = [
       'mp3',
       'aac',
@@ -182,11 +186,15 @@ class InputOption {
       'wav',
     ];
 
-    await _commonFilePickingSection(_allowedExtensions, ChatMessageType.audio);
+    if(forChat) {
+      _commonFilePickingSection(_allowedExtensions, ChatMessageType.audio);
+    } else {
+      return _commonFilePickingSection(_allowedExtensions, ChatMessageType.audio, forChat: forChat);
+    }
   }
 
   _commonFilePickingSection(
-      List<String> _allowedExtensions, ChatMessageType chatMessageType) async {
+      List<String> _allowedExtensions, ChatMessageType chatMessageType, {bool forChat = true}) async {
     try {
       final storagePermissionResponse =
           await _permissionManagement.storagePermission();
@@ -200,10 +208,12 @@ class InputOption {
         dialogTitle: "Choose Files",
         type: FileType.custom,
         allowedExtensions: _allowedExtensions,
-        allowMultiple: true,
+        allowMultiple: forChat?true:false,
       );
 
       if (filePickerResult == null || filePickerResult.files.isEmpty) return;
+
+      if(!forChat) return filePickerResult.files[0];
 
       Navigator.pop(context);
 
@@ -569,11 +579,183 @@ class InputOption {
 
   commonCreateActivityNavigation(ActivityContentType activityContentType,
       {required Map<String, dynamic> data}) {
+    print("Navigation at");
+
     Navigation.intent(
         context,
         CreateActivity(
           activityContentType: activityContentType,
           data: data,
         ));
+  }
+
+  void makeAudioActivity() {
+    showModalBottomSheet(
+        context: context,
+        elevation: 5,
+        builder: (_) => Container(
+              color: AppColors.backgroundDarkMode,
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: _recordForActivity,
+                    child: const Text("Record"),
+                    style: ElevatedButton.styleFrom(
+                        primary: AppColors.oppositeMsgDarkModeColor),
+                  ),
+                  ElevatedButton(
+                    onPressed: _pickAudioForActivity,
+                    child: const Text("Pick"),
+                    style: ElevatedButton.styleFrom(
+                        primary: AppColors.oppositeMsgDarkModeColor),
+                  ),
+                ],
+              ),
+            ));
+  }
+
+  _recordForActivity() {
+    Navigator.pop(context);
+    _deleteRecording() => IconButton(
+          icon: const Icon(
+            Icons.delete_outline_outlined,
+            color: AppColors.pureWhiteColor,
+          ),
+          onPressed: () {
+            Provider.of<SoundRecorderProvider>(context, listen: false)
+                .stopRecording();
+            Navigator.pop(context);
+          },
+        );
+
+    _recordingWaveForm() => SizedBox(
+          width: MediaQuery.of(context).size.width - 120,
+          child: MusicVisualizer(
+            barCount: 30,
+            colors: WaveForm.colors,
+            duration: Timings.waveFormDuration,
+          ),
+        );
+
+    _recordingVoiceSending() => IconButton(
+          icon: Image.asset(
+            IconImages.sendImagePath,
+            width: 25,
+          ),
+          onPressed: () async {
+            final _voiceRecordPath =
+                await Provider.of<SoundRecorderProvider>(context, listen: false)
+                    .stopRecording();
+
+            final int? durationInSec =
+                await Provider.of<SongManagementProvider>(context,
+                        listen: false)
+                    .getDurationInSec(_voiceRecordPath);
+
+            Navigator.pop(context);
+            Navigator.pop(context);
+
+            print("Duration in sec: $durationInSec");
+
+            if (durationInSec == null ||
+                durationInSec > Timings.audioDurationInSec) {
+              showToast(context,
+                  title:
+                      "Toast Duration greater than ${Timings.audioDurationInSec} sec",
+                  toastIconType: ToastIconType.warning);
+              return;
+            }
+
+            commonCreateActivityNavigation(ActivityContentType.audio, data: {
+              "path": _voiceRecordPath,
+              "duration": durationInSec.toString()
+            });
+          },
+        );
+
+    _whenRecordingWidget() => Container(
+          color: AppColors.backgroundDarkMode,
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _deleteRecording(),
+              _recordingWaveForm(),
+              _recordingVoiceSending(),
+            ],
+          ),
+        );
+
+    _whenNonRecordingWidget() => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ElevatedButton(
+              onPressed: () =>
+                  Provider.of<SoundRecorderProvider>(context, listen: false)
+                      .startRecording()
+                      .then((value) => _recordForActivity()),
+              child: const Text("Start"),
+              style: ElevatedButton.styleFrom(
+                  primary: AppColors.oppositeMsgDarkModeColor),
+            ),
+            Text(
+              "Audio Length Restricted to ${Timings.audioDurationInSec} sec",
+              style:
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+            )
+          ],
+        );
+
+    showModalBottomSheet(
+        context: context,
+        elevation: 5,
+        builder: (_) {
+          final bool _isRecording =
+              Provider.of<SoundRecorderProvider>(context).getRecordingStatus();
+
+          return Container(
+            color: AppColors.backgroundDarkMode,
+            padding: EdgeInsets.all(_isRecording ? 0 : 10),
+            child: _isRecording
+                ? _whenRecordingWidget()
+                : _whenNonRecordingWidget(),
+          );
+        });
+  }
+
+  void _pickAudioForActivity() async{
+    final file = await audioPickFromDevice(forChat: false);
+
+    if(file == null) return;
+
+    print("File: ${file.path}");
+
+    final int? durationInSec =
+    await Provider.of<SongManagementProvider>(context,
+        listen: false)
+        .getDurationInSec(File(file.path).path);
+
+    print("Duration in Sec: $durationInSec");
+
+    if (durationInSec == null ||
+        durationInSec > Timings.audioDurationInSec) {
+      showToast(context,
+          title:
+          "Toast Duration greater than ${Timings.audioDurationInSec} sec",
+          toastIconType: ToastIconType.warning);
+      return;
+    }
+
+    Navigator.pop(context);
+    Navigator.pop(context);
+
+    commonCreateActivityNavigation(ActivityContentType.audio, data: {
+      "path": File(file.path).path,
+      "duration": durationInSec.toString()
+    });
+
+
   }
 }
