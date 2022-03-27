@@ -20,6 +20,8 @@ import 'package:generation/providers/wallpaper/wallpaper_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+import 'activity/poll_creator_provider.dart';
+import 'activity/poll_show_provider.dart';
 import 'connection_management_provider_collection/incoming_request_provider.dart';
 import 'connection_management_provider_collection/sent_request_provider.dart';
 import 'main_screen_provider.dart';
@@ -47,4 +49,6 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => VideoEditingProvider()),
   ChangeNotifierProvider(create: (_) => TimeProvider()),
   ChangeNotifierProvider(create: (_) => VideoShowProvider()),
+  ChangeNotifierProvider(create: (_) => PollCreatorProvider()),
+  ChangeNotifierProvider(create: (_) => PollShowProvider()),
 ];

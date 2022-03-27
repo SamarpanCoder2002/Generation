@@ -1,15 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/time_collection.dart';
-
+import 'package:generation/providers/activity/poll_creator_provider.dart';
 import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:music_visualizer/music_visualizer.dart';
+import 'package:polls/polls.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/text_style_collection.dart';
@@ -50,10 +52,11 @@ class _CreateActivityState extends State<CreateActivity> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async{
+      onWillPop: () async {
         if (widget.activityContentType == ActivityContentType.audio) {
           print("At Here on Will Pop");
-          Provider.of<SongManagementProvider>(context, listen: false).stopSong();
+          Provider.of<SongManagementProvider>(context, listen: false)
+              .stopSong();
         }
         return true;
       },
@@ -83,11 +86,8 @@ class _CreateActivityState extends State<CreateActivity> {
       case ActivityContentType.audio:
         return _audioActivityCreationSection();
       case ActivityContentType.poll:
-        // TODO: Handle this case.
-        break;
+        return _pollActivityCreationSection();
     }
-
-    return const Center();
   }
 
   _textActivityCreationSection() => SingleChildScrollView(
@@ -269,7 +269,11 @@ class _CreateActivityState extends State<CreateActivity> {
         };
         break;
       case ActivityContentType.poll:
-        // TODO: Handle this case.
+        map["message"] = json.encode(widget.data).toString();
+        map["additionalThings"] = {
+          "text": _textActivityController.text,
+          "duration": widget.data["duration"]
+        };
         break;
     }
 
@@ -280,8 +284,14 @@ class _CreateActivityState extends State<CreateActivity> {
         toastDuration: 10);
 
     if (widget.activityContentType == ActivityContentType.audio) {
-      print("At Here");
-      Provider.of<SongManagementProvider>(context, listen: false).stopSong(update: false);
+      Provider.of<SongManagementProvider>(context, listen: false)
+          .stopSong(update: false);
+    }
+
+    if (widget.activityContentType == ActivityContentType.poll) {
+      Provider.of<PollCreatorProvider>(context, listen: false).reset();
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
 
     Navigator.pop(context);
@@ -324,4 +334,45 @@ class _CreateActivityState extends State<CreateActivity> {
       ],
     );
   }
+
+  _pollActivityCreationSection() {
+    return Stack(
+      children: [_pollShowingSection(), _bottomSection()],
+    );
+  }
+
+  _pollShowingSection() => Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 100),
+        alignment: Alignment.center,
+        color: AppColors.backgroundDarkMode,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _pollInstructionSection(),
+            Polls.viewPolls(
+              question: Text(
+                widget.data["question"],
+                style: TextStyleCollection.secondaryHeadingTextStyle,
+              ),
+              children: [
+                ...widget.data["answer"].map((answer) =>
+                    Polls.options(title: answer.keys.toList()[0], value: 0)),
+              ],
+            ),
+          ],
+        ),
+      );
+
+  _pollInstructionSection() => Container(
+        alignment: Alignment.center,
+        margin: const EdgeInsets.only(bottom: 30),
+        child: Text(
+          "This is the Poll Looks Like When You Create Your Activity. You Can Vote After Create Activity.",
+          textAlign: TextAlign.center,
+          style: TextStyleCollection.secondaryHeadingTextStyle
+              .copyWith(color: AppColors.orangeTextColor),
+        ),
+      );
 }

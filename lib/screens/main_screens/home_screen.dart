@@ -2,10 +2,12 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/icon_collection.dart';
+import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
+import 'package:generation/services/navigation_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
@@ -365,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
         } else if (index == 4) {
           _inputOption.makeAudioActivity();
         } else if (index == 5) {
-          //await _inputOption.showCurrentLocationInGoogleMaps(context);
+          Navigation.intent(context, const PollCreatorScreen());
         } else if (index == 6) {
           //await _inputOption.getContacts();
         }

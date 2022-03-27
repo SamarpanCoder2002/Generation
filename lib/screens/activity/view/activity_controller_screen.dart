@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
+import 'package:generation/providers/activity/poll_show_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/types/types.dart';
@@ -98,12 +99,20 @@ class _ActivityControllerState extends State<ActivityController>
 
           if (_currentActivityData == null) return const Center();
 
+          if (_currentActivityData.type ==
+              ActivityContentType.poll.toString()) {
+            Provider.of<PollShowProvider>(context, listen: false)
+                .setPollData(_currentActivityData.message, update: false);
+          }
+
           return Stack(
             clipBehavior: Clip.none,
             children: [
               ActivityViewer(activityData: _currentActivityData),
               _activityAnimation(),
-              _transparentNavigatingWidget(_currentActivityData),
+              if (_currentActivityData.type !=
+                  ActivityContentType.poll.toString())
+                _transparentNavigatingWidget(_currentActivityData),
             ],
           );
         },
@@ -149,7 +158,7 @@ class _ActivityControllerState extends State<ActivityController>
               child: Container(
                 width: MediaQuery.of(context).size.width / 6,
                 height: MediaQuery.of(context).size.height,
-                color: AppColors.transparentColor,
+                color: AppColors.pureWhiteColor,
               ),
             ),
             Expanded(
@@ -194,7 +203,7 @@ class _ActivityControllerState extends State<ActivityController>
               child: Container(
                 width: MediaQuery.of(context).size.width / 6,
                 height: MediaQuery.of(context).size.height,
-                color: AppColors.transparentColor,
+                color: AppColors.lightRedColor,
               ),
             ),
           ],

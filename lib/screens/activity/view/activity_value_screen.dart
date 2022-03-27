@@ -6,10 +6,12 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
+import 'package:generation/providers/activity/poll_show_provider.dart';
 import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/types/types.dart';
 import 'package:music_visualizer/music_visualizer.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:polls/polls.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,10 +36,9 @@ class _ActivityViewerState extends State<ActivityViewer> {
   void initState() {
     _scrollController.addListener(_scrollListener);
 
-    if(widget.activityData.type ==
-        ActivityContentType.audio.toString()) {
+    if (widget.activityData.type == ActivityContentType.audio.toString()) {
       Provider.of<SongManagementProvider>(context, listen: false)
-        .audioPlaying(widget.activityData.message);
+          .audioPlaying(widget.activityData.message);
     }
     super.initState();
   }
@@ -62,7 +63,6 @@ class _ActivityViewerState extends State<ActivityViewer> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-
         final bool _isSongPlaying =
             Provider.of<SongManagementProvider>(context, listen: false)
                 .isSongPlaying();
@@ -94,6 +94,9 @@ class _ActivityViewerState extends State<ActivityViewer> {
     } else if (widget.activityData.type ==
         ActivityContentType.audio.toString()) {
       return _audioActivityShow();
+    } else if (widget.activityData.type ==
+        ActivityContentType.poll.toString()) {
+      return _pollActivityShow();
     }
   }
 
@@ -202,8 +205,6 @@ class _ActivityViewerState extends State<ActivityViewer> {
   }
 
   _audioShowScreen() {
-
-
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -214,6 +215,54 @@ class _ActivityViewerState extends State<ActivityViewer> {
         barCount: 30,
         colors: WaveForm.colors,
         duration: Timings.waveFormDuration,
+      ),
+    );
+  }
+
+  _pollActivityShow() {
+    return Stack(
+      children: [
+        _pollShowScreen(),
+        //Text("Samarpan" , style: TextStyleCollection.terminalTextStyle,),
+        _bottomExtraTextSection(),
+      ],
+    );
+  }
+
+  _pollShowScreen() {
+    final _pollShowProvider = Provider.of<PollShowProvider>(context);
+    final _pollAnsCollection = _pollShowProvider.getPollAnswers();
+
+    print("Updated Data: ${_pollShowProvider.getIndexedAnswerValue(0)}");
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      color: AppColors.backgroundDarkMode,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Polls(
+            backgroundColor: AppColors.pureWhiteColor,
+            currentUser: _pollShowProvider.getCurrentUser(),
+            voteData: _pollShowProvider.getUsersVoted(),
+            creatorID: '1',
+            children: [
+              ..._pollAnsCollection.map((answer) => Polls.options(
+                  title: answer,
+                  value: _pollShowProvider.getIndexedAnswerValue(
+                      _pollAnsCollection.indexOf(answer))))
+            ],
+            question: Text(
+              _pollShowProvider.getPollQuestion(),
+              style: TextStyleCollection.secondaryHeadingTextStyle,
+            ),
+            onVote: (choice) =>
+                Provider.of<PollShowProvider>(context, listen: false)
+                    .increaseIndexedAnswerValue(choice - 1),
+          ),
+        ],
       ),
     );
   }

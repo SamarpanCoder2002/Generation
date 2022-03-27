@@ -50,7 +50,8 @@ class ActivityProvider extends ChangeNotifier {
 
     if (_currentActivityData != null) {
       if (_currentActivityData.type == ActivityContentType.video.toString() ||
-          _currentActivityData.type == ActivityContentType.audio.toString()) {
+          _currentActivityData.type == ActivityContentType.audio.toString() ||
+          _currentActivityData.type == ActivityContentType.poll.toString()) {
         durationInSec =
             int.parse(_currentActivityData.additionalThings["duration"]);
 
@@ -163,7 +164,8 @@ class ActivityProvider extends ChangeNotifier {
         Provider.of<SongManagementProvider>(context, listen: false)
             .isSongPlaying();
     if (_isPlaying) {
-      Provider.of<SongManagementProvider>(context, listen: false).stopSong(update: false);
+      Provider.of<SongManagementProvider>(context, listen: false)
+          .stopSong(update: false);
     }
   }
 }

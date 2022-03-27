@@ -47,6 +47,8 @@ class AppColors {
   static const Color audioIconBgColor = Color(0xffEFBF40);
   static const Color locationIconBgColor = Color(0xff3FBC6C);
   static const Color personIconBgColor = Color(0xffF26109);
+
+  static const Color orangeTextColor = Color(0xffffbf00);
 }
 
 class WaveForm{

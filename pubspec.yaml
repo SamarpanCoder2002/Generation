@@ -61,7 +61,7 @@ dependencies:
   share_plus: ^4.0.2
   flutter_colorpicker: ^1.0.3
   video_editor: ^1.2.4
-  helpers: ^1.1.4
+  polls: ^1.0.1
 
 
   # The following adds the Cupertino Icons font to your application.

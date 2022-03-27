@@ -186,15 +186,18 @@ class InputOption {
       'wav',
     ];
 
-    if(forChat) {
+    if (forChat) {
       _commonFilePickingSection(_allowedExtensions, ChatMessageType.audio);
     } else {
-      return _commonFilePickingSection(_allowedExtensions, ChatMessageType.audio, forChat: forChat);
+      return _commonFilePickingSection(
+          _allowedExtensions, ChatMessageType.audio,
+          forChat: forChat);
     }
   }
 
   _commonFilePickingSection(
-      List<String> _allowedExtensions, ChatMessageType chatMessageType, {bool forChat = true}) async {
+      List<String> _allowedExtensions, ChatMessageType chatMessageType,
+      {bool forChat = true}) async {
     try {
       final storagePermissionResponse =
           await _permissionManagement.storagePermission();
@@ -208,12 +211,12 @@ class InputOption {
         dialogTitle: "Choose Files",
         type: FileType.custom,
         allowedExtensions: _allowedExtensions,
-        allowMultiple: forChat?true:false,
+        allowMultiple: forChat ? true : false,
       );
 
       if (filePickerResult == null || filePickerResult.files.isEmpty) return;
 
-      if(!forChat) return filePickerResult.files[0];
+      if (!forChat) return filePickerResult.files[0];
 
       Navigator.pop(context);
 
@@ -725,25 +728,23 @@ class InputOption {
         });
   }
 
-  void _pickAudioForActivity() async{
+  void _pickAudioForActivity() async {
     final file = await audioPickFromDevice(forChat: false);
 
-    if(file == null) return;
+    if (file == null) return;
 
     print("File: ${file.path}");
 
     final int? durationInSec =
-    await Provider.of<SongManagementProvider>(context,
-        listen: false)
-        .getDurationInSec(File(file.path).path);
+        await Provider.of<SongManagementProvider>(context, listen: false)
+            .getDurationInSec(File(file.path).path);
 
     print("Duration in Sec: $durationInSec");
 
-    if (durationInSec == null ||
-        durationInSec > Timings.audioDurationInSec) {
+    if (durationInSec == null || durationInSec > Timings.audioDurationInSec) {
       showToast(context,
           title:
-          "Toast Duration greater than ${Timings.audioDurationInSec} sec",
+              "Toast Duration greater than ${Timings.audioDurationInSec} sec",
           toastIconType: ToastIconType.warning);
       return;
     }
@@ -755,7 +756,5 @@ class InputOption {
       "path": File(file.path).path,
       "duration": durationInSec.toString()
     });
-
-
   }
 }
