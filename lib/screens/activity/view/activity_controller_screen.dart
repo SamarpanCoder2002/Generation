@@ -158,7 +158,7 @@ class _ActivityControllerState extends State<ActivityController>
               child: Container(
                 width: MediaQuery.of(context).size.width / 6,
                 height: MediaQuery.of(context).size.height,
-                color: AppColors.pureWhiteColor,
+                color: AppColors.transparentColor,
               ),
             ),
             Expanded(
@@ -203,7 +203,7 @@ class _ActivityControllerState extends State<ActivityController>
               child: Container(
                 width: MediaQuery.of(context).size.width / 6,
                 height: MediaQuery.of(context).size.height,
-                color: AppColors.lightRedColor,
+                color: AppColors.transparentColor,
               ),
             ),
           ],
