@@ -115,7 +115,7 @@ class _CreateActivityState extends State<CreateActivity> {
             border: InputBorder.none,
             hintText: 'Type Anything Here',
             hintStyle: TextStyleCollection.terminalTextStyle.copyWith(
-                fontSize: 20, color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                fontSize: 20, color: AppColors.pureWhiteColor.withOpacity(0.6)),
           ),
         ),
       );
@@ -297,7 +297,7 @@ class _CreateActivityState extends State<CreateActivity> {
     Navigator.pop(context);
 
     if (widget.activityContentType == ActivityContentType.video &&
-        int.parse(widget.data["duration"]) > Timings.videoDurationInSec) {
+        int.parse(widget.data["duration"]) >= Timings.videoDurationInSec) {
       Navigator.pop(context);
     }
   }

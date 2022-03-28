@@ -68,8 +68,6 @@ class _ActivityViewerState extends State<ActivityViewer> {
             Provider.of<SongManagementProvider>(context, listen: false)
                 .isSongPlaying();
 
-        print("Here: $_isSongPlaying");
-
         if (_isSongPlaying) {
           Provider.of<SongManagementProvider>(context, listen: false)
               .stopSong(update: false);
@@ -126,11 +124,13 @@ class _ActivityViewerState extends State<ActivityViewer> {
   _imageActivityShow() {
     return Stack(
       children: [
-        SizedBox(
+        Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
+          color: AppColors.pureBlackColor,
           child: PhotoView(
             imageProvider: FileImage(File(widget.activityData.message)),
+            enableRotation: false,
             loadingBuilder: (_, __) => Center(
               child: Text(
                 "Loading...",
@@ -150,45 +150,6 @@ class _ActivityViewerState extends State<ActivityViewer> {
         _bottomExtraTextSection(),
       ],
     );
-  }
-
-  _bottomExtraTextSection() {
-    if (widget.activityData.additionalThings["text"] == null ||
-        widget.activityData.additionalThings["text"] == "") {
-      return const Center();
-    }
-
-    return Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          color: AppColors.pureBlackColor.withOpacity(0.2),
-          alignment: Alignment.center,
-          height: SizeCollection.activityBottomTextHeight,
-          margin: const EdgeInsets.only(bottom: 50),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          child: SingleChildScrollView(
-              controller: _scrollController,
-              scrollDirection: Axis.vertical,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10,bottom: 50),
-                child: Linkify(
-                  text: widget.activityData.additionalThings["text"],
-                  onOpen: (link) async {
-                    try {
-                      await launch(link.url);
-                    } catch (e) {
-                      throw 'Could not launch $link';
-                    }
-                  },
-                  linkStyle: TextStyleCollection.terminalTextStyle
-                      .copyWith(fontSize: 16),
-                  style: TextStyleCollection.terminalTextStyle
-                      .copyWith(fontSize: 16),
-                  options: const LinkifyOptions(humanize: false),
-                ),
-              )),
-        ));
   }
 
   _videoActivityShow() {
@@ -269,5 +230,45 @@ class _ActivityViewerState extends State<ActivityViewer> {
         ],
       ),
     );
+  }
+
+  _bottomExtraTextSection() {
+    if (widget.activityData.additionalThings["text"] == null ||
+        widget.activityData.additionalThings["text"] == "") {
+      return const Center();
+    }
+
+    return Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          color: AppColors.pureBlackColor.withOpacity(0.2),
+          alignment: Alignment.center,
+          height: SizeCollection.activityBottomTextHeight,
+          margin: const EdgeInsets.only(bottom: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              controller: _scrollController,
+              scrollDirection: Axis.vertical,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, bottom: 50),
+                child: Linkify(
+                  text: widget.activityData.additionalThings["text"],
+                  onOpen: (link) async {
+                    try {
+                      await launch(link.url);
+                    } catch (e) {
+                      throw 'Could not launch $link';
+                    }
+                  },
+                  linkStyle: TextStyleCollection.terminalTextStyle
+                      .copyWith(fontSize: 16),
+                  style: TextStyleCollection.terminalTextStyle
+                      .copyWith(fontSize: 16),
+                  options: const LinkifyOptions(humanize: false),
+                ),
+              )),
+        ));
   }
 }

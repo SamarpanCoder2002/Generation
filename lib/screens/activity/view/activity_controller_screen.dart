@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
 import 'package:generation/providers/activity/poll_show_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
@@ -8,6 +10,7 @@ import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../../config/size_collection.dart';
+import '../../../providers/sound_provider.dart';
 import '../../../providers/video_management/video_show_provider.dart';
 import '../animation_controller.dart';
 
@@ -21,7 +24,6 @@ class ActivityController extends StatefulWidget {
 class _ActivityControllerState extends State<ActivityController>
     with TickerProviderStateMixin {
   final TextEditingController textEditingController = TextEditingController();
-  bool _replyBtnClicked = false;
 
   @override
   void initState() {
@@ -45,19 +47,36 @@ class _ActivityControllerState extends State<ActivityController>
     super.dispose();
   }
 
+  _onReplySectionRemovedAction() {
+    final _activityProvider =
+        Provider.of<ActivityProvider>(context, listen: false);
+
+    final _currentActivityData = _activityProvider
+        .getParticularActivity(_activityProvider.getPageIndex());
+
+    Provider.of<ActivityProvider>(context, listen: false)
+        .updateReplyBtnClicked(false);
+
+    Provider.of<ActivityProvider>(context, listen: false)
+        .resumeActivityAnimation();
+
+    if (_currentActivityData!.type == ActivityContentType.video.toString()) {
+      Provider.of<VideoShowProvider>(context, listen: false).playVideo();
+    }
+
+    if (_currentActivityData.type == ActivityContentType.audio.toString()) {
+      Provider.of<SongManagementProvider>(context, listen: false).playSong();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final _activityProvider = Provider.of<ActivityProvider>(context);
+
     return WillPopScope(
       onWillPop: () async {
-        if (_replyBtnClicked) {
-          if (mounted) {
-            setState(() {
-              _replyBtnClicked = false;
-            });
-          }
-
-          Provider.of<ActivityProvider>(context, listen: false)
-              .resumeActivityAnimation();
+        if (_activityProvider.isReplyBtnClicked()) {
+          _onReplySectionRemovedAction();
           return false;
         }
 
@@ -77,8 +96,9 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _activityPagination() {
+    final _activityProvider = Provider.of<ActivityProvider>(context);
     final int _totalActivityData =
-        Provider.of<ActivityProvider>(context).getLengthOfActivityCollection();
+        _activityProvider.getLengthOfActivityCollection();
 
     if (_totalActivityData == 0) {
       changeOnlyNavigationBarColor(
@@ -126,11 +146,10 @@ class _ActivityControllerState extends State<ActivityController>
             children: [
               ActivityViewer(activityData: _currentActivityData),
               _activityAnimation(),
-              if (_currentActivityData.type !=
-                  ActivityContentType.poll.toString())
-                _transparentNavigatingWidget(_currentActivityData),
-              _replyButton(),
-              if (_replyBtnClicked) _replySection(),
+              _forNavigation(_currentActivityData),
+              if (!_activityProvider.isReplyBtnClicked())
+                _replyButton(_currentActivityData),
+              if (_activityProvider.isReplyBtnClicked()) _replySection(),
             ],
           );
         },
@@ -184,29 +203,35 @@ class _ActivityControllerState extends State<ActivityController>
             Expanded(
               child: GestureDetector(
                 onTapDown: (details) {
-                  if (activityModel.type !=
-                      ActivityContentType.audio.toString()) {
-                    Provider.of<ActivityProvider>(context, listen: false)
-                        .pauseActivityAnimation();
-                  }
+                  Provider.of<ActivityProvider>(context, listen: false)
+                      .pauseActivityAnimation();
 
                   if (activityModel.type ==
                       ActivityContentType.video.toString()) {
                     Provider.of<VideoShowProvider>(context, listen: false)
                         .pauseVideo();
                   }
+
+                  if (activityModel.type ==
+                      ActivityContentType.audio.toString()) {
+                    Provider.of<SongManagementProvider>(context, listen: false)
+                        .pauseSong();
+                  }
                 },
                 onTapUp: (details) {
-                  if (activityModel.type !=
-                      ActivityContentType.audio.toString()) {
-                    Provider.of<ActivityProvider>(context, listen: false)
-                        .resumeActivityAnimation();
-                  }
+                  Provider.of<ActivityProvider>(context, listen: false)
+                      .resumeActivityAnimation();
 
                   if (activityModel.type ==
                       ActivityContentType.video.toString()) {
                     Provider.of<VideoShowProvider>(context, listen: false)
                         .playVideo();
+                  }
+
+                  if (activityModel.type ==
+                      ActivityContentType.audio.toString()) {
+                    Provider.of<SongManagementProvider>(context, listen: false)
+                        .playSong();
                   }
                 },
                 child: Container(
@@ -230,24 +255,38 @@ class _ActivityControllerState extends State<ActivityController>
         ),
       );
 
-  _replyButton() {
+  _replyButton(_currentActivityData) {
+    _getBgColor() {
+      return _currentActivityData.additionalThings["text"] == null ||
+              _currentActivityData.additionalThings["text"] == ""
+          ? AppColors.transparentColor
+          : AppColors.pureBlackColor.withOpacity(0.2);
+    }
+
+    _onTap() {
+      Provider.of<ActivityProvider>(context, listen: false)
+          .pauseActivityAnimation();
+
+      Provider.of<ActivityProvider>(context, listen: false)
+          .updateReplyBtnClicked(true);
+
+      if (_currentActivityData.type == ActivityContentType.video.toString()) {
+        Provider.of<VideoShowProvider>(context, listen: false).pauseVideo();
+      }
+
+      if (_currentActivityData.type == ActivityContentType.audio.toString()) {
+        Provider.of<SongManagementProvider>(context, listen: false).pauseSong();
+      }
+    }
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: InkWell(
-        onTap: () {
-          Provider.of<ActivityProvider>(context, listen: false)
-              .pauseActivityAnimation();
-
-          if (mounted) {
-            setState(() {
-              _replyBtnClicked = !_replyBtnClicked;
-            });
-          }
-        },
+        onTap: _onTap,
         child: Container(
           width: double.maxFinite,
           height: 50,
-          color: AppColors.pureBlackColor.withOpacity(0.2),
+          color: _getBgColor(),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
@@ -316,6 +355,7 @@ class _ActivityControllerState extends State<ActivityController>
     return SizedBox(
       width: MediaQuery.of(context).size.width - 180,
       child: TextField(
+        autofocus: true,
         controller: textEditingController,
         style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
         maxLines: null,
@@ -332,19 +372,35 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _sendButton({Color bgColor = AppColors.darkBorderGreenColor}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+    return InkWell(
+      onTap: () {
+        textEditingController.clear();
+      },
       child: Container(
-        width: 45,
-        height: 45,
-        padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.only(right: 10),
-        decoration: BoxDecoration(
-            color: bgColor, borderRadius: BorderRadius.circular(100)),
-        child: Image.asset(
-          "assets/images/send.png",
+        margin: const EdgeInsets.only(bottom: 10),
+        child: Container(
+          width: 45,
+          height: 45,
+          padding: const EdgeInsets.all(10),
+          margin: const EdgeInsets.only(right: 10),
+          decoration: BoxDecoration(
+              color: bgColor, borderRadius: BorderRadius.circular(100)),
+          child: Image.asset(
+            IconImages.sendImagePath,
+          ),
         ),
       ),
     );
+  }
+
+  _forNavigation(ActivityModel _currentActivityData) {
+    final _activityProvider = Provider.of<ActivityProvider>(context);
+
+    if (_currentActivityData.type != ActivityContentType.poll.toString() &&
+        !_activityProvider.isReplyBtnClicked()) {
+      return _transparentNavigatingWidget(_currentActivityData);
+    }
+
+    return const Center();
   }
 }

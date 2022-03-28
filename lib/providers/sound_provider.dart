@@ -10,15 +10,16 @@ class SongManagementProvider extends ChangeNotifier {
 
   setSongPlaying({bool update = true}) {
     _isSongPlaying = true;
-    if(update) notifyListeners();
+    if (update) notifyListeners();
   }
 
   unsetSongPlaying({bool update = true}) {
     _isSongPlaying = false;
-    if(update) notifyListeners();
+    if (update) notifyListeners();
   }
 
   bool isSongPlaying() => _isSongPlaying;
+
   //bool isSongPlayingNative() => _justAudioPlayer.playing;
 
   getSongPath() => _currentSongPath ?? "";
@@ -48,7 +49,7 @@ class SongManagementProvider extends ChangeNotifier {
         final second = event.inSeconds;
         _showingTime =
             "${minute < 10 ? "0$minute" : minute}:${second < 10 ? "0$second" : second}";
-        if(update) notifyListeners();
+        if (update) notifyListeners();
       });
 
       _justAudioPlayer.playerStateStream.listen((event) {
@@ -57,7 +58,6 @@ class SongManagementProvider extends ChangeNotifier {
           _reset();
         }
       });
-
 
       if (_currentSongPath != playingSongPath) {
         await _justAudioPlayer.setFilePath(playingSongPath);
@@ -85,8 +85,7 @@ class SongManagementProvider extends ChangeNotifier {
 
           await _justAudioPlayer.play();
         } else if (_justAudioPlayer.processingState ==
-            ProcessingState.completed) {
-        }
+            ProcessingState.completed) {}
       }
     } catch (e) {
       print('Audio Playing Error: $e');

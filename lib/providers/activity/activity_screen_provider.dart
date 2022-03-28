@@ -11,6 +11,14 @@ class ActivityProvider extends ChangeNotifier {
   final PageController _pageController = PageController();
   late AnimationController _animationController;
   late BuildContext context;
+  bool _replyBtnClicked = false;
+
+  isReplyBtnClicked() => _replyBtnClicked;
+
+  updateReplyBtnClicked(bool status){
+    _replyBtnClicked = status;
+    notifyListeners();
+  }
 
   final List<String> _monthCollection = [
     "Jan",
