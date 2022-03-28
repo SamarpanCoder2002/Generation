@@ -7,6 +7,7 @@ import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
+import '../../../config/size_collection.dart';
 import '../../../providers/video_management/video_show_provider.dart';
 import '../animation_controller.dart';
 
@@ -19,6 +20,9 @@ class ActivityController extends StatefulWidget {
 
 class _ActivityControllerState extends State<ActivityController>
     with TickerProviderStateMixin {
+  final TextEditingController textEditingController = TextEditingController();
+  bool _replyBtnClicked = false;
+
   @override
   void initState() {
     changeSystemNavigationAndStatusBarColor(
@@ -45,6 +49,18 @@ class _ActivityControllerState extends State<ActivityController>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (_replyBtnClicked) {
+          if (mounted) {
+            setState(() {
+              _replyBtnClicked = false;
+            });
+          }
+
+          Provider.of<ActivityProvider>(context, listen: false)
+              .resumeActivityAnimation();
+          return false;
+        }
+
         Provider.of<ActivityProvider>(context, listen: false)
             .disposeAnimationController();
         return true;
@@ -113,6 +129,8 @@ class _ActivityControllerState extends State<ActivityController>
               if (_currentActivityData.type !=
                   ActivityContentType.poll.toString())
                 _transparentNavigatingWidget(_currentActivityData),
+              _replyButton(),
+              if (_replyBtnClicked) _replySection(),
             ],
           );
         },
@@ -144,7 +162,9 @@ class _ActivityControllerState extends State<ActivityController>
   _transparentNavigatingWidget(activityModel) => Container(
         width: MediaQuery.of(context).size.width,
         height: activityModel.type != ActivityContentType.text.toString()
-            ? MediaQuery.of(context).size.height - 150
+            ? MediaQuery.of(context).size.height -
+                SizeCollection.activityBottomTextHeight -
+                50
             : MediaQuery.of(context).size.height,
         color: AppColors.transparentColor,
         child: Row(
@@ -209,4 +229,122 @@ class _ActivityControllerState extends State<ActivityController>
           ],
         ),
       );
+
+  _replyButton() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: InkWell(
+        onTap: () {
+          Provider.of<ActivityProvider>(context, listen: false)
+              .pauseActivityAnimation();
+
+          if (mounted) {
+            setState(() {
+              _replyBtnClicked = !_replyBtnClicked;
+            });
+          }
+        },
+        child: Container(
+          width: double.maxFinite,
+          height: 50,
+          color: AppColors.pureBlackColor.withOpacity(0.2),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(
+                Icons.keyboard_arrow_up_outlined,
+                color: AppColors.pureWhiteColor,
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              Text(
+                "Reply",
+                style: TextStyleCollection.secondaryHeadingTextStyle,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _replySection() => Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          decoration: const BoxDecoration(
+              color: AppColors.transparentColor,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40.0),
+                  topRight: Radius.circular(40.0))),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _replyContainerToInput(),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  _replyContainerToInput() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _containerToInput(),
+          _sendButton(bgColor: AppColors.messageWritingSectionColor)
+        ],
+      ),
+    );
+  }
+
+  _containerToInput() {
+    return Container(
+      height: 40,
+      width: MediaQuery.of(context).size.width - 80,
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100),
+          color: AppColors.messageWritingSectionColor),
+      child: _textMessageWritingSection(),
+    );
+  }
+
+  _textMessageWritingSection() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - 180,
+      child: TextField(
+        controller: textEditingController,
+        style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+        maxLines: null,
+        cursorColor: AppColors.pureWhiteColor,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.only(bottom: 10, left: 20),
+          border: InputBorder.none,
+          hintText: "Write Something Here",
+          hintStyle: TextStyleCollection.searchTextStyle.copyWith(
+              color: AppColors.pureWhiteColor.withOpacity(0.8), fontSize: 14),
+        ),
+      ),
+    );
+  }
+
+  _sendButton({Color bgColor = AppColors.darkBorderGreenColor}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Container(
+        width: 45,
+        height: 45,
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(right: 10),
+        decoration: BoxDecoration(
+            color: bgColor, borderRadius: BorderRadius.circular(100)),
+        child: Image.asset(
+          "assets/images/send.png",
+        ),
+      ),
+    );
+  }
 }

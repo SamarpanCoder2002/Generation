@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/size_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/poll_show_provider.dart';
@@ -163,25 +164,29 @@ class _ActivityViewerState extends State<ActivityViewer> {
           width: MediaQuery.of(context).size.width,
           color: AppColors.pureBlackColor.withOpacity(0.2),
           alignment: Alignment.center,
-          height: 150,
-          padding: const EdgeInsets.all(10),
+          height: SizeCollection.activityBottomTextHeight,
+          margin: const EdgeInsets.only(bottom: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           child: SingleChildScrollView(
               controller: _scrollController,
               scrollDirection: Axis.vertical,
-              child: Linkify(
-                text: widget.activityData.additionalThings["text"],
-                onOpen: (link) async {
-                  try {
-                    await launch(link.url);
-                  } catch (e) {
-                    throw 'Could not launch $link';
-                  }
-                },
-                linkStyle: TextStyleCollection.terminalTextStyle
-                    .copyWith(fontSize: 16),
-                style: TextStyleCollection.terminalTextStyle
-                    .copyWith(fontSize: 16),
-                options: const LinkifyOptions(humanize: false),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10,bottom: 50),
+                child: Linkify(
+                  text: widget.activityData.additionalThings["text"],
+                  onOpen: (link) async {
+                    try {
+                      await launch(link.url);
+                    } catch (e) {
+                      throw 'Could not launch $link';
+                    }
+                  },
+                  linkStyle: TextStyleCollection.terminalTextStyle
+                      .copyWith(fontSize: 16),
+                  style: TextStyleCollection.terminalTextStyle
+                      .copyWith(fontSize: 16),
+                  options: const LinkifyOptions(humanize: false),
+                ),
               )),
         ));
   }
@@ -223,7 +228,6 @@ class _ActivityViewerState extends State<ActivityViewer> {
     return Stack(
       children: [
         _pollShowScreen(),
-        //Text("Samarpan" , style: TextStyleCollection.terminalTextStyle,),
         _bottomExtraTextSection(),
       ],
     );
