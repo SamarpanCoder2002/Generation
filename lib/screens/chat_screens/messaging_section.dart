@@ -34,7 +34,8 @@ class MessagingSection extends StatefulWidget {
 class _MessagingSectionState extends State<MessagingSection> {
   @override
   void didChangeDependencies() {
-    Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom(scrollDuration: 1000);
+    Provider.of<ChatScrollProvider>(context, listen: false)
+        .animateToBottom(scrollDuration: 1000);
     super.didChangeDependencies();
   }
 
@@ -297,7 +298,8 @@ class _MessagingSectionState extends State<MessagingSection> {
                 message: realMsg["message"],
                 time: realMsg["time"],
                 holder: realMsg["holder"],
-                additionalData: realMsg["additionalData"]);
+                additionalData: realMsg["additionalData"],
+                date: realMsg["date"]);
 
             return _commonMessageLayout(
                 messageId: messageData.keys.toList()[0].toString(),

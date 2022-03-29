@@ -20,23 +20,6 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<String> _monthCollection = [
-    "Jan",
-    "Feb",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "Sept",
-    "Oct",
-    "Nov",
-    "Dec"
-  ];
-
-  getParticularMonth(index) => _monthCollection[index];
-
   getAnimationBarCurrentIndex() => _animationBarCurrentIndex;
 
   disposeAnimationController() {
@@ -154,7 +137,7 @@ class ActivityProvider extends ChangeNotifier {
         date: _activityData["date"],
         time: _activityData["time"],
         message: _activityData["message"],
-        additionalThings: _activityData["additionalThings"] ?? {});
+        additionalThings: _activityData["additionalThings"] ?? {}, id: _activityData["id"]);
   }
 
   pauseActivityAnimation() {

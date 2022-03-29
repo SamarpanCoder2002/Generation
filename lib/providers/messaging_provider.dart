@@ -90,6 +90,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   getCurrentTime({DateTime? dateTime}) => DateFormat('hh:mm a').format(dateTime ?? DateTime.now());
+  getCurrentDate({DateTime? dateTime}) => DateFormat('dd MMMM, yyyy').format(dateTime ?? DateTime.now());
 
   getChatMessagingSectionHeight(bool isKeyboardShowing, BuildContext context) =>
       isKeyboardShowing

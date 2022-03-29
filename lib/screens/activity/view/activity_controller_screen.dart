@@ -161,7 +161,7 @@ class _ActivityControllerState extends State<ActivityController>
     final _dataCollection =
         Provider.of<ActivityProvider>(context).getActivityCollection();
     return Positioned(
-      top: 40.0,
+      top: 30.0,
       left: 5.0,
       right: 5.0,
       child: Row(

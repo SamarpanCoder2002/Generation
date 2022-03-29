@@ -62,7 +62,10 @@ class InputOption {
                   .toString(),
           MessageData.time:
               Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                  .getCurrentTime()
+                  .getCurrentTime(),
+          MessageData.date:
+              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                  .getCurrentDate()
         }
       });
     }
@@ -109,7 +112,10 @@ class InputOption {
                 .toString(),
         MessageData.time:
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentTime()
+                .getCurrentTime(),
+        MessageData.date:
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getCurrentDate()
       }
     });
 
@@ -153,6 +159,9 @@ class InputOption {
         MessageData.time:
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                 .getCurrentTime(),
+        MessageData.date:
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getCurrentDate(),
         MessageData.additionalData: {"thumbnail": thumbnailImage}
       }
     });
@@ -234,6 +243,9 @@ class InputOption {
               MessageData.time:
                   Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                       .getCurrentTime(),
+              MessageData.date:
+                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                      .getCurrentDate(),
               MessageData.additionalData: {
                 "extension-for-document": pickedFile.extension.toString()
               }
@@ -311,6 +323,9 @@ class InputOption {
         MessageData.time:
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                 .getCurrentTime(),
+        MessageData.date:
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getCurrentDate(),
       }
     });
 

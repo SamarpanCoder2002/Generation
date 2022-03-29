@@ -111,7 +111,10 @@ class MessageCreationSection extends StatelessWidget {
                 MessageData.message: _voiceRecordPath,
                 MessageData.time: Provider.of<ChatBoxMessagingProvider>(context,
                         listen: false)
-                    .getCurrentTime()
+                    .getCurrentTime(),
+                MessageData.date: Provider.of<ChatBoxMessagingProvider>(context,
+                        listen: false)
+                    .getCurrentDate(),
               }
             });
 
@@ -324,7 +327,10 @@ class MessageCreationSection extends StatelessWidget {
             MessageData.message: _messageController.text,
             MessageData.time:
                 Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getCurrentTime()
+                    .getCurrentTime(),
+            MessageData.date:
+                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                    .getCurrentDate()
           }
         });
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)

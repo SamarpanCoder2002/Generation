@@ -233,11 +233,16 @@ class _CreateActivityState extends State<CreateActivity> {
     final Map<String, dynamic> map = {};
     final DateTime _dateTime = DateTime.now();
     map["type"] = widget.activityContentType.toString();
-    map["date"] =
-        "${_dateTime.day} ${Provider.of<ActivityProvider>(context, listen: false).getParticularMonth(_dateTime.month)}, ${_dateTime.year}";
+    // map["date"] =
+    //     "${_dateTime.day} ${Provider.of<ActivityProvider>(context, listen: false).getParticularMonth(_dateTime.month)}, ${_dateTime.year}";
     map["time"] = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .getCurrentTime(dateTime: _dateTime);
+    map["date"] = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getCurrentDate(dateTime: _dateTime);
     map["holderId"] = _dateTime.toString();
+
+    /// Change Activity Id later
+    map["id"] = DateTime.now().toString();
 
     switch (widget.activityContentType) {
       case ActivityContentType.text:

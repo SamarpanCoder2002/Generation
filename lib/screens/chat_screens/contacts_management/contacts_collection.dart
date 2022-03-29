@@ -221,6 +221,9 @@ class _ContactsCollectionState extends State<ContactsCollection> {
               MessageData.time:
                   Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                       .getCurrentTime(),
+              MessageData.date:
+                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                      .getCurrentDate()
             }
           });
         }

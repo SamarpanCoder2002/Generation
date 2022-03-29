@@ -30,4 +30,7 @@ class DataManagement {
 
   static toJsonString(data) => json.encode(data).toString();
   static fromJsonString(String jsonData) => json.decode(jsonData);
+
+  static generateTableNameForNewConnectionChat(String name, String id) => "__${id}__${name}__";
+  static generateTableNameForNewConnectionActivity(String name, String id) => "__${id}__${name}__activity__";
 }

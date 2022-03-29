@@ -12,6 +12,7 @@ class MessageData {
   static const String type = "type";
   static const String holder = "holder";
   static const String message = "message";
+  static const String date = "date";
   static const String time = "time";
   static const String additionalData = "additionalData";
 }
@@ -29,8 +30,11 @@ class EnvFileKey{
 }
 
 class DbData{
-  static const currUserDb = "__current-user-encrypted-data__";
-  static const connectionsDb = "__connections-encrypted-data__";
+  static const currUserTable = "__current-user-encrypted-data__";
+  static const connectionsTable = "__connections-encrypted-data__";
+  static const chatTable = "__chat-encrypted-data__";
+
+  static const myActivityTable = "__my-activity_encrypted-data__";
 }
 
 class FolderData{
