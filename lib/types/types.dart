@@ -64,3 +64,8 @@ enum CommonRequirement{
   normal,
   localDataStorage
 }
+
+enum DBOperation{
+  update,
+  insert
+}

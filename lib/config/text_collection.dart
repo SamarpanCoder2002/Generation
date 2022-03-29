@@ -25,6 +25,16 @@ class PhoneNumberData {
 class EnvFileKey{
   static const supportMail = "SUPPORT_MAIL";
   static const rzpAPIKEY = "RZP_API_KEY";
+  static const dbName = "DATABASE_NAME";
+}
+
+class DbData{
+  static const currUserDb = "__current-user-encrypted-data__";
+  static const connectionsDb = "__connections-encrypted-data__";
+}
+
+class FolderData{
+  static const dbFolder = ".Databases";
 }
 
 class ShareCommonText{
