@@ -5,7 +5,7 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
-import 'package:generation/screens/main_screens/main_screen_management.dart';
+import 'package:generation/screens/entry_screens/intro_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -22,6 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
     makeScreenCleanView();
+    makeScreenStrictPortrait();
     _switchToNextScreen();
 
     super.initState();
@@ -65,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Timer(const Duration(seconds: 3), (){
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const IntroScreen()),
+          MaterialPageRoute(builder: (_) => const IntroScreens()),
               (route) => false);
     });
   }

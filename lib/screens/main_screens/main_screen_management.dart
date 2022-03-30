@@ -12,14 +12,14 @@ import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
 import 'groups_screen.dart';
 
-class IntroScreen extends StatefulWidget {
-  const IntroScreen({Key? key}) : super(key: key);
+class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
-  _IntroScreenState createState() => _IntroScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _IntroScreenState extends State<IntroScreen> {
+class _MainScreenState extends State<MainScreen> {
   var activeSlideIndex = 0;
 
   @override

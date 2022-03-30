@@ -62,6 +62,13 @@ makeNavigationBarTransparent() => SystemChrome.setSystemUIOverlayStyle(const Sys
     systemNavigationBarIconBrightness: Brightness.light)
 );
 
+makeScreenStrictPortrait() => SystemChrome.setPreferredOrientations(
+[
+DeviceOrientation.portraitDown,
+DeviceOrientation.portraitUp,
+],
+);
+
 makeFullScreen() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
 closeFullScreen() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
