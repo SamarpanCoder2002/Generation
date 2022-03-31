@@ -11,7 +11,7 @@ class NativeCallback {
     print('Call For Notification Result: $result');
   }
 
-  Future<bool> callToCheckNetworkConnectivity() async {
+  Future<bool> checkInternet() async {
     print('Here in Internet Connectivity Native Calling');
 
     final bool result =

@@ -61,12 +61,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mapKey: "name",
                 nameValue: _editableProfileData["name"]),
             const SizedBox(height: 10),
-            _commonSection(
-                iconData: Icons.person_outline_outlined,
-                heading: "User Name",
-                mapKey: "user_name",
-                nameValue: _editableProfileData["user_name"]),
-            const SizedBox(height: 10),
+            // _commonSection(
+            //     iconData: Icons.person_outline_outlined,
+            //     heading: "User Name",
+            //     mapKey: "user_name",
+            //     nameValue: _editableProfileData["user_name"]),
+            // const SizedBox(height: 10),
             _commonSection(
                 iconData: Icons.info_outlined,
                 heading: "About",

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/screens/entry_screens/information_taking.dart';
 import 'package:generation/screens/main_screens/main_screen_management.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -174,7 +175,8 @@ class _IntroScreensState extends State<IntroScreens> {
             ),
           ],
         ),
-        onPressed: () {},
+        onPressed: () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const InformationTakingScreen())),
       ),
     );
   }
