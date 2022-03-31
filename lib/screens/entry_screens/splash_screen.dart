@@ -5,9 +5,11 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/screens/entry_screens/intro_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -17,10 +19,14 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
+  _initialize() async{
+    await Provider.of<ThemeProvider>(context, listen: false).initialization();
+  }
+
   @override
   void initState() {
-
-
+    _initialize();
     makeScreenCleanView();
     makeScreenStrictPortrait();
     _switchToNextScreen();

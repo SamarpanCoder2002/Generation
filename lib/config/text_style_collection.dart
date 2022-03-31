@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 
 class TextStyleCollection{
+
   static const TextStyle headingTextStyle = TextStyle(
     fontSize: 25,
     color: AppColors.pureWhiteColor

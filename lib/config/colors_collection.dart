@@ -4,7 +4,8 @@ class AppColors {
   static const Color splashScreenColor = Color(0xff0152cd);
 
   static const Color backgroundDarkMode = Color(0xff15162d);
-  static const Color backgroundLightMode = Color(0xfffffefe);
+  static const Color backgroundLightMode = Color(0xfffefeff);
+  static const Color backgroundLightSecondaryMode = Color(0xffF3F7FC);
 
   static const Color searchBarBgDarkMode = Color(0xff2e2d42);
   static const Color searchBarBgLightMode = Color(0xffeaeaeb);
@@ -32,13 +33,13 @@ class AppColors {
   static const Color messageWritingSectionColor = Color(0xff484850);
 
   static const Color myMsgDarkModeColor = Color(0xff6145D2);
+
   //static const Color myMsgDarkModeColor = Color.fromRGBO(37, 137, 224, 1);
   static const Color oppositeMsgDarkModeColor = Color(0xff303250);
 
   static const Color lightBlueColor = Colors.lightBlue;
 
   static const Color toastBlueColor = Color(0xff3b80f7);
-
 
   static const Color cameraIconBgColor = Color(0xffB45BE7);
   static const Color galleryIconBgColor = Color(0xff3160F5);
@@ -49,9 +50,14 @@ class AppColors {
   static const Color personIconBgColor = Color(0xffF26109);
 
   static const Color orangeTextColor = Color(0xffffbf00);
+
+  static getBgColor(bool _isDarkMode) =>
+      _isDarkMode ? backgroundDarkMode : backgroundLightMode;
+
+  static getBgSecondaryColor(bool _isDarkMode) => _isDarkMode ? backgroundDarkMode : backgroundLightSecondaryMode;
 }
 
-class WaveForm{
+class WaveForm {
   static List<Color> colors = [
     Colors.red[900]!,
     Colors.green[900]!,

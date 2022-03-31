@@ -6,51 +6,48 @@ import '../services/local_data_management.dart';
 import '../types/types.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ThemeModeTypes _themeModeType = ThemeModeTypes.lightMode;
+  ThemeModeTypes _themeModeType = ThemeModeTypes.systemMode;
 
-  ThemeProvider() {
-    _initialization();
+  initialization() async {
+    final extractedTheme =
+        await DataManagement.getStringData(StoredString.themeKey);
+    await setThemeData(_filtration(extractedTheme));
   }
 
-  _initialization() {
-    DataManagement.getStringData(StoredString.themeKey).then((getThemeMode) {
-      _themeModeType = _getPerfectTheme(getThemeMode);
-      notifyListeners();
-    });
-  }
+  setThemeData(ThemeModeTypes themeModeType) async {
+    print("Theme Mode Type: $themeModeType");
+    if (_themeModeType == themeModeType) return;
 
-  ThemeModeTypes getCurrentTheme() {
-    if (_themeModeType == ThemeModeTypes.systemMode) return _forSystemMode();
-    return _themeModeType;
-  }
-
-  setCurrentTheme(ThemeModeTypes themeModeTypes) {
-    _themeModeType = themeModeTypes;
+    _themeModeType = themeModeType;
+    await DataManagement.storeStringData(
+        StoredString.themeKey, themeModeType.toString());
     notifyListeners();
-    DataManagement.storeStringData(
-        StoredString.themeKey, themeModeTypes.toString());
+    return isDarkTheme();
   }
 
-  getThemeDataValidation(ThemeModeTypes incomingThemeModeType) =>
-      incomingThemeModeType == _themeModeType;
+  _filtration(String? examineThemeData) {
+    print("Examine Theme Data: $examineThemeData");
+    if (examineThemeData == null) return ThemeModeTypes.darkMode;
 
-  _getPerfectTheme(examineThemeData) {
-    if (examineThemeData == ThemeModeTypes.darkMode.toString()) {
-      return ThemeModeTypes.darkMode;
-    } else if (examineThemeData == ThemeModeTypes.systemMode.toString()) {
+    if (examineThemeData == ThemeModeTypes.systemMode.toString()) {
       return ThemeModeTypes.systemMode;
     } else if (examineThemeData == ThemeModeTypes.lightMode.toString()) {
       return ThemeModeTypes.lightMode;
-    } else {
-      return _forSystemMode();
+    } else if (examineThemeData == ThemeModeTypes.darkMode.toString()) {
+      return ThemeModeTypes.darkMode;
     }
   }
 
-  _forSystemMode() {
+  isThatCurrentTheme(ThemeModeTypes themeModeType) =>
+      _themeModeType == themeModeType;
+
+  bool isDarkTheme() {
+    if (_themeModeType == ThemeModeTypes.darkMode) return true;
+    if (_themeModeType == ThemeModeTypes.lightMode) return false;
+
     final Brightness brightness =
         SchedulerBinding.instance!.window.platformBrightness;
-    return brightness == Brightness.dark
-        ? ThemeModeTypes.darkMode
-        : ThemeModeTypes.lightMode;
+
+    return brightness == Brightness.dark;
   }
 }

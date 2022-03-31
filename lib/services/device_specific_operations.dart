@@ -37,40 +37,45 @@ void changeOnlyNavigationBarColor(
       systemNavigationBarColor: navigationBarColor, // navigation bar color
     ));
 
-void makeStatusBarTransparent(){
+void makeStatusBarTransparent() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // status bar color
   ));
 }
 
-void makeScreenCleanView({Color navigationBarColor =  AppColors.splashScreenColor}){
+void makeScreenCleanView(
+    {Color navigationBarColor = AppColors.splashScreenColor}) {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: navigationBarColor,
     statusBarColor: Colors.transparent, // status bar color
   ));
 }
 
-void hideKeyboard()=>
-  SystemChannels.textInput.invokeMethod('TextInput.hide');
+void hideKeyboard() => SystemChannels.textInput.invokeMethod('TextInput.hide');
 
-void showKeyboard()=>
-    SystemChannels.textInput.invokeMethod('TextInput.show');
+void showKeyboard() => SystemChannels.textInput.invokeMethod('TextInput.show');
 
-makeNavigationBarTransparent() => SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-    systemNavigationBarIconBrightness: Brightness.light)
-);
+makeNavigationBarTransparent() =>
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light));
 
 makeScreenStrictPortrait() => SystemChrome.setPreferredOrientations(
-[
-DeviceOrientation.portraitDown,
-DeviceOrientation.portraitUp,
-],
-);
+      [
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.portraitUp,
+      ],
+    );
 
-makeFullScreen() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+makeFullScreen() =>
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-closeFullScreen() => SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+closeFullScreen() =>
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-
+changeTheme(bool dark) => SystemChrome.setSystemUIOverlayStyle( SystemUiOverlayStyle(
+  statusBarColor: dark?AppColors.backgroundDarkMode:AppColors.backgroundLightMode,
+   systemNavigationBarColor: dark?AppColors.backgroundDarkMode:AppColors.backgroundLightMode,
+   statusBarIconBrightness: dark?Brightness.light:Brightness.dark,
+    systemNavigationBarIconBrightness: dark?Brightness.light:Brightness.dark));

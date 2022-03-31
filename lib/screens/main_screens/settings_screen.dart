@@ -12,6 +12,7 @@ import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/device_specific_operations.dart';
 import '../../types/types.dart';
 import '../settings/about.dart';
 import '../settings/common_settings_screen.dart';
@@ -78,10 +79,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               correspondingTheme: ThemeModeTypes.systemMode),
           _themeModeOption(
               tileText: "Dark Theme",
-              correspondingTheme: ThemeModeTypes.lightMode),
+              correspondingTheme: ThemeModeTypes.darkMode),
           _themeModeOption(
               tileText: "Light Theme",
-              correspondingTheme: ThemeModeTypes.darkMode),
+              correspondingTheme: ThemeModeTypes.lightMode),
         ],
       ),
     );
@@ -93,14 +94,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return TextButton(
         onPressed: () async {
-          Provider.of<ThemeProvider>(context, listen: false)
-              .setCurrentTheme(correspondingTheme);
+          final _isDarkMode =
+              await Provider.of<ThemeProvider>(context, listen: false)
+                  .setThemeData(correspondingTheme);
+          changeTheme(_isDarkMode);
+
         },
         child: ListTile(
           visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
           dense: true,
           leading: Icon(
-            themeProviderRef.getThemeDataValidation(correspondingTheme)
+            themeProviderRef.isThatCurrentTheme(correspondingTheme)
                 ? Icons.circle_rounded
                 : Icons.circle_outlined,
             color: AppColors.pureWhiteColor,
