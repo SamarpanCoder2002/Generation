@@ -7,8 +7,10 @@ import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
+import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';
+import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -124,6 +126,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   _imageSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return InkWell(
       onTap: () async {
         Navigator.push(
@@ -138,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           showStatusAndNavigationBar();
 
           changeOnlyNavigationBarColor(
-              navigationBarColor: AppColors.backgroundDarkMode);
+              navigationBarColor: AppColors.getBgColor(_isDarkMode));
         });
       },
       child: Container(

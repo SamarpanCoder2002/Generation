@@ -74,8 +74,27 @@ makeFullScreen() =>
 closeFullScreen() =>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-changeTheme(bool dark) => SystemChrome.setSystemUIOverlayStyle( SystemUiOverlayStyle(
-  statusBarColor: dark?AppColors.backgroundDarkMode:AppColors.backgroundLightMode,
-   systemNavigationBarColor: dark?AppColors.backgroundDarkMode:AppColors.backgroundLightMode,
-   statusBarIconBrightness: dark?Brightness.light:Brightness.dark,
-    systemNavigationBarIconBrightness: dark?Brightness.light:Brightness.dark));
+changeContextTheme(bool dark) =>
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor:
+            dark ? AppColors.backgroundDarkMode : AppColors.backgroundLightMode,
+        systemNavigationBarColor:
+            dark ? AppColors.backgroundDarkMode : AppColors.backgroundLightMode,
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness:
+            dark ? Brightness.light : Brightness.dark));
+
+changeOnlyIconBrightness(bool dark) =>
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness:
+            dark ? Brightness.light : Brightness.dark));
+
+changeOnlyContextChatColor(bool dark) =>  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor:
+    dark ? AppColors.chatDarkBackgroundColor : AppColors.chatLightBackgroundColor,
+    systemNavigationBarColor:
+    dark ? AppColors.chatDarkBackgroundColor : AppColors.chatLightBackgroundColor,
+    statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+    systemNavigationBarIconBrightness:
+    dark ? Brightness.light : Brightness.dark));

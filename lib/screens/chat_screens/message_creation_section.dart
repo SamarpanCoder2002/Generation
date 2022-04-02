@@ -15,6 +15,7 @@ import 'package:music_visualizer/music_visualizer.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/chat_scroll_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
 
 class MessageCreationSection extends StatelessWidget {
@@ -67,10 +68,14 @@ class MessageCreationSection extends StatelessWidget {
   }
 
   _recordingModeContainer() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     _deleteRecording() => IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.delete_outline_outlined,
-            color: AppColors.pureWhiteColor,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor,
           ),
           onPressed: () {
             Provider.of<SoundRecorderProvider>(context, listen: false)
@@ -90,10 +95,11 @@ class MessageCreationSection extends StatelessWidget {
         );
 
     _recordingVoiceSending() => IconButton(
-          icon: Image.asset(
-            IconImages.sendImagePath,
-            width: 25,
-          ),
+          icon: Image.asset(IconImages.sendImagePath,
+              width: 25,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor),
           onPressed: () async {
             final _voiceRecordPath =
                 await Provider.of<SoundRecorderProvider>(context, listen: false)
@@ -138,6 +144,8 @@ class MessageCreationSection extends StatelessWidget {
         Provider.of<ChatCreationSectionProvider>(context)
             .getEmojiActivationState();
 
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return IconButton(
         onPressed: () {
           if (_isEmojiSectionShowing) {
@@ -148,11 +156,15 @@ class MessageCreationSection extends StatelessWidget {
                 .setSectionHeight();
           }
         },
-        color: AppColors.pureWhiteColor.withOpacity(0.9),
+        color: _isDarkMode
+            ? AppColors.pureWhiteColor.withOpacity(0.9)
+            : AppColors.lightChatConnectionTextColor.withOpacity(0.9),
         icon: const Icon(Icons.emoji_emotions_outlined));
   }
 
   _textMessageWritingSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return SizedBox(
       width: MediaQuery.of(context).size.width - 180,
       child: TextField(
@@ -160,9 +172,13 @@ class MessageCreationSection extends StatelessWidget {
             Provider.of<ChatBoxMessagingProvider>(context).getFocusNode(),
         controller:
             Provider.of<ChatBoxMessagingProvider>(context).getTextController(),
-        style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+        style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14, color: _isDarkMode
+            ? AppColors.pureWhiteColor
+            : AppColors.lightChatConnectionTextColor),
         maxLines: null,
-        cursorColor: AppColors.pureWhiteColor,
+        cursorColor: _isDarkMode
+            ? AppColors.pureWhiteColor
+            : AppColors.lightChatConnectionTextColor.withOpacity(0.6),
         onTap: () {
           Provider.of<ChatCreationSectionProvider>(context, listen: false)
               .backToNormalHeight();
@@ -176,7 +192,10 @@ class MessageCreationSection extends StatelessWidget {
           border: InputBorder.none,
           hintText: "Write Something Here",
           hintStyle: TextStyleCollection.searchTextStyle.copyWith(
-              color: AppColors.pureWhiteColor.withOpacity(0.8), fontSize: 14),
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor.withOpacity(0.8)
+                  : AppColors.lightChatConnectionTextColor.withOpacity(0.6),
+              fontSize: 14),
         ),
       ),
     );
@@ -184,6 +203,7 @@ class MessageCreationSection extends StatelessWidget {
 
   _moreMessageOptions() {
     final InputOption _inputOption = InputOption(context);
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     _videoTakingOption() {
       showModalBottomSheet(
@@ -281,16 +301,31 @@ class MessageCreationSection extends StatelessWidget {
     return IconButton(
         color: AppColors.pureWhiteColor.withOpacity(0.8),
         onPressed: _showMoreOptions,
-        icon: const Icon(Icons.attachment_outlined));
+        icon: Icon(Icons.attachment_outlined,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor));
   }
 
   _containerToInput() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       height: 40,
       width: MediaQuery.of(context).size.width - 80,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(100),
-          color: AppColors.messageWritingSectionColor),
+          color: _isDarkMode
+              ? AppColors.messageWritingSectionColor
+              : AppColors.lightMsgCreationColor,
+          boxShadow: [
+            BoxShadow(
+                offset: const Offset(0, 1),
+                blurRadius: 5,
+                color: _isDarkMode
+                    ? AppColors.pureBlackColor
+                    : AppColors.pureBlackColor.withOpacity(0.2))
+          ]),
       child: Row(
         children: [
           _emojiSection(),
@@ -304,6 +339,8 @@ class MessageCreationSection extends StatelessWidget {
   _messageAndVoiceSendButton() {
     final bool _showVoiceIcon =
         Provider.of<ChatBoxMessagingProvider>(context).showVoiceIcon();
+
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     _voiceOrSendIconPressed() async {
       if (_showVoiceIcon) {
@@ -349,10 +386,15 @@ class MessageCreationSection extends StatelessWidget {
           ? Image.asset(
               IconImages.sendImagePath,
               width: 25,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor,
             )
-          : const Icon(
+          : Icon(
               Icons.keyboard_voice_outlined,
-              color: AppColors.pureWhiteColor,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor,
             ),
       onPressed: _voiceOrSendIconPressed,
     );

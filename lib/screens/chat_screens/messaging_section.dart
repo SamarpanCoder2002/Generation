@@ -21,6 +21,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/sound_provider.dart';
+import '../../providers/theme_provider.dart';
 
 class MessagingSection extends StatefulWidget {
   final BuildContext context;
@@ -315,6 +316,8 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _noChatBoxMessagesSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       width: double.maxFinite,
       height: MediaQuery.of(widget.context).size.height / 2,
@@ -326,23 +329,23 @@ class _MessagingSectionState extends State<MessagingSection> {
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                color: AppColors.oppositeMsgDarkModeColor,
+                color: _isDarkMode?AppColors.oppositeMsgDarkModeColor:AppColors.chatLightBackgroundColor,
                 borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(offset: Offset(0, 1), blurRadius: 5)
+                boxShadow: [
+                  BoxShadow(offset: const Offset(0, 1), blurRadius: 5, color: _isDarkMode?AppColors.pureBlackColor:AppColors.pureBlackColor.withOpacity(0.2))
                 ]),
             child: Text(
               "Messages are End-to-End Encrypted.\nNo other Third Party Person, Organization or even Generation Team can't read your messages",
               textAlign: TextAlign.center,
               style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
             ),
           ),
           Center(
             child: Text(
               "Start Your Messaging 👇",
               style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 18),
+                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 18, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
             ),
           ),
         ],

@@ -4,6 +4,7 @@ import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../providers/theme_provider.dart';
 
 class CommonChatListLayout {
   final BuildContext context;
@@ -23,6 +24,9 @@ class CommonChatListLayout {
       bool isSelected = false,
       double height = 60.0,
       double? middleWidth}) {
+
+
+
     return Container(
       height: height,
       width: double.maxFinite,
@@ -55,13 +59,17 @@ class CommonChatListLayout {
   }
 
   _chatConnectionImage(String? photo) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       width: 60,
       height: 60,
       decoration: BoxDecoration(
-          color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
+          color: _isDarkMode
+              ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+              : AppColors.searchBarBgLightMode.withOpacity(0.5),
           borderRadius: BorderRadius.circular(100),
-          border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
+          border: Border.all(color: _isDarkMode?AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor, width: 3),
           image: photo == null
               ? null
               : DecorationImage(image: NetworkImage(photo), fit: BoxFit.cover)),
@@ -69,6 +77,8 @@ class CommonChatListLayout {
   }
 
   _chatConnectionData(String heading, String? subheading, double? middleWidth) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return SizedBox(
       width: middleWidth ?? MediaQuery.of(context).size.width - 200,
       child: Column(
@@ -79,7 +89,7 @@ class CommonChatListLayout {
               child: Text(
                 heading,
                 style: TextStyleCollection.activityTitleTextStyle
-                    .copyWith(fontSize: 16),
+                    .copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
               )),
           if (subheading != null && subheading.isNotEmpty)
             Flexible(
@@ -91,7 +101,7 @@ class CommonChatListLayout {
                 maxLines: 2,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     fontSize: 12,
-                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                    color: _isDarkMode?AppColors.pureWhiteColor.withOpacity(0.8):AppColors.lightLatestMsgTextColor),
               ),
             )),
         ],
@@ -101,6 +111,8 @@ class CommonChatListLayout {
 
   _chatConnectionInformationData(
       String? lastMsgTime, String? totalPendingMessages) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +122,7 @@ class CommonChatListLayout {
               child: Text(
                 lastMsgTime,
                 style: TextStyleCollection.activityTitleTextStyle
-                    .copyWith(fontSize: 14),
+                    .copyWith(fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightBorderGreenColor),
               ),
             ),
           const SizedBox(
@@ -121,7 +133,7 @@ class CommonChatListLayout {
               width: 25,
               height: 25,
               decoration: BoxDecoration(
-                  color: AppColors.darkBorderGreenColor,
+                  color: _isDarkMode?AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor,
                   borderRadius: BorderRadius.circular(100)),
               child: Center(
                   child: Text(

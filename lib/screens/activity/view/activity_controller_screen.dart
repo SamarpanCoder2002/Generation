@@ -11,6 +11,7 @@ import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../../config/size_collection.dart';
 import '../../../providers/sound_provider.dart';
+import '../../../providers/theme_provider.dart';
 import '../../../providers/video_management/video_show_provider.dart';
 import '../animation_controller.dart';
 
@@ -39,13 +40,13 @@ class _ActivityControllerState extends State<ActivityController>
     super.initState();
   }
 
-  @override
-  void dispose() {
-    changeOnlyNavigationBarColor(
-        navigationBarColor: AppColors.backgroundDarkMode);
-
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   changeOnlyNavigationBarColor(
+  //       navigationBarColor: AppColors.getBgColor(_isDarkMode));
+  //
+  //   super.dispose();
+  // }
 
   _onReplySectionRemovedAction() {
     final _activityProvider =
@@ -100,13 +101,15 @@ class _ActivityControllerState extends State<ActivityController>
     final int _totalActivityData =
         _activityProvider.getLengthOfActivityCollection();
 
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     if (_totalActivityData == 0) {
       changeOnlyNavigationBarColor(
-          navigationBarColor: AppColors.backgroundDarkMode);
+          navigationBarColor: AppColors.getBgColor(_isDarkMode));
       return Container(
         width: double.maxFinite,
         height: MediaQuery.of(context).size.height,
-        color: AppColors.backgroundDarkMode,
+        color: AppColors.getBgColor(_isDarkMode),
         alignment: Alignment.center,
         child: Text(
           "No Activity Found",

@@ -8,7 +8,7 @@ class AppColors {
   static const Color backgroundLightSecondaryMode = Color(0xffF3F7FC);
 
   static const Color searchBarBgDarkMode = Color(0xff2e2d42);
-  static const Color searchBarBgLightMode = Color(0xffeaeaeb);
+  static const Color searchBarBgLightMode = Color(0xffebebeb);
 
   static const Color pureWhiteColor = Colors.white;
   static const Color pureBlackColor = Colors.black;
@@ -20,7 +20,7 @@ class AppColors {
   static const Color lightBorderGreenColor = Color(0xff01bd47);
 
   static const Color darkInactiveIconColor = Colors.white60;
-  static const Color lightInactiveIconColor = Color(0xffb4b5b4);
+  static const Color lightInactiveIconColor = Color(0xff9fa0a1);
 
   static const Color normalBlueColor = Colors.blue;
   static const Color transparentColor = Colors.transparent;
@@ -48,11 +48,19 @@ class AppColors {
   static const Color audioIconBgColor = Color(0xffEFBF40);
   static const Color locationIconBgColor = Color(0xff3FBC6C);
   static const Color personIconBgColor = Color(0xffF26109);
+  static const Color lightMsgCreationColor = Color(0xffFFFEFE);
 
   static const Color orangeTextColor = Color(0xffffbf00);
+  static const Color lightTextColor = Color(0xff6d6e75);
+  static const Color lightSecondaryTextColor = Color(0xffb5b4b7);
+  static const Color lightActivityTextColor = Color(0xff71747a);
+  static const Color lightChatConnectionTextColor = Color(0xff696b71);
+  static const Color lightLatestMsgTextColor = Color(0xff9fa0a1);
 
   static getBgColor(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : backgroundLightMode;
+
+  static getChatBgColor(bool _isDarkMode) => _isDarkMode?chatDarkBackgroundColor:chatLightBackgroundColor;
 
   static getBgSecondaryColor(bool _isDarkMode) => _isDarkMode ? backgroundDarkMode : backgroundLightSecondaryMode;
 }

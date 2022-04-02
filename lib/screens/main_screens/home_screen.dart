@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/icon_collection.dart';
+import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
@@ -16,6 +17,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/status_collection_provider.dart';
+import '../../services/device_specific_operations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -38,8 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     _inputOption = InputOption(context);
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
           margin: const EdgeInsets.only(top: 2, left: 20, right: 20),
           height: MediaQuery.of(context).size.height,
@@ -63,30 +67,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _headingSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 23),
         child: Text(
           AppText.appName,
-          style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+          style: TextStyleCollection.headingTextStyle.copyWith(
+              fontSize: 20,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightTextColor),
         ));
   }
 
   _searchBar() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppColors.searchBarBgDarkMode,
+        color: _isDarkMode
+            ? AppColors.searchBarBgDarkMode
+            : AppColors.searchBarBgLightMode,
         borderRadius: BorderRadius.circular(40),
       ),
       child: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 10),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
             child: Icon(
               Icons.search_outlined,
-              color: AppColors.pureWhiteColor,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightTextColor.withOpacity(0.8),
             ),
           ),
           Expanded(
@@ -100,8 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
-                hintStyle: TextStyleCollection.searchTextStyle
-                    .copyWith(color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                hintStyle: TextStyleCollection.searchTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor.withOpacity(0.8)
+                        : AppColors.lightTextColor.withOpacity(0.8)),
               ),
             ),
           )
@@ -111,16 +129,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _activitiesSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return SizedBox(
       height: MediaQuery.of(context).size.height / 5.8,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Text(
               AppText.activityHeading,
-              style: TextStyleCollection.secondaryHeadingTextStyle,
+              style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightTextColor),
             ),
           ),
           _horizontalActivitySection()
@@ -156,13 +179,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getData()[index];
 
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return OpenContainer(
       closedElevation: 0.0,
       transitionType: ContainerTransitionType.fadeThrough,
       transitionDuration: const Duration(milliseconds: 500),
-      closedColor: AppColors.backgroundDarkMode,
-      middleColor: AppColors.backgroundDarkMode,
-      openColor: AppColors.backgroundDarkMode,
+      closedColor: AppColors.getBgColor(_isDarkMode),
+      middleColor: AppColors.getBgColor(_isDarkMode),
+      openColor: AppColors.getBgColor(_isDarkMode),
+      onClosed: (_) => changeOnlyNavigationBarColor(
+          navigationBarColor: AppColors.getBgColor(_isDarkMode)),
       openBuilder: (_, __) => const ActivityController(),
       closedBuilder: (_, __) => Container(
         margin: const EdgeInsets.only(right: 15),
@@ -172,23 +199,31 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                  color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(
-                      color: _currentActivityData["isActive"]
-                          ? AppColors.darkBorderGreenColor
-                          : AppColors.imageDarkBgColor,
-                      width: 3),
-                  image: DecorationImage(
-                      image: NetworkImage(_currentActivityData["profilePic"]),
-                      fit: BoxFit.cover)),
+                color: _isDarkMode
+                    ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+                    : AppColors.searchBarBgLightMode.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(100),
+                image: DecorationImage(
+                    image: NetworkImage(_currentActivityData["profilePic"]),
+                    fit: BoxFit.cover),
+                border: Border.all(
+                    color: _currentActivityData["isActive"]
+                        ? _isDarkMode
+                            ? AppColors.darkBorderGreenColor
+                            : AppColors.lightBorderGreenColor
+                        : AppColors.imageDarkBgColor,
+                    width: 3),
+              ),
             ),
             Container(
               margin: const EdgeInsets.only(top: 10),
               child: Text(
                 _currentActivityData["connectionName"],
                 overflow: TextOverflow.ellipsis,
-                style: TextStyleCollection.activityTitleTextStyle,
+                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightActivityTextColor),
               ),
             )
           ],
@@ -198,14 +233,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _messagesSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Align(
+        Align(
           alignment: Alignment.centerLeft,
           child: Text(
             AppText.messagesHeading,
-            style: TextStyleCollection.secondaryHeadingTextStyle,
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                color: _isDarkMode
+                    ? AppColors.pureWhiteColor
+                    : AppColors.lightTextColor),
           ),
         ),
         _messagesCollectionSection(),
@@ -232,6 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final _commonChatLayout = CommonChatListLayout(context: context);
 
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       width: double.maxFinite,
       height: MediaQuery.of(context).size.height / 1.8,
@@ -251,9 +293,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 closedElevation: 0.0,
                 transitionType: ContainerTransitionType.fadeThrough,
                 transitionDuration: const Duration(milliseconds: 500),
-                closedColor: AppColors.backgroundDarkMode,
-                middleColor: AppColors.backgroundDarkMode,
-                openColor: AppColors.backgroundDarkMode,
+                closedColor: AppColors.getBgColor(_isDarkMode),
+                middleColor: AppColors.getBgColor(_isDarkMode),
+                openColor: AppColors.getBgColor(_isDarkMode),
+                onClosed: (_) => changeContextTheme(_isDarkMode),
                 openBuilder: (_, __) => ChatScreen(
                       connectionData: _connectionData,
                     ),
@@ -274,6 +317,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getData()[3];
 
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     _addActivityIcon() {
       return InkWell(
         onTap: () {
@@ -288,7 +333,9 @@ class _HomeScreenState extends State<HomeScreen> {
             color: AppColors.pureWhiteColor,
           ),
           decoration: BoxDecoration(
-              color: AppColors.darkBorderGreenColor,
+              color: _isDarkMode
+                  ? AppColors.darkBorderGreenColor
+                  : AppColors.lightBorderGreenColor,
               borderRadius: BorderRadius.circular(100)),
         ),
       );
@@ -302,20 +349,26 @@ class _HomeScreenState extends State<HomeScreen> {
             closedElevation: 0.0,
             transitionType: ContainerTransitionType.fadeThrough,
             transitionDuration: const Duration(milliseconds: 500),
-            closedColor: AppColors.backgroundDarkMode,
-            middleColor: AppColors.backgroundDarkMode,
-            openColor: AppColors.backgroundDarkMode,
+            closedColor: AppColors.getBgColor(_isDarkMode),
+            middleColor: AppColors.getBgColor(_isDarkMode),
+            openColor: AppColors.getBgColor(_isDarkMode),
+            onClosed: (_) => changeOnlyNavigationBarColor(
+                navigationBarColor: AppColors.getBgColor(_isDarkMode)),
             openBuilder: (_, __) => const ActivityController(),
             closedBuilder: (_, __) => Container(
                 width: 80,
                 height: 80,
                 alignment: Alignment.bottomRight,
                 decoration: BoxDecoration(
-                    color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
+                    color: _isDarkMode
+                        ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+                        : AppColors.searchBarBgLightMode.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(
                         color: _currentActivityData["isActive"]
-                            ? AppColors.darkBorderGreenColor
+                            ? _isDarkMode
+                                ? AppColors.darkBorderGreenColor
+                                : AppColors.lightBorderGreenColor
                             : AppColors.imageDarkBgColor,
                         width: 3),
                     image: DecorationImage(
@@ -325,10 +378,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Container(
             margin: const EdgeInsets.only(top: 10),
-            child: const Text(
+            child: Text(
               "Daefon",
               overflow: TextOverflow.ellipsis,
-              style: TextStyleCollection.activityTitleTextStyle,
+              style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightActivityTextColor),
             ),
           )
         ],
@@ -337,11 +393,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _showActivityCategoryOptions() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
     showModalBottomSheet(
         context: context,
         builder: (_) => Container(
             height: 300,
-            color: AppColors.oppositeMsgDarkModeColor,
+            color: _isDarkMode
+                ? AppColors.oppositeMsgDarkModeColor
+                : AppColors.chatLightBackgroundColor,
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
             child: GridView.count(
               crossAxisCount: 3,
@@ -354,10 +415,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _particularOption(index) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return InkWell(
       onTap: () async {
         if (index == 0) {
-          _inputOption.commonCreateActivityNavigation(ActivityContentType.text, data: {});
+          _inputOption.commonCreateActivityNavigation(ActivityContentType.text,
+              data: {});
         } else if (index == 1) {
           _inputOption.activityImageFromCamera();
         } else if (index == 2) {
@@ -388,8 +452,11 @@ class _HomeScreenState extends State<HomeScreen> {
           Center(
             child: Text(
               ActivityIconCollection.iconsCollection[index][1],
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+              style: TextStyleCollection.terminalTextStyle.copyWith(
+                  fontSize: 14,
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor),
             ),
           )
         ],

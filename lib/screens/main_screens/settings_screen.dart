@@ -97,7 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           final _isDarkMode =
               await Provider.of<ThemeProvider>(context, listen: false)
                   .setThemeData(correspondingTheme);
-          changeTheme(_isDarkMode);
+          changeContextTheme(_isDarkMode);
 
         },
         child: ListTile(

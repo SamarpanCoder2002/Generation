@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../providers/theme_provider.dart';
 import '../../services/toast_message_show.dart';
 import '../../types/types.dart';
 
@@ -20,6 +22,8 @@ class ChatBoxHeaderSection extends StatelessWidget {
   }
 
   _headingSection() {
+
+
     return Container(
         alignment: Alignment.centerLeft,
         child: Row(
@@ -33,12 +37,16 @@ class ChatBoxHeaderSection extends StatelessWidget {
   }
 
   _headerProfilePicSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       width: 45,
       height: 45,
-      margin: EdgeInsets.only(left: 20),
+      margin: const EdgeInsets.only(left: 20),
       decoration: BoxDecoration(
-          color: AppColors.searchBarBgDarkMode.withOpacity(0.5),
+          color: _isDarkMode
+              ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+              : AppColors.searchBarBgLightMode.withOpacity(0.5),
           borderRadius: BorderRadius.circular(100),
           border: Border.all(color: AppColors.darkBorderGreenColor, width: 2),
           image: connectionData["profilePic"] == null
@@ -50,6 +58,8 @@ class ChatBoxHeaderSection extends StatelessWidget {
   }
 
   _profileShortInformationSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       width: (MediaQuery.of(context).size.width - 40) / 1.7,
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -61,16 +71,16 @@ class ChatBoxHeaderSection extends StatelessWidget {
               connectionData["connectionName"],
               overflow: TextOverflow.ellipsis,
               style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 16),
+                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
             ),
           ),
           AnimatedContainer(
             duration: const Duration(milliseconds: 500),
-            child: const Align(
+            child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Online",
-                style: TextStyleCollection.terminalTextStyle,
+                style: TextStyleCollection.terminalTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightLatestMsgTextColor),
               ),
             ),
           ),
@@ -80,10 +90,13 @@ class ChatBoxHeaderSection extends StatelessWidget {
   }
 
   _terminalSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return InkWell(
       child: Image.asset(
         "assets/images/video.png",
         width: 30,
+        color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor,
       ),
       onTap: () {
         print("Video clickjed");
@@ -97,11 +110,15 @@ class ChatBoxHeaderSection extends StatelessWidget {
   }
 
   _backButton() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return InkWell(
-      child: const Icon(
+      child: Icon(
         Icons.arrow_back_outlined,
         size: 20,
-        color: AppColors.pureWhiteColor,
+        color: _isDarkMode
+            ? AppColors.pureWhiteColor
+            : AppColors.lightChatConnectionTextColor,
       ),
       onTap: () {
         Navigator.pop(context);

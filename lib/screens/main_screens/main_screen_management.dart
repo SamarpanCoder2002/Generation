@@ -8,6 +8,7 @@ import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/main_scrolling_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
 import 'groups_screen.dart';
@@ -24,12 +25,17 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
     showStatusAndNavigationBar();
     makeStatusBarTransparent();
-    changeOnlyNavigationBarColor(
-        navigationBarColor: AppColors.backgroundDarkMode);
+    // changeOnlyNavigationBarColor(
+    //     navigationBarColor: AppColors.getBgColor(_isDarkMode));
 
-    debugPrint("Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
+    changeContextTheme(_isDarkMode);
+
+    debugPrint(
+        "Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
 
     super.initState();
   }
@@ -37,11 +43,12 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     timeDilation = 1.0;
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-          backgroundColor: AppColors.backgroundDarkMode,
+          backgroundColor: AppColors.getBgColor(_isDarkMode),
           bottomSheet: _bottomSheet(),
           body: _currentScreenDetector()),
     );
@@ -49,17 +56,18 @@ class _MainScreenState extends State<MainScreen> {
 
   _bottomSheet() {
     final ScrollController _messageScreenScrollController =
-        Provider.of<MainScrollingProvider>(context)
-            .getScrollController();
+        Provider.of<MainScrollingProvider>(context).getScrollController();
 
     final int _currentBottomIconIndex =
         Provider.of<MainScreenNavigationProvider>(context).getUpdatedIndex();
+
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return ScrollToHideWidget(
       scrollController: _messageScreenScrollController,
       child: Container(
         height: 60,
-        color: AppColors.backgroundDarkMode,
+        color: AppColors.getBgColor(_isDarkMode),
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Row(
@@ -67,14 +75,18 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             IconButton(
               color: _currentBottomIconIndex == 0
-                  ? AppColors.darkBorderGreenColor
-                  : AppColors.darkInactiveIconColor,
+                  ? _isDarkMode
+                      ? AppColors.darkBorderGreenColor
+                      : AppColors.lightBorderGreenColor
+                  : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
               icon: Image.asset(IconImages.messageImagePath,
                   height: 30,
                   width: 30,
                   color: _currentBottomIconIndex == 0
-                      ? AppColors.darkBorderGreenColor
-                      : AppColors.darkInactiveIconColor),
+                      ? _isDarkMode
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.lightBorderGreenColor
+                      : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
               onPressed: () => Provider.of<MainScreenNavigationProvider>(
                       context,
                       listen: false)
@@ -82,14 +94,18 @@ class _MainScreenState extends State<MainScreen> {
             ),
             IconButton(
               color: _currentBottomIconIndex == 1
-                  ? AppColors.darkBorderGreenColor
-                  : AppColors.darkInactiveIconColor,
+                  ? _isDarkMode
+                      ? AppColors.darkBorderGreenColor
+                      : AppColors.lightBorderGreenColor
+                  : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
               icon: Image.asset(IconImages.groupImagePath,
                   height: 30,
                   width: 30,
                   color: _currentBottomIconIndex == 1
-                      ? AppColors.darkBorderGreenColor
-                      : AppColors.darkInactiveIconColor),
+                      ? _isDarkMode
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.lightBorderGreenColor
+                      : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
               onPressed: () => Provider.of<MainScreenNavigationProvider>(
                       context,
                       listen: false)
@@ -97,14 +113,18 @@ class _MainScreenState extends State<MainScreen> {
             ),
             IconButton(
               color: _currentBottomIconIndex == 2
-                  ? AppColors.darkBorderGreenColor
-                  : AppColors.darkInactiveIconColor,
+                  ? _isDarkMode
+                      ? AppColors.darkBorderGreenColor
+                      : AppColors.lightBorderGreenColor
+                  : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
               icon: Image.asset(IconImages.connectImagePath,
                   height: 30,
                   width: 30,
                   color: _currentBottomIconIndex == 2
-                      ? AppColors.darkBorderGreenColor
-                      : AppColors.darkInactiveIconColor),
+                      ? _isDarkMode
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.lightBorderGreenColor
+                      :_isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
               onPressed: () => Provider.of<MainScreenNavigationProvider>(
                       context,
                       listen: false)
@@ -112,14 +132,18 @@ class _MainScreenState extends State<MainScreen> {
             ),
             IconButton(
               color: _currentBottomIconIndex == 3
-                  ? AppColors.darkBorderGreenColor
-                  : AppColors.darkInactiveIconColor,
+                  ? _isDarkMode
+                      ? AppColors.darkBorderGreenColor
+                      : AppColors.lightBorderGreenColor
+                  : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
               icon: Image.asset(IconImages.settingsImagePath,
                   height: 30,
                   width: 30,
                   color: _currentBottomIconIndex == 3
-                      ? AppColors.darkBorderGreenColor
-                      : AppColors.darkInactiveIconColor),
+                      ? _isDarkMode
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.lightBorderGreenColor
+                      : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
               onPressed: () => Provider.of<MainScreenNavigationProvider>(
                       context,
                       listen: false)

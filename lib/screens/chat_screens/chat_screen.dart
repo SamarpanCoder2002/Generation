@@ -5,10 +5,12 @@ import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
+import 'package:generation/services/device_specific_operations.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/chat_creation_section_provider.dart';
 import '../../providers/chat_scroll_provider.dart';
+import '../../providers/theme_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final Map<String, dynamic> connectionData;
@@ -22,30 +24,40 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
     Provider.of<ChatScrollProvider>(context, listen: false).startListening();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
+
+    changeOnlyContextChatColor(_isDarkMode);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.chatDarkBackgroundColor,
+      backgroundColor: AppColors.getChatBgColor(_isDarkMode),
       appBar: _headerSection(),
       bottomSheet: _messageCreationSection(),
       body: _chatCollectionSection(),
     );
   }
 
-  _headerSection() => AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.chatDarkBackgroundColor,
-        automaticallyImplyLeading: false,
-        title: ChatBoxHeaderSection(
-            connectionData: widget.connectionData, context: context),
-      );
+  _headerSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme(); 
+    
+    return AppBar(
+      elevation: 0,
+      backgroundColor: AppColors.getChatBgColor(_isDarkMode),
+      automaticallyImplyLeading: false,
+      title: ChatBoxHeaderSection(
+          connectionData: widget.connectionData, context: context),
+    );
+  }
 
   _messageCreationSection() {
     return ScrollToHideWidget(
