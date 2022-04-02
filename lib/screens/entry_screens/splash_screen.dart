@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
     _initialize();
     makeScreenCleanView();
     makeScreenStrictPortrait();
-    changeOnlyIconBrightness(true);
+    //changeOnlyIconBrightness(true);
     _switchToNextScreen();
 
     super.initState();
