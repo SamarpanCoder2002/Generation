@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:generation/config/images_path_collection.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
@@ -22,8 +23,6 @@ class ChatBoxHeaderSection extends StatelessWidget {
   }
 
   _headingSection() {
-
-
     return Container(
         alignment: Alignment.centerLeft,
         child: Row(
@@ -70,8 +69,10 @@ class ChatBoxHeaderSection extends StatelessWidget {
             child: Text(
               connectionData["connectionName"],
               overflow: TextOverflow.ellipsis,
-              style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+              style: TextStyleCollection.headingTextStyle.copyWith(
+                  fontSize: 16,
+                  color: AppColors.chatInfoTextColor(_isDarkMode),
+                  fontWeight: FontWeight.w600),
             ),
           ),
           AnimatedContainer(
@@ -80,7 +81,8 @@ class ChatBoxHeaderSection extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 "Online",
-                style: TextStyleCollection.terminalTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightLatestMsgTextColor),
+                style: TextStyleCollection.terminalTextStyle
+                    .copyWith(color: AppColors.chatInfoTextColor(_isDarkMode)),
               ),
             ),
           ),
@@ -94,9 +96,9 @@ class ChatBoxHeaderSection extends StatelessWidget {
 
     return InkWell(
       child: Image.asset(
-        "assets/images/video.png",
+        IconImages.videoImagePath,
         width: 30,
-        color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor,
+        color: AppColors.getIconColor(_isDarkMode),
       ),
       onTap: () {
         print("Video clickjed");

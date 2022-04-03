@@ -28,14 +28,15 @@ class AppColors {
   static const Color lightRedColor = Colors.redAccent;
 
   static const Color chatDarkBackgroundColor = Color(0xff14172D);
-  static const Color chatLightBackgroundColor = Color(0xffF3F7FC);
+  static const Color chatLightBackgroundColor = Color(0xffdde5e6);
 
   static const Color messageWritingSectionColor = Color(0xff484850);
 
   static const Color myMsgDarkModeColor = Color(0xff6145D2);
+  static const Color myMsgLightModeColor = Color(0xff01bd47);
 
-  //static const Color myMsgDarkModeColor = Color.fromRGBO(37, 137, 224, 1);
   static const Color oppositeMsgDarkModeColor = Color(0xff303250);
+  static const Color oppositeMsgLightModeColor = Color(0xffffffff);
 
   static const Color lightBlueColor = Colors.lightBlue;
 
@@ -57,12 +58,63 @@ class AppColors {
   static const Color lightChatConnectionTextColor = Color(0xff696b71);
   static const Color lightLatestMsgTextColor = Color(0xff9fa0a1);
 
+  static const Color lightModeBlueColor = Color(0xff0186fe);
+
   static getBgColor(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : backgroundLightMode;
 
-  static getChatBgColor(bool _isDarkMode) => _isDarkMode?chatDarkBackgroundColor:chatLightBackgroundColor;
+  static getChatBgColor(bool _isDarkMode) =>
+      _isDarkMode ? chatDarkBackgroundColor : chatLightBackgroundColor;
 
-  static getBgSecondaryColor(bool _isDarkMode) => _isDarkMode ? backgroundDarkMode : backgroundLightSecondaryMode;
+  static getBgSecondaryColor(bool _isDarkMode) =>
+      _isDarkMode ? backgroundDarkMode : backgroundLightSecondaryMode;
+
+  static getMsgColor(bool _isDarkMode, bool _isOppositeMsg) {
+    if (_isDarkMode) {
+      return _isOppositeMsg ? oppositeMsgDarkModeColor : myMsgDarkModeColor;
+    } else {
+      return _isOppositeMsg ? oppositeMsgLightModeColor : myMsgLightModeColor;
+    }
+  }
+
+  static getMsgTextColor(bool _isOppositeSideMsg, bool _isDarkMode) =>
+      !_isDarkMode && _isOppositeSideMsg
+          ? AppColors.pureBlackColor
+          : AppColors.pureWhiteColor;
+
+  static getIconColor(bool _isDarkMode, {bool? isOpposite}) {
+    if (_isDarkMode) return AppColors.pureWhiteColor;
+    if (isOpposite == null) return AppColors.lightBorderGreenColor;
+    return isOpposite
+        ? AppColors.lightBorderGreenColor
+        : AppColors.pureWhiteColor;
+  }
+
+  static getLoadingColor(bool _isDarkMode, bool isOppositeMsg) => _isDarkMode
+      ? lightBlueColor
+      : isOppositeMsg
+          ? lightBorderGreenColor
+          : pureWhiteColor;
+
+  static chatInfoTextColor(bool _isDarkMode) =>
+      _isDarkMode ? pureWhiteColor : lightChatConnectionTextColor;
+
+  static getModalColor(bool _isDarkMode) =>
+      _isDarkMode ? oppositeMsgDarkModeColor : chatLightBackgroundColor;
+
+  static getModalColorSecondary(bool _isDarkMode) =>
+      _isDarkMode ? backgroundDarkMode : chatLightBackgroundColor;
+
+  static getModalTextColor(bool _isDarkMode) =>
+      _isDarkMode ? pureWhiteColor : lightChatConnectionTextColor;
+
+  static getTextButtonColor(bool _isDarkMode, bool isOpposite) {
+    if (_isDarkMode) return null;
+    return isOpposite ? lightBorderGreenColor : pureWhiteColor;
+  }
+
+  static getElevatedBtnColor(bool isDarkMode) =>
+      isDarkMode ? oppositeMsgDarkModeColor : normalBlueColor;
 }
 
 class WaveForm {

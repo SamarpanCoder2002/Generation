@@ -17,6 +17,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/chat_scroll_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
+import '../common/button.dart';
 
 class MessageCreationSection extends StatelessWidget {
   final BuildContext context;
@@ -73,9 +74,7 @@ class MessageCreationSection extends StatelessWidget {
     _deleteRecording() => IconButton(
           icon: Icon(
             Icons.delete_outline_outlined,
-            color: _isDarkMode
-                ? AppColors.pureWhiteColor
-                : AppColors.lightChatConnectionTextColor,
+            color: AppColors.lightRedColor.withOpacity(0.8),
           ),
           onPressed: () {
             Provider.of<SoundRecorderProvider>(context, listen: false)
@@ -95,11 +94,11 @@ class MessageCreationSection extends StatelessWidget {
         );
 
     _recordingVoiceSending() => IconButton(
-          icon: Image.asset(IconImages.sendImagePath,
-              width: 25,
-              color: _isDarkMode
-                  ? AppColors.pureWhiteColor
-                  : AppColors.lightChatConnectionTextColor),
+          icon: Image.asset(
+            IconImages.sendImagePath,
+            width: 25,
+            color: AppColors.getIconColor(_isDarkMode),
+          ),
           onPressed: () async {
             final _voiceRecordPath =
                 await Provider.of<SoundRecorderProvider>(context, listen: false)
@@ -172,9 +171,11 @@ class MessageCreationSection extends StatelessWidget {
             Provider.of<ChatBoxMessagingProvider>(context).getFocusNode(),
         controller:
             Provider.of<ChatBoxMessagingProvider>(context).getTextController(),
-        style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14, color: _isDarkMode
-            ? AppColors.pureWhiteColor
-            : AppColors.lightChatConnectionTextColor),
+        style: TextStyleCollection.terminalTextStyle.copyWith(
+            fontSize: 14,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor),
         maxLines: null,
         cursorColor: _isDarkMode
             ? AppColors.pureWhiteColor
@@ -210,28 +211,21 @@ class MessageCreationSection extends StatelessWidget {
           context: context,
           elevation: 5,
           builder: (_) => Container(
-                color: AppColors.backgroundDarkMode,
+                color: AppColors.getModalColorSecondary(_isDarkMode),
                 padding: const EdgeInsets.all(10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        _inputOption.pickVideoFromCameraAndGallery();
-                      },
-                      child: const Text("Camera"),
-                      style: ElevatedButton.styleFrom(
-                          primary: AppColors.oppositeMsgDarkModeColor),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _inputOption.pickVideoFromCameraAndGallery(
-                            fromCamera: false);
-                      },
-                      child: const Text("Gallery"),
-                      style: ElevatedButton.styleFrom(
-                          primary: AppColors.oppositeMsgDarkModeColor),
-                    ),
+                    commonElevatedButton(
+                        btnText: "Camera",
+                        onPressed: () =>
+                            _inputOption.pickVideoFromCameraAndGallery(),
+                        bgColor: AppColors.getElevatedBtnColor(_isDarkMode)),
+                    commonElevatedButton(
+                        btnText: "Gallery",
+                        onPressed: () => _inputOption
+                            .pickVideoFromCameraAndGallery(fromCamera: false),
+                        bgColor: AppColors.getElevatedBtnColor(_isDarkMode))
                   ],
                 ),
               ));
@@ -273,8 +267,9 @@ class MessageCreationSection extends StatelessWidget {
             Center(
               child: Text(
                 IconCollection.iconsCollection[index][1],
-                style: TextStyleCollection.terminalTextStyle
-                    .copyWith(fontSize: 14),
+                style: TextStyleCollection.terminalTextStyle.copyWith(
+                    fontSize: 14,
+                    color: AppColors.getModalTextColor(_isDarkMode)),
               ),
             )
           ],
@@ -287,7 +282,7 @@ class MessageCreationSection extends StatelessWidget {
           context: context,
           builder: (_) => Container(
               height: 450,
-              color: AppColors.oppositeMsgDarkModeColor,
+              color: AppColors.getModalColor(_isDarkMode),
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
               child: GridView.count(
                 crossAxisCount: 3,
@@ -386,15 +381,11 @@ class MessageCreationSection extends StatelessWidget {
           ? Image.asset(
               IconImages.sendImagePath,
               width: 25,
-              color: _isDarkMode
-                  ? AppColors.pureWhiteColor
-                  : AppColors.lightChatConnectionTextColor,
+              color: AppColors.getIconColor(_isDarkMode),
             )
           : Icon(
               Icons.keyboard_voice_outlined,
-              color: _isDarkMode
-                  ? AppColors.pureWhiteColor
-                  : AppColors.lightChatConnectionTextColor,
+              color: AppColors.getIconColor(_isDarkMode),
             ),
       onPressed: _voiceOrSendIconPressed,
     );

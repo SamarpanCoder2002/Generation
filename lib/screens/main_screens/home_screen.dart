@@ -400,9 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (_) => Container(
             height: 300,
-            color: _isDarkMode
-                ? AppColors.oppositeMsgDarkModeColor
-                : AppColors.chatLightBackgroundColor,
+            color: AppColors.getModalColor(_isDarkMode),
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
             child: GridView.count(
               crossAxisCount: 3,
@@ -427,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> {
         } else if (index == 2) {
           _inputOption.activityImageFromGallery();
         } else if (index == 3) {
-          _inputOption.makeVideoActivity();
+          _inputOption.makeVideoActivity(_isDarkMode);
         } else if (index == 4) {
           _inputOption.makeAudioActivity();
         } else if (index == 5) {
@@ -454,9 +452,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ActivityIconCollection.iconsCollection[index][1],
               style: TextStyleCollection.terminalTextStyle.copyWith(
                   fontSize: 14,
-                  color: _isDarkMode
-                      ? AppColors.pureWhiteColor
-                      : AppColors.lightChatConnectionTextColor),
+                  color: AppColors.getModalTextColor(_isDarkMode)),
             ),
           )
         ],

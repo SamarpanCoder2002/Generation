@@ -54,6 +54,8 @@ class _MessagingSectionState extends State<MessagingSection> {
       {required String messageId,
       required ChatMessageModel messageData,
       required int index}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Align(
       alignment: messageData.holder == MessageHolderType.other.toString()
           ? Alignment.centerLeft
@@ -66,9 +68,8 @@ class _MessagingSectionState extends State<MessagingSection> {
           elevation: 0,
           shadowColor: AppColors.pureWhiteColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: messageData.holder == MessageHolderType.other.toString()
-              ? AppColors.oppositeMsgDarkModeColor
-              : AppColors.myMsgDarkModeColor,
+          color: AppColors.getMsgColor(_isDarkMode,
+              messageData.holder == MessageHolderType.other.toString()),
           child: Stack(
             children: [
               _getPerfectMessageContainer(messageData: messageData),
@@ -83,6 +84,8 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _textMessageSection({required ChatMessageModel messageData}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 15, top: 8, bottom: 28),
       child: Linkify(
@@ -95,32 +98,30 @@ class _MessagingSectionState extends State<MessagingSection> {
           }
         },
         linkStyle: const TextStyle(color: AppColors.lightBlueColor),
-        style: const TextStyle(fontSize: 14, color: AppColors.pureWhiteColor),
+        style: TextStyle(
+            fontSize: 14,
+            color: AppColors.getMsgTextColor(
+                messageData.holder == MessageHolderType.other.toString(),
+                _isDarkMode)),
         options: const LinkifyOptions(humanize: false),
       ),
     );
   }
 
   _messageTimingAndStatus({required ChatMessageModel messageData}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Positioned(
       bottom: 3,
       right: 10,
-      child: Row(
-        children: [
-          Text(
-            messageData.time,
-            style: TextStyle(
-                fontSize: 12, color: AppColors.pureWhiteColor.withOpacity(0.8)),
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          const Padding(
-            padding: EdgeInsets.only(bottom: 3),
-            child: Icon(Icons.done_outlined,
-                size: 20, color: AppColors.pureWhiteColor),
-          )
-        ],
+      child: Text(
+        messageData.time,
+        style: TextStyleCollection.terminalTextStyle.copyWith(
+            color: AppColors.getMsgTextColor(
+                    messageData.holder == MessageHolderType.other.toString(),
+                    _isDarkMode)
+                .withOpacity(0.8),
+            fontWeight: FontWeight.normal),
       ),
     );
   }
@@ -202,27 +203,36 @@ class _MessagingSectionState extends State<MessagingSection> {
           .audioPlaying(messageData.message);
     }
 
-    _loadingProgress() => Expanded(
-          child: Container(
-            width: double.maxFinite,
-            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: LinearPercentIndicator(
-                percent: _getCurrentSongPath == messageData.message
-                    ? _currentLoadingTime ?? 1.0
-                    : 0.0,
-                backgroundColor: Colors.black26,
-                progressColor: AppColors.lightBlueColor),
-          ),
-        );
+    _loadingProgress() {
+      final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+      return Expanded(
+        child: Container(
+          width: double.maxFinite,
+          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: LinearPercentIndicator(
+              percent: _getCurrentSongPath == messageData.message
+                  ? _currentLoadingTime ?? 1.0
+                  : 0.0,
+              backgroundColor: Colors.black26,
+              progressColor: AppColors.getLoadingColor(_isDarkMode,
+                  messageData.holder == MessageHolderType.other.toString())),
+        ),
+      );
+    }
 
     _controllingButton() {
+      final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
       return IconButton(
           onPressed: _songPlayManagement,
           icon: Icon(
             isSongPlaying && _getCurrentSongPath == messageData.message
                 ? Icons.pause
                 : Icons.play_arrow,
-            color: AppColors.pureWhiteColor,
+            color: AppColors.getIconColor(_isDarkMode,
+                isOpposite:
+                    messageData.holder == MessageHolderType.other.toString()),
             size: 30,
           ));
     }
@@ -329,23 +339,33 @@ class _MessagingSectionState extends State<MessagingSection> {
             margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                color: _isDarkMode?AppColors.oppositeMsgDarkModeColor:AppColors.chatLightBackgroundColor,
+                color: _isDarkMode
+                    ? AppColors.oppositeMsgDarkModeColor
+                    : AppColors.lightModeBlueColor,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
-                  BoxShadow(offset: const Offset(0, 1), blurRadius: 5, color: _isDarkMode?AppColors.pureBlackColor:AppColors.pureBlackColor.withOpacity(0.2))
+                  BoxShadow(
+                      offset: const Offset(0, 1),
+                      blurRadius: 5,
+                      color: _isDarkMode
+                          ? AppColors.pureBlackColor
+                          : AppColors.pureBlackColor.withOpacity(0.2))
                 ]),
             child: Text(
               "Messages are End-to-End Encrypted.\nNo other Third Party Person, Organization or even Generation Team can't read your messages",
               textAlign: TextAlign.center,
               style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
             ),
           ),
           Center(
             child: Text(
               "Start Your Messaging 👇",
-              style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 18, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+              style: TextStyleCollection.headingTextStyle.copyWith(
+                  fontSize: 18,
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor),
             ),
           ),
         ],
@@ -462,15 +482,16 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _locationMessageSection({required ChatMessageModel messageData}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return ConstrainedBox(
         constraints: BoxConstraints(
             maxHeight: 300,
             maxWidth: MediaQuery.of(widget.context).size.width - 110),
         child: Card(
           elevation: 2,
-          color: messageData.holder == MessageHolderType.other.toString()
-              ? AppColors.oppositeMsgDarkModeColor
-              : AppColors.myMsgDarkModeColor,
+          color: AppColors.getMsgColor(_isDarkMode,
+              messageData.holder == MessageHolderType.other.toString()),
           shadowColor: AppColors.pureWhiteColor,
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
@@ -487,6 +508,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _contactMessageSection({required ChatMessageModel messageData}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final contact = messageData.message;
 
     return ConstrainedBox(
@@ -495,9 +517,8 @@ class _MessagingSectionState extends State<MessagingSection> {
             maxWidth: MediaQuery.of(widget.context).size.width - 160),
         child: Card(
           elevation: 2,
-          color: messageData.holder == MessageHolderType.other.toString()
-              ? AppColors.oppositeMsgDarkModeColor
-              : AppColors.myMsgDarkModeColor,
+          color: AppColors.getMsgColor(_isDarkMode,
+              messageData.holder == MessageHolderType.other.toString()),
           shadowColor: AppColors.pureWhiteColor,
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
@@ -512,8 +533,12 @@ class _MessagingSectionState extends State<MessagingSection> {
                 children: [
                   Text(
                     contact[PhoneNumberData.name],
-                    style: TextStyleCollection.activityTitleTextStyle
-                        .copyWith(fontSize: 16),
+                    style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                        fontSize: 16,
+                        color: AppColors.getMsgTextColor(
+                            messageData.holder ==
+                                MessageHolderType.other.toString(),
+                            _isDarkMode)),
                   ),
                   const SizedBox(
                     height: 5,
@@ -522,8 +547,13 @@ class _MessagingSectionState extends State<MessagingSection> {
                     contact[PhoneNumberData.number],
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                    style: TextStyleCollection.terminalTextStyle
-                        .copyWith(fontSize: 14, fontWeight: FontWeight.normal),
+                    style: TextStyleCollection.terminalTextStyle.copyWith(
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                        color: AppColors.getMsgTextColor(
+                            messageData.holder ==
+                                MessageHolderType.other.toString(),
+                            _isDarkMode)),
                   ),
                   const SizedBox(
                     height: 5,
@@ -531,7 +561,8 @@ class _MessagingSectionState extends State<MessagingSection> {
                   _phoneNumberManagementSection(
                       phoneNumber: contact[PhoneNumberData.number],
                       name: contact[PhoneNumberData.name],
-                      label: contact[PhoneNumberData.numberLabel]),
+                      label: contact[PhoneNumberData.numberLabel],
+                      messageData: messageData),
                 ],
               ),
             ),
@@ -540,8 +571,12 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _phoneNumberManagementSection(
-      {required String phoneNumber, String? name, String? label}) {
+      {required String phoneNumber,
+      String? name,
+      String? label,
+      required ChatMessageModel messageData}) {
     final InputOption _inputOption = InputOption(widget.context);
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     _addContactButtonPressed() {
       final TextEditingController _contactNameController =
@@ -551,19 +586,31 @@ class _MessagingSectionState extends State<MessagingSection> {
       _inputOption.takeInputForContactName(
           contactNameController: _contactNameController,
           phoneNumber: phoneNumber,
-          phoneNumberLabel: label ?? "mobile");
+          phoneNumberLabel: label ?? "mobile",
+          isDarkMode: _isDarkMode);
     }
 
-    _messageOrCallButtonPressed() => _inputOption
-        .phoneNumberOpeningOptions(widget.context, phoneNumber: phoneNumber);
+    _messageOrCallButtonPressed() =>
+        _inputOption.phoneNumberOpeningOptions(widget.context,
+            phoneNumber: phoneNumber, isDarkMode: _isDarkMode);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         commonTextButton(
-            btnText: "Add Contact", onPressed: _addContactButtonPressed),
+            btnText: "Add Contact",
+            onPressed: _addContactButtonPressed,
+            textColor: AppColors.getTextButtonColor(_isDarkMode,
+                messageData.holder == MessageHolderType.other.toString()),
+            borderColor: AppColors.getTextButtonColor(_isDarkMode,
+                messageData.holder == MessageHolderType.other.toString())),
         commonTextButton(
-            btnText: "Message/Call", onPressed: _messageOrCallButtonPressed),
+            btnText: "Message/Call",
+            onPressed: _messageOrCallButtonPressed,
+            textColor: AppColors.getTextButtonColor(_isDarkMode,
+                messageData.holder == MessageHolderType.other.toString()),
+            borderColor: AppColors.getTextButtonColor(_isDarkMode,
+                messageData.holder == MessageHolderType.other.toString())),
       ],
     );
   }

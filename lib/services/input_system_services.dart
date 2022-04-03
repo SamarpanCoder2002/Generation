@@ -353,34 +353,39 @@ class InputOption {
   takeInputForContactName(
       {required TextEditingController contactNameController,
       required String phoneNumber,
-      required String phoneNumberLabel}) {
+      required String phoneNumberLabel,
+      required bool isDarkMode}) {
     _heading() => Center(
           child: Text(
             "Contact Name",
-            style: TextStyleCollection.secondaryHeadingTextStyle
-                .copyWith(fontSize: 18),
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                fontSize: 18, color: AppColors.getModalTextColor(isDarkMode)),
           ),
         );
 
     _contactNameInputSection() => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: TextField(
-            style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+            style: TextStyleCollection.terminalTextStyle.copyWith(
+                fontSize: 14, color: AppColors.getModalTextColor(isDarkMode)),
             controller: contactNameController,
             autofocus: true,
-            cursorColor: AppColors.pureWhiteColor,
+            cursorColor: AppColors.getModalTextColor(isDarkMode),
             decoration: InputDecoration(
               hintText: "Enter Contact Name",
               hintStyle: TextStyleCollection.terminalTextStyle.copyWith(
-                  color: AppColors.pureWhiteColor.withOpacity(0.6),
+                  color:
+                      AppColors.getModalTextColor(isDarkMode).withOpacity(0.6),
                   fontSize: 14),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
-                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                    color: AppColors.getModalTextColor(isDarkMode)
+                        .withOpacity(0.8)),
               ),
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
-                    color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                    color: AppColors.getModalTextColor(isDarkMode)
+                        .withOpacity(0.8)),
               ),
             ),
           ),
@@ -410,7 +415,7 @@ class InputOption {
         context: context,
         elevation: 5,
         builder: (_) => Container(
-            color: AppColors.oppositeMsgDarkModeColor,
+            color: AppColors.getModalColor(isDarkMode),
             padding: const EdgeInsets.all(10),
             child: Column(
               children: [
@@ -430,7 +435,8 @@ class InputOption {
             )));
   }
 
-  phoneNumberOpeningOptions(context, {required String phoneNumber}) {
+  phoneNumberOpeningOptions(context,
+      {required String phoneNumber, required bool isDarkMode}) {
     openSms() async {
       try {
         await launch("sms:$phoneNumber");
@@ -462,16 +468,23 @@ class InputOption {
         context: context,
         elevation: 5,
         builder: (_) => Container(
-              color: AppColors.backgroundDarkMode,
+              color: AppColors.getModalColorSecondary(isDarkMode),
               padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  commonElevatedButton(btnText: "Sms", onPressed: openSms),
                   commonElevatedButton(
-                      btnText: "Call", onPressed: callToNumber),
+                      btnText: "Sms",
+                      onPressed: openSms,
+                      bgColor: AppColors.getElevatedBtnColor(isDarkMode)),
                   commonElevatedButton(
-                      btnText: "Whatsapp", onPressed: openInWhatsapp),
+                      btnText: "Call",
+                      onPressed: callToNumber,
+                      bgColor: AppColors.getElevatedBtnColor(isDarkMode)),
+                  commonElevatedButton(
+                      btnText: "Whatsapp",
+                      onPressed: openInWhatsapp,
+                      bgColor: AppColors.getElevatedBtnColor(isDarkMode)),
                 ],
               ),
             ));
@@ -515,40 +528,39 @@ class InputOption {
   Future<void> shareTextContent(String textToShare) async =>
       await Share.share(textToShare);
 
-  makeVideoActivity() {
+  _onGalleryPressed() async {
+    final data =
+        await pickVideoFromCameraAndGallery(fromCamera: false, forChat: false);
+
+    if (data == null) return;
+    _commonVideoNavigationForActivity(data, VideoType.file);
+  }
+
+  _onCameraPressed() async {
+    final data = await pickVideoFromCameraAndGallery(forChat: false);
+
+    if (data == null) return;
+    _commonVideoNavigationForActivity(data, VideoType.file);
+  }
+
+  makeVideoActivity(bool _isDarkMode) {
     showModalBottomSheet(
         context: context,
         elevation: 5,
         builder: (_) => Container(
-              color: AppColors.backgroundDarkMode,
+              color: AppColors.getModalColorSecondary(_isDarkMode),
               padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      final data =
-                          await pickVideoFromCameraAndGallery(forChat: false);
-
-                      if (data == null) return;
-                      _commonVideoNavigationForActivity(data, VideoType.file);
-                    },
-                    child: const Text("Camera"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final data = await pickVideoFromCameraAndGallery(
-                          fromCamera: false, forChat: false);
-
-                      if (data == null) return;
-                      _commonVideoNavigationForActivity(data, VideoType.file);
-                    },
-                    child: const Text("Gallery"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
+                  commonElevatedButton(
+                      btnText: "Camera",
+                      onPressed: _onCameraPressed,
+                      bgColor: AppColors.getElevatedBtnColor(_isDarkMode)),
+                  commonElevatedButton(
+                      btnText: "Gallery",
+                      onPressed: _onGalleryPressed,
+                      bgColor: AppColors.getElevatedBtnColor(_isDarkMode))
                 ],
               ),
             ));

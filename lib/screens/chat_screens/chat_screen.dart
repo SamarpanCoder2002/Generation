@@ -35,15 +35,33 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return Scaffold(
-      backgroundColor: AppColors.getChatBgColor(_isDarkMode),
-      appBar: _headerSection(),
-      bottomSheet: _messageCreationSection(),
-      body: _chatCollectionSection(),
+    return WillPopScope(
+      onWillPop: () async{
+        final bool _isEmojiSectionShowing =
+        Provider.of<ChatCreationSectionProvider>(context, listen: false)
+            .getEmojiActivationState();
+
+        if(_isEmojiSectionShowing){
+          Provider.of<ChatCreationSectionProvider>(context, listen: false).updateEmojiActivationState(false);
+          Provider.of<ChatCreationSectionProvider>(context, listen: false)
+              .backToNormalHeight();
+          return false;
+        }
+
+        Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.getChatBgColor(_isDarkMode),
+        appBar: _headerSection(),
+        bottomSheet: _messageCreationSection(),
+        body: _chatCollectionSection(),
+      ),
     );
   }
 
