@@ -376,6 +376,30 @@ class MessageCreationSection extends StatelessWidget {
       }
     }
 
+    if(!_isDarkMode) {
+      return InkWell(
+        onTap: _voiceOrSendIconPressed,
+        child: Container(
+        width: 40,
+        height: 40,
+        padding: EdgeInsets.all(_showVoiceIcon?0:8),
+        decoration: BoxDecoration(
+          color: AppColors.lightBorderGreenColor,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: !_showVoiceIcon
+            ? Image.asset(
+                IconImages.sendImagePath,
+                color: AppColors.pureWhiteColor,
+              )
+            : const Icon(
+                Icons.keyboard_voice_outlined,
+                color: AppColors.pureWhiteColor,
+              ),
+    ),
+      );
+    }
+
     return IconButton(
       icon: !_showVoiceIcon
           ? Image.asset(

@@ -44,8 +44,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -90,15 +92,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   _heading() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 5),
         child: Row(
           children: [
             InkWell(
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_outlined,
-                color: AppColors.pureWhiteColor,
+                color: _isDarkMode
+                    ? AppColors.pureWhiteColor
+                    : AppColors.lightChatConnectionTextColor,
               ),
               onTap: () => Navigator.pop(context),
             ),
@@ -107,8 +113,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             Text(
               "Profile",
-              style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+              style: TextStyleCollection.headingTextStyle.copyWith(
+                  fontSize: 20,
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor),
             ),
           ],
         ));
@@ -151,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         margin: const EdgeInsets.only(top: 20),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
-            color: AppColors.oppositeMsgDarkModeColor,
+            color: AppColors.getImageBgColor(_isDarkMode),
             border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
             image: _editableProfileData["profile_image"].startsWith("https")
                 ? DecorationImage(
@@ -215,6 +224,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       {required IconData iconData,
       required String heading,
       required String nameValue}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Row(
       children: [
         Icon(
@@ -233,8 +244,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 heading,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
-                style: TextStyleCollection.terminalTextStyle
-                    .copyWith(color: AppColors.pureWhiteColor.withOpacity(0.6)),
+                style: TextStyleCollection.terminalTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor.withOpacity(0.6)
+                        : AppColors.lightChatConnectionTextColor
+                            .withOpacity(0.6)),
               ),
             ),
             SizedBox(
@@ -243,8 +257,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 nameValue,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
-                style: TextStyleCollection.secondaryHeadingTextStyle
-                    .copyWith(fontSize: 14),
+                style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                    fontSize: 14,
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightChatConnectionTextColor),
               ),
             ),
           ],
@@ -257,12 +274,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       {required String editContent,
       required String previousValue,
       required String parameterKey}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         margin: const EdgeInsets.only(top: 10),
         child: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.create_rounded,
-            color: AppColors.pureWhiteColor,
+            color: AppColors.getIconColor(_isDarkMode),
             size: 20,
           ),
           onPressed: () {
@@ -275,6 +294,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   _saveButton() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     if (_actualProfileData["profile_image"] ==
             _editableProfileData["profile_image"] &&
         _actualProfileData["name"] == _editableProfileData["name"] &&
@@ -284,75 +305,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Center();
     }
 
-    return Center(
-        child: commonElevatedButton(
-            btnText: "Save",
-            onPressed: () {
-              if (mounted) {
-                setState(() {
-                  _actualProfileData["profile_image"] =
-                      _editableProfileData["profile_image"];
-                  _actualProfileData["name"] = _editableProfileData["name"];
-                  _actualProfileData["user_name"] =
-                      _editableProfileData["user_name"];
-                  _actualProfileData["about"] = _editableProfileData["about"];
-                  _actualProfileData["email"] = _editableProfileData["email"];
-                });
-              }
+    _onSave(){
+      if (mounted) {
+        setState(() {
+          _actualProfileData["profile_image"] =
+          _editableProfileData["profile_image"];
+          _actualProfileData["name"] = _editableProfileData["name"];
+          _actualProfileData["user_name"] =
+          _editableProfileData["user_name"];
+          _actualProfileData["about"] = _editableProfileData["about"];
+          _actualProfileData["email"] = _editableProfileData["email"];
+        });
+      }
 
-              showToast(context,
-                  title: "Profile Updated",
-                  toastIconType: ToastIconType.success,
-                  toastDuration: 6,
-                  showFromTop: false);
-            }));
+      showToast(context,
+          title: "Profile Updated",
+          toastIconType: ToastIconType.success,
+          toastDuration: 6,
+          showFromTop: false);
+    }
+
+    return Center(
+        child: commonElevatedButton(btnText: "Save", onPressed: _onSave, bgColor: AppColors.getElevatedBtnColor(_isDarkMode)));
   }
 
   _imageTakingOption() {
     final InputOption _inputOption = InputOption(context);
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    _onCameraPressed() async {
+      final String? imgPath =
+          await _inputOption.takeImageFromCamera(forChat: false);
+      if (imgPath == null) return;
+
+      if (mounted) {
+        setState(() {
+          _editableProfileData["profile_image"] = imgPath;
+        });
+      }
+    }
+
+    _onGalleryPressed() async {
+      final String? imgPath = await _inputOption.pickSingleImageFromGallery();
+
+      if (imgPath == null) return;
+
+      if (mounted) {
+        setState(() {
+          _editableProfileData["profile_image"] = imgPath;
+        });
+      }
+    }
 
     showModalBottomSheet(
         context: context,
         elevation: 5,
         builder: (_) => Container(
-              color: AppColors.backgroundDarkMode,
+              color: AppColors.getBgColor(_isDarkMode),
               padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String? imgPath = await _inputOption
-                          .takeImageFromCamera(forChat: false);
-                      if (imgPath == null) return;
-
-                      if (mounted) {
-                        setState(() {
-                          _editableProfileData["profile_image"] = imgPath;
-                        });
-                      }
-                    },
-                    child: const Text("Camera"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final String? imgPath =
-                          await _inputOption.pickSingleImageFromGallery();
-
-                      if (imgPath == null) return;
-
-                      if (mounted) {
-                        setState(() {
-                          _editableProfileData["profile_image"] = imgPath;
-                        });
-                      }
-                    },
-                    child: const Text("Gallery"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
+                  commonElevatedButton(
+                      btnText: "Camera",
+                      onPressed: _onCameraPressed,
+                      bgColor: AppColors.getElevatedBtnColor(_isDarkMode)),
+                  commonElevatedButton(
+                      btnText: "Gallery",
+                      onPressed: _onGalleryPressed,
+                      bgColor: AppColors.getElevatedBtnColor(_isDarkMode))
                 ],
               ),
             ));

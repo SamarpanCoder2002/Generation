@@ -341,7 +341,7 @@ class _MessagingSectionState extends State<MessagingSection> {
             decoration: BoxDecoration(
                 color: _isDarkMode
                     ? AppColors.oppositeMsgDarkModeColor
-                    : AppColors.lightModeBlueColor,
+                    : AppColors.lightBorderGreenColor,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(

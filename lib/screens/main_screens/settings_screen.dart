@@ -34,8 +34,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
           margin: const EdgeInsets.only(top: 30, left: 20, right: 20),
           height: MediaQuery.of(context).size.height * 0.9,
@@ -45,33 +47,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   _headingSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 23),
         child: Text(
           "Settings",
-          style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+          style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
         ));
   }
 
   _themeManager() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Theme(
-      data: ThemeData().copyWith(dividerColor: Colors.transparent),
+      data: Theme.of(context).copyWith(backgroundColor: AppColors.getBgColor(_isDarkMode), dividerColor: AppColors.transparentColor),
       child: ExpansionTile(
-        backgroundColor: AppColors.backgroundDarkMode,
-        leading: const Icon(
+        backgroundColor: AppColors.getBgColor(_isDarkMode),
+        leading: Icon(
           Icons.invert_colors_on_outlined,
-          color: AppColors.pureWhiteColor,
+          color: AppColors.getIconColor(_isDarkMode),
         ),
         title: Text(
           "App theme",
           style: TextStyleCollection.secondaryHeadingTextStyle
-              .copyWith(fontSize: 16),
+              .copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor,fontWeight: FontWeight.normal,),
         ),
-        trailing: const Icon(
+        trailing: Icon(
           Icons.arrow_drop_down_outlined,
           size: 22,
-          color: AppColors.pureWhiteColor,
+          color: AppColors.getIconColor(_isDarkMode),
         ),
         children: [
           _themeModeOption(
@@ -91,6 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   _themeModeOption(
       {required String tileText, required ThemeModeTypes correspondingTheme}) {
     final themeProviderRef = Provider.of<ThemeProvider>(context);
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return TextButton(
         onPressed: () async {
@@ -107,13 +114,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             themeProviderRef.isThatCurrentTheme(correspondingTheme)
                 ? Icons.circle_rounded
                 : Icons.circle_outlined,
-            color: AppColors.pureWhiteColor,
+            color: AppColors.getIconColor(_isDarkMode),
             size: 18,
           ),
           contentPadding: const EdgeInsets.only(left: 20),
           title: Text(
             tileText,
-            style: TextStyleCollection.secondaryHeadingTextStyle,
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
           ),
         ));
   }
@@ -123,6 +130,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       required String title,
       required IconData? terminalIconData,
       required VoidCallback onPressed}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return InkWell(
       onTap: onPressed,
       child: Container(
@@ -136,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Icon(
                   leadingIconData,
-                  color: AppColors.pureWhiteColor,
+                  color: AppColors.getIconColor(_isDarkMode),
                 ),
                 const SizedBox(
                   width: 30,
@@ -144,14 +153,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   title,
                   style: TextStyleCollection.secondaryHeadingTextStyle
-                      .copyWith(fontSize: 16, fontWeight: FontWeight.normal),
+                      .copyWith(fontSize: 16, fontWeight: FontWeight.normal,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
                 )
               ],
             ),
             if (terminalIconData != null)
               Icon(
                 terminalIconData,
-                color: AppColors.pureWhiteColor,
+                color: AppColors.getIconColor(_isDarkMode),
                 size: 15,
               ),
           ],
@@ -165,6 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Provider.of<MainScrollingProvider>(context).getScrollController();
 
     final InputOption _inputOption = InputOption(context);
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return ListView(
       shrinkWrap: true,
@@ -236,8 +246,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Created By ",
-                  style: TextStyleCollection.secondaryHeadingTextStyle),
+              Text("Created By ",
+                  style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
               Text(
                 "Samarpan Dasgupta",
                 style: TextStyleCollection.secondaryHeadingTextStyle
