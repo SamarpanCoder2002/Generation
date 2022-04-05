@@ -92,20 +92,39 @@ class _MainScreenState extends State<MainScreen> {
                       listen: false)
                   .setUpdatedIndex(0),
             ),
+            // IconButton(
+            //   color: _currentBottomIconIndex == 1
+            //       ? _isDarkMode
+            //           ? AppColors.darkBorderGreenColor
+            //           : AppColors.lightBorderGreenColor
+            //       : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
+            //   icon: Image.asset(IconImages.groupImagePath,
+            //       height: 30,
+            //       width: 30,
+            //       color: _currentBottomIconIndex == 1
+            //           ? _isDarkMode
+            //               ? AppColors.darkBorderGreenColor
+            //               : AppColors.lightBorderGreenColor
+            //           : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
+            //   onPressed: () => Provider.of<MainScreenNavigationProvider>(
+            //           context,
+            //           listen: false)
+            //       .setUpdatedIndex(1),
+            // ),
             IconButton(
               color: _currentBottomIconIndex == 1
                   ? _isDarkMode
                       ? AppColors.darkBorderGreenColor
                       : AppColors.lightBorderGreenColor
                   : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
-              icon: Image.asset(IconImages.groupImagePath,
+              icon: Image.asset(IconImages.connectImagePath,
                   height: 30,
                   width: 30,
                   color: _currentBottomIconIndex == 1
                       ? _isDarkMode
                           ? AppColors.darkBorderGreenColor
                           : AppColors.lightBorderGreenColor
-                      : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
+                      :_isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
               onPressed: () => Provider.of<MainScreenNavigationProvider>(
                       context,
                       listen: false)
@@ -117,29 +136,10 @@ class _MainScreenState extends State<MainScreen> {
                       ? AppColors.darkBorderGreenColor
                       : AppColors.lightBorderGreenColor
                   : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
-              icon: Image.asset(IconImages.connectImagePath,
-                  height: 30,
-                  width: 30,
-                  color: _currentBottomIconIndex == 2
-                      ? _isDarkMode
-                          ? AppColors.darkBorderGreenColor
-                          : AppColors.lightBorderGreenColor
-                      :_isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor),
-              onPressed: () => Provider.of<MainScreenNavigationProvider>(
-                      context,
-                      listen: false)
-                  .setUpdatedIndex(2),
-            ),
-            IconButton(
-              color: _currentBottomIconIndex == 3
-                  ? _isDarkMode
-                      ? AppColors.darkBorderGreenColor
-                      : AppColors.lightBorderGreenColor
-                  : _isDarkMode?AppColors.darkInactiveIconColor:AppColors.lightInactiveIconColor,
               icon: Image.asset(IconImages.settingsImagePath,
                   height: 30,
                   width: 30,
-                  color: _currentBottomIconIndex == 3
+                  color: _currentBottomIconIndex == 2
                       ? _isDarkMode
                           ? AppColors.darkBorderGreenColor
                           : AppColors.lightBorderGreenColor
@@ -147,7 +147,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () => Provider.of<MainScreenNavigationProvider>(
                       context,
                       listen: false)
-                  .setUpdatedIndex(3),
+                  .setUpdatedIndex(2),
             ),
           ],
         ),
@@ -162,11 +162,11 @@ class _MainScreenState extends State<MainScreen> {
     switch (_currentIndex) {
       case 0:
         return const HomeScreen();
+      // case 1:
+      //   return const GroupsScreen();
       case 1:
-        return const GroupsScreen();
-      case 2:
         return const ConnectionManagementScreen();
-      case 3:
+      case 2:
         return const SettingsScreen();
     }
   }

@@ -116,7 +116,7 @@ class AppColors {
   static getElevatedBtnColor(bool isDarkMode) =>
       isDarkMode ? oppositeMsgDarkModeColor : normalBlueColor;
 
-  static getImageBgColor(bool _isDarkMode) => _isDarkMode?oppositeMsgDarkModeColor.withOpacity(0.2):pureBlackColor.withOpacity(0.2);
+  static getImageBgColor(bool _isDarkMode) => _isDarkMode?oppositeMsgDarkModeColor.withOpacity(0.2):pureBlackColor.withOpacity(0.1);
 }
 
 class WaveForm {

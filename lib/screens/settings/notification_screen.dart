@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';
+import '../../providers/theme_provider.dart';
 
 class NotificationOptionsScreen extends StatefulWidget {
   const NotificationOptionsScreen({Key? key}) : super(key: key);
@@ -17,8 +19,10 @@ class _NotificationOptionsScreenState extends State<NotificationOptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -41,15 +45,19 @@ class _NotificationOptionsScreenState extends State<NotificationOptionsScreen> {
   }
 
   _heading() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 5),
         child: Row(
           children: [
             InkWell(
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_outlined,
-                color: AppColors.pureWhiteColor,
+                color: _isDarkMode
+                    ? AppColors.pureWhiteColor
+                    : AppColors.lightChatConnectionTextColor,
               ),
               onTap: () => Navigator.pop(context),
             ),
@@ -59,20 +67,24 @@ class _NotificationOptionsScreenState extends State<NotificationOptionsScreen> {
             Text(
               "Notification",
               style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 20, color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor),
             ),
           ],
         ));
   }
 
   _commonSection({required String title, required String subTitle}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return ListTile(
-      tileColor: AppColors.backgroundDarkMode,
+      tileColor: AppColors.getBgColor(_isDarkMode),
       onTap: () {},
       title: Text(
         title,
         style: TextStyleCollection.terminalTextStyle
-            .copyWith(fontSize: 16, fontWeight: FontWeight.normal),
+            .copyWith(fontSize: 16, fontWeight: FontWeight.normal,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
       ),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 5),
@@ -81,7 +93,7 @@ class _NotificationOptionsScreenState extends State<NotificationOptionsScreen> {
           style: TextStyleCollection.terminalTextStyle.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.normal,
-              color: AppColors.pureWhiteColor.withOpacity(0.6)),
+              color: _isDarkMode?AppColors.pureWhiteColor.withOpacity(0.6):AppColors.lightChatConnectionTextColor.withOpacity(0.6)),
         ),
       ),
       trailing: Switch.adaptive(
@@ -91,9 +103,9 @@ class _NotificationOptionsScreenState extends State<NotificationOptionsScreen> {
             _isActive = value;
           });
         },
-        activeTrackColor: AppColors.darkBorderGreenColor.withOpacity(0.8),
+        activeTrackColor: _isDarkMode?AppColors.darkBorderGreenColor.withOpacity(0.8):AppColors.lightBorderGreenColor.withOpacity(0.8),
         activeColor: AppColors.locationIconBgColor,
-        inactiveTrackColor: AppColors.oppositeMsgDarkModeColor,
+        inactiveTrackColor: _isDarkMode?AppColors.oppositeMsgDarkModeColor:AppColors.pureBlackColor.withOpacity(0.2),
       ),
     );
   }

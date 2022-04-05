@@ -7,7 +7,9 @@ import 'package:generation/services/input_system_services.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
+import '../../../providers/theme_provider.dart';
 import '../../../providers/wallpaper/wallpaper_provider.dart';
+import '../../../services/device_specific_operations.dart';
 
 class ChatWallpaperScreen extends StatefulWidget {
   const ChatWallpaperScreen({Key? key}) : super(key: key);
@@ -17,10 +19,14 @@ class ChatWallpaperScreen extends StatefulWidget {
 }
 
 class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
+
+
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       appBar: _headerSection(),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -56,7 +62,9 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                                 wallpaperData["category"],
                                 style: TextStyleCollection
                                     .secondaryHeadingTextStyle
-                                    .copyWith(fontSize: 16),
+                                    .copyWith(fontSize: 16, color: _isDarkMode
+                                ? AppColors.pureWhiteColor
+                                    : AppColors.lightChatConnectionTextColor,),
                               ),
                             )
                           ],
@@ -69,25 +77,36 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
     );
   }
 
-  _headerSection() => AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.chatDarkBackgroundColor,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_outlined)),
-            Text(
-              "Wallpaper Management",
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
-            ),
-          ],
-        ),
-      );
+  _headerSection(){
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return AppBar(
+      elevation: 0,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
+      automaticallyImplyLeading: false,
+      title: Row(
+        children: [
+          IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon:Icon(Icons.arrow_back_outlined, color: _isDarkMode
+              ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor,)),
+          Text(
+            "Wallpaper Management",
+            style:
+            TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+          ),
+        ],
+      ),
+    );
+  }
 
   _imageCategoryTapAction(wallpaperData) async {
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    changeOnlyContextChatColor(_isDarkMode);
+
+
     if (wallpaperData["type"] == WallpaperType.myPhotos) {
       final InputOption _inputOption = InputOption(context);
       final _singleImagePath = await _inputOption.pickSingleImageFromGallery(
@@ -100,13 +119,20 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
           MaterialPageRoute(
               builder: (_) => ChatWallpaperPreview(
                   wallpaperType: wallpaperData["type"],
-                  imgPath: _singleImagePath)));
+                  imgPath: _singleImagePath))).then((value){
+        print("nOw");
+        changeContextTheme(_isDarkMode);
+      });
     } else {
       Navigator.push(
           context,
           MaterialPageRoute(
+
               builder: (_) =>
-                  ChatWallpaperPreview(wallpaperType: wallpaperData["type"])));
+                  ChatWallpaperPreview(wallpaperType: wallpaperData["type"]))).then((value){
+                    print("nOw");
+        changeContextTheme(_isDarkMode);
+      });
     }
   }
 }
