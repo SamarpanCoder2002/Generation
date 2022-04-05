@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';
 import '../../providers/connection_collection_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../common/chat_connections_common_design.dart';
 
 class CommonSettingScreen extends StatefulWidget {
@@ -29,6 +30,8 @@ class _CommonSettingScreenState extends State<CommonSettingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return WillPopScope(
       onWillPop: () async {
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
@@ -36,7 +39,7 @@ class _CommonSettingScreenState extends State<CommonSettingScreen> {
         return true;
       },
       child: Scaffold(
-        backgroundColor: AppColors.backgroundDarkMode,
+        backgroundColor: AppColors.getBgColor(_isDarkMode),
         appBar: _headerSection(),
         body: Container(
           width: MediaQuery.of(context).size.width,
@@ -48,23 +51,26 @@ class _CommonSettingScreenState extends State<CommonSettingScreen> {
     );
   }
 
-  _headerSection() => AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.chatDarkBackgroundColor,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_outlined)),
-            Text(
-              "Select Any Connection",
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
-            ),
-          ],
-        ),
-      );
+  _headerSection(){
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    return AppBar(
+      elevation: 0,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
+      automaticallyImplyLeading: false,
+      title: Row(
+        children: [
+          IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.arrow_back_outlined,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
+          Text(
+            "Select Any Connection",
+            style:
+            TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+          ),
+        ],
+      ),
+    );
+  }
 
   _chatConnectionCollection() {
     final _commonChatLayout = CommonChatListLayout(context: context);

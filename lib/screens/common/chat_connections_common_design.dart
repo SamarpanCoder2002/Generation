@@ -147,20 +147,23 @@ class CommonChatListLayout {
   }
 
   _selectionButton(
-          bool _isSelected, dynamic connectionData, int currentIndex) =>
-      IconButton(
-          onPressed: () {
-            connectionData["isSelected"] = !connectionData["isSelected"];
-            Provider.of<ConnectionCollectionProvider>(context, listen: false)
-                .updateParticularSelectionData(connectionData, currentIndex);
-          },
-          icon: _isSelected
-              ? const Icon(
-                  Icons.circle,
-                  color: AppColors.pureWhiteColor,
-                )
-              : const Icon(
-                  Icons.circle_outlined,
-                  color: AppColors.pureWhiteColor,
-                ));
+          bool _isSelected, dynamic connectionData, int currentIndex){
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return  IconButton(
+        onPressed: () {
+          connectionData["isSelected"] = !connectionData["isSelected"];
+          Provider.of<ConnectionCollectionProvider>(context, listen: false)
+              .updateParticularSelectionData(connectionData, currentIndex);
+        },
+        icon: _isSelected
+            ? Icon(
+          Icons.circle,
+          color: AppColors.getIconColor(_isDarkMode),
+        )
+            : Icon(
+          Icons.circle_outlined,
+          color: AppColors.getIconColor(_isDarkMode),
+        ));
+  }
 }

@@ -6,6 +6,7 @@ import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
+import '../../../providers/theme_provider.dart';
 import '../../../providers/wallpaper/wallpaper_provider.dart';
 import '../../../services/device_specific_operations.dart';
 
@@ -18,8 +19,10 @@ class StorageImageAndVideoCollection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -45,6 +48,7 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         /// When Integrate Functions later, Open Video from phone app write here
         /// await OpenFile.open("give_local_video_file_path_here");
       } else {
+        makeStatusBarTransparent();
         Navigator.push(
             context,
             MaterialPageRoute(

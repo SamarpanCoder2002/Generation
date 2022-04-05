@@ -4,9 +4,11 @@ import 'package:generation/config/text_collection.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
+import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../../config/text_style_collection.dart';
+import '../../../providers/theme_provider.dart';
 import '../../common/button.dart';
 
 class DonateScreen extends StatefulWidget {
@@ -53,9 +55,11 @@ class _DonateScreenState extends State<DonateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
       appBar: _headerSection(),
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -72,14 +76,16 @@ class _DonateScreenState extends State<DonateScreen> {
   }
 
   _donateAmount() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       margin: const EdgeInsets.only(left: 40, right: 40, top: 5, bottom: 20),
       child: TextFormField(
         autofocus: true,
         controller: _donateController,
         style: TextStyleCollection.terminalTextStyle
-            .copyWith(fontSize: 14, color: AppColors.pureWhiteColor),
-        cursorColor: AppColors.pureWhiteColor,
+            .copyWith(fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+        cursorColor: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightLatestMsgTextColor,
         maxLines: null,
         keyboardType: TextInputType.number,
         validator: (inputVal) {
@@ -95,20 +101,23 @@ class _DonateScreenState extends State<DonateScreen> {
           alignLabelWithHint: true,
           labelText: "Donation Amount",
           labelStyle: TextStyleCollection.terminalTextStyle.copyWith(
-              fontSize: 14, color: AppColors.pureWhiteColor.withOpacity(0.6)),
-          enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.pureWhiteColor)),
-          focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.pureWhiteColor)),
+              fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor.withOpacity(0.6):AppColors.lightLatestMsgTextColor),
+          enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
+          focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
         ),
       ),
     );
   }
 
   _submitProblem() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 20),
       child: commonElevatedButton(
+        bgColor: AppColors.getElevatedBtnColor(_isDarkMode),
           btnText: "Donate",
           onPressed: () async {
             if (!_formKey.currentState!.validate()) return;
@@ -141,21 +150,25 @@ class _DonateScreenState extends State<DonateScreen> {
     }
   }
 
-  _headerSection() => AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.chatDarkBackgroundColor,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_outlined)),
-            Text(
-              "Donate For Generation",
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
-            ),
-          ],
-        ),
-      );
+  _headerSection(){
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return AppBar(
+      elevation: 0,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
+      automaticallyImplyLeading: false,
+      title: Row(
+        children: [
+          IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.arrow_back_outlined, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
+          Text(
+            "Donate For Generation",
+            style:
+            TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+          ),
+        ],
+      ),
+    );
+  }
 }

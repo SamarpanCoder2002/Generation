@@ -3,6 +3,9 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/screens/settings/storage/storage_audio_document_collection.dart';
 import 'package:generation/screens/settings/storage/storage_image_video_collection.dart';
+import 'package:provider/provider.dart';
+
+import '../../../providers/theme_provider.dart';
 
 class LocalStorageScreen extends StatefulWidget {
   const LocalStorageScreen({Key? key}) : super(key: key);
@@ -25,30 +28,37 @@ class _LocalStorageScreenState extends State<LocalStorageScreen> {
     );
   }
 
-  _appBarSection() => AppBar(
-        titleSpacing: 0,
-        backgroundColor: AppColors.backgroundDarkMode,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 40,
-        elevation: 0,
-        title: _headerTitleSection(),
-        bottom: _tabCollection(),
-      );
+  _appBarSection(){
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return AppBar(
+      titleSpacing: 0,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
+      automaticallyImplyLeading: false,
+      toolbarHeight: 40,
+      elevation: 0,
+      title: _headerTitleSection(),
+      bottom: _tabCollection(),
+    );
+  }
 
   _headerTitleSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       margin: const EdgeInsets.only(left: 10),
       child: Row(
         children: [
           IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_outlined,
                 size: 20,
+                  color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor
               )),
           Text(
             "Storage",
-            style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
+            style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
           ),
         ],
       ),
@@ -56,10 +66,13 @@ class _LocalStorageScreenState extends State<LocalStorageScreen> {
   }
 
   _tabCollection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     _tabDesign(String tabText) {
       return Tab(
         child: Text(
           tabText,
+          style: TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
         ),
       );
     }

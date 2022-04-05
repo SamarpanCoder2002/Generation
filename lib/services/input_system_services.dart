@@ -27,6 +27,7 @@ import '../config/images_path_collection.dart';
 import '../providers/chat_scroll_provider.dart';
 import '../providers/messaging_provider.dart';
 import '../providers/sound_provider.dart';
+import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
 import '../screens/common/video_editor_common.dart';
 import 'local_data_management.dart';
@@ -620,38 +621,40 @@ class InputOption {
   }
 
   void makeAudioActivity() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
     showModalBottomSheet(
         context: context,
         elevation: 5,
         builder: (_) => Container(
-              color: AppColors.backgroundDarkMode,
+              color: AppColors.getBgColor(_isDarkMode),
               padding: const EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    onPressed: _recordForActivity,
-                    child: const Text("Record"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
-                  ElevatedButton(
-                    onPressed: _pickAudioForActivity,
-                    child: const Text("Pick"),
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColors.oppositeMsgDarkModeColor),
-                  ),
+                  commonElevatedButton(
+                      btnText: "Record",
+                      onPressed: _recordForActivity,
+                      bgColor: AppColors.getElevatedBtnColor(_isDarkMode)),
+                  commonElevatedButton(
+                      btnText: "Pick",
+                      onPressed: _pickAudioForActivity,
+                      bgColor: AppColors.getElevatedBtnColor(_isDarkMode)),
                 ],
               ),
             ));
   }
 
   _recordForActivity() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
     Navigator.pop(context);
     _deleteRecording() => IconButton(
           icon: const Icon(
             Icons.delete_outline_outlined,
-            color: AppColors.pureWhiteColor,
+            color: AppColors.lightRedColor,
           ),
           onPressed: () {
             Provider.of<SoundRecorderProvider>(context, listen: false)
@@ -673,6 +676,7 @@ class InputOption {
           icon: Image.asset(
             IconImages.sendImagePath,
             width: 25,
+            color: AppColors.getIconColor(_isDarkMode),
           ),
           onPressed: () async {
             final _voiceRecordPath =
@@ -706,7 +710,7 @@ class InputOption {
         );
 
     _whenRecordingWidget() => Container(
-          color: AppColors.backgroundDarkMode,
+          color: AppColors.getBgColor(_isDarkMode),
           padding: const EdgeInsets.all(10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -721,19 +725,20 @@ class InputOption {
     _whenNonRecordingWidget() => Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            ElevatedButton(
-              onPressed: () =>
-                  Provider.of<SoundRecorderProvider>(context, listen: false)
-                      .startRecording()
-                      .then((value) => _recordForActivity()),
-              child: const Text("Start"),
-              style: ElevatedButton.styleFrom(
-                  primary: AppColors.oppositeMsgDarkModeColor),
-            ),
+            commonElevatedButton(
+                btnText: "Start",
+                onPressed: () =>
+                    Provider.of<SoundRecorderProvider>(context, listen: false)
+                        .startRecording()
+                        .then((value) => _recordForActivity()),
+                bgColor: AppColors.getElevatedBtnColor(_isDarkMode)),
             Text(
               "Audio Length Restricted to ${Timings.audioDurationInSec} sec",
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+              style: TextStyleCollection.terminalTextStyle.copyWith(
+                  fontSize: 14,
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor),
             )
           ],
         );
@@ -746,7 +751,7 @@ class InputOption {
               Provider.of<SoundRecorderProvider>(context).getRecordingStatus();
 
           return Container(
-            color: AppColors.backgroundDarkMode,
+            color: AppColors.getBgColor(_isDarkMode),
             padding: EdgeInsets.all(_isRecording ? 0 : 10),
             child: _isRecording
                 ? _whenRecordingWidget()

@@ -5,6 +5,8 @@ import 'package:generation/providers/storage/storage_provider.dart';
 import 'package:generation/services/system_file_management.dart';
 import 'package:provider/provider.dart';
 
+import '../../../providers/theme_provider.dart';
+
 class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
   final bool isAudio;
 
@@ -13,8 +15,10 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -34,6 +38,8 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
   _particularAudioData(int index, BuildContext context) {
     final String _audioFile =
         Provider.of<StorageProvider>(context).getImagesCollection()[index];
+
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return InkWell(
       onTap: () async => await SystemFileManagement.openFile(_audioFile),
@@ -57,7 +63,7 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
             Text(
               _audioFile.split("/").last.split("?").first,
               style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16),
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
             ),
           ],
         ),
