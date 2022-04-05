@@ -18,6 +18,7 @@ import '../../../config/text_style_collection.dart';
 import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/messaging_provider.dart';
 import '../../../providers/sound_provider.dart';
+import '../../../providers/theme_provider.dart';
 
 class CreateActivity extends StatefulWidget {
   final ActivityContentType activityContentType;
@@ -37,20 +38,26 @@ class _CreateActivityState extends State<CreateActivity> {
 
   @override
   void initState() {
-    changeOnlyNavigationBarColor(navigationBarColor: AppColors.pureBlackColor);
+    changeSystemNavigationAndStatusBarColor(
+        statusBarColor: AppColors.transparentColor,
+        navigationBarColor: Colors.black12.withOpacity(0));
     super.initState();
   }
 
   @override
   void dispose() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
     _textActivityController.dispose();
     changeOnlyNavigationBarColor(
-        navigationBarColor: AppColors.backgroundDarkMode);
+        navigationBarColor: AppColors.getBgColor(_isDarkMode));
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return WillPopScope(
       onWillPop: () async {
         if (widget.activityContentType == ActivityContentType.audio) {
@@ -120,29 +127,33 @@ class _CreateActivityState extends State<CreateActivity> {
         ),
       );
 
-  _activityTextCreationSection() => Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.width / 2,
-        color: AppColors.backgroundDarkMode,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width / 2,
-          child: ColorPicker(
-            colorPickerWidth: MediaQuery.of(context).size.width,
-            labelTextStyle: TextStyleCollection.terminalTextStyle,
-            pickerAreaHeightPercent: 0.05,
-            displayThumbColor: false,
-            pickerColor: pickColor,
-            paletteType: PaletteType.rgbWithBlue,
-            onColorChanged: (Color color) {
-              if (mounted) {
-                setState(() {
-                  pickColor = color;
-                });
-              }
-            },
-          ),
+  _activityTextCreationSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.width / 2,
+      color: AppColors.getBgColor(_isDarkMode),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width / 2,
+        child: ColorPicker(
+          colorPickerWidth: MediaQuery.of(context).size.width,
+          labelTextStyle: TextStyleCollection.terminalTextStyle,
+          pickerAreaHeightPercent: 0.05,
+          displayThumbColor: false,
+          pickerColor: pickColor,
+          paletteType: PaletteType.rgbWithBlue,
+          onColorChanged: (Color color) {
+            if (mounted) {
+              setState(() {
+                pickColor = color;
+              });
+            }
+          },
         ),
-      );
+      ),
+    );
+  }
 
   _textActivityMakeButton() {
     if (_textActivityController.text.isNotEmpty) return _sendButton();

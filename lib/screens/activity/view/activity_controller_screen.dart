@@ -34,8 +34,6 @@ class _ActivityControllerState extends State<ActivityController>
     Provider.of<ActivityProvider>(context, listen: false)
         .initializeAnimationController(this, context);
 
-    changeOnlyNavigationBarColor(
-        navigationBarColor: AppColors.pureBlackColor.withOpacity(0.1));
 
     super.initState();
   }

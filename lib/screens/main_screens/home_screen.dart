@@ -188,8 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
       closedColor: AppColors.getBgColor(_isDarkMode),
       middleColor: AppColors.getBgColor(_isDarkMode),
       openColor: AppColors.getBgColor(_isDarkMode),
-      onClosed: (_) => changeOnlyNavigationBarColor(
-          navigationBarColor: AppColors.getBgColor(_isDarkMode)),
+      onClosed: (_) => changeContextTheme(_isDarkMode),
       openBuilder: (_, __) => const ActivityController(),
       closedBuilder: (_, __) => Container(
         margin: const EdgeInsets.only(right: 15),
@@ -352,8 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
             closedColor: AppColors.getBgColor(_isDarkMode),
             middleColor: AppColors.getBgColor(_isDarkMode),
             openColor: AppColors.getBgColor(_isDarkMode),
-            onClosed: (_) => changeOnlyNavigationBarColor(
-                navigationBarColor: AppColors.getBgColor(_isDarkMode)),
+            onClosed: (_) => changeContextTheme(_isDarkMode),
             openBuilder: (_, __) => const ActivityController(),
             closedBuilder: (_, __) => Container(
                 width: 80,

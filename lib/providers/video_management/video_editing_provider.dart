@@ -43,6 +43,8 @@ class VideoEditingProvider extends ChangeNotifier {
 
   isExported() => _exported;
 
+  isPlaying() => _controller.isPlaying;
+
   updatedExportedValue(bool updatedValue) {
     _exported = updatedValue;
     notifyListeners();

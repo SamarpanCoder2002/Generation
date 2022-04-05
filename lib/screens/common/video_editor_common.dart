@@ -10,6 +10,7 @@ import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 import 'package:video_editor/video_editor.dart';
 
+import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
 
 class VideoEditingScreen extends StatefulWidget {
@@ -42,6 +43,8 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     final _controller =
         Provider.of<VideoEditingProvider>(context).getController();
 
@@ -53,7 +56,7 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
         return true;
       },
       child: Scaffold(
-        backgroundColor: AppColors.backgroundDarkMode,
+        backgroundColor: AppColors.getBgColor(_isDarkMode),
         body: _controller.initialized
             ? SafeArea(
                 child: Stack(children: [
@@ -76,6 +79,8 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
   }
 
   Widget _topNavBar() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     final _controller =
         Provider.of<VideoEditingProvider>(context).getController();
 
@@ -87,7 +92,7 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
             onTap: onTap,
             child: Icon(
               iconData,
-              color: AppColors.pureWhiteColor,
+              color: AppColors.getIconColor(_isDarkMode),
             ),
           ),
         );
@@ -186,6 +191,8 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
     final _controller =
         Provider.of<VideoEditingProvider>(context).getController();
 
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return _controller == null
         ? const []
         : [
@@ -200,7 +207,7 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
                   child: Row(children: [
                     Text(
                       formatter(Duration(seconds: pos.toInt())),
-                      style: TextStyleCollection.terminalTextStyle,
+                      style: TextStyleCollection.terminalTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
                     ),
                     const Expanded(child: SizedBox()),
                     // OpacityTransition(
@@ -239,6 +246,10 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
     final _controller =
         Provider.of<VideoEditingProvider>(context).getController();
 
+    final _isPlaying = Provider.of<VideoEditingProvider>(context).isPlaying();
+
+    print("is playing: $_isPlaying");
+
     return _controller == null
         ? const Center()
         : Expanded(
@@ -247,7 +258,7 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
               controller: _controller,
               showGrid: false,
             ),
-            if (!_controller.isPlaying)
+            if (!_isPlaying)
               InkWell(
                 onTap: _controller.video.play,
                 child: Container(
@@ -265,21 +276,24 @@ class _VideoEditingScreenState extends State<VideoEditingScreen> {
   }
 
   _bottomTabBarHeading() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     return Container(
         height: 200,
         margin: const EdgeInsets.only(top: 10),
         child: Column(children: [
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Padding(
-                padding: EdgeInsets.all(5),
+            Padding(
+                padding: const EdgeInsets.all(5),
                 child: Icon(
                   Icons.content_cut,
-                  color: AppColors.pureWhiteColor,
+                  color: AppColors.getIconColor(_isDarkMode),
                 )),
             Text(
               'Trim',
               style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14,color: _isDarkMode
+    ? AppColors.pureWhiteColor
+        : AppColors.lightTextColor,),
             )
           ]),
           Column(

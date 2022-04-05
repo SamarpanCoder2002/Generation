@@ -9,6 +9,7 @@ import '../../../config/colors_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
 import '../../../providers/main_scrolling_provider.dart';
+import '../../../providers/theme_provider.dart';
 import '../../common/chat_connections_common_design.dart';
 
 class ConnectionManagementScreen extends StatefulWidget {
@@ -34,8 +35,10 @@ class _ConnectionManagementScreenState
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -61,22 +64,33 @@ class _ConnectionManagementScreenState
   }
 
   _headingSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 23),
         child: Text(
           AppText.appName,
-          style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+          style: TextStyleCollection.headingTextStyle.copyWith(
+              fontSize: 20,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor),
         ));
   }
 
   _screenHeading() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Align(
       alignment: Alignment.topCenter,
       child: Text(
         "Connection Management",
-        style: TextStyleCollection.secondaryHeadingTextStyle
-            .copyWith(fontSize: 16),
+        style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+            fontSize: 16,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor),
       ),
     );
   }
@@ -90,6 +104,8 @@ class _ConnectionManagementScreenState
         Provider.of<ConnectionManagementProvider>(context).getTabsCollection();
 
     _particularSection(int correspondingIndex, String sectionText) {
+      final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
       return GestureDetector(
         onTap: () {
           Provider.of<ConnectionManagementProvider>(context, listen: false)
@@ -104,7 +120,9 @@ class _ConnectionManagementScreenState
             style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
                 color: _currentIndex == correspondingIndex
                     ? AppColors.normalBlueColor
-                    : AppColors.pureWhiteColor),
+                    : _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightChatConnectionTextColor),
             textAlign: TextAlign.center,
           ),
         ),
@@ -163,32 +181,40 @@ class _ConnectionManagementScreenState
   }
 
   _searchBar() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       height: 45,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppColors.searchBarBgDarkMode,
+        color: _isDarkMode
+            ? AppColors.searchBarBgDarkMode
+            : AppColors.searchBarBgLightMode,
         borderRadius: BorderRadius.circular(40),
       ),
       child: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 10),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
             child: Icon(
               Icons.search_outlined,
-              color: AppColors.pureWhiteColor,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightTextColor.withOpacity(0.8),
             ),
           ),
           Expanded(
             child: TextField(
-              cursorColor: AppColors.pureWhiteColor,
-              style: TextStyleCollection.searchTextStyle,
+              cursorColor: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor,
+              style: TextStyleCollection.searchTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
               onChanged: _onSearch,
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
-                hintStyle: TextStyleCollection.searchTextStyle
-                    .copyWith(color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                hintStyle: TextStyleCollection.searchTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor.withOpacity(0.8)
+                        : AppColors.lightTextColor.withOpacity(0.8)),
               ),
             ),
           )
