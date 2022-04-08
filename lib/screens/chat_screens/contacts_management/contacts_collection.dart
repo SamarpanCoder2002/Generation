@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 import '../../../config/images_path_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
-import '../../../providers/chat_scroll_provider.dart';
-import '../../../providers/messaging_provider.dart';
+import '../../../providers/chat/chat_scroll_provider.dart';
+import '../../../providers/chat/messaging_provider.dart';
 import '../../../types/types.dart';
 
 class ContactsCollection extends StatefulWidget {

@@ -24,8 +24,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../config/images_path_collection.dart';
-import '../providers/chat_scroll_provider.dart';
-import '../providers/messaging_provider.dart';
+import '../providers/chat/chat_scroll_provider.dart';
+import '../providers/chat/messaging_provider.dart';
 import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';

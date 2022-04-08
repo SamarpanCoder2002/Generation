@@ -59,6 +59,7 @@ class AppColors {
   static const Color lightLatestMsgTextColor = Color(0xff9fa0a1);
 
   static const Color lightModeBlueColor = Color(0xff0186fe);
+  static const Color darkSelectionBlueColor = Color(0xff749cf2);
 
   static getBgColor(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : backgroundLightMode;
@@ -116,7 +117,15 @@ class AppColors {
   static getElevatedBtnColor(bool isDarkMode) =>
       isDarkMode ? oppositeMsgDarkModeColor : normalBlueColor;
 
-  static getImageBgColor(bool _isDarkMode) => _isDarkMode?oppositeMsgDarkModeColor.withOpacity(0.2):pureBlackColor.withOpacity(0.1);
+  static getImageBgColor(bool _isDarkMode) => _isDarkMode
+      ? oppositeMsgDarkModeColor.withOpacity(0.2)
+      : pureBlackColor.withOpacity(0.1);
+
+  static getSelectedMsgColor(bool _isDarkMode, bool isMsgSelected) {
+    if (!isMsgSelected) return transparentColor;
+
+    return _isDarkMode?darkSelectionBlueColor.withOpacity(0.3):lightModeBlueColor.withOpacity(0.3);
+  }
 }
 
 class WaveForm {

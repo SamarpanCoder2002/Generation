@@ -11,8 +11,9 @@ class ChatScrollProvider extends ChangeNotifier {
 
   animateToBottom(
       {scrollDuration = 750, bool shouldNotify = true, int milliSec = 100}) {
-    if (!_scrollController.hasClients || !_scrollController.hasListeners)
+    if (!_scrollController.hasClients || !_scrollController.hasListeners) {
       return;
+    }
 
     Timer(Duration(milliseconds: milliSec), () {
       _scrollController

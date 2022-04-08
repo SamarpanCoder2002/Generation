@@ -4,8 +4,8 @@ import 'package:generation/config/icon_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/time_collection.dart';
-import 'package:generation/providers/chat_creation_section_provider.dart';
-import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/providers/chat/chat_creation_section_provider.dart';
+import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/input_system_services.dart';
@@ -14,7 +14,7 @@ import 'package:music_visualizer/music_visualizer.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
-import '../../providers/chat_scroll_provider.dart';
+import '../../providers/chat/chat_scroll_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
 import '../common/button.dart';
@@ -317,9 +317,7 @@ class MessageCreationSection extends StatelessWidget {
             BoxShadow(
                 offset: const Offset(0, 1),
                 blurRadius: 5,
-                color: _isDarkMode
-                    ? AppColors.pureBlackColor
-                    : AppColors.pureBlackColor.withOpacity(0.2))
+                color: AppColors.pureBlackColor.withOpacity(0.2))
           ]),
       child: Row(
         children: [

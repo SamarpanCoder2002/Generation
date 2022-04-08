@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
-import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
@@ -8,8 +8,8 @@ import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/chat_creation_section_provider.dart';
-import '../../providers/chat_scroll_provider.dart';
+import '../../providers/chat/chat_creation_section_provider.dart';
+import '../../providers/chat/chat_scroll_provider.dart';
 import '../../providers/theme_provider.dart';
 
 class ChatScreen extends StatefulWidget {

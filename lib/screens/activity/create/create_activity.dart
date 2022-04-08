@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 
 import '../../../config/text_style_collection.dart';
 import '../../../providers/activity/activity_screen_provider.dart';
-import '../../../providers/messaging_provider.dart';
+import '../../../providers/chat/messaging_provider.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
 

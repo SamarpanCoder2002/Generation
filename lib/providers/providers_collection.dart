@@ -1,13 +1,13 @@
 import 'package:generation/providers/activity/activity_screen_provider.dart';
-import 'package:generation/providers/chat_creation_section_provider.dart';
-import 'package:generation/providers/chat_scroll_provider.dart';
+import 'package:generation/providers/chat/chat_creation_section_provider.dart';
+import 'package:generation/providers/chat/chat_scroll_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider.dart';
 import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/providers/group_collection_provider.dart';
 import 'package:generation/providers/main_scrolling_provider.dart';
-import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/providers/sound_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/status_collection_provider.dart';

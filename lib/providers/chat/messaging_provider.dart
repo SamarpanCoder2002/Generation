@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../types/types.dart';
+import '../../types/types.dart';
 
 class ChatBoxMessagingProvider extends ChangeNotifier {
   List<dynamic> _messageData = [];
@@ -9,6 +9,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   FocusNode _focus = FocusNode();
   MessageHolderType _messageHolderType = MessageHolderType.me;
   bool _showVoiceIcon = true;
+  final Map<String,dynamic> _selectedMessage = {};
 
   showVoiceIcon() => _showVoiceIcon && _messageController!.text.isEmpty;
 
@@ -99,6 +100,29 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   insertEmoji(String incomingEmojiData) {
     _messageController!.text += incomingEmojiData;
+    notifyListeners();
+  }
+
+
+  setSelectedMessage(messageId, messageData){
+    _selectedMessage[messageId] = messageData;
+    notifyListeners();
+  }
+
+  Map<String,dynamic> getSelectedMessage() => _selectedMessage;
+
+  removeSingleMessageSelection(messageId){
+    _selectedMessage.remove(messageId);
+    notifyListeners();
+  }
+
+  bool eligibleForCopyTextSelMsg(){
+    if(_selectedMessage.length > 1) return false;
+    return _selectedMessage.values.toList()[0].type == ChatMessageType.text.toString();
+  }
+
+  clearSelectedMsgCollection(){
+    _selectedMessage.clear();
     notifyListeners();
   }
 }

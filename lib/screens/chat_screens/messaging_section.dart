@@ -5,9 +5,9 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/chat_message_model.dart';
-import 'package:generation/providers/chat_creation_section_provider.dart';
-import 'package:generation/providers/chat_scroll_provider.dart';
-import 'package:generation/providers/messaging_provider.dart';
+import 'package:generation/providers/chat/chat_creation_section_provider.dart';
+import 'package:generation/providers/chat/chat_scroll_provider.dart';
+import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/show_google_map.dart';
@@ -17,6 +17,7 @@ import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
+import 'package:swipe_to/swipe_to.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,6 +38,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   void didChangeDependencies() {
     Provider.of<ChatScrollProvider>(context, listen: false)
         .animateToBottom(scrollDuration: 1000);
+
     super.didChangeDependencies();
   }
 
@@ -55,28 +57,44 @@ class _MessagingSectionState extends State<MessagingSection> {
       required ChatMessageModel messageData,
       required int index}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context).getSelectedMessage();
 
-    return Align(
-      alignment: messageData.holder == MessageHolderType.other.toString()
-          ? Alignment.centerLeft
-          : Alignment.centerRight,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(widget.context).size.width - 45,
-            minWidth: 100),
-        child: Card(
-          elevation: 0,
-          shadowColor: AppColors.pureWhiteColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: AppColors.getMsgColor(_isDarkMode,
-              messageData.holder == MessageHolderType.other.toString()),
-          child: Stack(
-            children: [
-              _getPerfectMessageContainer(messageData: messageData),
-              _messageTimingAndStatus(messageData: messageData),
-              if (messageData.type == ChatMessageType.audio.toString())
-                _audioPlayingLoadingTime(messageData: messageData),
-            ],
+    return SwipeTo(
+      iconColor: AppColors.getIconColor(_isDarkMode),
+      onRightSwipe: () => _rightSwipe(messageId, messageData),
+      child: InkWell(
+        onTap: () => onMessageTap(messageId, messageData, _selectedMessages),
+        onLongPress: () =>
+            onMessageLongTap(messageId, messageData, _selectedMessages),
+        child: Container(
+          color: AppColors.getSelectedMsgColor(
+              _isDarkMode, _selectedMessages[messageId] != null),
+          child: Align(
+            alignment: messageData.holder == MessageHolderType.other.toString()
+                ? Alignment.centerLeft
+                : Alignment.centerRight,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(widget.context).size.width - 45,
+                  minWidth: 100),
+              child: Card(
+                elevation: 0,
+                shadowColor: AppColors.pureWhiteColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                color: AppColors.getMsgColor(_isDarkMode,
+                    messageData.holder == MessageHolderType.other.toString()),
+                child: Stack(
+                  children: [
+                    _getPerfectMessageContainer(messageData: messageData),
+                    _messageTimingAndStatus(messageData: messageData),
+                    if (messageData.type == ChatMessageType.audio.toString())
+                      _audioPlayingLoadingTime(messageData: messageData),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -408,6 +426,8 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _documentMessageSection({required ChatMessageModel messageData}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     _pdfMaintainerWidget() => Stack(
           children: [
             PdfView(
@@ -463,9 +483,8 @@ class _MessagingSectionState extends State<MessagingSection> {
             maxWidth: MediaQuery.of(widget.context).size.width - 110),
         child: Card(
           elevation: 2,
-          color: messageData.holder == MessageHolderType.other.toString()
-              ? AppColors.oppositeMsgDarkModeColor
-              : AppColors.myMsgDarkModeColor,
+          color: AppColors.getMsgColor(_isDarkMode,
+              messageData.holder == MessageHolderType.other.toString()),
           shadowColor: AppColors.pureWhiteColor,
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
@@ -613,5 +632,25 @@ class _MessagingSectionState extends State<MessagingSection> {
                 messageData.holder == MessageHolderType.other.toString())),
       ],
     );
+  }
+
+  _rightSwipe(String messageId, ChatMessageModel messageData) {
+    print("Reply to This Message");
+  }
+
+  onMessageTap(
+      String messageId, ChatMessageModel messageData, _selectedMessages) {
+    if (!_selectedMessages.containsKey(messageId)) return;
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .removeSingleMessageSelection(messageId);
+  }
+
+  onMessageLongTap(
+      String messageId, ChatMessageModel messageData, _selectedMessages) {
+    if (_selectedMessages.containsKey(messageId)) return;
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setSelectedMessage(messageId, messageData);
   }
 }

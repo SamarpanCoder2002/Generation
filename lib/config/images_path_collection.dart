@@ -9,4 +9,5 @@ class IconImages{
   static const String settingsImagePath = "assets/images/settings.png";
   static const String sendImagePath = "assets/images/send.png";
   static const String videoImagePath = "assets/images/video.png";
+  static const String forwardImagePath = "assets/images/forward.png";
 }
