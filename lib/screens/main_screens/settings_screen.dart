@@ -15,7 +15,7 @@ import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../types/types.dart';
 import '../settings/about.dart';
-import '../settings/common_settings_screen.dart';
+import '../common/common_selection_screen.dart';
 import '../settings/profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -206,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             terminalIconData: Icons.arrow_forward_ios_outlined,
             onPressed: () => Navigation.intent(
                 context,
-                const CommonSettingScreen(
+                const CommonSelectionScreen(
                   commonRequirement: CommonRequirement.chatHistory,
                 ))),
         _commonOption(
@@ -221,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             terminalIconData: Icons.arrow_forward_ios_outlined,
             onPressed: () => Navigation.intent(
                 context,
-                const CommonSettingScreen(
+                const CommonSelectionScreen(
                     commonRequirement: CommonRequirement.localDataStorage))),
         _commonOption(
             leadingIconData: Icons.support_agent_outlined,

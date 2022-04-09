@@ -235,6 +235,17 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     setForSelection();
     _selectedSearchedChatConnectionsDataCollection[index] = incoming;
     notifyListeners();
+
+  }
+
+  selectUnselectMultipleConnection(incoming, index){
+    if(_selectedSearchedChatConnectionsDataCollection[index] == null){
+      _selectedSearchedChatConnectionsDataCollection[index] = incoming;
+    }else{
+      _selectedSearchedChatConnectionsDataCollection.remove(index);
+    }
+
+    notifyListeners();
   }
 
   resetSelectionData(){

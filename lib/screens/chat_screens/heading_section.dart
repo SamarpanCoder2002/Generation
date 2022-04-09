@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/screens/common/common_selection_screen.dart';
+import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
@@ -160,7 +162,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
                 width: 20,
                 color: AppColors.getIconColor(_isDarkMode),
               ),
-              onTap: () {},
+              onTap: () => Navigation.intent(context, const CommonSelectionScreen(commonRequirement: CommonRequirement.forwardMsg)),
             ),
             const SizedBox(width: 10,),
             IconButton(onPressed: (){}, icon: const Icon(Icons.delete_outline_outlined), color: AppColors.getIconColor(_isDarkMode),),

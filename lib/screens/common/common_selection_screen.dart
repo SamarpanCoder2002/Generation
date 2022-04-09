@@ -7,20 +7,20 @@ import 'package:provider/provider.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/theme_provider.dart';
-import '../common/chat_connections_common_design.dart';
+import 'chat_connections_common_design.dart';
 
-class CommonSettingScreen extends StatefulWidget {
+class CommonSelectionScreen extends StatefulWidget {
   final CommonRequirement commonRequirement;
 
-  const CommonSettingScreen(
+  const CommonSelectionScreen(
       {Key? key, required this.commonRequirement})
       : super(key: key);
 
   @override
-  State<CommonSettingScreen> createState() => _CommonSettingScreenState();
+  State<CommonSelectionScreen> createState() => _CommonSelectionScreenState();
 }
 
-class _CommonSettingScreenState extends State<CommonSettingScreen> {
+class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   @override
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
@@ -86,7 +86,7 @@ class _CommonSettingScreenState extends State<CommonSettingScreen> {
                 .getWillSelectData()[connectionIndex];
 
         return InkWell(
-          onTap: widget.commonRequirement == CommonRequirement.chatHistory?null: () => _onClicked(_connectionData),
+          onTap: () => _getPerfectMethod(_connectionData),
           child: _commonChatLayout.particularChatConnection(
               commonRequirement: widget.commonRequirement,
               connectionData: _connectionData,
@@ -96,8 +96,7 @@ class _CommonSettingScreenState extends State<CommonSettingScreen> {
               subheading: _connectionData["latestMessage"]["message"],
               lastMsgTime: _connectionData["latestMessage"]["time"],
               currentIndex: connectionIndex,
-              totalPendingMessages:
-                  _connectionData["notSeenMsgCount"].toString()),
+              totalPendingMessages:      _connectionData["notSeenMsgCount"].toString()),
         );
       },
     );
@@ -105,5 +104,11 @@ class _CommonSettingScreenState extends State<CommonSettingScreen> {
 
   _onClicked(connectionData) {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const LocalStorageScreen()));
+  }
+
+  _getPerfectMethod(_connectionData) {
+    if(widget.commonRequirement == CommonRequirement.chatHistory) return {};
+    if(widget.commonRequirement == CommonRequirement.forwardMsg) return{};
+    return _onClicked(_connectionData);
   }
 }

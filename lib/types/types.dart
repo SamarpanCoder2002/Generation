@@ -62,7 +62,8 @@ enum WallpaperType{
 enum CommonRequirement{
   chatHistory,
   normal,
-  localDataStorage
+  localDataStorage,
+  forwardMsg,
 }
 
 enum DBOperation{

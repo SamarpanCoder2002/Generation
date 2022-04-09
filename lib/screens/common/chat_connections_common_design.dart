@@ -33,8 +33,8 @@ class CommonChatListLayout {
       margin: const EdgeInsets.only(bottom: 20),
       child: Row(
         children: [
-          if (commonRequirement == CommonRequirement.chatHistory)
-            _selectionButton(isSelected, connectionData, currentIndex),
+          if (commonRequirement == CommonRequirement.chatHistory || commonRequirement == CommonRequirement.forwardMsg)
+            _selectionButton(isSelected, connectionData, currentIndex, commonRequirement),
           if (commonRequirement != CommonRequirement.normal) const SizedBox(width: 20),
           _chatConnectionImage(photo),
           const SizedBox(
@@ -147,14 +147,19 @@ class CommonChatListLayout {
   }
 
   _selectionButton(
-          bool _isSelected, dynamic connectionData, int currentIndex){
+          bool _isSelected, dynamic connectionData, int currentIndex, CommonRequirement commonRequirement){
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return  IconButton(
         onPressed: () {
-          connectionData["isSelected"] = !connectionData["isSelected"];
-          Provider.of<ConnectionCollectionProvider>(context, listen: false)
-              .updateParticularSelectionData(connectionData, currentIndex);
+          if(commonRequirement == CommonRequirement.chatHistory) {
+            connectionData["isSelected"] = !connectionData["isSelected"];
+            Provider.of<ConnectionCollectionProvider>(context, listen: false)
+                .updateParticularSelectionData(connectionData, currentIndex);
+          }else{
+            connectionData["isSelected"] = !connectionData["isSelected"];
+            Provider.of<ConnectionCollectionProvider>(context, listen: false).selectUnselectMultipleConnection(connectionData, currentIndex);
+          }
         },
         icon: _isSelected
             ? Icon(
