@@ -26,10 +26,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   late StreamSubscription _intentDataStreamSubscription;
 
-  _initialize() async {
-    await Provider.of<ThemeProvider>(context, listen: false).initialization();
-
-    // For sharing images coming from outside the app while the app is in the memory
+  _incomingDataManagement(){
+    /// For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile>? value) {
       print("Shared MediaStream: $value");
@@ -48,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
       print("getIntentDataStream error: $err");
     });
 
-    // For sharing images coming from outside the app while the app is closed
+    /// For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile>? value) {
       print("Shared Images: $value");
       if (value != null && mounted) {
@@ -64,20 +62,20 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     });
 
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    /// For sharing or opening urls/text coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen((String? value) {
-      print("Shared urls/text coming from outside the app: $value");
+          print("Shared urls/text coming from outside the app: $value");
 
-      if (value != null && mounted) {
-        Provider.of<IncomingDataProvider>(context, listen: false)
-            .setIncomingData(value);
-      }
-    }, onError: (err) {
-      print("getLinkStream error: $err");
-    });
+          if (value != null && mounted) {
+            Provider.of<IncomingDataProvider>(context, listen: false)
+                .setIncomingData(value);
+          }
+        }, onError: (err) {
+          print("getLinkStream error: $err");
+        });
 
-    // For sharing or opening urls/text coming from outside the app while the app is closed
+    /// For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String? value) {
       print(
           "urls/text coming from outside the app while the app is closed: $value");
@@ -87,7 +85,11 @@ class _SplashScreenState extends State<SplashScreen> {
             .setIncomingData(value);
       }
     });
+  }
 
+  _initialize() async {
+    await Provider.of<ThemeProvider>(context, listen: false).initialization();
+    _incomingDataManagement();
     _switchToNextScreen();
   }
 
