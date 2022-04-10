@@ -27,7 +27,6 @@ class _SplashScreenState extends State<SplashScreen> {
   late StreamSubscription _intentDataStreamSubscription;
 
   _initialize() async {
-
     await Provider.of<ThemeProvider>(context, listen: false).initialization();
 
     // For sharing images coming from outside the app while the app is in the memory
@@ -44,8 +43,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
         Provider.of<IncomingDataProvider>(context, listen: false)
             .setIncomingData(_data);
-
-
       }
     }, onError: (err) {
       print("getIntentDataStream error: $err");
@@ -64,8 +61,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
         Provider.of<IncomingDataProvider>(context, listen: false)
             .setIncomingData(_data);
-
-
       }
     });
 
@@ -77,8 +72,6 @@ class _SplashScreenState extends State<SplashScreen> {
       if (value != null && mounted) {
         Provider.of<IncomingDataProvider>(context, listen: false)
             .setIncomingData(value);
-
-
       }
     }, onError: (err) {
       print("getLinkStream error: $err");
@@ -92,13 +85,10 @@ class _SplashScreenState extends State<SplashScreen> {
       if (value != null && mounted) {
         Provider.of<IncomingDataProvider>(context, listen: false)
             .setIncomingData(value);
-
       }
     });
 
-
-      _switchToNextScreen();
-
+    _switchToNextScreen();
   }
 
   @override

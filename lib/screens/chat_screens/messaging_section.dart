@@ -189,7 +189,7 @@ class _MessagingSectionState extends State<MessagingSection> {
                 backgroundDecoration:
                     const BoxDecoration(color: AppColors.pureWhiteColor),
                 imageProvider: FileImage(File(fromVideo
-                    ? messageData.additionalData["thumbnail"]!
+                    ? messageData.additionalData["thumbnail"] ?? ""
                     : messageData.message)),
                 minScale: PhotoViewComputedScale.covered,
                 errorBuilder: (_, __, ___) => const Center(
