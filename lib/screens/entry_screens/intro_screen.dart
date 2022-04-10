@@ -3,11 +3,16 @@ import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/screens/entry_screens/information_taking.dart';
 import 'package:generation/screens/main_screens/main_screen_management.dart';
+import 'package:generation/types/types.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/images_path_collection.dart';
+import '../../providers/incoming_data_provider.dart';
 import '../../services/device_specific_operations.dart';
+import '../../services/navigation_management.dart';
+import '../common/common_selection_screen.dart';
 
 class IntroScreens extends StatefulWidget {
   const IntroScreens({Key? key}) : super(key: key);
@@ -25,8 +30,37 @@ class _IntroScreensState extends State<IntroScreens> {
     super.initState();
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   final _incomingData = Provider.of<IncomingDataProvider>(context).getIncomingData();
+  //
+  //   print("Incoming DAta: $_incomingData");
+  //
+  //   if(_incomingData.isNotEmpty){
+  //
+  //
+  //     Navigation.intent(
+  //         context,
+  //         const CommonSelectionScreen(
+  //           commonRequirement: CommonRequirement.forwardMsg,
+  //         ));
+  //   }
+  //   super.didChangeDependencies();
+  // }
+
   @override
   Widget build(BuildContext context) {
+    final _incomingData =
+        Provider.of<IncomingDataProvider>(context, listen: false).getIncomingData();
+
+    print("Incoming DAta: $_incomingData");
+
+    if (_incomingData.isNotEmpty) {
+      return const CommonSelectionScreen(
+        commonRequirement: CommonRequirement.forwardMsg,
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.splashScreenColor,
       body: SizedBox(
@@ -90,8 +124,10 @@ class _IntroScreensState extends State<IntroScreens> {
               children: [
                 Text(
                   _currentData["title"],
-                  style: TextStyleCollection.headingTextStyle
-                      .copyWith(fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+                  style: TextStyleCollection.headingTextStyle.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.0),
                 ),
                 const SizedBox(
                   height: 20,
@@ -99,7 +135,8 @@ class _IntroScreensState extends State<IntroScreens> {
                 Flexible(
                     child: Text(
                   _currentData["subtitle"],
-                  style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(letterSpacing: 1.0),
+                  style: TextStyleCollection.secondaryHeadingTextStyle
+                      .copyWith(letterSpacing: 1.0),
                   textAlign: TextAlign.center,
                 ))
               ],
@@ -175,8 +212,8 @@ class _IntroScreensState extends State<IntroScreens> {
             ),
           ],
         ),
-        onPressed: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const InformationTakingScreen())),
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const InformationTakingScreen())),
       ),
     );
   }

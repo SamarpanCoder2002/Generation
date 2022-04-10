@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/device_specific_operations.dart';
 import 'chat_connections_common_design.dart';
 
 class CommonSelectionScreen extends StatefulWidget {
@@ -25,6 +26,9 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .setForSelection();
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    changeContextTheme(_isDarkMode);
     super.initState();
   }
 

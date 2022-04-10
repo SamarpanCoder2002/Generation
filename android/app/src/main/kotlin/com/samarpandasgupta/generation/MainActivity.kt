@@ -2,13 +2,13 @@ package com.samarpandasgupta.generation
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.view.WindowManager
 
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -35,6 +35,13 @@ class MainActivity : FlutterActivity() {
 
         // for Screenshot Restriction
         // window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+
+        // If you want to launch it as a task independent of chrome
+        if (intent.getIntExtra("org.chromium.chrome.extra.TASK_ID", -1) == this.taskId) {
+            this.finish()
+            intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {

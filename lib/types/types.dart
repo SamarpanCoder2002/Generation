@@ -70,3 +70,9 @@ enum DBOperation{
   update,
   insert
 }
+
+enum IncomingMediaType{
+  file,
+  image,
+  video
+}
