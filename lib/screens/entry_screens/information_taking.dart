@@ -11,7 +11,11 @@ import '../../services/device_specific_operations.dart';
 import '../../services/input_system_services.dart';
 
 class InformationTakingScreen extends StatefulWidget {
-  const InformationTakingScreen({Key? key}) : super(key: key);
+  final String name, email, profilePic;
+
+  const InformationTakingScreen(
+      {Key? key, this.email = "", this.name = "", this.profilePic = ""})
+      : super(key: key);
 
   @override
   State<InformationTakingScreen> createState() =>
@@ -20,11 +24,7 @@ class InformationTakingScreen extends StatefulWidget {
 
 class _InformationTakingScreenState extends State<InformationTakingScreen> {
   final Map<String, dynamic> userData = {
-    "profilePic":
-        "https://www.samarpandasgupta.com/static/media/samarpan_dasgupta.48a013aa.png",
-    "name": "Samarpan Dasgupta",
-    "email": "samarpan2dasgupta@gmail.com",
-    "about": "Hey Guys, I am Using Generation"
+    "about": "Hello, I am Using Generation."
   };
 
   final TextEditingController _nameController = TextEditingController();
@@ -38,9 +38,19 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
   @override
   void initState() {
     makeScreenCleanView();
-    _nameController.text = userData["name"];
-    _emailController.text = userData["email"];
+    if (widget.name != "") {
+      _nameController.text = widget.name;
+    }
+    if (widget.email != "") {
+      _emailController.text = widget.email;
+    }
+
+    if (widget.profilePic != "") {
+      userData["profilePic"] = widget.profilePic;
+    }
+
     _aboutController.text = userData["about"];
+
     super.initState();
   }
 
@@ -71,7 +81,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
                   ),
                 if (_isLoading) _loadingIndicator(),
                 SizedBox(
-                  height: _isLoading?30:40,
+                  height: _isLoading ? 30 : 40,
                 ),
                 Center(
                   child: Text(
@@ -103,9 +113,9 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
                     labelText: "About",
                     textEditingController: _aboutController),
                 if (!_isLoading)
-                const SizedBox(
-                  height: 100,
-                ),
+                  const SizedBox(
+                    height: 100,
+                  ),
                 if (!_isLoading)
                   commonElevatedButton(
                       btnText: "Submit",
@@ -144,15 +154,18 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
             borderRadius: BorderRadius.circular(100),
             color: AppColors.lightBlueColor.withOpacity(0.2),
             border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
-            image: userData["profilePic"].startsWith("https")
-                ? DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(userData["profilePic"]),
-                  )
-                : DecorationImage(
-                    fit: BoxFit.cover,
-                    image: FileImage(File(userData["profilePic"])),
-                  )),
+            image: userData["profilePic"] != null
+                ? (userData["profilePic"].startsWith("https") ||
+                        userData["profilePic"].startsWith("http"))
+                    ? DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(userData["profilePic"]),
+                      )
+                    : DecorationImage(
+                        fit: BoxFit.cover,
+                        image: FileImage(File(userData["profilePic"])),
+                      )
+                : null),
       ),
     );
   }
@@ -285,14 +298,14 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
   void _onSubmitInformation() {
     if (!_formKey.currentState!.validate()) return;
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         _isLoading = true;
       });
     }
 
-    Timer(const Duration(seconds: 10), (){
-      if(mounted){
+    Timer(const Duration(seconds: 10), () {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });

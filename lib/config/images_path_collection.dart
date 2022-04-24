@@ -1,5 +1,6 @@
 class AppImages{
   static const String splashScreenLogo = "assets/images/logo.png";
+  static const String googleLogo = "assets/images/google.png";
 }
 
 class IconImages{

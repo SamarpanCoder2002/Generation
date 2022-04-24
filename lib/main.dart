@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/providers_collection.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _initializeFirebase();
   await DataManagement.loadEnvData();
   runApp(const GenerationEntry());
 }
@@ -35,4 +37,8 @@ class GenerationEntry extends StatelessWidget {
       ),
     );
   }
+}
+
+_initializeFirebase(){
+  Firebase.initializeApp();
 }

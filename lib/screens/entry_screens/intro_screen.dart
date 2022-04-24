@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/operation/google_auth.dart';
 import 'package:generation/screens/entry_screens/information_taking.dart';
-import 'package:generation/screens/main_screens/main_screen_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -13,6 +13,7 @@ import '../../providers/incoming_data_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
 import '../common/common_selection_screen.dart';
+import '../main_screens/main_screen_management.dart';
 
 class IntroScreens extends StatefulWidget {
   const IntroScreens({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class IntroScreens extends StatefulWidget {
 
 class _IntroScreensState extends State<IntroScreens> {
   final PageController _controller = PageController();
+  final GoogleAuth _googleAuth = GoogleAuth();
 
   @override
   void initState() {
@@ -51,7 +53,8 @@ class _IntroScreensState extends State<IntroScreens> {
   @override
   Widget build(BuildContext context) {
     final _incomingData =
-        Provider.of<IncomingDataProvider>(context, listen: false).getIncomingData();
+        Provider.of<IncomingDataProvider>(context, listen: false)
+            .getIncomingData();
 
     print("Incoming DAta: $_incomingData");
 
@@ -168,7 +171,7 @@ class _IntroScreensState extends State<IntroScreens> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/images/google.png",
+              AppImages.googleLogo,
               width: 35,
             ),
             const SizedBox(
@@ -181,8 +184,13 @@ class _IntroScreensState extends State<IntroScreens> {
             ),
           ],
         ),
-        onPressed: () => Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const MainScreen())),
+        onPressed: () async {
+          final _userData = await _googleAuth.logIn();
+          if(_userData == null) return;
+
+          Navigation.intent(
+              context, InformationTakingScreen(name: _userData["name"], email: _userData["email"], profilePic: _userData["profilePic"],));
+        },
       ),
     );
   }
@@ -198,22 +206,23 @@ class _IntroScreensState extends State<IntroScreens> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              "assets/images/facebook.png",
-              width: 35,
+            const Icon(
+              Icons.email_outlined,
+              size: 30,
+              color: AppColors.pureWhiteColor,
             ),
             const SizedBox(
               width: 15,
             ),
             Text(
-              "Continue With Facebook",
+              "Continue With Email",
               style: TextStyleCollection.secondaryHeadingTextStyle
                   .copyWith(fontSize: 16),
             ),
           ],
         ),
         onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const InformationTakingScreen())),
+            MaterialPageRoute(builder: (_) => const MainScreen())),
       ),
     );
   }
