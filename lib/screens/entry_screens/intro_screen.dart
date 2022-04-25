@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/api_collection/api_call.dart';
 import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/operation/google_auth.dart';
@@ -190,8 +191,13 @@ class _IntroScreensState extends State<IntroScreens> {
           final _userData = await _googleAuth.logIn();
           if(_userData == null) return;
 
-          Navigation.intent(
-              context, InformationTakingScreen(name: _userData["name"], email: _userData["email"], profilePic: _userData["profilePic"],));
+          print("User Data: $_userData");
+
+          final result = await signInManually(_userData["id"]);
+          print("Result: $result");
+
+          // Navigation.intent(
+          //     context, InformationTakingScreen(name: _userData["name"], email: _userData["email"], profilePic: _userData["profilePic"],));
         },
       ),
     );

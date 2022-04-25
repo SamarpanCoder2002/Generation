@@ -32,6 +32,7 @@ class GoogleAuth {
           _userCollectedData["name"] = _userData?.displayName ?? "";
           _userCollectedData["email"] = _userData?.email ?? "";
           _userCollectedData["profilePic"] = _userData?.photoURL ?? "";
+          _userCollectedData["id"] = _userData?.uid ?? "";
 
           print("User Data: $_userData");
 

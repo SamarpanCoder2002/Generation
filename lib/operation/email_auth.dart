@@ -19,7 +19,7 @@ class EmailAuth {
     return false;
   }
 
-  Future<String> signIn() async {
+   signIn() async {
     try {
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: pwd);
@@ -28,7 +28,12 @@ class EmailAuth {
         return "Email Not Verified. Please Check your mail";
       }
 
-      return "Sign In Successful";
+      final Map<String,dynamic> _data = {};
+
+      _data["message"] = "Sign In Successful";
+      _data["id"] = userCredential.user?.uid ?? "";
+
+      return _data;
     } catch (e) {
       print("Sign Up Error is: $e");
     }

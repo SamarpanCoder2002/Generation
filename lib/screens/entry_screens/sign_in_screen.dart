@@ -6,6 +6,7 @@ import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 
+import '../../api_collection/api_call.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../operation/email_auth.dart';
@@ -140,7 +141,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     final EmailAuth _emailAuth = EmailAuth(email: _emailController.text, pwd: _pwdController.text);
 
-    final _message = await _emailAuth.signIn();
+    final _data = await _emailAuth.signIn();
 
     if (mounted) {
       setState(() {
@@ -148,9 +149,20 @@ class _SignInScreenState extends State<SignInScreen> {
       });
     }
 
-    showToast(context, title: _message, toastIconType: ToastIconType.success, showFromTop: false, toastDuration: 5);
+    if(_data.runtimeType == String){
+      return;
+    }
 
-    if(_message != "Sign In Successful") return;
+    print("Data is: $_data");
+
+    final result = await signInManually(_data["id"]);
+    print("Result: $result");
+
+
+
+    showToast(context, title: _data["message"], toastIconType: ToastIconType.success, showFromTop: false, toastDuration: 5);
+
+    if(_data["message"] != "Sign In Successful") return;
 
     Navigation.intent(context, InformationTakingScreen(email: _emailController.text,));
   }

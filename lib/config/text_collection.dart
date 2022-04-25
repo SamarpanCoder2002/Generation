@@ -27,6 +27,7 @@ class EnvFileKey{
   static const supportMail = "SUPPORT_MAIL";
   static const rzpAPIKEY = "RZP_API_KEY";
   static const dbName = "DATABASE_NAME";
+  static const baseUrl = "BASE_URL";
 }
 
 class DbData{
