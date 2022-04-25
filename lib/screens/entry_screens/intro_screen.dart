@@ -3,6 +3,8 @@ import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/operation/google_auth.dart';
 import 'package:generation/screens/entry_screens/information_taking.dart';
+import 'package:generation/screens/entry_screens/sign_in_screen.dart';
+import 'package:generation/screens/entry_screens/sign_up_screen.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -221,8 +223,7 @@ class _IntroScreensState extends State<IntroScreens> {
             ),
           ],
         ),
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => const MainScreen())),
+        onPressed: () =>Navigation.intent(context, const SignInScreen()),
       ),
     );
   }

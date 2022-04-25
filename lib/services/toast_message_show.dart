@@ -1,54 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/screens/common/button.dart';
 import 'package:generation/types/types.dart';
 
-void showToast(BuildContext context,
-    {required String title,
-    int? toastDuration,
-    double? height,
-    required ToastIconType toastIconType, bool showFromTop = true}) async {
-  Fluttertoast.showToast(
-    msg: title,
-    toastLength: toastDuration == null
-        ? Toast.LENGTH_SHORT
-        : toastDuration < 5
-            ? Toast.LENGTH_SHORT
-            : Toast.LENGTH_LONG,
-    gravity: showFromTop?ToastGravity.TOP:ToastGravity.BOTTOM,
-    backgroundColor: _getColor(toastIconType),
-    textColor: AppColors.pureWhiteColor,
-    fontSize: 16.0,
-  );
-
-  // showDialog(
-  //     context: context,
-  //     builder: (_) => MotionToast(
-  //           title: Text(title),
-  //           description: Text(description ?? ""),
-  //           width: MediaQuery.of(context).size.width - 80,
-  //           height: height ?? 150,
-  //           position: MOTION_TOAST_POSITION.top,
-  //           animationType: ANIMATION.fromTop,
-  //           toastDuration: Duration(seconds: toastDuration ?? 3),
-  //           icon: _getCorrespondingIcon(toastIconType),
-  //           primaryColor: _getColor(toastIconType),
-  //           secondaryColor: _getColor(toastIconType).withOpacity(0.8),
-  //         ));
-}
-
-// IconData _getCorrespondingIcon(ToastIconType toastIconType) {
-//   switch (toastIconType) {
-//     case ToastIconType.info:
-//       return Icons.info_outlined;
-//     case ToastIconType.success:
-//       return Icons.done_outlined;
-//     case ToastIconType.error:
-//       return Icons.clear_outlined;
-//     case ToastIconType.warning:
-//       return Icons.warning_amber_outlined;
-//   }
-// }
 
 Color _getColor(ToastIconType toastIconType) {
   switch (toastIconType) {
@@ -62,3 +18,40 @@ Color _getColor(ToastIconType toastIconType) {
       return AppColors.audioIconBgColor;
   }
 }
+
+void showToast(BuildContext context,
+    {required String title,
+      int? toastDuration,
+      double? height,
+      required ToastIconType toastIconType, bool showFromTop = true}) async {
+  Fluttertoast.showToast(
+    msg: title,
+    toastLength: toastDuration == null
+        ? Toast.LENGTH_SHORT
+        : toastDuration < 5
+        ? Toast.LENGTH_SHORT
+        : Toast.LENGTH_LONG,
+    gravity: showFromTop ? ToastGravity.TOP : ToastGravity.BOTTOM,
+    backgroundColor: _getColor(toastIconType),
+    textColor: AppColors.pureWhiteColor,
+    fontSize: 16.0,
+  );
+}
+
+
+
+  void showPopUpDialog(BuildContext context, String title, String content,
+      VoidCallback onPressed) {
+    showDialog(context: context, builder: (_) =>
+        AlertDialog(
+          backgroundColor: AppColors.splashScreenColor,
+          elevation: 10,
+          title: Center(
+            child: Text(title, style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),),),
+          content: Text(
+            content, style: TextStyleCollection.secondaryHeadingTextStyle, textAlign: TextAlign.center,),
+          actions: [
+            commonElevatedButton(btnText: "Ok", onPressed: onPressed, bgColor: AppColors.darkBorderGreenColor),
+          ],
+        ));
+  }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/screens/common/button.dart';
@@ -14,7 +15,7 @@ class InformationTakingScreen extends StatefulWidget {
   final String name, email, profilePic;
 
   const InformationTakingScreen(
-      {Key? key, this.email = "", this.name = "", this.profilePic = ""})
+      {Key? key, required this.email, this.name = "", this.profilePic = ""})
       : super(key: key);
 
   @override
@@ -304,7 +305,10 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
       });
     }
 
-    Timer(const Duration(seconds: 10), () {
+    Timer(const Duration(seconds: 10), () async {
+      final String? _getToken = await FirebaseMessaging.instance.getToken();
+      print("Generated Token is: $_getToken");
+
       if (mounted) {
         setState(() {
           _isLoading = false;
