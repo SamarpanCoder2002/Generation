@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:generation/api_collection/api_call.dart';
 import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/operation/google_auth.dart';
-import 'package:generation/screens/entry_screens/information_taking.dart';
 import 'package:generation/screens/entry_screens/sign_in_screen.dart';
-import 'package:generation/screens/entry_screens/sign_up_screen.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -16,7 +14,7 @@ import '../../providers/incoming_data_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
 import '../common/common_selection_screen.dart';
-import '../main_screens/main_screen_management.dart';
+import 'information_taking.dart';
 
 class IntroScreens extends StatefulWidget {
   const IntroScreens({Key? key}) : super(key: key);
@@ -28,6 +26,7 @@ class IntroScreens extends StatefulWidget {
 class _IntroScreensState extends State<IntroScreens> {
   final PageController _controller = PageController();
   final GoogleAuth _googleAuth = GoogleAuth();
+  final DBOperations _dbOperations = DBOperations();
 
   @override
   void initState() {
@@ -193,11 +192,12 @@ class _IntroScreensState extends State<IntroScreens> {
 
           print("User Data: $_userData");
 
-          final result = await signInManually(_userData["id"]);
-          print("Result: $result");
+          final bool _createdBefore = await _dbOperations.isAccountCreatedBefore();
 
-          // Navigation.intent(
-          //     context, InformationTakingScreen(name: _userData["name"], email: _userData["email"], profilePic: _userData["profilePic"],));
+          if(!_createdBefore){
+            Navigation.intent(
+                context, InformationTakingScreen(name: _userData["name"], email: _userData["email"], profilePic: _userData["profilePic"],));
+          }
         },
       ),
     );

@@ -6,7 +6,6 @@ import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 
-import '../../api_collection/api_call.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../operation/email_auth.dart';
@@ -155,8 +154,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
     print("Data is: $_data");
 
-    final result = await signInManually(_data["id"]);
-    print("Result: $result");
+
 
 
 

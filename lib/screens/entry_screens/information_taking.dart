@@ -4,7 +4,10 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/common/button.dart';
+import 'package:generation/services/toast_message_show.dart';
+import 'package:generation/types/types.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/icon_collection.dart';
@@ -33,6 +36,8 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
   final TextEditingController _emailController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final DBOperations _dbOperations = DBOperations();
 
   bool _isLoading = false;
 
@@ -296,8 +301,14 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     );
   }
 
-  void _onSubmitInformation() {
+  void _onSubmitInformation() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (userData["profilePic"] == "") {
+      showToast(context,
+          title: "Profile Picture Required", toastIconType: ToastIconType.info);
+      return;
+    }
 
     if (mounted) {
       setState(() {
@@ -305,16 +316,18 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
       });
     }
 
-    Timer(const Duration(seconds: 10), () async {
-      final String? _getToken = await FirebaseMessaging.instance.getToken();
-      print("Generated Token is: $_getToken");
+    final _response = await _dbOperations.createAccount(
+        name: _nameController.text,
+        about: _aboutController.text,
+        profilePic: userData["profilePic"]);
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    print("Response: $_response");
   }
 
   _loadingIndicator() {
