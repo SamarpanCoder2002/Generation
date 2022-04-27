@@ -6,6 +6,7 @@ import 'package:generation/types/types.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../config/stored_string_collection.dart';
 import '../config/text_collection.dart';
 import 'local_data_management.dart';
 
@@ -378,5 +379,21 @@ class LocalStorage {
         await db.rawQuery("""SELECT COUNT(*) FROM $tableName""");
 
     return int.parse(data[0].values.first.toString());
+  }
+
+  storeDataForCurrAccount(_data,String currUserId)async{
+    await createTableForStorePrimaryData();
+    await insertUpdateDataCurrAccData(
+        currUserId: currUserId,
+        currUserName: _data["name"],
+        currUserProfilePic: _data["profilePic"],
+        currUserAbout: _data["about"],
+        currUserEmail: _data["email"],
+        currConTone: true,
+        dbOperation: DBOperation.insert);
+
+    await DataManagement.storeStringData(StoredString.accCreatedBefore, DataManagement.toJsonString(_data)).then((value) => print("Stored Data"));
+
+    print("stored Data gEr: ${await DataManagement.getStringData(StoredString.accCreatedBefore)}");
   }
 }

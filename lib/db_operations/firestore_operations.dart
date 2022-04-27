@@ -21,11 +21,15 @@ class DBOperations {
   Future<String> _fToken() async =>
       await FirebaseMessaging.instance.getToken() ?? "";
 
-  Future<bool> isAccountCreatedBefore() async {
+  Future<Map<String, dynamic>> isAccountCreatedBefore() async {
+    final Map<String, dynamic> _response = {};
+
     final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
         await _getInstance.doc('${DBPath.userCollection}/$currUid').get();
 
-    return documentSnapshot.data() != null;
+    _response["success"] = documentSnapshot.data() != null;
+    _response["data"] = documentSnapshot.data() ?? {};
+    return _response;
   }
 
   Future<Map<String, dynamic>> createAccount(
@@ -62,6 +66,13 @@ class DBOperations {
 
       _response["success"] = true;
       _response["message"] = DBStatement.profileCompleted;
+      _response["data"] = {
+        "id": currUid,
+        "email": currEmail,
+        "name": name,
+        "about": about,
+        "profilePic": profilePicRemote,
+      };
     } catch (e) {
       print("ERROR in create Account: ${e.toString()}");
       _response["success"] = false;
@@ -85,7 +96,6 @@ class DBOperations {
         downLoadUrl = await firebaseStorageRef.getDownloadURL();
         print("Download Url: $downLoadUrl}");
       });
-
 
       return downLoadUrl ?? "";
     } catch (e) {

@@ -2,6 +2,7 @@ class AppText {
   static const String appName = "Generation";
   static const String activityHeading = "Activities";
   static const String messagesHeading = "Messages";
+  static const String fontFamily = 'Poppins';
 }
 
 class DirectoryName {
@@ -31,11 +32,11 @@ class EnvFileKey{
 }
 
 class DbData{
-  static const currUserTable = "__current-user-encrypted-data__";
-  static const connectionsTable = "__connections-encrypted-data__";
-  static const chatTable = "__chat-encrypted-data__";
+  static const currUserTable = "__currentUserEncryptedData__";
+  static const connectionsTable = "__connectionsEncryptedData__";
+  static const chatTable = "__chatEncryptedData__";
 
-  static const myActivityTable = "__my-activity_encrypted-data__";
+  static const myActivityTable = "__myActivityEncryptedData__";
 }
 
 class FolderData{

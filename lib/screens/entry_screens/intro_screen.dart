@@ -4,6 +4,8 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/operation/google_auth.dart';
 import 'package:generation/screens/entry_screens/sign_in_screen.dart';
+import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -13,7 +15,9 @@ import '../../config/images_path_collection.dart';
 import '../../providers/incoming_data_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
+import '../common/common_operations.dart';
 import '../common/common_selection_screen.dart';
+import '../main_screens/main_screen_management.dart';
 import 'information_taking.dart';
 
 class IntroScreens extends StatefulWidget {
@@ -27,6 +31,7 @@ class _IntroScreensState extends State<IntroScreens> {
   final PageController _controller = PageController();
   final GoogleAuth _googleAuth = GoogleAuth();
   final DBOperations _dbOperations = DBOperations();
+  final LocalStorage _localStorage = LocalStorage();
 
   @override
   void initState() {
@@ -93,7 +98,7 @@ class _IntroScreensState extends State<IntroScreens> {
             const SizedBox(
               height: 30,
             ),
-            _fbLogInButton(),
+            _emailLogInButton(),
             const SizedBox(
               height: 30,
             )
@@ -186,24 +191,12 @@ class _IntroScreensState extends State<IntroScreens> {
             ),
           ],
         ),
-        onPressed: () async {
-          final _userData = await _googleAuth.logIn();
-          if(_userData == null) return;
-
-          print("User Data: $_userData");
-
-          final bool _createdBefore = await _dbOperations.isAccountCreatedBefore();
-
-          if(!_createdBefore){
-            Navigation.intent(
-                context, InformationTakingScreen(name: _userData["name"], email: _userData["email"], profilePic: _userData["profilePic"],));
-          }
-        },
+        onPressed: _googleSignIn,
       ),
     );
   }
 
-  _fbLogInButton() {
+  _emailLogInButton() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: TextButton(
@@ -229,8 +222,41 @@ class _IntroScreensState extends State<IntroScreens> {
             ),
           ],
         ),
-        onPressed: () =>Navigation.intent(context, const SignInScreen()),
+        onPressed: () => Navigation.intent(context, const SignInScreen()),
       ),
     );
+  }
+
+  void _googleSignIn() async {
+    final _userData = await _googleAuth.logIn();
+
+    if (_userData == null) {
+      showToast(context,
+          title: "Sign In Failed",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
+      return;
+    }
+
+    showToast(context,
+        title: "Sign In Successful",
+        toastIconType: ToastIconType.success,
+        showFromTop: false);
+
+    print("User Data: $_userData");
+
+    final _createdBefore = await _dbOperations.isAccountCreatedBefore();
+
+    if (!_createdBefore["success"]) {
+      Navigation.intent(
+          context,
+          InformationTakingScreen(
+            name: _userData["name"],
+            email: _userData["email"],
+            profilePic: _userData["profilePic"],
+          ));
+    } else {
+     dataFetchingOperations(context, _createdBefore, _dbOperations.currUid);
+    }
   }
 }

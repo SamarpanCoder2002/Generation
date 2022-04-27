@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/regex_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/entry_screens/information_taking.dart';
 import 'package:generation/screens/entry_screens/sign_up_screen.dart';
+import 'package:generation/screens/main_screens/main_screen_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
@@ -10,6 +13,7 @@ import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../operation/email_auth.dart';
 import '../common/button.dart';
+import '../common/common_operations.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
@@ -22,6 +26,8 @@ class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
+  final DBOperations _dbOperations = DBOperations();
+  final LocalStorage _localStorage = LocalStorage();
 
   bool _isLoading = false;
 
@@ -107,7 +113,7 @@ class _SignInScreenState extends State<SignInScreen> {
           if (labelText == "Email" &&
               !RegexCollection.emailRegex.hasMatch(inputVal)) {
             return "*Please provider a valid email";
-          }else if(inputVal.length < 6){
+          } else if (inputVal.length < 6) {
             return "Password Must be at least 6 characters";
           }
           return null;
@@ -129,41 +135,7 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  void _onSubmitInformation() async{
-    if (!_formKey.currentState!.validate()) return;
 
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-      });
-    }
-
-    final EmailAuth _emailAuth = EmailAuth(email: _emailController.text, pwd: _pwdController.text);
-
-    final _data = await _emailAuth.signIn();
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-
-    if(_data.runtimeType == String){
-      return;
-    }
-
-    print("Data is: $_data");
-
-
-
-
-
-    showToast(context, title: _data["message"], toastIconType: ToastIconType.success, showFromTop: false, toastDuration: 5);
-
-    if(_data["message"] != "Sign In Successful") return;
-
-    Navigation.intent(context, InformationTakingScreen(email: _emailController.text,));
-  }
 
   _loadingIndicator() {
     return SizedBox(
@@ -181,9 +153,55 @@ class _SignInScreenState extends State<SignInScreen> {
       child: Text(
         "Sign Up",
         style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
-            decoration: TextDecoration.underline, fontWeight: FontWeight.w600, letterSpacing: 1),
+            decoration: TextDecoration.underline,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1),
       ),
       onPressed: () => Navigation.intent(context, const SignUpScreen()),
     );
+  }
+
+  void _onSubmitInformation() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    final EmailAuth _emailAuth =
+    EmailAuth(email: _emailController.text, pwd: _pwdController.text);
+
+    final _data = await _emailAuth.signIn();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    print("Data is: $_data");
+
+    showToast(context,
+        title: _data["message"],
+        toastIconType:
+        _data["success"] ? ToastIconType.success : ToastIconType.error,
+        showFromTop: false,
+        toastDuration: 5);
+
+    if (!_data["success"]) return;
+
+    final _createdBefore = await _dbOperations.isAccountCreatedBefore();
+
+    if (!_createdBefore["success"]) {
+      Navigation.intent(
+          context,
+          InformationTakingScreen(
+            email: _emailController.text,
+          ));
+    } else {
+      dataFetchingOperations(context, _createdBefore, _dbOperations.currUid);
+    }
   }
 }

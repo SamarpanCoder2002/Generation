@@ -8,12 +8,15 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/incoming_data_provider.dart';
 import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/screens/entry_screens/intro_screen.dart';
+import 'package:generation/screens/main_screens/main_screen_management.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
+import '../../config/stored_string_collection.dart';
+import '../../services/local_data_management.dart';
 import '../../types/types.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,7 +29,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   late StreamSubscription _intentDataStreamSubscription;
 
-  _incomingDataManagement(){
+  _incomingDataManagement() {
     /// For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile>? value) {
@@ -65,15 +68,15 @@ class _SplashScreenState extends State<SplashScreen> {
     /// For sharing or opening urls/text coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen((String? value) {
-          print("Shared urls/text coming from outside the app: $value");
+      print("Shared urls/text coming from outside the app: $value");
 
-          if (value != null && mounted) {
-            Provider.of<IncomingDataProvider>(context, listen: false)
-                .setIncomingData(value);
-          }
-        }, onError: (err) {
-          print("getLinkStream error: $err");
-        });
+      if (value != null && mounted) {
+        Provider.of<IncomingDataProvider>(context, listen: false)
+            .setIncomingData(value);
+      }
+    }, onError: (err) {
+      print("getLinkStream error: $err");
+    });
 
     /// For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String? value) {
@@ -141,10 +144,11 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  void _switchToNextScreen() {
-    Timer(const Duration(seconds: 1), () {
-      Navigation.intentStraight(context, const IntroScreens());
-    });
+  void _switchToNextScreen() async {
+    final _currAccData = await DataManagement.getStringData(StoredString.accCreatedBefore);
+
+    Timer(const Duration(milliseconds: 500), () => Navigation.intentStraight(context,
+        _currAccData == null ? const IntroScreens() : const MainScreen()));
   }
 }
 

@@ -19,17 +19,20 @@ class EmailAuth {
     return false;
   }
 
-   signIn() async {
+  Future<Map<String, dynamic>> signIn() async {
+    final Map<String, dynamic> _data = {};
+
     try {
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: pwd);
 
       if (!(userCredential.user!.emailVerified)) {
-        return "Email Not Verified. Please Check your mail";
+        _data["success"] = false;
+        _data["message"] = "Email Not Verified. Please Check your mail";
+        return _data;
       }
 
-      final Map<String,dynamic> _data = {};
-
+      _data["success"] = true;
       _data["message"] = "Sign In Successful";
       _data["id"] = userCredential.user?.uid ?? "";
 
@@ -38,6 +41,8 @@ class EmailAuth {
       print("Sign Up Error is: $e");
     }
 
-    return "Invalid Email or Password";
+    _data["success"] = false;
+    _data["message"] = "Invalid Email or Password";
+    return _data;
   }
 }

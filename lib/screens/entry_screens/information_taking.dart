@@ -1,11 +1,15 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/common/button.dart';
+import 'package:generation/screens/common/common_operations.dart';
+import 'package:generation/screens/main_screens/main_screen_management.dart';
+import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 
@@ -38,6 +42,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final DBOperations _dbOperations = DBOperations();
+  final LocalStorage _localStorage = LocalStorage();
 
   bool _isLoading = false;
 
@@ -120,7 +125,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
                     textEditingController: _aboutController),
                 if (!_isLoading)
                   const SizedBox(
-                    height: 100,
+                    height: 50,
                   ),
                 if (!_isLoading)
                   commonElevatedButton(
@@ -304,9 +309,11 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
   void _onSubmitInformation() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (userData["profilePic"] == "") {
+    if (userData["profilePic"] == null) {
       showToast(context,
-          title: "Profile Picture Required", toastIconType: ToastIconType.info);
+          title: "Profile Picture Required",
+          toastIconType: ToastIconType.info,
+          showFromTop: false);
       return;
     }
 
@@ -328,6 +335,19 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     }
 
     print("Response: $_response");
+
+    if (!_response["success"]) {
+      showToast(context,
+          title: _response["message"],
+          toastIconType: ToastIconType.success,
+          showFromTop: false);
+      return;
+    }
+
+    storagePermissionForStoreCurrAccData(
+        context, () => _onAccCreatedSuccessfully(_response));
+
+    //_reasonBeforeTakingPermission(_response);
   }
 
   _loadingIndicator() {
@@ -339,5 +359,46 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
         color: AppColors.darkBorderGreenColor,
       ),
     );
+  }
+
+  // void _reasonBeforeTakingPermission(Map<String, dynamic> response) {
+  //   storagePermissionForStoreCurrAccData(
+  //       context, () => () => _onAccCreatedSuccessfully(response));
+  //
+  //   showPopUpDialog(
+  //       context,
+  //       "Require Storage Permission",
+  //       "Generation will store your some frequent used data with encrypted form in your local system",
+  //       () => _onAccCreatedSuccessfully(response),
+  //       rightBtnText: "Give Permission",
+  //       barrierDismissible: false,
+  //       showCancelBtn: true,
+  //       leftOnPressed: () => closeYourApp());
+  // }
+
+  _onAccCreatedSuccessfully(_response) async {
+    final _data = _response["data"];
+
+    print("Data to Store: $_data");
+
+    await _localStorage.createTableForStorePrimaryData();
+    await _localStorage.insertUpdateDataCurrAccData(
+        currUserId: _data["id"],
+        currUserName: _data["name"],
+        currUserProfilePic: _data["profilePic"],
+        currUserAbout: _data["about"],
+        currUserEmail: _data["email"],
+        currConTone: true,
+        dbOperation: DBOperation.insert);
+
+    await DataManagement.storeStringData(
+        StoredString.accCreatedBefore, DataManagement.toJsonString(_data));
+
+    showToast(context,
+        title: _response["message"],
+        toastIconType: ToastIconType.success,
+        showFromTop: false);
+
+    Navigation.intentStraight(context, const MainScreen());
   }
 }

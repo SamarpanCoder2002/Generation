@@ -98,3 +98,5 @@ changeOnlyContextChatColor(bool dark) =>  SystemChrome.setSystemUIOverlayStyle(S
     statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
     systemNavigationBarIconBrightness:
     dark ? Brightness.light : Brightness.dark));
+
+closeYourApp() => SystemNavigator.pop();

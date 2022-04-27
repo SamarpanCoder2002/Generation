@@ -41,9 +41,11 @@ class GoogleAuth {
       } else {
         print("Already Logged In");
         await logOut();
+        return await logIn();
       }
     } catch (e) {
       print("Google LogIn Error: ${e.toString()}");
+      return null;
     }
   }
 
