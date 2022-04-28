@@ -5,9 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:generation/db_operations/db_models.dart';
 import 'package:generation/db_operations/helper.dart';
 import 'package:generation/db_operations/types.dart';
+import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
+import 'package:generation/providers/connection_management_provider_collection/incoming_request_provider.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/connection_management_provider_collection/sent_request_provider.dart';
 
 class DBOperations {
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
@@ -58,7 +65,8 @@ class DBOperations {
           iAbout: about,
           iEmail: currEmail,
           iProfilePic: profilePicRemote,
-          iToken: _token);
+          iToken: _token,
+          iId: currUid);
 
       await _getInstance
           .doc('${DBPath.userCollection}/$currUid')
@@ -101,5 +109,91 @@ class DBOperations {
     } catch (e) {
       return "Upload Incomplete";
     }
+  }
+
+  Future<List> getConnectedUsersData(BuildContext context) async {
+    final _connectedData = await _getInstance
+        .collection(
+            '${DBPath.userCollection}/$currUid/${DBPath.userConnections}')
+        .get();
+
+    Provider.of<ConnectionCollectionProvider>(context, listen: false)
+        .setFreshData(_connectedData.docs);
+
+    return _connectedData.docs;
+  }
+
+  Future<List> getReceivedRequestUsersData(BuildContext context) async {
+    final _receivedData = await _getInstance
+        .collection(
+            '${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}')
+        .get();
+
+    Provider.of<RequestConnectionsProvider>(context, listen: false)
+        .setConnections(_receivedData.docs);
+
+    return _receivedData.docs;
+  }
+
+  Future<List> getSentRequestUsersData(BuildContext context) async {
+    final _sentData = await _getInstance
+        .collection(
+            '${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}')
+        .get();
+
+    Provider.of<SentConnectionsProvider>(context, listen: false)
+        .setConnections(_sentData.docs);
+
+    return _sentData.docs;
+  }
+
+  Future<List> getAllUsersData(BuildContext context) async {
+    final _allQueryData =
+        await _getInstance.collection(DBPath.userCollection).get();
+
+    return _allQueryData.docs;
+  }
+
+  Future<Map<String, dynamic>> getAvailableUsersData(BuildContext context) async {
+    final Map<String,dynamic> _allAvailableUsersData = {};
+
+    /// For All Users Fetch
+    final _allQueryDataList = await getAllUsersData(context);
+    for (var doc in _allQueryDataList) {
+      if (doc.id != currUid) {
+        _allAvailableUsersData[doc.id] = doc.data();
+      }
+    }
+
+    /// For Connected Users Fetch
+    final _connectedDataList = await getConnectedUsersData(context);
+    for (final doc in _connectedDataList) {
+      if (_allAvailableUsersData[doc.id] != null) {
+        _allAvailableUsersData.remove(doc.id);
+      }
+    }
+
+    /// For Received Users Fetch
+    final _receivedDataList = await getReceivedRequestUsersData(context);
+    for (final doc in _receivedDataList) {
+      if (_allAvailableUsersData[doc.id] != null) {
+        _allAvailableUsersData.remove(doc.id);
+      }
+    }
+
+    /// For Sent Users Fetch
+    final _sentDataList = await getSentRequestUsersData(context);
+    for (final doc in _sentDataList) {
+      if (_allAvailableUsersData[doc.id] != null) {
+        _allAvailableUsersData.remove(doc.id);
+      }
+    }
+
+    Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+        .setConnections(_allAvailableUsersData.values.toList());
+
+    print("All Available Users Data: $_allAvailableUsersData");
+
+    return _allAvailableUsersData;
   }
 }

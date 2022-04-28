@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
@@ -22,6 +23,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   var activeSlideIndex = 0;
+  final DBOperations _dbOperations = DBOperations();
 
   @override
   void initState() {
@@ -33,6 +35,8 @@ class _MainScreenState extends State<MainScreen> {
     //     navigationBarColor: AppColors.getBgColor(_isDarkMode));
 
     changeContextTheme(_isDarkMode);
+
+    _dbOperations.getAvailableUsersData(context);
 
     debugPrint(
         "Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");

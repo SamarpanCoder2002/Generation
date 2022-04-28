@@ -137,4 +137,5 @@ class AllAvailableConnectionsProvider extends ChangeNotifier {
   getConnections() => _searchedConnections;
 
   getConnectionsLength() => _searchedConnections.length;
+
 }

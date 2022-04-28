@@ -6,26 +6,27 @@ class ProfileModel {
   final String email;
   final String profilePic;
   final String token;
+  final String id;
 
   ProfileModel(
       {required this.name,
       required this.about,
       required this.email,
       required this.profilePic,
-      required this.token});
+      required this.token, required this.id});
 
   static Map<String,dynamic> getJson(
       {required String iName,
       required String iAbout,
       required String iEmail,
       required String iProfilePic,
-      required String iToken}) {
+      required String iToken, required String iId}) {
     final _profile = ProfileModel(
         name: iName,
         about: iAbout,
         email: iEmail,
         profilePic: iProfilePic,
-        token: iToken);
+        token: iToken, id: iId);
 
     return {
       "name": _profile.name,
@@ -34,6 +35,7 @@ class ProfileModel {
       "profilePic": _profile.profilePic,
       "token": _profile.token,
       "createdAt": DateTime.now().toString(),
+      "id": _profile.id
     };
   }
 }

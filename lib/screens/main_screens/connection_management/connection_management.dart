@@ -224,14 +224,9 @@ class _ConnectionManagementScreenState
   }
 
   _collectionsSection() {
-    if (Provider.of<AllAvailableConnectionsProvider>(context)
-                .getConnectionsLength() ==
-            0 ||
-        Provider.of<RequestConnectionsProvider>(context)
-                .getConnectionsLength() ==
-            0 ||
-        Provider.of<SentConnectionsProvider>(context).getConnectionsLength() ==
+    if (_getItemCount() ==
             0) {
+      print("Here");
       return Container(
           width: double.maxFinite,
           height: MediaQuery.of(context).size.height / 1.8,
@@ -242,6 +237,8 @@ class _ConnectionManagementScreenState
                 .copyWith(fontSize: 16),
           ));
     }
+
+
 
     final ScrollController _scrollController =
         Provider.of<MainScrollingProvider>(context).getScrollController();
@@ -263,9 +260,9 @@ class _ConnectionManagementScreenState
           shrinkWrap: true,
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
-          itemCount: _getItemCount(),
+          itemCount: _getItemCount()+1,
           itemBuilder: (_, availableIndex) =>
-              _getConnectionsList(availableIndex),
+              availableIndex <= _getItemCount() - 1?_getConnectionsList(availableIndex):const SizedBox(height: 100,),
         ),
       ),
     );
@@ -283,9 +280,9 @@ class _ConnectionManagementScreenState
 
       return _commonChatLayout.particularChatConnection(
         currentIndex: availableIndex,
-        photo: _particularData["photo"],
+        photo: _particularData["profilePic"],
         heading: _particularData["name"],
-        subheading: _particularData["description"],
+        subheading: _particularData["about"],
         lastMsgTime: null,
         totalPendingMessages: null,
         trailingWidget: connectButton(),
@@ -296,9 +293,9 @@ class _ConnectionManagementScreenState
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
-          photo: _particularData["photo"],
+          photo: _particularData["profilePic"],
           heading: _particularData["name"],
-          subheading: _particularData["description"],
+          subheading: _particularData["about"],
           lastMsgTime: null,
           totalPendingMessages: null,
           middleWidth: MediaQuery.of(context).size.width - 240,
@@ -309,9 +306,9 @@ class _ConnectionManagementScreenState
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
-          photo: _particularData["photo"],
+          photo: _particularData["profilePic"],
           heading: _particularData["name"],
-          subheading: _particularData["description"],
+          subheading: _particularData["about"],
           lastMsgTime: null,
           totalPendingMessages: null,
           trailingWidget: withdrawButton());
