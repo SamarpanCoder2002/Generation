@@ -103,12 +103,18 @@ class AllAvailableConnectionsProvider extends ChangeNotifier {
     },
   ];
 
-  initialize(){
+  initialize({bool update = false}){
     _searchedConnections = _allAvailableConnections;
+    if(update) notifyListeners();
   }
 
   setConnections(incomingConnections) {
     _allAvailableConnections = incomingConnections;
+    notifyListeners();
+  }
+
+  removeIndexFromSearch(int indexInSearch){
+    _searchedConnections.removeAt(indexInSearch);
     notifyListeners();
   }
 

@@ -196,4 +196,46 @@ class DBOperations {
 
     return _allAvailableUsersData;
   }
+
+  Future<bool> sendConnectionRequest({required currUserData, required String otherUserId, required Map<String,dynamic> otherUserData})async{
+    try{
+      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}/$otherUserId').set(otherUserData, SetOptions(merge: true));
+      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userReceiveRequest}/$currUid').set(currUserData, SetOptions(merge: true));
+      return true;
+    }catch(e){
+      print("Error in Sent Connection Request: $e");
+      return false;
+    }
+  }
+
+  Future<bool> withdrawConnectionRequest({required currUserData, required String otherUserId, required otherUserData}) async{
+    try{
+      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}/$otherUserId').delete();
+      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userReceiveRequest}/$currUid').delete();
+      return true;
+    }catch(e){
+      print("Error in Sent Connection Request: $e");
+      return false;
+    }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

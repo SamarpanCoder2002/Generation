@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_management_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/incoming_request_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/sent_request_provider.dart';
+import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/toast_message_show.dart';
+import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/colors_collection.dart';
@@ -22,6 +26,10 @@ class ConnectionManagementScreen extends StatefulWidget {
 
 class _ConnectionManagementScreenState
     extends State<ConnectionManagementScreen> {
+  
+  final LocalStorage _localStorage = LocalStorage();
+  final DBOperations _dbOperations = DBOperations();
+  
   @override
   void initState() {
     Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
@@ -285,7 +293,7 @@ class _ConnectionManagementScreenState
         subheading: _particularData["about"],
         lastMsgTime: null,
         totalPendingMessages: null,
-        trailingWidget: connectButton(),
+        trailingWidget: connectButton(_particularData, availableIndex),
       );
     } else if (_currentIndex == 1) {
       final _particularData = Provider.of<RequestConnectionsProvider>(context)
@@ -311,7 +319,7 @@ class _ConnectionManagementScreenState
           subheading: _particularData["about"],
           lastMsgTime: null,
           totalPendingMessages: null,
-          trailingWidget: withdrawButton());
+          trailingWidget: withdrawButton(_particularData, availableIndex));
     }
 
     return const Center(child: Text("Not Implemented till now"));
@@ -351,20 +359,18 @@ class _ConnectionManagementScreenState
     }
   }
 
-  connectButton() {
+  connectButton(otherUserData, int index) {
     return TextButton(
       child: Text(
         "Connect",
         style: TextStyleCollection.terminalTextStyle
             .copyWith(color: AppColors.normalBlueColor, fontSize: 14),
       ),
-      onPressed: () {
-        /// Write Logic for Connect To A User
-      },
+      onPressed: () => _sendConnectionRequest(otherUserData, index),
     );
   }
 
-  withdrawButton() {
+  withdrawButton(otherData, int index) {
     return TextButton(
       child: Text(
         "Withdraw",
@@ -373,9 +379,7 @@ class _ConnectionManagementScreenState
             fontSize: 14,
             fontWeight: FontWeight.normal),
       ),
-      onPressed: () {
-        /// Write Logic for Connect To A User
-      },
+      onPressed: () => _withdrawRequest(otherData, index),
     );
   }
 
@@ -411,5 +415,41 @@ class _ConnectionManagementScreenState
         )
       ],
     );
+  }
+
+  _sendConnectionRequest(otherUserData, int index) async{
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+    print("Current Account Data: $_currAccData");
+    
+    if(_currAccData == null) return;
+    
+    final _response = await _dbOperations.sendConnectionRequest(currUserData: _currAccData, otherUserId: otherUserData["id"], otherUserData: otherUserData);
+    if(_response){
+      await _dbOperations.getAvailableUsersData(context);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false).removeIndexFromSearch(index);
+      Provider.of<SentConnectionsProvider>(context, listen: false).initialize(update: true);
+      showToast(context, title: "Connection Request Sent", toastIconType: ToastIconType.success, showFromTop: false);
+    }else{
+      showToast(context, title: "Failed to sent request", toastIconType: ToastIconType.error, showFromTop: false);
+    }
+    
+  }
+
+  _withdrawRequest(otherUserData, index) async{
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+    print("Current Account Data: $_currAccData");
+    print("Ogther Accoutn data: $otherUserData");
+
+    if(_currAccData == null) return;
+
+    final _response = await _dbOperations.withdrawConnectionRequest(currUserData: _currAccData, otherUserId: otherUserData["id"], otherUserData: otherUserData);
+    if(_response){
+      await _dbOperations.getAvailableUsersData(context);
+      Provider.of<SentConnectionsProvider>(context, listen: false).removeIndexFromSearch(index);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false).initialize(update: true);
+      showToast(context, title: "Request withdrawn", toastIconType: ToastIconType.success, showFromTop: false);
+    }else{
+      showToast(context, title: "Failed to withdraw request", toastIconType: ToastIconType.error, showFromTop: false);
+    }
   }
 }

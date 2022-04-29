@@ -25,7 +25,12 @@ class ConnectionManagementProvider extends ChangeNotifier{
   }
 
   changePageView(incomingIndex){
-    _pageController.animateToPage(incomingIndex, duration: const Duration(milliseconds: 500), curve: Curves.fastOutSlowIn);
-    notifyListeners();
+    try{
+      _pageController.animateToPage(incomingIndex, duration: const Duration(milliseconds: 500), curve: Curves.fastOutSlowIn);
+      notifyListeners();
+    }catch(e){
+      print("Error in Change View Page under connectionManagementProvider.dart");
+    }
+
   }
 }

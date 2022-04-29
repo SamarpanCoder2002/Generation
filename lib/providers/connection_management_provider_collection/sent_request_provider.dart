@@ -103,8 +103,9 @@ class SentConnectionsProvider extends ChangeNotifier {
     },
   ];
 
-  initialize() {
+  initialize({bool update = false}) {
     _searchedConnections = _sentConnections;
+    if(update) notifyListeners();
   }
 
   setConnections(incomingConnections) {
@@ -137,4 +138,9 @@ class SentConnectionsProvider extends ChangeNotifier {
   getConnections() => _searchedConnections;
 
   getConnectionsLength() => _searchedConnections.length;
+
+  void removeIndexFromSearch(int index) {
+    _searchedConnections.removeAt(index);
+    notifyListeners();
+  }
 }

@@ -103,8 +103,9 @@ class RequestConnectionsProvider extends ChangeNotifier {
     },
   ];
 
-  initialize(){
+  initialize({bool update = false}){
     _searchedConnections = _requestConnections;
+    if(update) notifyListeners();
   }
 
   operateOnSearch(searchKeyword) {
