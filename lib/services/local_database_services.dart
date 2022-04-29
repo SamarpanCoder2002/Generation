@@ -17,7 +17,7 @@ import 'local_data_management.dart';
 
 class LocalStorage {
   /// Current User Data
-  final String _currUserId = "_id";
+  final String _currUserId = "id";
   final String _currUserName = "name";
   final String _currUserAbout = "about";
   final String _currUserEmail = "email";
@@ -25,7 +25,7 @@ class LocalStorage {
   final String _currUserConversationTone = "conversationTone";
 
   /// Connections Primary Data
-  final String _conId = "_id";
+  final String _conId = "id";
   final String _conUserName = "name";
   final String _conUserAbout = "about";
   final String _conProfilePic = "profilePic";

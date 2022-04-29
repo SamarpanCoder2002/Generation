@@ -297,7 +297,7 @@ class _ConnectionManagementScreenState
       );
     } else if (_currentIndex == 1) {
       final _particularData = Provider.of<RequestConnectionsProvider>(context)
-          .getConnections()[availableIndex];
+          .getConnections()[availableIndex].data();
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
@@ -307,10 +307,10 @@ class _ConnectionManagementScreenState
           lastMsgTime: null,
           totalPendingMessages: null,
           middleWidth: MediaQuery.of(context).size.width - 240,
-          trailingWidget: incomingRequestButtonCollection());
+          trailingWidget: incomingRequestButtonCollection(_particularData, availableIndex));
     } else if (_currentIndex == 2) {
       final _particularData = Provider.of<SentConnectionsProvider>(context)
-          .getConnections()[availableIndex];
+          .getConnections()[availableIndex].data();
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
@@ -383,7 +383,7 @@ class _ConnectionManagementScreenState
     );
   }
 
-  incomingRequestButtonCollection() {
+  incomingRequestButtonCollection(otherData,int index) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -395,9 +395,7 @@ class _ConnectionManagementScreenState
                 fontSize: 14,
                 fontWeight: FontWeight.normal),
           ),
-          onPressed: () {
-            /// Write Logic for Connect To A User
-          },
+          onPressed: () => _acceptConnectionRequest(otherData, index),
         ),
         Expanded(
           child: TextButton(
@@ -437,8 +435,7 @@ class _ConnectionManagementScreenState
 
   _withdrawRequest(otherUserData, index) async{
     final _currAccData = await _localStorage.getDataForCurrAccount();
-    print("Current Account Data: $_currAccData");
-    print("Ogther Accoutn data: $otherUserData");
+
 
     if(_currAccData == null) return;
 
@@ -450,6 +447,23 @@ class _ConnectionManagementScreenState
       showToast(context, title: "Request withdrawn", toastIconType: ToastIconType.success, showFromTop: false);
     }else{
       showToast(context, title: "Failed to withdraw request", toastIconType: ToastIconType.error, showFromTop: false);
+    }
+  }
+
+  _acceptConnectionRequest(otherUserData, int index) async{
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+
+
+    if(_currAccData == null) return;
+
+    final _response = await _dbOperations.acceptConnectionRequest(currUserData: _currAccData, otherUserId: otherUserData["id"], otherUserData: otherUserData);
+    if(_response){
+      await _dbOperations.getAvailableUsersData(context);
+      Provider.of<RequestConnectionsProvider>(context, listen: false).removeFromSearch(index);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false).initialize(update: true);
+      showToast(context, title: "Request Accepted", toastIconType: ToastIconType.success, showFromTop: false);
+    }else{
+      showToast(context, title: "Failed to accept request", toastIconType: ToastIconType.error, showFromTop: false);
     }
   }
 }

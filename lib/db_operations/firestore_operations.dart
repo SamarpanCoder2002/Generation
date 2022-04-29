@@ -218,6 +218,13 @@ class DBOperations {
       return false;
     }
   }
+
+  acceptConnectionRequest({required currUserData, required String otherUserId, required otherUserData}) async{
+    await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId').set(otherUserData, SetOptions(merge: true));
+     _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid').set(currUserData, SetOptions(merge: true));
+    _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}/$otherUserId').delete();
+    return await withdrawConnectionRequest(currUserData: currUserData, otherUserId: otherUserId, otherUserData: otherUserData);
+  }
 }
 
 

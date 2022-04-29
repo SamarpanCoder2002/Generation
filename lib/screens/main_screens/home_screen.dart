@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (_, connectionIndex) {
             final _connectionData =
                 Provider.of<ConnectionCollectionProvider>(context)
-                    .getData()[connectionIndex];
+                    .getData()[connectionIndex].data();
 
             return OpenContainer(
                 closedElevation: 0.0,
@@ -302,12 +302,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 closedBuilder: (_, __) =>
                     _commonChatLayout.particularChatConnection(
                         photo: _connectionData["profilePic"],
-                        heading: _connectionData["connectionName"],
-                        subheading: _connectionData["latestMessage"]["message"],
-                        lastMsgTime: _connectionData["latestMessage"]["time"],
+                        heading: _connectionData["name"],
+                        subheading: _connectionData["latestMessage"]?["message"] ?? "",
+                        lastMsgTime: _connectionData["latestMessage"]?["time"] ?? "",
                         currentIndex: connectionIndex,
                         totalPendingMessages:
-                            _connectionData["notSeenMsgCount"].toString()));
+                            '${_connectionData["notSeenMsgCount"]}'));
           }),
     );
   }
