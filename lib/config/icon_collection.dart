@@ -128,3 +128,36 @@ class ActivityIconCollection{
     ],
   ];
 }
+
+
+class ConnectionActionOptions{
+  static List<dynamic> iconsCollection = [
+    [
+      const Icon(
+        Icons.person_add_disabled,
+        color: AppColors.pureWhiteColor,
+        size: 25,
+      ),
+      "Remove Connection",
+      AppColors.normalBlueColor,
+    ],
+    [
+      const Icon(
+        Icons.delete_outline_outlined,
+        color: AppColors.pureWhiteColor,
+        size: 25,
+      ),
+      "Delete Chat",
+      AppColors.cameraIconBgColor,
+    ],
+    [
+      const Icon(
+        Icons.notifications_none,
+        color: AppColors.pureWhiteColor,
+        size: 25,
+      ),
+      "Notification",
+      AppColors.galleryIconBgColor,
+    ],
+  ];
+}

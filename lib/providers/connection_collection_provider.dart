@@ -3,7 +3,7 @@ import 'package:generation/types/types.dart';
 
 class ConnectionCollectionProvider extends ChangeNotifier {
   List<dynamic> _searchedChatConnectionsDataCollection = [];
-  List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
+  final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   List<dynamic> _chatConnectionsDataCollection = [
 
   ];
@@ -25,6 +25,13 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
 
   }
+
+  removeConnectionAtIndex(int index){
+    _searchedChatConnectionsDataCollection.removeAt(index);
+    notifyListeners();
+  }
+
+
 
   selectUnselectMultipleConnection(incoming, index){
     if(_selectedSearchedChatConnectionsDataCollection[index] == null){

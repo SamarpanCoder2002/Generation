@@ -225,6 +225,23 @@ class DBOperations {
     _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}/$otherUserId').delete();
     return await withdrawConnectionRequest(currUserData: currUserData, otherUserId: otherUserId, otherUserData: otherUserData);
   }
+
+  removeConnectedUser({required String otherUserId}) async{
+    try{
+      _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.messages}').delete();
+      _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.activities}').delete();
+      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId').delete();
+
+      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.messages}').delete();
+      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.activities}').delete();
+      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid').delete();
+      return true;
+    }catch(e){
+      print("ERROR in Remove Connected User: $e");
+      return false;
+    }
+
+  }
 }
 
 

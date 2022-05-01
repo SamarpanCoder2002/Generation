@@ -9,6 +9,7 @@ import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/navigation_management.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
@@ -271,8 +272,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final _commonChatLayout = CommonChatListLayout(context: context);
 
-    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-
     return Container(
       width: double.maxFinite,
       height: MediaQuery.of(context).size.height / 1.8,
@@ -286,30 +285,36 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (_, connectionIndex) {
             final _connectionData =
                 Provider.of<ConnectionCollectionProvider>(context)
-                    .getData()[connectionIndex].data();
+                    .getData()[connectionIndex]
+                    .data();
 
-            return OpenContainer(
-                closedElevation: 0.0,
-                transitionType: ContainerTransitionType.fadeThrough,
-                transitionDuration: const Duration(milliseconds: 500),
-                closedColor: AppColors.getBgColor(_isDarkMode),
-                middleColor: AppColors.getBgColor(_isDarkMode),
-                openColor: AppColors.getBgColor(_isDarkMode),
-                onClosed: (_) => changeContextTheme(_isDarkMode),
-                openBuilder: (_, __) => ChatScreen(
-                      connectionData: _connectionData,
-                    ),
-                closedBuilder: (_, __) =>
-                    _commonChatLayout.particularChatConnection(
-                        photo: _connectionData["profilePic"],
-                        heading: _connectionData["name"],
-                        subheading: _connectionData["latestMessage"]?["message"] ?? "",
-                        lastMsgTime: _connectionData["latestMessage"]?["time"] ?? "",
-                        currentIndex: connectionIndex,
-                        totalPendingMessages:
-                            '${_connectionData["notSeenMsgCount"]}'));
+            return InkWell(
+                onTap: () => _onChatClicked(_connectionData),
+                onLongPress: () => _onChatLongPressed(_connectionData, connectionIndex),
+                child: _commonChatLayout.particularChatConnection(
+                    photo: _connectionData["profilePic"],
+                    heading: _connectionData["name"],
+                    subheading:
+                        _connectionData["latestMessage"]?["message"] ?? "",
+                    lastMsgTime:
+                        _connectionData["latestMessage"]?["time"] ?? "",
+                    currentIndex: connectionIndex,
+                    totalPendingMessages:
+                        '${_connectionData["notSeenMsgCount"]}'));
           }),
     );
+  }
+
+  _onChatClicked(_connectionData) {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    Navigation.intent(
+        context,
+        ChatScreen(
+          connectionData: _connectionData,
+        ),
+        afterWork: () => changeContextTheme(_isDarkMode));
   }
 
   _myActivity() {
@@ -451,6 +456,74 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyleCollection.terminalTextStyle.copyWith(
                   fontSize: 14,
                   color: AppColors.getModalTextColor(_isDarkMode)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  _onChatLongPressed(_connectionData, connectionIndex) {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    showModalBottomSheet(
+        context: context,
+        builder: (_) => Container(
+            height: 130,
+            color: AppColors.getModalColor(_isDarkMode),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+            child: GridView.count(
+              crossAxisCount: 3,
+              crossAxisSpacing: 4,
+              mainAxisSpacing: 6,
+              children: List.generate(
+                  ConnectionActionOptions.iconsCollection.length,
+                  (index) => _particularConnectionOption(index, _connectionData, connectionIndex)),
+            )));
+  }
+
+  _particularConnectionOption(index, _connectionData, connectionIndex) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return InkWell(
+      onTap: () async {
+        if (index == 0) {
+          _inputOption.removeConnectedUser(_connectionData["id"], _isDarkMode, connectionIndex);
+        } else if (index == 1) {
+          _inputOption.activityImageFromCamera();
+        } else if (index == 2) {
+          _inputOption.activityImageFromGallery();
+        } else if (index == 3) {
+          _inputOption.makeVideoActivity(_isDarkMode);
+        } else if (index == 4) {
+          _inputOption.makeAudioActivity();
+        } else if (index == 5) {
+          Navigation.intent(context, const PollCreatorScreen());
+        } else if (index == 6) {
+          //await _inputOption.getContacts();
+        }
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: ConnectionActionOptions.iconsCollection[index][2]),
+            child: ConnectionActionOptions.iconsCollection[index][0],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: Text(
+              ConnectionActionOptions.iconsCollection[index][1],
+              textAlign: TextAlign.center,
+              style: TextStyleCollection.terminalTextStyle.copyWith(
+                  color: AppColors.getModalTextColor(_isDarkMode),
+                  letterSpacing: 1.0),
             ),
           )
         ],

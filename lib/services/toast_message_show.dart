@@ -45,12 +45,13 @@ void showPopUpDialog(
     bool barrierDismissible = true,
     bool showCancelBtn = false,
     VoidCallback? leftOnPressed,
+      Color? bgColor,
     Color? leftBtnColor}) {
   showDialog(
       context: context,
       barrierDismissible: barrierDismissible,
       builder: (_) => AlertDialog(
-            backgroundColor: AppColors.splashScreenColor,
+            backgroundColor: bgColor ?? AppColors.splashScreenColor,
             elevation: 10,
             title: Center(
               child: Text(

@@ -6,6 +6,7 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/config/time_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/video_management/video_editing_provider.dart';
@@ -26,6 +27,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config/images_path_collection.dart';
 import '../providers/chat/chat_scroll_provider.dart';
 import '../providers/chat/messaging_provider.dart';
+import '../providers/connection_collection_provider.dart';
+import '../providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
@@ -36,6 +39,7 @@ import '../types/types.dart';
 
 class InputOption {
   final BuildContext context;
+  final DBOperations _dbOperation = DBOperations();
 
   InputOption(this.context);
 
@@ -788,5 +792,40 @@ class InputOption {
       "path": File(file.path).path,
       "duration": durationInSec.toString()
     });
+  }
+
+  removeConnectedUser(
+      String otherUserId, bool _isDarkMode, int connectionLocalIndex) {
+    _removeConnectedFunctionality() async {
+      final _response =
+          await _dbOperation.removeConnectedUser(otherUserId: otherUserId);
+
+      if (_response) {
+        showToast(context,
+            title: "Connection Removed Successfully",
+            toastIconType: ToastIconType.success,
+            showFromTop: false);
+
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .removeConnectionAtIndex(connectionLocalIndex);
+        _dbOperation.getAvailableUsersData(context);
+
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }else{
+        showToast(context,
+            title: "Failed to Remove Connection",
+            toastIconType: ToastIconType.error,
+            showFromTop: false);
+      }
+    }
+
+    showPopUpDialog(
+        context,
+        "Remove That Connection?",
+        "Both of you can't send messages to each other until and unless you are connected again",
+        _removeConnectedFunctionality,
+        showCancelBtn: true,
+        bgColor: AppColors.getChatBgColor(_isDarkMode));
   }
 }
