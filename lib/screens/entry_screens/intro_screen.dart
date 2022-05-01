@@ -17,7 +17,6 @@ import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
 import '../common/common_operations.dart';
 import '../common/common_selection_screen.dart';
-import '../main_screens/main_screen_management.dart';
 import 'information_taking.dart';
 
 class IntroScreens extends StatefulWidget {
@@ -32,6 +31,8 @@ class _IntroScreensState extends State<IntroScreens> {
   final GoogleAuth _googleAuth = GoogleAuth();
   final DBOperations _dbOperations = DBOperations();
   final LocalStorage _localStorage = LocalStorage();
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -78,8 +79,13 @@ class _IntroScreensState extends State<IntroScreens> {
         height: MediaQuery.of(context).size.height,
         child: Column(
           children: [
-            const SizedBox(
-              height: 140,
+            if (_isLoading)
+              const SizedBox(
+                height: 40,
+              ),
+            if (_isLoading) _loadingIndicator(),
+            SizedBox(
+              height: _isLoading ? 95 : 140,
             ),
             _logoSection(),
             const SizedBox(
@@ -104,6 +110,17 @@ class _IntroScreensState extends State<IntroScreens> {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  _loadingIndicator() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 3,
+      child: const LinearProgressIndicator(
+        backgroundColor: AppColors.pureWhiteColor,
+        color: AppColors.darkBorderGreenColor,
       ),
     );
   }
@@ -228,6 +245,12 @@ class _IntroScreensState extends State<IntroScreens> {
   }
 
   void _googleSignIn() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
     final _userData = await _googleAuth.logIn();
 
     if (_userData == null) {
@@ -247,6 +270,12 @@ class _IntroScreensState extends State<IntroScreens> {
 
     final _createdBefore = await _dbOperations.isAccountCreatedBefore();
 
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
     if (!_createdBefore["success"]) {
       Navigation.intent(
           context,
@@ -256,7 +285,7 @@ class _IntroScreensState extends State<IntroScreens> {
             profilePic: _userData["profilePic"],
           ));
     } else {
-     dataFetchingOperations(context, _createdBefore, _dbOperations.currUid);
+      dataFetchingOperations(context, _createdBefore, _dbOperations.currUid);
     }
   }
 }

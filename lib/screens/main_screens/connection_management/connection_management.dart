@@ -26,10 +26,9 @@ class ConnectionManagementScreen extends StatefulWidget {
 
 class _ConnectionManagementScreenState
     extends State<ConnectionManagementScreen> {
-  
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
-  
+
   @override
   void initState() {
     Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
@@ -213,8 +212,13 @@ class _ConnectionManagementScreenState
           ),
           Expanded(
             child: TextField(
-              cursorColor: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor,
-              style: TextStyleCollection.searchTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+              cursorColor: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor,
+              style: TextStyleCollection.searchTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor),
               onChanged: _onSearch,
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -232,8 +236,7 @@ class _ConnectionManagementScreenState
   }
 
   _collectionsSection() {
-    if (_getItemCount() ==
-            0) {
+    if (_getItemCount() == 0) {
       print("Here");
       return Container(
           width: double.maxFinite,
@@ -245,8 +248,6 @@ class _ConnectionManagementScreenState
                 .copyWith(fontSize: 16),
           ));
     }
-
-
 
     final ScrollController _scrollController =
         Provider.of<MainScrollingProvider>(context).getScrollController();
@@ -268,9 +269,13 @@ class _ConnectionManagementScreenState
           shrinkWrap: true,
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
-          itemCount: _getItemCount()+1,
+          itemCount: _getItemCount() + 1,
           itemBuilder: (_, availableIndex) =>
-              availableIndex <= _getItemCount() - 1?_getConnectionsList(availableIndex):const SizedBox(height: 100,),
+              availableIndex <= _getItemCount() - 1
+                  ? _getConnectionsList(availableIndex)
+                  : const SizedBox(
+                      height: 100,
+                    ),
         ),
       ),
     );
@@ -297,7 +302,8 @@ class _ConnectionManagementScreenState
       );
     } else if (_currentIndex == 1) {
       final _particularData = Provider.of<RequestConnectionsProvider>(context)
-          .getConnections()[availableIndex].data();
+          .getConnections()[availableIndex]
+          .data();
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
@@ -307,10 +313,12 @@ class _ConnectionManagementScreenState
           lastMsgTime: null,
           totalPendingMessages: null,
           middleWidth: MediaQuery.of(context).size.width - 240,
-          trailingWidget: incomingRequestButtonCollection(_particularData, availableIndex));
+          trailingWidget:
+              incomingRequestButtonCollection(_particularData, availableIndex));
     } else if (_currentIndex == 2) {
       final _particularData = Provider.of<SentConnectionsProvider>(context)
-          .getConnections()[availableIndex].data();
+          .getConnections()[availableIndex]
+          .data();
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
@@ -383,7 +391,7 @@ class _ConnectionManagementScreenState
     );
   }
 
-  incomingRequestButtonCollection(otherData,int index) {
+  incomingRequestButtonCollection(otherData, int index) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -406,64 +414,117 @@ class _ConnectionManagementScreenState
                   fontSize: 14,
                   fontWeight: FontWeight.normal),
             ),
-            onPressed: () {
-              /// Write Logic for Connect To A User
-            },
+            onPressed: () => _rejectConnectionRequest(otherData, index),
           ),
         )
       ],
     );
   }
 
-  _sendConnectionRequest(otherUserData, int index) async{
+  _sendConnectionRequest(otherUserData, int index) async {
     final _currAccData = await _localStorage.getDataForCurrAccount();
     print("Current Account Data: $_currAccData");
-    
-    if(_currAccData == null) return;
-    
-    final _response = await _dbOperations.sendConnectionRequest(currUserData: _currAccData, otherUserId: otherUserData["id"], otherUserData: otherUserData);
-    if(_response){
+
+    if (_currAccData == null) return;
+
+    final _response = await _dbOperations.sendConnectionRequest(
+        currUserData: _currAccData,
+        otherUserId: otherUserData["id"],
+        otherUserData: otherUserData);
+    if (_response) {
       await _dbOperations.getAvailableUsersData(context);
-      Provider.of<AllAvailableConnectionsProvider>(context, listen: false).removeIndexFromSearch(index);
-      Provider.of<SentConnectionsProvider>(context, listen: false).initialize(update: true);
-      showToast(context, title: "Connection Request Sent", toastIconType: ToastIconType.success, showFromTop: false);
-    }else{
-      showToast(context, title: "Failed to sent request", toastIconType: ToastIconType.error, showFromTop: false);
-    }
-    
-  }
-
-  _withdrawRequest(otherUserData, index) async{
-    final _currAccData = await _localStorage.getDataForCurrAccount();
-
-
-    if(_currAccData == null) return;
-
-    final _response = await _dbOperations.withdrawConnectionRequest(currUserData: _currAccData, otherUserId: otherUserData["id"], otherUserData: otherUserData);
-    if(_response){
-      await _dbOperations.getAvailableUsersData(context);
-      Provider.of<SentConnectionsProvider>(context, listen: false).removeIndexFromSearch(index);
-      Provider.of<AllAvailableConnectionsProvider>(context, listen: false).initialize(update: true);
-      showToast(context, title: "Request withdrawn", toastIconType: ToastIconType.success, showFromTop: false);
-    }else{
-      showToast(context, title: "Failed to withdraw request", toastIconType: ToastIconType.error, showFromTop: false);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+          .removeIndexFromSearch(index);
+      Provider.of<SentConnectionsProvider>(context, listen: false)
+          .initialize(update: true);
+      showToast(context,
+          title: "Connection Request Sent",
+          toastIconType: ToastIconType.success,
+          showFromTop: false);
+    } else {
+      showToast(context,
+          title: "Failed to sent request",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
     }
   }
 
-  _acceptConnectionRequest(otherUserData, int index) async{
+  _withdrawRequest(otherUserData, index) async {
     final _currAccData = await _localStorage.getDataForCurrAccount();
 
+    if (_currAccData == null) return;
 
-    if(_currAccData == null) return;
-
-    final _response = await _dbOperations.acceptConnectionRequest(currUserData: _currAccData, otherUserId: otherUserData["id"], otherUserData: otherUserData);
-    if(_response){
+    final _response = await _dbOperations.withdrawConnectionRequest(
+        currUserData: _currAccData,
+        otherUserId: otherUserData["id"],
+        otherUserData: otherUserData);
+    if (_response) {
       await _dbOperations.getAvailableUsersData(context);
-      Provider.of<RequestConnectionsProvider>(context, listen: false).removeFromSearch(index);
-      Provider.of<AllAvailableConnectionsProvider>(context, listen: false).initialize(update: true);
-      showToast(context, title: "Request Accepted", toastIconType: ToastIconType.success, showFromTop: false);
-    }else{
-      showToast(context, title: "Failed to accept request", toastIconType: ToastIconType.error, showFromTop: false);
+      Provider.of<SentConnectionsProvider>(context, listen: false)
+          .removeIndexFromSearch(index);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+          .initialize(update: true);
+      showToast(context,
+          title: "Request withdrawn",
+          toastIconType: ToastIconType.success,
+          showFromTop: false);
+    } else {
+      showToast(context,
+          title: "Failed to withdraw request",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
+    }
+  }
+
+  _acceptConnectionRequest(otherUserData, int index) async {
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+
+    if (_currAccData == null) return;
+
+    final _response = await _dbOperations.acceptConnectionRequest(
+        currUserData: _currAccData,
+        otherUserId: otherUserData["id"],
+        otherUserData: otherUserData);
+    if (_response) {
+      await _dbOperations.getAvailableUsersData(context);
+      Provider.of<RequestConnectionsProvider>(context, listen: false)
+          .removeFromSearch(index);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+          .initialize(update: true);
+      showToast(context,
+          title: "Request Accepted",
+          toastIconType: ToastIconType.success,
+          showFromTop: false);
+    } else {
+      showToast(context,
+          title: "Failed to accept request",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
+    }
+  }
+
+  _rejectConnectionRequest(otherUserData, int index) async {
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+
+    if (_currAccData == null) return;
+
+    final _response = await _dbOperations.rejectIncomingRequest(
+        otherUserId: otherUserData["id"]);
+    if (_response) {
+      await _dbOperations.getAvailableUsersData(context);
+      Provider.of<RequestConnectionsProvider>(context, listen: false)
+          .removeFromSearch(index);
+      Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
+          .initialize(update: true);
+      showToast(context,
+          title: "Incoming Request Rejected",
+          toastIconType: ToastIconType.success,
+          showFromTop: false);
+    } else {
+      showToast(context,
+          title: "Failed to reject request",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
     }
   }
 }
