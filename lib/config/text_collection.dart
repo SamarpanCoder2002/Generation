@@ -35,7 +35,6 @@ class DbData{
   static const currUserTable = "__currentUserEncryptedData__";
   static const connectionsTable = "__connectionsEncryptedData__";
   static const chatTable = "__chatEncryptedData__";
-
   static const myActivityTable = "__myActivityEncryptedData__";
 }
 

@@ -382,6 +382,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     print("Data to Store: $_data");
 
     await _localStorage.createTableForStorePrimaryData();
+    _localStorage.createTableForConnectionsPrimaryData();
     await _localStorage.insertUpdateDataCurrAccData(
         currUserId: _data["id"],
         currUserName: _data["name"],

@@ -181,13 +181,15 @@ class LocalStorage {
     _conData[_conUserAbout] = about;
     _conData[_conProfilePic] = profilePic;
     _conData[_conChatWallpaperPath] = wallpaper;
-    _conData[_conChatTableName] =
-        DataManagement.generateTableNameForNewConnectionChat(name, id);
-    _conData[_conActivityTableName] =
-        DataManagement.generateTableNameForNewConnectionActivity(name, id);
 
     if (dbOperation == DBOperation.insert) {
       await db.insert(DbData.connectionsTable, _conData);
+
+      _conData[_conChatTableName] =
+          DataManagement.generateTableNameForNewConnectionChat(id);
+      _conData[_conActivityTableName] =
+          DataManagement.generateTableNameForNewConnectionActivity(id);
+
       _createTableForConnectionChat(tableName: _conData[_conChatTableName]);
       _createTableForActivity(tableName: _conData[_conActivityTableName]);
     } else {
@@ -202,7 +204,11 @@ class LocalStorage {
 
     final _rowAffected =
         await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
-    if (_rowAffected == 1) return true;
+    if (_rowAffected == 1) {
+      deleteDataFromParticularChatConnTable(tableName: DataManagement.generateTableNameForNewConnectionChat(id));
+      deleteActivity(tableName: DataManagement.generateTableNameForNewConnectionActivity(id));
+      return true;
+    }
     return false;
   }
 
@@ -345,20 +351,22 @@ class LocalStorage {
 
     dbOperation == DBOperation.insert
         ? db.insert(tableName, _activityData)
-        : db.update(tableName, _activityData, where: """$_activityHolderId = "$activityHolderId" """);
+        : db.update(tableName, _activityData,
+            where: """$_activityHolderId = "$activityHolderId" """);
   }
 
-  deleteActivity({required String tableName, String? activityId}) async{
+  deleteActivity({required String tableName, String? activityId}) async {
     final Database db = await database;
 
-    if(activityId == null){
+    if (activityId == null) {
       await db.delete(tableName);
-    }else{
+    } else {
       await db.delete(tableName, where: """$_activityId = "$activityId" """);
     }
   }
 
-  getAllActivity({required String tableName, required String activityHolderId})async{
+  getAllActivity(
+      {required String tableName, required String activityHolderId}) async {
     final Database db = await database;
 
     final _activitySet = await db.rawQuery(
@@ -366,10 +374,6 @@ class LocalStorage {
 
     return _activitySet;
   }
-
-
-
-
 
   /// Get Total Messages from Any Table
   Future<int> getTotalMessages({required String tableName}) async {
@@ -381,8 +385,9 @@ class LocalStorage {
     return int.parse(data[0].values.first.toString());
   }
 
-  storeDataForCurrAccount(_data,String currUserId)async{
+  storeDataForCurrAccount(_data, String currUserId) async {
     await createTableForStorePrimaryData();
+    createTableForConnectionsPrimaryData();
     await insertUpdateDataCurrAccData(
         currUserId: currUserId,
         currUserName: _data["name"],
@@ -392,8 +397,11 @@ class LocalStorage {
         currConTone: true,
         dbOperation: DBOperation.insert);
 
-    await DataManagement.storeStringData(StoredString.accCreatedBefore, DataManagement.toJsonString(_data)).then((value) => print("Stored Data"));
+    await DataManagement.storeStringData(
+            StoredString.accCreatedBefore, DataManagement.toJsonString(_data))
+        .then((value) => print("Stored Data"));
 
-    print("stored Data gEr: ${await DataManagement.getStringData(StoredString.accCreatedBefore)}");
+    print(
+        "stored Data gEr: ${await DataManagement.getStringData(StoredString.accCreatedBefore)}");
   }
 }

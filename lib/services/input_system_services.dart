@@ -13,6 +13,7 @@ import 'package:generation/providers/video_management/video_editing_provider.dar
 import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
 import 'package:generation/screens/common/button.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/services/toast_message_show.dart';
@@ -28,7 +29,6 @@ import '../config/images_path_collection.dart';
 import '../providers/chat/chat_scroll_provider.dart';
 import '../providers/chat/messaging_provider.dart';
 import '../providers/connection_collection_provider.dart';
-import '../providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
@@ -40,10 +40,10 @@ import '../types/types.dart';
 class InputOption {
   final BuildContext context;
   final DBOperations _dbOperation = DBOperations();
+  final PermissionManagement _permissionManagement = PermissionManagement();
+  final LocalStorage _localStorage = LocalStorage();
 
   InputOption(this.context);
-
-  final PermissionManagement _permissionManagement = PermissionManagement();
 
   pickImageFromGallery({int imageQuality = 50}) async {
     final List<XFile>? _pickedImagesCollection =
@@ -801,6 +801,7 @@ class InputOption {
           await _dbOperation.removeConnectedUser(otherUserId: otherUserId);
 
       if (_response) {
+        _localStorage.deleteConnectionPrimaryData(id: otherUserId);
         showToast(context,
             title: "Connection Removed Successfully",
             toastIconType: ToastIconType.success,
@@ -812,7 +813,7 @@ class InputOption {
 
         Navigator.pop(context);
         Navigator.pop(context);
-      }else{
+      } else {
         showToast(context,
             title: "Failed to Remove Connection",
             toastIconType: ToastIconType.error,
