@@ -77,7 +77,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              connectionData["connectionName"],
+              connectionData["name"],
               overflow: TextOverflow.ellipsis,
               style: TextStyleCollection.headingTextStyle.copyWith(
                   fontSize: 16,

@@ -294,12 +294,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     photo: _connectionData["profilePic"],
                     heading: _connectionData["name"],
                     subheading:
-                        _connectionData["latestMessage"]?["message"] ?? "",
+                        _connectionData["chatLastMsg"]?["message"] ?? "",
                     lastMsgTime:
-                        _connectionData["latestMessage"]?["time"] ?? "",
+                        _connectionData["chatLastMsg"]?["time"] ?? "",
                     currentIndex: connectionIndex,
                     totalPendingMessages:
-                        '${_connectionData["notSeenMsgCount"]}'));
+                        _connectionData["notSeenMsgCount"]));
           }),
     );
   }

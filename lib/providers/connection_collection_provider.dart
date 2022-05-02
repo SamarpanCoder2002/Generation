@@ -79,7 +79,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     }
 
     for (final connection in _chatConnectionsDataCollection) {
-      if (connection["connectionName"]
+      if (connection["name"]
           .toString()
           .toLowerCase()
           .contains(searchKeyword.toString().toLowerCase())) {

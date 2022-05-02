@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:generation/config/size_collection.dart';
@@ -30,6 +31,8 @@ class LocalStorage {
   final String _conUserAbout = "about";
   final String _conProfilePic = "profilePic";
   final String _conChatWallpaperPath = "wallpaper";
+  final String _conLastMsgData = "chatLastMsg";
+  final String _conNotSeenMsgCount = "notSeenMsgCount";
   final String _conChatTableName = "chatTableName";
   final String _conActivityTableName = "connectionTableName";
 
@@ -158,7 +161,7 @@ class LocalStorage {
     final Database db = await database;
     try {
       await db.execute(
-          """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT)""");
+          """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT, $_conLastMsgData TEXT, $_conNotSeenMsgCount TEXT)""");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -172,6 +175,8 @@ class LocalStorage {
       required String profilePic,
       required String about,
       required DBOperation dbOperation,
+      dynamic lastMsgData,
+      dynamic notSeenMsgCount,
       String? wallpaper}) async {
     final Database db = await database;
 
@@ -181,6 +186,10 @@ class LocalStorage {
     _conData[_conUserAbout] = about;
     _conData[_conProfilePic] = profilePic;
     _conData[_conChatWallpaperPath] = wallpaper;
+    _conData[_conLastMsgData] =
+        lastMsgData == null ? "" : json.encode(lastMsgData);
+    _conData[_conNotSeenMsgCount] =
+        notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
 
     if (dbOperation == DBOperation.insert) {
       await db.insert(DbData.connectionsTable, _conData);
@@ -205,8 +214,11 @@ class LocalStorage {
     final _rowAffected =
         await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
     if (_rowAffected == 1) {
-      deleteDataFromParticularChatConnTable(tableName: DataManagement.generateTableNameForNewConnectionChat(id));
-      deleteActivity(tableName: DataManagement.generateTableNameForNewConnectionActivity(id));
+      deleteDataFromParticularChatConnTable(
+          tableName: DataManagement.generateTableNameForNewConnectionChat(id));
+      deleteActivity(
+          tableName:
+              DataManagement.generateTableNameForNewConnectionActivity(id));
       return true;
     }
     return false;

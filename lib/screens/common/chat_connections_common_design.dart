@@ -51,7 +51,7 @@ class CommonChatListLayout {
               trailingWidget == null &&
               lastMsgTime != null &&
               totalPendingMessages != null)
-            _chatConnectionInformationData(lastMsgTime, totalPendingMessages),
+            _chatConnectionInformationData(lastMsgTime, totalPendingMessages.toString()),
           if (trailingWidget != null) Expanded(child: trailingWidget)
         ],
       ),
