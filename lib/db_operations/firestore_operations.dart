@@ -42,7 +42,8 @@ class DBOperations {
   Future<Map<String, dynamic>> createAccount(
       {required String name,
       required String about,
-      required String profilePic, bool update = false}) async {
+      required String profilePic,
+      bool update = false}) async {
     final Map<String, dynamic> _response = {};
     String profilePicRemote = profilePic;
 
@@ -73,7 +74,8 @@ class DBOperations {
           .set(_profile, SetOptions(merge: true));
 
       _response["success"] = true;
-      _response["message"] = update ? DBStatement.profileUpdated :DBStatement.profileCompleted;
+      _response["message"] =
+          update ? DBStatement.profileUpdated : DBStatement.profileCompleted;
       _response["data"] = {
         "id": currUid,
         "email": currEmail,
@@ -132,10 +134,10 @@ class DBOperations {
             '${DBPath.userCollection}/$currUid/${DBPath.userConnections}')
         .get();
 
-    Provider.of<ConnectionCollectionProvider>(context, listen: false)
-        .manageRemoteDataCollection(_connectedData.docs);
+    // Provider.of<ConnectionCollectionProvider>(context, listen: false)
+    //     .manageRemoteDataCollection(_connectedData.docs);
 
-    return _connectedData.docs;
+    return _connectedData.docs.map((doc) => doc.data()).toList();
   }
 
   Future<List> getReceivedRequestUsersData(BuildContext context) async {
@@ -182,15 +184,16 @@ class DBOperations {
     }
 
     /// For Connected Users Fetch
-    final _connectedDataList = await getConnectedUsersData(context);
+    final _localConnectedData = Provider.of<ConnectionCollectionProvider>(context, listen: false).getAllChatConnectionData();
+    final _connectedDataList = _localConnectedData.isEmpty? await getConnectedUsersData(context):_localConnectedData;
     for (final doc in _connectedDataList) {
-      if (_allAvailableUsersData[doc.id] != null) {
-        _allAvailableUsersData.remove(doc.id);
+      if (_allAvailableUsersData[doc["id"]] != null) {
+        _allAvailableUsersData.remove(doc["id"]);
       }
     }
 
     /// For Received Users Fetch
-    final _receivedDataList = await getReceivedRequestUsersData(context);
+    final _receivedDataList = await getReceivedRequestUsersData(context); // Provider.of<RequestConnectionsProvider>(context, listen: false).getRequestConnections();//
     for (final doc in _receivedDataList) {
       if (_allAvailableUsersData[doc.id] != null) {
         _allAvailableUsersData.remove(doc.id);
@@ -212,6 +215,7 @@ class DBOperations {
 
     return _allAvailableUsersData;
   }
+
 
   Future<bool> sendConnectionRequest(
       {required currUserData,
@@ -331,4 +335,22 @@ class DBOperations {
       return false;
     }
   }
+}
+
+class RealTimeOperations {
+  FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
+
+  String get currUid => FirebaseAuth.instance.currentUser?.uid ?? "";
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getConnectedUsers() =>
+      _getInstance
+          .collection(
+              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}')
+          .snapshots();
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getReceivedRequestUsers() =>
+      _getInstance
+          .collection(
+              '${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}')
+          .snapshots();
 }

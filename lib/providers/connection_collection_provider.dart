@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -10,11 +12,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
+  final RealTimeOperations _realTimeOperations = RealTimeOperations();
+  late StreamSubscription _connectedDataStream;
 
   initialize({bool update = false}) {
     _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
     if (update) notifyListeners();
   }
+
+  getAllChatConnectionData() => _chatConnectionsDataCollection;
 
   fetchLocalConnectedUsers(context) async {
     try {
@@ -27,34 +33,37 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       }
 
       initialize(update: true);
+      _remoteConnectedDataStream(context);
       _dbOperations.getAvailableUsersData(context);
     } catch (e) {
       print("Error in Fetch Local Connected Users: $e");
     }
   }
 
-  manageRemoteDataCollection(incomingData) {
+  _remoteConnectedDataStream(context) async {
+    _connectedDataStream = _realTimeOperations.getConnectedUsers().listen((querySnapShot) {
+      final _conPrimaryData = querySnapShot.docs;
 
-
-    for (final remoteData in incomingData) {
-      final _data = remoteData.data();
-
-
-      if (!_localConnectedUsersMap.containsKey(_data["id"].toString())) {
-        _localConnectedUsersMap[_data["id"].toString()] = _data;
-        addNewData(_data);
-        _localStorage.insertUpdateConnectionPrimaryData(
-            id: _data["id"],
-            name: _data["name"],
-            profilePic: _data["profilePic"],
-            about: _data["about"],
-            dbOperation: DBOperation.insert);
+      for (final connData in _conPrimaryData) {
+        if (!_localConnectedUsersMap.containsKey(connData.id.toString())) {
+          _localConnectedUsersMap[connData.id.toString()] = connData.data();
+          addNewData(connData.data());
+          _localStorage.insertUpdateConnectionPrimaryData(
+              id: connData.data()["id"],
+              name: connData.data()["name"],
+              profilePic: connData.data()["profilePic"],
+              about: connData.data()["about"],
+              dbOperation: DBOperation.insert);
+        }
 
         initialize(update: true);
-      }else{
-        print("PResent: ${remoteData.id}");
       }
-    }
+    });
+  }
+
+  destroyConnectedDataStream(){
+    _connectedDataStream.cancel();
+    notifyListeners();
   }
 
   setForSelection() {

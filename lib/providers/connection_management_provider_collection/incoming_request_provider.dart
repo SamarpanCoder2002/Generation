@@ -1,19 +1,42 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 
 class RequestConnectionsProvider extends ChangeNotifier {
   List<dynamic> _searchedConnections = [];
-  List<dynamic> _requestConnections = [
+  List<dynamic> _requestConnections = [];
+  final RealTimeOperations _realTimeOperations = RealTimeOperations();
+  late StreamSubscription _receivedRequestStream;
 
-  ];
-
-  initialize({bool update = false}){
+  initialize({bool update = false}) {
     _searchedConnections = _requestConnections;
-    if(update) notifyListeners();
+    if (update) notifyListeners();
   }
 
-  removeFromSearch(int index){
-    _searchedConnections.removeAt(index);
+  getRequestConnections() => _requestConnections;
+
+  remoteReceiveRequestDataStream() {
+    _receivedRequestStream =
+        _realTimeOperations.getReceivedRequestUsers().listen((querySnapShot) {
+      setConnections(querySnapShot.docs);
+      initialize(update: true);
+    });
+  }
+
+  destroyReceivedRequestStream() {
+    _receivedRequestStream.cancel();
     notifyListeners();
+  }
+
+  removeFromSearch(int index) {
+  //  if(_searchedConnections.length - 1 <= index) return;
+    try{
+      _searchedConnections.removeAt(index);
+      notifyListeners();
+    }catch(e){
+      print("Error in Remove From SEarch Incoming Reuqets: $e");
+    }
   }
 
   operateOnSearch(searchKeyword) {

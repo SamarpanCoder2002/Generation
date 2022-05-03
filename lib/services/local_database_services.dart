@@ -178,32 +178,37 @@ class LocalStorage {
       dynamic lastMsgData,
       dynamic notSeenMsgCount,
       String? wallpaper}) async {
-    final Database db = await database;
+    try{
+      final Database db = await database;
 
-    final Map<String, dynamic> _conData = <String, dynamic>{};
-    _conData[_conId] = id;
-    _conData[_conUserName] = name;
-    _conData[_conUserAbout] = about;
-    _conData[_conProfilePic] = profilePic;
-    _conData[_conChatWallpaperPath] = wallpaper;
-    _conData[_conLastMsgData] = json.encode(lastMsgData);
-    _conData[_conNotSeenMsgCount] =
-        notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
+      final Map<String, dynamic> _conData = <String, dynamic>{};
+      _conData[_conId] = id;
+      _conData[_conUserName] = name;
+      _conData[_conUserAbout] = about;
+      _conData[_conProfilePic] = profilePic;
+      _conData[_conChatWallpaperPath] = wallpaper;
+      _conData[_conLastMsgData] = lastMsgData == null ? null: json.encode(lastMsgData);
+      _conData[_conNotSeenMsgCount] =
+      notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
 
-    if (dbOperation == DBOperation.insert) {
-      await db.insert(DbData.connectionsTable, _conData);
+      if (dbOperation == DBOperation.insert) {
+        await db.insert(DbData.connectionsTable, _conData);
 
-      _conData[_conChatTableName] =
-          DataManagement.generateTableNameForNewConnectionChat(id);
-      _conData[_conActivityTableName] =
-          DataManagement.generateTableNameForNewConnectionActivity(id);
+        _conData[_conChatTableName] =
+            DataManagement.generateTableNameForNewConnectionChat(id);
+        _conData[_conActivityTableName] =
+            DataManagement.generateTableNameForNewConnectionActivity(id);
 
-      _createTableForConnectionChat(tableName: _conData[_conChatTableName]);
-      _createTableForActivity(tableName: _conData[_conActivityTableName]);
-    } else {
-      await db.update(DbData.connectionsTable, _conData,
-          where: """$_conId = "$id" """);
+        _createTableForConnectionChat(tableName: _conData[_conChatTableName]);
+        _createTableForActivity(tableName: _conData[_conActivityTableName]);
+      } else {
+        await db.update(DbData.connectionsTable, _conData,
+            where: """$_conId = "$id" """);
+      }
+    }catch(e){
+      print("ERROR in insertUpdateConnectionPrimaryData: $e");
     }
+
   }
 
   /// Delete particular connection

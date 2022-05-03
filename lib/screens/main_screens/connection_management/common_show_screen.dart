@@ -340,15 +340,16 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         otherUserId: otherUserData["id"],
         otherUserData: otherUserData);
     if (_response) {
-      Provider.of<ConnectionCollectionProvider>(context, listen: false)
-          .addNewData(otherUserData);
+      // Provider.of<ConnectionCollectionProvider>(context, listen: false)
+      //     .addNewData(otherUserData);
 
-      _localStorage.insertUpdateConnectionPrimaryData(
-          id: otherUserData["id"],
-          name: otherUserData["name"],
-          profilePic: otherUserData["profilePic"],
-          about: otherUserData["about"],
-          dbOperation: DBOperation.insert);
+      // _localStorage.insertUpdateConnectionPrimaryData(
+      //     id: otherUserData["id"],
+      //     name: otherUserData["name"],
+      //     profilePic: otherUserData["profilePic"],
+      //     about: otherUserData["about"],
+      //     dbOperation: DBOperation.insert);
+
 
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<RequestConnectionsProvider>(context, listen: false)

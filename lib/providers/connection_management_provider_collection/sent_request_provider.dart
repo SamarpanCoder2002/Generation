@@ -43,6 +43,7 @@ class SentConnectionsProvider extends ChangeNotifier {
   getConnectionsLength() => _searchedConnections.length;
 
   void removeIndexFromSearch(int index) {
+    //if(_searchedConnections.length - 1 <= index) return;
     _searchedConnections.removeAt(index);
     notifyListeners();
   }

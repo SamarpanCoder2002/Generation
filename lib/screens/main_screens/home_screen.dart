@@ -291,8 +291,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 Provider.of<ConnectionCollectionProvider>(context)
                     .getData()[connectionIndex];
 
-            print("last Chat Msg: ${_connectionData["chatLastMsg"]}   $_connectionData");
-
             return InkWell(
                 onTap: () => _onChatClicked(_connectionData),
                 onLongPress: () =>

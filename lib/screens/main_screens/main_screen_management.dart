@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/connection_collection_provider.dart';
+import '../../providers/connection_management_provider_collection/incoming_request_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
-import 'groups_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -24,23 +23,20 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   var activeSlideIndex = 0;
-  final DBOperations _dbOperations = DBOperations();
 
   @override
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .fetchLocalConnectedUsers(context);
+    // Provider.of<RequestConnectionsProvider>(context, listen: false)
+    //     .remoteReceiveRequestDataStream();
 
     final _isDarkMode =
         Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     showStatusAndNavigationBar();
     makeStatusBarTransparent();
-
     changeContextTheme(_isDarkMode);
-
-    debugPrint(
-        "Platform Brightness: ${SchedulerBinding.instance!.window.platformBrightness}");
 
     super.initState();
   }
@@ -199,6 +195,10 @@ class _MainScreenState extends State<MainScreen> {
 
       return false;
     }
+
+    Provider.of<ConnectionCollectionProvider>(context, listen: false)
+        .destroyConnectedDataStream();
+    Provider.of<RequestConnectionsProvider>(context, listen: false).destroyReceivedRequestStream();
 
     return true;
   }
