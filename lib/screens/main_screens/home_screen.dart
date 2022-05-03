@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _searchBar(),
               const SizedBox(height: 25),
               _activitiesSection(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               _messagesSection(),
             ],
           )),
@@ -132,22 +132,27 @@ class _HomeScreenState extends State<HomeScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height / 5.8,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              AppText.activityHeading,
-              style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
-                  color: _isDarkMode
-                      ? AppColors.pureWhiteColor
-                      : AppColors.lightTextColor),
+      height: 150,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                AppText.activityHeading,
+                style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightTextColor),
+              ),
             ),
-          ),
-          _horizontalActivitySection()
-        ],
+            const SizedBox(
+              height: 10,
+            ),
+            _horizontalActivitySection()
+          ],
+        ),
       ),
     );
   }
@@ -158,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SizedBox(
       width: MediaQuery.of(context).size.width - 40,
-      height: 115,
+      height: 140,
       child: ListView(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,
@@ -284,22 +289,22 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (_, connectionIndex) {
             final _connectionData =
                 Provider.of<ConnectionCollectionProvider>(context)
-                    .getData()[connectionIndex]
-                    .data();
+                    .getData()[connectionIndex];
+
+            print("last Chat Msg: ${_connectionData["chatLastMsg"]}   $_connectionData");
 
             return InkWell(
                 onTap: () => _onChatClicked(_connectionData),
-                onLongPress: () => _onChatLongPressed(_connectionData, connectionIndex),
+                onLongPress: () =>
+                    _onChatLongPressed(_connectionData, connectionIndex),
                 child: _commonChatLayout.particularChatConnection(
                     photo: _connectionData["profilePic"],
                     heading: _connectionData["name"],
                     subheading:
                         _connectionData["chatLastMsg"]?["message"] ?? "",
-                    lastMsgTime:
-                        _connectionData["chatLastMsg"]?["time"] ?? "",
+                    lastMsgTime: _connectionData["chatLastMsg"]?["time"] ?? "",
                     currentIndex: connectionIndex,
-                    totalPendingMessages:
-                        _connectionData["notSeenMsgCount"]));
+                    totalPendingMessages: _connectionData["notSeenMsgCount"]));
           }),
     );
   }
@@ -478,7 +483,8 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSpacing: 6,
               children: List.generate(
                   ConnectionActionOptions.iconsCollection.length,
-                  (index) => _particularConnectionOption(index, _connectionData, connectionIndex)),
+                  (index) => _particularConnectionOption(
+                      index, _connectionData, connectionIndex)),
             )));
   }
 
@@ -488,7 +494,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () async {
         if (index == 0) {
-          _inputOption.removeConnectedUser(_connectionData["id"], _isDarkMode, connectionIndex);
+          _inputOption.removeConnectedUser(
+              _connectionData["id"], _isDarkMode, connectionIndex);
         } else if (index == 1) {
           _inputOption.activityImageFromCamera();
         } else if (index == 2) {

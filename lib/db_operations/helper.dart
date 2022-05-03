@@ -22,4 +22,5 @@ class Validator{
 class DBStatement{
   static const profilePicRestriction = "Profile picture size should be within 4 mb";
   static const profileCompleted = "Profile Completed Successfully";
+  static const profileUpdated = "Profile Updated Successfully";
 }

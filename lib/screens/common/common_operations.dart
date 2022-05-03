@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 
@@ -22,6 +23,7 @@ storagePermissionForStoreCurrAccData(
 
 dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
   final LocalStorage _localStorage = LocalStorage();
+  final DBOperations _dbOperations = DBOperations();
 
   showToast(context,
       title: "Account Created Before",
@@ -31,6 +33,8 @@ dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
   storagePermissionForStoreCurrAccData(context, () async {
     await _localStorage.storeDataForCurrAccount(
         _createdBefore["data"], currUserId);
+
+    await _dbOperations.updateCurrentAccount(_createdBefore["data"]);
 
     showToast(context,
         title: "Data Fetched Successfully",

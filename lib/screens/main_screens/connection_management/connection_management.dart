@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_management_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/incoming_request_provider.dart';
@@ -23,9 +24,12 @@ class ConnectionManagementScreen extends StatefulWidget {
 class _ConnectionManagementScreenState extends State<ConnectionManagementScreen>
     with TickerProviderStateMixin {
   TabController? _tabController;
+  final DBOperations _dbOperations = DBOperations();
+
 
   @override
   void initState() {
+    _dbOperations.getAvailableUsersData(context);
     final _tabLength = Provider.of<ConnectionManagementProvider>(context, listen: false).getTabsCollectionLength();
     _tabController = TabController(length: _tabLength, vsync: this, initialIndex: 0);
     Provider.of<AllAvailableConnectionsProvider>(context, listen: false)

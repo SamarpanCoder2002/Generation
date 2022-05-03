@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../config/colors_collection.dart';
 import '../../../config/text_style_collection.dart';
 import '../../../db_operations/firestore_operations.dart';
-import '../../../providers/connection_management_provider.dart';
+import '../../../providers/connection_collection_provider.dart';
 import '../../../providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import '../../../providers/connection_management_provider_collection/incoming_request_provider.dart';
 import '../../../providers/connection_management_provider_collection/sent_request_provider.dart';
@@ -17,7 +17,9 @@ import '../../common/chat_connections_common_design.dart';
 
 class CommonUsersShowScreen extends StatefulWidget {
   final int currIndex;
-  const CommonUsersShowScreen({Key? key, required this.currIndex}) : super(key: key);
+
+  const CommonUsersShowScreen({Key? key, required this.currIndex})
+      : super(key: key);
 
   @override
   State<CommonUsersShowScreen> createState() => _CommonUsersShowScreenState();
@@ -32,8 +34,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return Scaffold(
-        backgroundColor: AppColors.getBgColor(_isDarkMode),
-    body: _getBody(),);
+      backgroundColor: AppColors.getBgColor(_isDarkMode),
+      body: _getBody(),
+    );
   }
 
   _getBody() {
@@ -44,10 +47,10 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-                    const SizedBox(height: 15),
-                    _searchBar(),
-                    const SizedBox(height: 15),
-                    _collectionsSection(),
+            const SizedBox(height: 15),
+            _searchBar(),
+            const SizedBox(height: 15),
+            _collectionsSection(),
           ],
         ),
       ),
@@ -117,7 +120,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
     }
 
     final ScrollController _scrollController =
-    Provider.of<MainScrollingProvider>(context).getScrollController();
+        Provider.of<MainScrollingProvider>(context).getScrollController();
 
     return SizedBox(
       width: double.maxFinite,
@@ -128,15 +131,14 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         physics: const BouncingScrollPhysics(),
         itemCount: _getItemCount() + 1,
         itemBuilder: (_, availableIndex) =>
-        availableIndex <= _getItemCount() - 1
-            ? _getConnectionsList(availableIndex)
-            : const SizedBox(
-          height: 100,
-        ),
+            availableIndex <= _getItemCount() - 1
+                ? _getConnectionsList(availableIndex)
+                : const SizedBox(
+                    height: 100,
+                  ),
       ),
     );
   }
-
 
   _getConnectionsList(availableIndex) {
     final _commonChatLayout = CommonChatListLayout(context: context);
@@ -144,8 +146,8 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
 
     if (_currentIndex == 0) {
       final _particularData =
-      Provider.of<AllAvailableConnectionsProvider>(context)
-          .getConnections()[availableIndex];
+          Provider.of<AllAvailableConnectionsProvider>(context)
+              .getConnections()[availableIndex];
 
       return _commonChatLayout.particularChatConnection(
         currentIndex: availableIndex,
@@ -170,7 +172,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           totalPendingMessages: null,
           middleWidth: MediaQuery.of(context).size.width - 240,
           trailingWidget:
-          incomingRequestButtonCollection(_particularData, availableIndex));
+              incomingRequestButtonCollection(_particularData, availableIndex));
     } else if (_currentIndex == 2) {
       final _particularData = Provider.of<SentConnectionsProvider>(context)
           .getConnections()[availableIndex]
@@ -338,6 +340,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         otherUserId: otherUserData["id"],
         otherUserData: otherUserData);
     if (_response) {
+      Provider.of<ConnectionCollectionProvider>(context, listen: false)
+          .addNewData(otherUserData);
+
       _localStorage.insertUpdateConnectionPrimaryData(
           id: otherUserData["id"],
           name: otherUserData["name"],
@@ -350,6 +355,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           .removeFromSearch(index);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
+      Provider.of<ConnectionCollectionProvider>(context, listen: false)
+          .initialize(update: true);
+
       showToast(context,
           title: "Request Accepted",
           toastIconType: ToastIconType.success,

@@ -42,7 +42,7 @@ class DBOperations {
   Future<Map<String, dynamic>> createAccount(
       {required String name,
       required String about,
-      required String profilePic}) async {
+      required String profilePic, bool update = false}) async {
     final Map<String, dynamic> _response = {};
     String profilePicRemote = profilePic;
 
@@ -73,7 +73,7 @@ class DBOperations {
           .set(_profile, SetOptions(merge: true));
 
       _response["success"] = true;
-      _response["message"] = DBStatement.profileCompleted;
+      _response["message"] = update ? DBStatement.profileUpdated :DBStatement.profileCompleted;
       _response["data"] = {
         "id": currUid,
         "email": currEmail,
@@ -88,6 +88,21 @@ class DBOperations {
     }
 
     return _response;
+  }
+
+  Future<bool> updateCurrentAccount(updatedData) async {
+    try {
+      updatedData["token"] = await _fToken();
+
+      await _getInstance
+          .doc('${DBPath.userCollection}/$currUid')
+          .set(updatedData, SetOptions(merge: true));
+
+      return true;
+    } catch (e) {
+      print("ERROR in update Current Account: $e");
+      return false;
+    }
   }
 
   Future<String> uploadMediaToStorage(String fileName, File file,
@@ -118,7 +133,7 @@ class DBOperations {
         .get();
 
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
-        .setFreshData(_connectedData.docs);
+        .manageRemoteDataCollection(_connectedData.docs);
 
     return _connectedData.docs;
   }
@@ -154,8 +169,9 @@ class DBOperations {
     return _allQueryData.docs;
   }
 
-  Future<Map<String, dynamic>> getAvailableUsersData(BuildContext context) async {
-    final Map<String,dynamic> _allAvailableUsersData = {};
+  Future<Map<String, dynamic>> getAvailableUsersData(
+      BuildContext context) async {
+    final Map<String, dynamic> _allAvailableUsersData = {};
 
     /// For All Users Fetch
     final _allQueryDataList = await getAllUsersData(context);
@@ -197,87 +213,122 @@ class DBOperations {
     return _allAvailableUsersData;
   }
 
-  Future<bool> sendConnectionRequest({required currUserData, required String otherUserId, required Map<String,dynamic> otherUserData})async{
-    try{
-      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}/$otherUserId').set(otherUserData, SetOptions(merge: true));
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userReceiveRequest}/$currUid').set(currUserData, SetOptions(merge: true));
+  Future<bool> sendConnectionRequest(
+      {required currUserData,
+      required String otherUserId,
+      required Map<String, dynamic> otherUserData}) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}/$otherUserId')
+          .set(otherUserData, SetOptions(merge: true));
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userReceiveRequest}/$currUid')
+          .set(currUserData, SetOptions(merge: true));
       return true;
-    }catch(e){
+    } catch (e) {
       print("Error in Sent Connection Request: $e");
       return false;
     }
   }
 
-  Future<bool> withdrawConnectionRequest({required currUserData, required String otherUserId, required otherUserData}) async{
-    try{
-      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}/$otherUserId').delete();
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userReceiveRequest}/$currUid').delete();
+  Future<bool> withdrawConnectionRequest(
+      {required currUserData,
+      required String otherUserId,
+      required otherUserData}) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}/$otherUserId')
+          .delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userReceiveRequest}/$currUid')
+          .delete();
       return true;
-    }catch(e){
+    } catch (e) {
       print("Error in Sent Connection Request: $e");
       return false;
     }
   }
 
-  acceptConnectionRequest({required currUserData, required String otherUserId, required otherUserData}) async{
-    try{
-      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId').set(otherUserData, SetOptions(merge: true));
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid').set(currUserData, SetOptions(merge: true));
-      _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}/$otherUserId').delete();
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userSentRequest}/$currUid').delete();
+  acceptConnectionRequest(
+      {required currUserData,
+      required String otherUserId,
+      required otherUserData}) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId')
+          .set(otherUserData, SetOptions(merge: true));
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid')
+          .set(currUserData, SetOptions(merge: true));
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}/$otherUserId')
+          .delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userSentRequest}/$currUid')
+          .delete();
       return true;
-    }catch(e){
+    } catch (e) {
       print("ERROR in Accept Connection Request: $e");
       return false;
     }
-
-
   }
 
-  removeConnectedUser({required String otherUserId}) async{
-    try{
-      _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.messages}').delete();
-      _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.activities}').delete();
-      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId').delete();
+  removeConnectedUser({required String otherUserId}) async {
+    try {
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.messages}')
+          .delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.activities}')
+          .delete();
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId')
+          .delete();
 
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.messages}').delete();
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.activities}').delete();
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid').delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.messages}')
+          .delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.activities}')
+          .delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid')
+          .delete();
       return true;
-    }catch(e){
+    } catch (e) {
       print("ERROR in Remove Connected User: $e");
       return false;
     }
   }
 
-  rejectIncomingRequest({required String otherUserId}) async{
-    try{
-      await _getInstance.doc('${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}/$otherUserId').delete();
-      _getInstance.doc('${DBPath.userCollection}/$otherUserId/${DBPath.userSentRequest}/$currUid').delete();
+  rejectIncomingRequest({required String otherUserId}) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}/$otherUserId')
+          .delete();
+      _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.userSentRequest}/$currUid')
+          .delete();
       return true;
-    }catch(e){
+    } catch (e) {
       print("Error in Sent Connection Request: $e");
       return false;
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

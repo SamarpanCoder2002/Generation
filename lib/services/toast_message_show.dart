@@ -43,19 +43,22 @@ void showPopUpDialog(
     {String? rightBtnText,
     String? leftBtnText,
     bool barrierDismissible = true,
-    bool showCancelBtn = false,
+    bool showCancelBtn = true,
     VoidCallback? leftOnPressed,
-      Color? bgColor,
+    Color? bgColor,
     Color? leftBtnColor}) {
+
   showDialog(
       context: context,
       barrierDismissible: barrierDismissible,
       builder: (_) => AlertDialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
             backgroundColor: bgColor ?? AppColors.splashScreenColor,
             elevation: 10,
             title: Center(
               child: Text(
                 title,
+                textAlign: TextAlign.center,
                 style:
                     TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
               ),

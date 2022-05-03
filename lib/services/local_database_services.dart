@@ -186,8 +186,7 @@ class LocalStorage {
     _conData[_conUserAbout] = about;
     _conData[_conProfilePic] = profilePic;
     _conData[_conChatWallpaperPath] = wallpaper;
-    _conData[_conLastMsgData] =
-        lastMsgData == null ? "" : json.encode(lastMsgData);
+    _conData[_conLastMsgData] = json.encode(lastMsgData);
     _conData[_conNotSeenMsgCount] =
         notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
 
