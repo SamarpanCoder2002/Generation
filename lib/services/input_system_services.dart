@@ -57,7 +57,9 @@ class InputOption {
 
     for (final pickedImage in _pickedImagesCollection) {
       Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-          .sendMsgManagement(msgType: ChatMessageType.image.toString(), message: File(pickedImage.path).path);
+          .sendMsgManagement(
+              msgType: ChatMessageType.image.toString(),
+              message: File(pickedImage.path).path);
     }
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
@@ -92,7 +94,9 @@ class InputOption {
     }
 
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .sendMsgManagement(msgType: ChatMessageType.image.toString(), message: File(pickedImage.path).path);
+        .sendMsgManagement(
+            msgType: ChatMessageType.image.toString(),
+            message: File(pickedImage.path).path);
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
@@ -122,9 +126,11 @@ class InputOption {
       return data;
     }
 
-
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .sendMsgManagement(msgType: ChatMessageType.video.toString(), message: File(pickedVideo.path).path, additionalData:  {"thumbnail": thumbnailImage});
+        .sendMsgManagement(
+            msgType: ChatMessageType.video.toString(),
+            message: File(pickedVideo.path).path,
+            additionalData: {"thumbnail": thumbnailImage});
 
     // Provider.of<ChatBoxMessagingProvider>(context, listen: false)
     //     .setSingleNewMessage({
@@ -209,27 +215,16 @@ class InputOption {
       Navigator.pop(context);
 
       for (final pickedFile in filePickerResult.files) {
-        if (_allowedExtensions.contains(pickedFile.extension)) {
+        if (_allowedExtensions.contains(pickedFile.extension) &&
+            pickedFile.path != null) {
+          /// Message Send Management
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .setSingleNewMessage({
-            DateTime.now().toString(): {
-              MessageData.type: chatMessageType.toString(),
-              MessageData.message: File(pickedFile.path!).path,
-              MessageData.holder:
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getMessageHolderType()
-                      .toString(),
-              MessageData.time:
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getCurrentTime(),
-              MessageData.date:
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getCurrentDate(),
-              MessageData.additionalData: {
+              .sendMsgManagement(
+                  msgType: chatMessageType.toString(),
+                  message: File(pickedFile.path!).path,
+                  additionalData: {
                 "extension-for-document": pickedFile.extension.toString()
-              }
-            }
-          });
+              });
         }
       }
 
@@ -290,23 +285,11 @@ class InputOption {
   sendLocationService(double _latitude, double _longitude) {
     Navigator.pop(context);
 
+    /// Message Send Management
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .setSingleNewMessage({
-      DateTime.now().toString(): {
-        MessageData.type: ChatMessageType.location.toString(),
-        MessageData.message: {"latitude": _latitude, "longitude": _longitude},
-        MessageData.holder:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getMessageHolderType()
-                .toString(),
-        MessageData.time:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentTime(),
-        MessageData.date:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentDate(),
-      }
-    });
+        .sendMsgManagement(
+            msgType: ChatMessageType.location.toString(),
+            message: {"latitude": _latitude, "longitude": _longitude});
 
     Navigator.pop(context);
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();

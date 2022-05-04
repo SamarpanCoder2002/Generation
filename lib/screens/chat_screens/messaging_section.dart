@@ -10,6 +10,7 @@ import 'package:generation/providers/chat/chat_scroll_provider.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/input_system_services.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/show_google_map.dart';
 import 'package:generation/services/system_file_management.dart';
 import 'package:generation/types/types.dart';
@@ -327,7 +328,9 @@ class _MessagingSectionState extends State<MessagingSection> {
                 message: realMsg["message"],
                 time: realMsg["time"],
                 holder: realMsg["holder"],
-                additionalData: realMsg["additionalData"],
+                additionalData: realMsg["additionalData"] != null
+                    ? DataManagement.fromJsonString(realMsg["additionalData"])
+                    : null,
                 date: realMsg["date"]);
 
             return _commonMessageLayout(
@@ -502,6 +505,7 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _locationMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    final message = DataManagement.fromJsonString(messageData.message);
 
     return ConstrainedBox(
         constraints: BoxConstraints(
@@ -520,15 +524,14 @@ class _MessagingSectionState extends State<MessagingSection> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
             child: showMapSection(
-                latitude: messageData.message["latitude"],
-                longitude: messageData.message["longitude"]),
+                latitude: message["latitude"], longitude: message["longitude"]),
           ),
         ));
   }
 
   _contactMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-    final contact = messageData.message;
+    final contact = DataManagement.fromJsonString(messageData.message);
 
     return ConstrainedBox(
         constraints: BoxConstraints(

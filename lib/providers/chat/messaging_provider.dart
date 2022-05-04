@@ -161,15 +161,23 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     final _msgTime = getCurrentTime();
     final _msgDate = getCurrentDate();
 
+    var _localMsgModify = message;
+    if (msgType == ChatMessageType.contact.toString() ||
+        msgType == ChatMessageType.location.toString()) {
+      _localMsgModify = DataManagement.toJsonString(message);
+    }
+
     /// Local Data Management
     final _msgLocalData = {
       _uniqueMsgId: {
         MessageData.type: msgType,
-        MessageData.message: message,
+        MessageData.message: _localMsgModify,
         MessageData.time: _msgTime,
         MessageData.date: _msgDate,
         MessageData.holder: getMessageHolderForSendMsg(SendMsgStorage.local),
-        MessageData.additionalData: additionalData
+        MessageData.additionalData: additionalData != null
+            ? DataManagement.toJsonString(additionalData)
+            : additionalData
       }
     };
     _manageMessageForLocale(_msgLocalData);
@@ -198,6 +206,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         message: _msgData.values.toList()[0][MessageData.message],
         date: _msgData.values.toList()[0][MessageData.date],
         time: _msgData.values.toList()[0][MessageData.time],
+        additionalData: _msgData.values.toList()[0][MessageData.additionalData],
         dbOperation: DBOperation.insert);
   }
 
@@ -218,6 +227,12 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
           reference: _getStorageRef(msgType));
     }
 
+
+    if (msgType == ChatMessageType.contact.toString() ||
+        msgType == ChatMessageType.location.toString()) {
+      _remoteMsg = DataManagement.toJsonString(message);
+    }
+
     var _additionalDataModified = additionalData;
     if (msgType == ChatMessageType.video.toString()) {
       final _thumbnail = await _dbOperations.uploadMediaToStorage(
@@ -235,7 +250,9 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         MessageData.time: msgTime,
         MessageData.date: msgDate,
         MessageData.holder: getMessageHolderForSendMsg(SendMsgStorage.remote),
-        MessageData.additionalData: _additionalDataModified
+        MessageData.additionalData: _additionalDataModified != null
+            ? DataManagement.toJsonString(_additionalDataModified)
+            : _additionalDataModified
       }
     };
 

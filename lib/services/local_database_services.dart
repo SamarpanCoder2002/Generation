@@ -274,10 +274,10 @@ class LocalStorage {
 
     _chatData[_msgId] = id;
     _chatData[_msgHolder] = holder;
-    _chatData[_msgData] = DataManagement.toJsonString(message);
+    _chatData[_msgData] = message;
     _chatData[_msgDate] = date;
     _chatData[_msgTime] = time;
-    _chatData[_msgAdditionalData] = DataManagement.toJsonString(additionalData);
+    _chatData[_msgAdditionalData] = additionalData;
 
     print("Chat Messgae In Local Storage: $_chatData");
 
