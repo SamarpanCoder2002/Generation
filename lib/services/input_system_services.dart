@@ -57,22 +57,7 @@ class InputOption {
 
     for (final pickedImage in _pickedImagesCollection) {
       Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-          .setSingleNewMessage({
-        DateTime.now().toString(): {
-          MessageData.type: ChatMessageType.image.toString(),
-          MessageData.message: File(pickedImage.path).path,
-          MessageData.holder:
-              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                  .getMessageHolderType()
-                  .toString(),
-          MessageData.time:
-              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                  .getCurrentTime(),
-          MessageData.date:
-              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                  .getCurrentDate()
-        }
-      });
+          .sendMsgManagement(msgType: ChatMessageType.image.toString(), message: File(pickedImage.path).path);
     }
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
@@ -107,22 +92,7 @@ class InputOption {
     }
 
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .setSingleNewMessage({
-      DateTime.now().toString(): {
-        MessageData.type: ChatMessageType.image.toString(),
-        MessageData.message: File(pickedImage.path).path,
-        MessageData.holder:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getMessageHolderType()
-                .toString(),
-        MessageData.time:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentTime(),
-        MessageData.date:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentDate()
-      }
-    });
+        .sendMsgManagement(msgType: ChatMessageType.image.toString(), message: File(pickedImage.path).path);
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
@@ -152,24 +122,28 @@ class InputOption {
       return data;
     }
 
+
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .setSingleNewMessage({
-      DateTime.now().toString(): {
-        MessageData.type: ChatMessageType.video.toString(),
-        MessageData.message: File(pickedVideo.path).path,
-        MessageData.holder:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getMessageHolderType()
-                .toString(),
-        MessageData.time:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentTime(),
-        MessageData.date:
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getCurrentDate(),
-        MessageData.additionalData: {"thumbnail": thumbnailImage}
-      }
-    });
+        .sendMsgManagement(msgType: ChatMessageType.video.toString(), message: File(pickedVideo.path).path, additionalData:  {"thumbnail": thumbnailImage});
+
+    // Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+    //     .setSingleNewMessage({
+    //   DateTime.now().toString(): {
+    //     MessageData.type: ChatMessageType.video.toString(),
+    //     MessageData.message: File(pickedVideo.path).path,
+    //     MessageData.holder:
+    //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+    //             .getMessageHolderType()
+    //             .toString(),
+    //     MessageData.time:
+    //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+    //             .getCurrentTime(),
+    //     MessageData.date:
+    //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+    //             .getCurrentDate(),
+    //     MessageData.additionalData: {"thumbnail": thumbnailImage}
+    //   }
+    // });
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }

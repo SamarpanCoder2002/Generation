@@ -124,7 +124,8 @@ class DBOperations {
 
       return downLoadUrl ?? "";
     } catch (e) {
-      return "Upload Incomplete";
+      print("Upload Error: $e");
+      return "";
     }
   }
 
@@ -184,8 +185,12 @@ class DBOperations {
     }
 
     /// For Connected Users Fetch
-    final _localConnectedData = Provider.of<ConnectionCollectionProvider>(context, listen: false).getAllChatConnectionData();
-    final _connectedDataList = _localConnectedData.isEmpty? await getConnectedUsersData(context):_localConnectedData;
+    final _localConnectedData =
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .getAllChatConnectionData();
+    final _connectedDataList = _localConnectedData.isEmpty
+        ? await getConnectedUsersData(context)
+        : _localConnectedData;
     for (final doc in _connectedDataList) {
       if (_allAvailableUsersData[doc["id"]] != null) {
         _allAvailableUsersData.remove(doc["id"]);
@@ -193,7 +198,8 @@ class DBOperations {
     }
 
     /// For Received Users Fetch
-    final _receivedDataList = await getReceivedRequestUsersData(context); // Provider.of<RequestConnectionsProvider>(context, listen: false).getRequestConnections();//
+    final _receivedDataList = await getReceivedRequestUsersData(
+        context); // Provider.of<RequestConnectionsProvider>(context, listen: false).getRequestConnections();//
     for (final doc in _receivedDataList) {
       if (_allAvailableUsersData[doc.id] != null) {
         _allAvailableUsersData.remove(doc.id);
@@ -215,7 +221,6 @@ class DBOperations {
 
     return _allAvailableUsersData;
   }
-
 
   Future<bool> sendConnectionRequest(
       {required currUserData,
@@ -332,6 +337,21 @@ class DBOperations {
       return true;
     } catch (e) {
       print("Error in Sent Connection Request: $e");
+      return false;
+    }
+  }
+
+  Future<bool> sendMessage({required String partnerId, required dynamic msgData}) async{
+    try{
+      await _getInstance
+          .doc(
+          '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.messages}')
+          .set({
+        DBPath.data: FieldValue.arrayUnion([msgData])
+      }, SetOptions(merge: true));
+      return true;
+    }catch(e){
+      print("ERROR in send MSg: $e");
       return false;
     }
   }

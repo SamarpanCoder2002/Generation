@@ -263,10 +263,10 @@ class LocalStorage {
       {required String chatConTableName,
       required String id,
       required String holder,
-      required String message,
+      required message,
       required String date,
       required String time,
-      required dynamic additionalData,
+      dynamic additionalData,
       required DBOperation dbOperation}) async {
     final Database db = await database;
 
@@ -274,10 +274,12 @@ class LocalStorage {
 
     _chatData[_msgId] = id;
     _chatData[_msgHolder] = holder;
-    _chatData[_msgData] = message;
+    _chatData[_msgData] = DataManagement.toJsonString(message);
     _chatData[_msgDate] = date;
     _chatData[_msgTime] = time;
     _chatData[_msgAdditionalData] = DataManagement.toJsonString(additionalData);
+
+    print("Chat Messgae In Local Storage: $_chatData");
 
     dbOperation == DBOperation.insert
         ? db.insert(chatConTableName, _chatData)

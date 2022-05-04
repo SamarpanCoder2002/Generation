@@ -204,27 +204,12 @@ class _ContactsCollectionState extends State<ContactsCollection> {
           final _phoneNumbersCollection = filterContact.phones;
 
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .setSingleNewMessage({
-            DateTime.now().toString(): {
-              MessageData.type: ChatMessageType.contact.toString(),
-              MessageData.message: {
-                PhoneNumberData.number: _phoneNumbersCollection!.isNotEmpty
-                    ? _phoneNumbersCollection[0].value ?? ""
-                    : "",
-                PhoneNumberData.name: filterContact.displayName,
-                PhoneNumberData.numberLabel: _phoneNumbersCollection[0].label
-              },
-              MessageData.holder:
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getMessageHolderType()
-                      .toString(),
-              MessageData.time:
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getCurrentTime(),
-              MessageData.date:
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .getCurrentDate()
-            }
+              .sendMsgManagement(msgType: ChatMessageType.contact.toString(), message: {
+            PhoneNumberData.number: _phoneNumbersCollection!.isNotEmpty
+                ? _phoneNumbersCollection[0].value ?? ""
+                : "",
+            PhoneNumberData.name: filterContact.displayName,
+            PhoneNumberData.numberLabel: _phoneNumbersCollection[0].label
           });
         }
 

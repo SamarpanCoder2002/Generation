@@ -105,23 +105,7 @@ class MessageCreationSection extends StatelessWidget {
                     .stopRecording();
 
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .setSingleNewMessage({
-              DateTime.now().toString(): {
-                MessageData.type: ChatMessageType.audio.toString(),
-                MessageData.holder: Provider.of<ChatBoxMessagingProvider>(
-                        context,
-                        listen: false)
-                    .getMessageHolderType()
-                    .toString(),
-                MessageData.message: _voiceRecordPath,
-                MessageData.time: Provider.of<ChatBoxMessagingProvider>(context,
-                        listen: false)
-                    .getCurrentTime(),
-                MessageData.date: Provider.of<ChatBoxMessagingProvider>(context,
-                        listen: false)
-                    .getCurrentDate(),
-              }
-            });
+                .sendMsgManagement(msgType: ChatMessageType.audio.toString(), message: _voiceRecordPath);
 
             Provider.of<ChatScrollProvider>(context, listen: false)
                 .animateToBottom();
@@ -340,61 +324,31 @@ class MessageCreationSection extends StatelessWidget {
         Provider.of<SoundRecorderProvider>(context, listen: false)
             .startRecording();
       } else {
-        final TextEditingController? _messageController =
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .getTextController();
-
-        if (_messageController!.text.isEmpty) return;
-
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .setSingleNewMessage({
-          DateTime.now().toString(): {
-            MessageData.type: ChatMessageType.text.toString(),
-            MessageData.holder:
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getMessageHolderType()
-                    .toString(),
-            MessageData.message: _messageController.text,
-            MessageData.time:
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getCurrentTime(),
-            MessageData.date:
-                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                    .getCurrentDate()
-          }
-        });
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .clearTextFromMessageInputSection();
-
-        Provider.of<ChatScrollProvider>(context, listen: false)
-            .animateToBottom();
-
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .setShowVoiceIcon(true);
+        _manageTextMessage();
       }
     }
 
-    if(!_isDarkMode) {
+    if (!_isDarkMode) {
       return InkWell(
         onTap: _voiceOrSendIconPressed,
         child: Container(
-        width: 40,
-        height: 40,
-        padding: EdgeInsets.all(_showVoiceIcon?0:8),
-        decoration: BoxDecoration(
-          color: AppColors.lightBorderGreenColor,
-          borderRadius: BorderRadius.circular(100),
+          width: 40,
+          height: 40,
+          padding: EdgeInsets.all(_showVoiceIcon ? 0 : 8),
+          decoration: BoxDecoration(
+            color: AppColors.lightBorderGreenColor,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: !_showVoiceIcon
+              ? Image.asset(
+                  IconImages.sendImagePath,
+                  color: AppColors.pureWhiteColor,
+                )
+              : const Icon(
+                  Icons.keyboard_voice_outlined,
+                  color: AppColors.pureWhiteColor,
+                ),
         ),
-        child: !_showVoiceIcon
-            ? Image.asset(
-                IconImages.sendImagePath,
-                color: AppColors.pureWhiteColor,
-              )
-            : const Icon(
-                Icons.keyboard_voice_outlined,
-                color: AppColors.pureWhiteColor,
-              ),
-    ),
       );
     }
 
@@ -451,5 +405,28 @@ class MessageCreationSection extends StatelessWidget {
             buttonMode: ButtonMode.MATERIAL),
       ),
     );
+  }
+
+  void _manageTextMessage() {
+    final TextEditingController? _messageController =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getTextController();
+
+    if (_messageController!.text.isEmpty) return;
+
+    /// Message Send Management
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .sendMsgManagement(
+            msgType: ChatMessageType.text.toString(),
+            message: _messageController.text);
+
+    /// POST Operation after managing local messages
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .clearTextFromMessageInputSection();
+
+    Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setShowVoiceIcon(true);
   }
 }

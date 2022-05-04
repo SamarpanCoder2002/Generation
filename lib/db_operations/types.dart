@@ -11,5 +11,5 @@ class DBPath{
   static const data = "data";
   static const messages = "messages";
   static const activities = "activities";
-  static const features = "features";
+  static const contents = "contents";
 }

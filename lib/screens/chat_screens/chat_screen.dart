@@ -27,6 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     Provider.of<ChatScrollProvider>(context, listen: false).startListening();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setPartnerUserId(widget.connectionData["id"]);
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();

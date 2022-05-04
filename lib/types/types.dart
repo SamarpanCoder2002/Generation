@@ -76,3 +76,8 @@ enum IncomingMediaType{
   image,
   video
 }
+
+enum SendMsgStorage{
+  local,
+  remote
+}

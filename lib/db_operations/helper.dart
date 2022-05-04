@@ -8,6 +8,14 @@ class DBHelper{
 
 class StorageHelper{
   static const profilePicRef = "media/profile-picture/";
+
+  static chatAudioRef(String currId, String partnerId) => "chat/$currId-$partnerId/audio/";
+  static chatImageRef(String currId, String partnerId) => "chat/$currId-$partnerId/images/";
+  static chatVideoRef(String currId, String partnerId) => "chat/$currId-$partnerId/videos/";
+  static chatDocRef(String currId, String partnerId) => "chat/$currId-$partnerId/documents/";
+  static chatVideoThumbnailRef(String currId, String partnerId) => "chat/$currId-$partnerId/thumbnails/";
+
+  static const otherRef = "media/other";
 }
 
 class Validator{
