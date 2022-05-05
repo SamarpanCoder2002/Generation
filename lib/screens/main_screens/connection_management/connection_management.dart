@@ -32,6 +32,7 @@ class _ConnectionManagementScreenState extends State<ConnectionManagementScreen>
     _dbOperations.getAvailableUsersData(context);
     final _tabLength = Provider.of<ConnectionManagementProvider>(context, listen: false).getTabsCollectionLength();
     _tabController = TabController(length: _tabLength, vsync: this, initialIndex: 0);
+    _tabController?.addListener(_tabMovementListener);
     Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
         .initialize();
     Provider.of<RequestConnectionsProvider>(context, listen: false)
@@ -129,10 +130,22 @@ class _ConnectionManagementScreenState extends State<ConnectionManagementScreen>
       preferredSize: Size(MediaQuery.of(context).size.width, 140));
 
   _tabBarView() {
-    return TabBarView(controller: _tabController, children: [
+    return TabBarView(controller: _tabController, children: const [
       CommonUsersShowScreen(currIndex: 0),
       CommonUsersShowScreen(currIndex: 1),
       CommonUsersShowScreen(currIndex: 2),
     ]);
+  }
+
+  void _tabMovementListener() {
+    if(!_tabController!.indexIsChanging) return;
+
+    if(_tabController?.index == 0){
+      _dbOperations.getAvailableUsersData(context);
+    }else if(_tabController?.index == 1){
+      _dbOperations.getReceivedRequestUsersData(context);
+    }else{
+      _dbOperations.getSentRequestUsersData(context);
+    }
   }
 }

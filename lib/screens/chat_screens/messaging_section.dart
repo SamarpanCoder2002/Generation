@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
@@ -167,6 +168,10 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _imageMessageSection(
       {required ChatMessageModel messageData, bool fromVideo = false}) {
+    final _imagePath = _getPerfectImage(fromVideo
+        ? messageData.additionalData["thumbnail"] ?? ""
+        : messageData.message);
+
     return InkWell(
       onTap: () async {
         await SystemFileManagement.openFile(messageData.message);
@@ -185,22 +190,24 @@ class _MessagingSectionState extends State<MessagingSection> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: PhotoView(
-                enableRotation: false,
-                backgroundDecoration:
-                    const BoxDecoration(color: AppColors.pureWhiteColor),
-                imageProvider: FileImage(File(fromVideo
-                    ? messageData.additionalData["thumbnail"] ?? ""
-                    : messageData.message)),
-                minScale: PhotoViewComputedScale.covered,
-                errorBuilder: (_, __, ___) => const Center(
-                  child: Text(
-                    "Image Not Found... 😔",
-                    style: TextStyle(
-                        fontSize: 20, color: AppColors.pureWhiteColor),
-                  ),
-                ),
-              ),
+              child: _imagePath == null
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : PhotoView(
+                      enableRotation: false,
+                      backgroundDecoration:
+                          const BoxDecoration(color: AppColors.pureWhiteColor),
+                      imageProvider: _imagePath,
+                      minScale: PhotoViewComputedScale.covered,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Text(
+                          "Image Not Found... 😔",
+                          style: TextStyle(
+                              fontSize: 20, color: AppColors.pureWhiteColor),
+                        ),
+                      ),
+                    ),
             ),
           )),
     );
@@ -216,6 +223,8 @@ class _MessagingSectionState extends State<MessagingSection> {
     final double? _currentLoadingTime =
         Provider.of<SongManagementProvider>(widget.context)
             .getCurrentLoadingTime();
+
+    final _isLocalFile = _isItLocalFile(messageData.message);
 
     _songPlayManagement() async {
       await Provider.of<SongManagementProvider>(widget.context, listen: false)
@@ -242,6 +251,12 @@ class _MessagingSectionState extends State<MessagingSection> {
 
     _controllingButton() {
       final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+      if (!_isLocalFile) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
 
       return IconButton(
           onPressed: _songPlayManagement,
@@ -395,41 +410,49 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _videoMessageSection({required ChatMessageModel messageData}) {
+    final _isLocalFile = _isItLocalFile(messageData.message);
+
     return ConstrainedBox(
       constraints: BoxConstraints(
           maxHeight: 300,
           maxWidth: MediaQuery.of(widget.context).size.width - 110),
-      child: Stack(
-        children: [
-          _imageMessageSection(messageData: messageData, fromVideo: true),
-          InkWell(
-            onTap: () async {
-              print("Ok Video");
-              await SystemFileManagement.openFile(messageData.message);
-            },
-            child: SizedBox(
-              width: MediaQuery.of(widget.context).size.width - 110,
-              height: 300,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.play_circle_outline_outlined,
-                  size: 60,
-                  color: AppColors.darkBorderGreenColor,
+      child: !_isLocalFile
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Stack(
+              children: [
+                _imageMessageSection(messageData: messageData, fromVideo: true),
+                InkWell(
+                  onTap: () async {
+                    print("Ok Video");
+                    await SystemFileManagement.openFile(messageData.message);
+                  },
+                  child: SizedBox(
+                    width: MediaQuery.of(widget.context).size.width - 110,
+                    height: 300,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.play_circle_outline_outlined,
+                        size: 60,
+                        color: AppColors.darkBorderGreenColor,
+                      ),
+                      onPressed: () async {
+                        print("Message Data: ${messageData.message}");
+                        await SystemFileManagement.openFile(
+                            messageData.message);
+                      },
+                    ),
+                  ),
                 ),
-                onPressed: () async {
-                  print("Message Data: ${messageData.message}");
-                  await SystemFileManagement.openFile(messageData.message);
-                },
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
   _documentMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    final _isLocalFile = _isItLocalFile(messageData.message);
 
     _pdfMaintainerWidget() => Stack(
           children: [
@@ -494,12 +517,17 @@ class _MessagingSectionState extends State<MessagingSection> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
-            child: messageData.additionalData["extension-for-document"] == 'pdf'
-                ? _pdfMaintainerWidget()
-                : _otherDocumentMaintainerWidget(),
-          ),
+          child: !_isLocalFile
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: messageData.additionalData["extension-for-document"] ==
+                          'pdf'
+                      ? _pdfMaintainerWidget()
+                      : _otherDocumentMaintainerWidget(),
+                ),
         ));
   }
 
@@ -656,4 +684,14 @@ class _MessagingSectionState extends State<MessagingSection> {
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setSelectedMessage(messageId, messageData);
   }
+
+  _getPerfectImage(String imagePath) {
+    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+      return null;
+    }
+    return FileImage(File(imagePath));
+  }
+
+  _isItLocalFile(String message) =>
+      !message.startsWith('http') && !message.startsWith('https');
 }

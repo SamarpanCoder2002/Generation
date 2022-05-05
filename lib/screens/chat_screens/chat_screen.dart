@@ -31,6 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).getMessagesRealtime(widget.connectionData["id"]);
 
     changeOnlyContextChatColor(_isDarkMode);
     super.initState();
@@ -55,6 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false).destroyRealTimeMessaging();
         return true;
       },
       child: Scaffold(

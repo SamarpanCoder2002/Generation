@@ -63,7 +63,7 @@ class RequestConnectionsProvider extends ChangeNotifier {
 
   setConnections(incomingConnections) {
     _requestConnections = incomingConnections;
-    notifyListeners();
+    initialize(update: true);
   }
 
   getConnections() => _searchedConnections;

@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/db_operations/helper.dart';
+import 'package:generation/services/directory_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
+import 'package:dio/dio.dart';
 
 import '../../config/text_collection.dart';
 import '../../services/local_data_management.dart';
@@ -13,13 +16,139 @@ import '../../types/types.dart';
 class ChatBoxMessagingProvider extends ChangeNotifier {
   List<dynamic> _messageData = [];
   TextEditingController? _messageController;
-  FocusNode _focus = FocusNode();
-  final LocalStorage _localStorage = LocalStorage();
-  final DBOperations _dbOperations = DBOperations();
   MessageHolderType _messageHolderType = MessageHolderType.me;
   bool _showVoiceIcon = true;
   final Map<String, dynamic> _selectedMessage = {};
   String _partnerUserId = "";
+  StreamSubscription? _streamSubscription;
+
+  FocusNode _focus = FocusNode();
+  final LocalStorage _localStorage = LocalStorage();
+  final DBOperations _dbOperations = DBOperations();
+  final RealTimeOperations _realTimeOperations = RealTimeOperations();
+  final Dio _dio = Dio();
+
+  getMessagesRealtime(String partnerId) {
+    _streamSubscription =
+        _realTimeOperations.getChatMessages(partnerId).listen((docSnapShot) {
+      final _docData = docSnapShot.data();
+
+      if (_docData != null &&
+          _docData.isNotEmpty &&
+          _docData["data"].isNotEmpty) {
+        print("Document Data is: ${_docData["data"]}\n\n");
+
+        _manageIncomingMessages(_docData["data"]);
+
+        _dbOperations.resetRemoteOldChatMessages(partnerId);
+      }
+    });
+  }
+
+  _manageIncomingMessages(messages) {
+    for (final message in messages) {
+      _manageMessageForLocale(message);
+      final _msgType = message.values.toList()[0][MessageData.type];
+      if (_msgType != ChatMessageType.text.toString() &&
+          _msgType != ChatMessageType.location.toString() &&
+          _msgType != ChatMessageType.contact.toString()) {
+        _downloadMediaContent(message);
+      }
+    }
+  }
+
+  _downloadMediaContent(message) async {
+    final _message = message.values.toList()[0];
+    final _msgData = _message[MessageData.message];
+    final _msgType = _message[MessageData.type];
+    final _msgAdditionalData = _message[MessageData.additionalData] == null
+        ? {}
+        : DataManagement.fromJsonString(_message[MessageData.additionalData]);
+
+    String _mediaStorePath = "";
+
+    if (_msgType == ChatMessageType.image.toString()) {
+      final _dirPath = await createImageStoreDir();
+      _mediaStorePath = createImageFile(dirPath: _dirPath);
+    } else if (_msgType == ChatMessageType.video.toString()) {
+      final _dirPath = await createVideoStoreDir();
+      _mediaStorePath = createVideoFile(dirPath: _dirPath);
+    } else if (_msgType == ChatMessageType.audio.toString()) {
+      final _dirPath = await createVoiceStoreDir();
+      _mediaStorePath = createAudioFile(dirPath: _dirPath);
+    } else if (_msgType == ChatMessageType.document.toString()) {
+      final _dirPath = await createDocStoreDir();
+      _mediaStorePath = createDocFile(
+          dirPath: _dirPath,
+          extension: _msgAdditionalData["extension-for-document"]);
+    }
+
+    print("Media Message Data is:   $_mediaStorePath\n\n");
+
+    _dio.download(_msgData, _mediaStorePath).whenComplete(() async {
+      print("Media Download Completed");
+      message.values.toList()[0][MessageData.message] = _mediaStorePath;
+      _dbOperations.deleteMediaFromFirebaseStorage(_msgData);
+
+      /// For Thumbnail Management
+      if (_msgType == ChatMessageType.video.toString()) {
+        _incomingMsgThumbnailManagement(_msgAdditionalData, message);
+        return;
+      }
+
+      _updateInLocalStorage(message);
+      _updateInTopLevel(message);
+    });
+  }
+
+  _incomingMsgThumbnailManagement(_msgAdditionalData, message)async{
+    final _dirPath = await createThumbnailStoreDir();
+    final _thumbnailPath = createImageFile(dirPath: _dirPath);
+
+    _dio
+        .download(_msgAdditionalData["thumbnail"], _thumbnailPath)
+        .whenComplete(() {
+      print("Thumbnail Download Completed");
+      _msgAdditionalData["thumbnail"] = _thumbnailPath;
+      message.values.toList()[0][MessageData.additionalData] =
+          DataManagement.toJsonString(_msgAdditionalData);
+
+      _dbOperations.deleteMediaFromFirebaseStorage(_msgAdditionalData["thumbnail"]);
+
+      _updateInLocalStorage(message);
+      _updateInTopLevel(message);
+    });
+  }
+
+  _updateInTopLevel(message) {
+    for (var msg in _messageData) {
+      if (msg.keys.toList()[0].toString() ==
+          message.keys.toList()[0].toString()) {
+        _messageData[_messageData.indexOf(msg)] = message;
+        notifyListeners();
+        break;
+      }
+    }
+  }
+
+  _updateInLocalStorage(_msgData) {
+    _localStorage.insertUpdateMsgUnderConnectionChatTable(
+        chatConTableName: DataManagement.generateTableNameForNewConnectionChat(
+            getPartnerUserId()),
+        id: _msgData.keys.toList()[0],
+        holder: _msgData.values.toList()[0][MessageData.holder],
+        message: _msgData.values.toList()[0][MessageData.message],
+        date: _msgData.values.toList()[0][MessageData.date],
+        time: _msgData.values.toList()[0][MessageData.time],
+        type: _msgData.values.toList()[0][MessageData.type],
+        additionalData: _msgData.values.toList()[0][MessageData.additionalData],
+        dbOperation: DBOperation.update);
+  }
+
+  destroyRealTimeMessaging() {
+    _streamSubscription?.cancel();
+    notifyListeners();
+  }
 
   setPartnerUserId(String partnerUserId, {bool update = false}) {
     _partnerUserId = partnerUserId;
@@ -195,7 +324,9 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   /// Making Message Data Ready For Local
-  void _manageMessageForLocale(Map<dynamic, Map<String, dynamic>> _msgData) {
+  void _manageMessageForLocale(_msgData) {
+    print("Message Data to Stoer: $_msgData");
+
     setSingleNewMessage(_msgData);
 
     _localStorage.insertUpdateMsgUnderConnectionChatTable(
@@ -206,6 +337,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         message: _msgData.values.toList()[0][MessageData.message],
         date: _msgData.values.toList()[0][MessageData.date],
         time: _msgData.values.toList()[0][MessageData.time],
+        type: _msgData.values.toList()[0][MessageData.type],
         additionalData: _msgData.values.toList()[0][MessageData.additionalData],
         dbOperation: DBOperation.insert);
   }
@@ -226,7 +358,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
           message.split("/").last, File(message),
           reference: _getStorageRef(msgType));
     }
-
 
     if (msgType == ChatMessageType.contact.toString() ||
         msgType == ChatMessageType.location.toString()) {

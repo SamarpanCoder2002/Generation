@@ -266,6 +266,7 @@ class LocalStorage {
       required message,
       required String date,
       required String time,
+        required String type,
       dynamic additionalData,
       required DBOperation dbOperation}) async {
     final Database db = await database;
@@ -277,6 +278,7 @@ class LocalStorage {
     _chatData[_msgData] = message;
     _chatData[_msgDate] = date;
     _chatData[_msgTime] = time;
+    _chatData[_msgType] = type;
     _chatData[_msgAdditionalData] = additionalData;
 
     print("Chat Messgae In Local Storage: $_chatData");

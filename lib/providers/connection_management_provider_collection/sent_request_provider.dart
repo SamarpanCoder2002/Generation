@@ -13,7 +13,7 @@ class SentConnectionsProvider extends ChangeNotifier {
 
   setConnections(incomingConnections) {
     _sentConnections = incomingConnections;
-    notifyListeners();
+    initialize(update: true);
   }
 
   operateOnSearch(searchKeyword) {

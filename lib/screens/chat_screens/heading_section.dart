@@ -37,7 +37,8 @@ class ChatBoxHeaderSection extends StatelessWidget {
             _headerProfilePicSection(),
             if (_selectedMessages.isEmpty)
             _profileShortInformationSection(),
-            if (_selectedMessages.isEmpty) _terminalSection(),
+
+            //if (_selectedMessages.isEmpty) _terminalSection(),
             //if(_selectedMessages.isNotEmpty) const SizedBox(width: 100,),
             if (_selectedMessages.isNotEmpty)
               _selectedMessagesOperationSection(),

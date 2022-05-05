@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -341,18 +342,51 @@ class DBOperations {
     }
   }
 
-  Future<bool> sendMessage({required String partnerId, required dynamic msgData}) async{
-    try{
+  Future<bool> sendMessage(
+      {required String partnerId, required dynamic msgData}) async {
+    try {
       await _getInstance
           .doc(
-          '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.messages}')
+              '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.messages}')
           .set({
         DBPath.data: FieldValue.arrayUnion([msgData])
       }, SetOptions(merge: true));
       return true;
-    }catch(e){
+    } catch (e) {
       print("ERROR in send MSg: $e");
       return false;
+    }
+  }
+
+  resetRemoteOldChatMessages(String partnerId) {
+    _getInstance
+        .doc(
+            '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.messages}')
+        .set({DBPath.data: []}, SetOptions(merge: true));
+  }
+
+  Future<void> deleteMediaFromFirebaseStorage(String fileName,
+      {bool specialPurpose = false}) async {
+    try {
+      try {
+        if (specialPurpose && Firebase.apps.isEmpty) {
+          await Firebase.initializeApp();
+        }
+      } catch (e) {
+        print(
+            'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
+        print('Firebase Already Initialized');
+      }
+
+      final Reference reference =
+      FirebaseStorage.instance.ref().storage.refFromURL(fileName);
+      print('Reference is: $reference');
+
+      await reference.delete();
+
+      print("File Deleted");
+    } catch (e) {
+      print("Delete From Firebase Storage Exception: ${e.toString()}");
     }
   }
 }
@@ -373,4 +407,12 @@ class RealTimeOperations {
           .collection(
               '${DBPath.userCollection}/$currUid/${DBPath.userReceiveRequest}')
           .snapshots();
+
+  Stream<
+      DocumentSnapshot<
+          Map<String,
+              dynamic>>> getChatMessages(String partnerId) => _getInstance
+      .doc(
+          '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.messages}')
+      .snapshots();
 }

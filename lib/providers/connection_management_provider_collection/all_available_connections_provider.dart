@@ -11,11 +11,13 @@ class AllAvailableConnectionsProvider extends ChangeNotifier {
 
   setConnections(incomingConnections) {
     _allAvailableConnections = incomingConnections;
-    notifyListeners();
+    initialize(update: true);
+    //initialize(update: true);
   }
 
   removeIndexFromSearch(int indexInSearch) {
 //    if(_searchedConnections.length - 1 <= indexInSearch) return;
+  if(indexInSearch > _searchedConnections.length - 1) return;
     _searchedConnections.removeAt(indexInSearch);
     notifyListeners();
   }

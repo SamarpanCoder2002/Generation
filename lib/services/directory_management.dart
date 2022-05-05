@@ -17,8 +17,14 @@ Future<String> makeDirectoryOnce(
   return newDir.path;
 }
 
-Future<String> createVoiceStoreDir() async{
-  return await makeDirectoryOnce(directoryName: DirectoryName.voiceRecordDir);
-}
+Future<String> createVoiceStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.voiceRecordDir);
+Future<String> createImageStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.imageDir);
+Future<String> createVideoStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.videoDir);
+Future<String> createDocStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.docDir);
+Future<String> createThumbnailStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.thumbnailDir);
+
 
 String createAudioFile({required String dirPath}) => "$dirPath${DateTime.now()}.aac";
+String createImageFile({required String dirPath}) =>  "$dirPath${DateTime.now()}.png";
+String createVideoFile({required String dirPath}) =>  "$dirPath${DateTime.now()}.mp4";
+String createDocFile({required String dirPath, required String extension}) =>  "$dirPath${DateTime.now()}.$extension";
