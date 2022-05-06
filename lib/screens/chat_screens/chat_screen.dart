@@ -26,12 +26,13 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setContext(context);
     Provider.of<ChatScrollProvider>(context, listen: false).startListening();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).setPartnerUserId(widget.connectionData["id"]);
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).getMessagesRealtime(widget.connectionData["id"]);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).getOldStoredChatMessages();
 
     changeOnlyContextChatColor(_isDarkMode);
     super.initState();
@@ -55,8 +56,10 @@ class _ChatScreenState extends State<ChatScreen> {
           return false;
         }
 
-        Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
         Provider.of<ChatBoxMessagingProvider>(context, listen: false).destroyRealTimeMessaging();
+        Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false).clearMessageData();
+        Provider.of<ChatScrollProvider>(context, listen: false).changeScrollAtFirstValue(true);
         return true;
       },
       child: Scaffold(

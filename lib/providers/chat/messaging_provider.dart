@@ -8,10 +8,12 @@ import 'package:generation/services/directory_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
+import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
 import '../../services/local_data_management.dart';
 import '../../types/types.dart';
+import 'chat_scroll_provider.dart';
 
 class ChatBoxMessagingProvider extends ChangeNotifier {
   List<dynamic> _messageData = [];
@@ -21,6 +23,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   final Map<String, dynamic> _selectedMessage = {};
   String _partnerUserId = "";
   StreamSubscription? _streamSubscription;
+  late BuildContext context;
 
   FocusNode _focus = FocusNode();
   final LocalStorage _localStorage = LocalStorage();
@@ -28,21 +31,27 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   final RealTimeOperations _realTimeOperations = RealTimeOperations();
   final Dio _dio = Dio();
 
+  setContext(context) {
+    this.context = context;
+  }
+
+  getContext() => context;
+
   getMessagesRealtime(String partnerId) {
     _streamSubscription =
         _realTimeOperations.getChatMessages(partnerId).listen((docSnapShot) {
-          final _docData = docSnapShot.data();
+      final _docData = docSnapShot.data();
 
-          if (_docData != null &&
-              _docData.isNotEmpty &&
-              _docData["data"].isNotEmpty) {
-            print("Document Data is: ${_docData["data"]}\n\n");
+      if (_docData != null &&
+          _docData.isNotEmpty &&
+          _docData["data"].isNotEmpty) {
+        print("Document Data is: ${_docData["data"]}\n\n");
 
-            _manageIncomingMessages(_docData["data"]);
+        _manageIncomingMessages(_docData["data"]);
 
-            _dbOperations.resetRemoteOldChatMessages(partnerId);
-          }
-        });
+        _dbOperations.resetRemoteOldChatMessages(partnerId);
+      }
+    });
   }
 
   _manageIncomingMessages(messages) {
@@ -101,7 +110,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     });
   }
 
-  _incomingMsgThumbnailManagement(_msgAdditionalData, message)async{
+  _incomingMsgThumbnailManagement(_msgAdditionalData, message) async {
     final _dirPath = await createThumbnailStoreDir();
     final _thumbnailPath = createImageFile(dirPath: _dirPath);
 
@@ -113,7 +122,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       message.values.toList()[0][MessageData.additionalData] =
           DataManagement.toJsonString(_msgAdditionalData);
 
-      _dbOperations.deleteMediaFromFirebaseStorage(_msgAdditionalData["thumbnail"]);
+      _dbOperations
+          .deleteMediaFromFirebaseStorage(_msgAdditionalData["thumbnail"]);
 
       _updateInLocalStorage(message);
       _updateInTopLevel(message);
@@ -148,6 +158,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   destroyRealTimeMessaging() {
     _streamSubscription?.cancel();
     notifyListeners();
+    _removePartnerId();
   }
 
   setPartnerUserId(String partnerUserId, {bool update = false}) {
@@ -156,6 +167,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   getPartnerUserId() => _partnerUserId;
+
+  _removePartnerId() {
+    _partnerUserId = "";
+    notifyListeners();
+  }
 
   showVoiceIcon() => _showVoiceIcon && _messageController!.text.isEmpty;
 
@@ -191,7 +207,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   hasTextFieldFocus(context) =>
       _focus.hasFocus &&
-          WidgetsBinding.instance!.window.viewInsets.bottom > 0.0;
+      WidgetsBinding.instance!.window.viewInsets.bottom > 0.0;
 
   unFocusNode() {
     _focus.unfocus();
@@ -215,6 +231,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   setMessageData(incomingMessageData) {
     _messageData = incomingMessageData;
+    notifyListeners();
   }
 
   void _onFocusChange() {
@@ -223,11 +240,14 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   setSingleNewMessage(incomingMessageSet) {
     _messageData.add(incomingMessageSet);
+    Provider.of<ChatScrollProvider>(context, listen: false)
+        .animateToBottom();
     notifyListeners();
   }
 
   clearMessageData() {
     _messageData.clear();
+    notifyListeners();
   }
 
   disposeTextFieldOperation() {
@@ -345,11 +365,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   /// Making Message Data Ready For Remote
   void _manageMessageForRemote(
       {required message,
-        required msgType,
-        required additionalData,
-        required uniqueMsgId,
-        required msgTime,
-        required msgDate}) async {
+      required msgType,
+      required additionalData,
+      required uniqueMsgId,
+      required msgTime,
+      required msgDate}) async {
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&
         msgType != ChatMessageType.contact.toString() &&
@@ -411,5 +431,29 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     }
 
     return StorageHelper.otherRef;
+  }
+
+  getOldStoredChatMessages() {
+    _localStorage
+        .getOldChatMessages(
+            tableName: DataManagement.generateTableNameForNewConnectionChat(
+                getPartnerUserId()))
+        .then((oldMessages) {
+      if (oldMessages.isEmpty) {
+        getMessagesRealtime(getPartnerUserId());
+        return;
+      }
+
+      final _oldMessagesCollection = [];
+
+      for (final message in oldMessages) {
+        _oldMessagesCollection.add({message["id"]: message});
+        //setSingleNewMessage({message["id"]: message});
+      }
+
+      setMessageData(_oldMessagesCollection);
+
+      getMessagesRealtime(getPartnerUserId());
+    });
   }
 }
