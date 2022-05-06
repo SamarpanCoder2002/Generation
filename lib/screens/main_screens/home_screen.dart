@@ -287,9 +287,12 @@ class _HomeScreenState extends State<HomeScreen> {
           itemCount: Provider.of<ConnectionCollectionProvider>(context)
               .getDataLength(),
           itemBuilder: (_, connectionIndex) {
+            final _rawData = Provider.of<ConnectionCollectionProvider>(context)
+                .getData()[connectionIndex];
+
             final _connectionData =
                 Provider.of<ConnectionCollectionProvider>(context)
-                    .getData()[connectionIndex];
+                    .getUsersMap(_rawData["id"]);
 
             return InkWell(
                 onTap: () => _onChatClicked(_connectionData),

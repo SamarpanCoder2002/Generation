@@ -6,16 +6,26 @@ import 'package:flutter/rendering.dart';
 class ChatScrollProvider extends ChangeNotifier {
   final ScrollController _scrollController = ScrollController();
   bool _comeAtTop = false;
+  bool _scrollAtFirst = true;
+
+  bool get getScrollAtFirst => _scrollAtFirst;
+
+  changeScrollAtFirstValue(bool update){
+    _scrollAtFirst = update;
+    notifyListeners();
+  }
 
   getController() => _scrollController;
 
   animateToBottom(
-      {scrollDuration = 750, bool shouldNotify = true, int milliSec = 100}) {
+      {scrollDuration = 750, bool shouldNotify = true, int milliSec = 100, bool updateScrollAtFirstValue = false}) {
     if (!_scrollController.hasClients || !_scrollController.hasListeners) {
       return;
     }
 
     Timer(Duration(milliseconds: milliSec), () {
+      if(!isAttachedToScrollView) return;
+
       _scrollController
           .animateTo(
         _scrollController.position.maxScrollExtent,
@@ -24,8 +34,24 @@ class ChatScrollProvider extends ChangeNotifier {
       )
           .whenComplete(() {
         if (shouldNotify) notifyListeners();
+
+        if(updateScrollAtFirstValue){
+          changeScrollAtFirstValue(false);
+        }
       });
     });
+  }
+
+  bool get isAttachedToScrollView => _scrollController.positions.length == 1;
+
+  directBottom() {
+    try {
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
+      );
+    } catch (e) {
+      print("Direct Bottom Error:  $e");
+    }
   }
 
   bool _isMainAppBarVisible = true;
@@ -44,10 +70,12 @@ class ChatScrollProvider extends ChangeNotifier {
   }
 
   void _listener() {
+
     final scrollDirection = _scrollController.position.userScrollDirection;
 
     if (!_comeAtTop && _scrollController.position.pixels == 0) {
       print("At Top of Chat Messaging Section");
+
       /// Call Next Amount of local messages from here
       _comeAtTop = true;
       notifyListeners();

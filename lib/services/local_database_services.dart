@@ -79,12 +79,10 @@ class LocalStorage {
       return _database;
     } else {
       final Directory? directory = await getExternalStorageDirectory();
-      print("Directory Path: ${directory!.path}");
 
       final Directory newDirectory =
-          await Directory(directory.path + "/${FolderData.dbFolder}/").create();
-
-      print("Directory Path: ${newDirectory.path}");
+          await Directory(directory!.path + "/${FolderData.dbFolder}/")
+              .create();
 
       final String path = newDirectory.path +
           "/${DataManagement.getEnvData(EnvFileKey.dbName)}.db";
@@ -178,7 +176,7 @@ class LocalStorage {
       dynamic lastMsgData,
       dynamic notSeenMsgCount,
       String? wallpaper}) async {
-    try{
+    try {
       final Database db = await database;
 
       final Map<String, dynamic> _conData = <String, dynamic>{};
@@ -187,9 +185,10 @@ class LocalStorage {
       _conData[_conUserAbout] = about;
       _conData[_conProfilePic] = profilePic;
       _conData[_conChatWallpaperPath] = wallpaper;
-      _conData[_conLastMsgData] = lastMsgData == null ? null: json.encode(lastMsgData);
+      _conData[_conLastMsgData] =
+          lastMsgData == null ? null : json.encode(lastMsgData);
       _conData[_conNotSeenMsgCount] =
-      notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
+          notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
 
       if (dbOperation == DBOperation.insert) {
         await db.insert(DbData.connectionsTable, _conData);
@@ -205,10 +204,9 @@ class LocalStorage {
         await db.update(DbData.connectionsTable, _conData,
             where: """$_conId = "$id" """);
       }
-    }catch(e){
+    } catch (e) {
       print("ERROR in insertUpdateConnectionPrimaryData: $e");
     }
-
   }
 
   /// Delete particular connection
@@ -266,7 +264,7 @@ class LocalStorage {
       required message,
       required String date,
       required String time,
-        required String type,
+      required String type,
       dynamic additionalData,
       required DBOperation dbOperation}) async {
     final Database db = await database;
@@ -403,6 +401,16 @@ class LocalStorage {
         await db.rawQuery("""SELECT COUNT(*) FROM $tableName""");
 
     return int.parse(data[0].values.first.toString());
+  }
+
+  Future<List<Map<String, Object?>>> getOldChatMessages(
+      {required String tableName}) async {
+    final Database db = await database;
+
+    final List<Map<String, Object?>> data =
+        await db.rawQuery("""SELECT * FROM $tableName""");
+
+    return data;
   }
 
   storeDataForCurrAccount(_data, String currUserId) async {

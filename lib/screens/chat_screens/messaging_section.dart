@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:generation/config/colors_collection.dart';
@@ -36,18 +35,23 @@ class MessagingSection extends StatefulWidget {
 }
 
 class _MessagingSectionState extends State<MessagingSection> {
-  @override
-  void didChangeDependencies() {
-    Provider.of<ChatScrollProvider>(context, listen: false)
-        .animateToBottom(scrollDuration: 1000);
-
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   Provider.of<ChatScrollProvider>(context, listen: false)
+  //       .animateToBottom(scrollDuration: 1000);
+  //
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
     final int _totalChatMessages =
         Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages();
+
+    if (Provider.of<ChatScrollProvider>(context).getScrollAtFirst &&
+        Provider.of<ChatScrollProvider>(context).isAttachedToScrollView) {
+      Provider.of<ChatScrollProvider>(context).directBottom();
+    }
 
     return _totalChatMessages > 0
         ? _chatBoxContainingMessages()
@@ -147,6 +151,11 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _getPerfectMessageContainer({required ChatMessageModel messageData}) {
+    if(Provider.of<ChatScrollProvider>(context).getScrollAtFirst) {
+      Provider.of<ChatScrollProvider>(context, listen: false)
+        .animateToBottom(scrollDuration: 100, updateScrollAtFirstValue: true);
+    }
+
     if (messageData.type == ChatMessageType.text.toString()) {
       return _textMessageSection(messageData: messageData);
     } else if (messageData.type == ChatMessageType.image.toString()) {
@@ -326,6 +335,7 @@ class _MessagingSectionState extends State<MessagingSection> {
         child: ListView.separated(
           controller:
               Provider.of<ChatScrollProvider>(widget.context).getController(),
+
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemCount: Provider.of<ChatBoxMessagingProvider>(widget.context)
