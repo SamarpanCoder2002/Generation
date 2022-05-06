@@ -147,4 +147,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   getData() => _searchedChatConnectionsDataCollection;
 
   getDataLength() => _searchedChatConnectionsDataCollection.length;
+
+  getUsersMap(String id) => _localConnectedUsersMap[id];
 }

@@ -69,8 +69,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   _headerSection() {
-    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme(); 
-    
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return AppBar(
       elevation: 0,
       backgroundColor: AppColors.getChatBgColor(_isDarkMode),
@@ -83,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
   _messageCreationSection() {
     return ScrollToHideWidget(
       scrollController:
-          Provider.of<ChatScrollProvider>(context).getController(),
+      Provider.of<ChatScrollProvider>(context).getController(),
       hideWhenScrollToBottom: false,
       height: Provider.of<ChatCreationSectionProvider>(context)
           .getSectionHeight(context),
@@ -93,32 +93,32 @@ class _ChatScreenState extends State<ChatScreen> {
           backgroundColor: AppColors.transparentColor,
           elevation: 0,
           builder: (_) => MessageCreationSection(
-                context: context,
-              )),
+            context: context,
+          )),
     );
   }
 
   _chatCollectionSection() => Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        padding: const EdgeInsets.only(top: 2, left: 10, right: 10),
-        // // Don't Remove that following code
-        // decoration: BoxDecoration(
-        //     image: DecorationImage(
-        //         fit: BoxFit.cover,
-        //         image: NetworkImage(
-        //             "https://images.pexels.com/photos/1612461/pexels-photo-1612461.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"))),
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            MessagingSection(context: context),
-            const SizedBox(
-              height: 10,
-            ),
-          ],
+    width: MediaQuery.of(context).size.width,
+    height: MediaQuery.of(context).size.height,
+    padding: const EdgeInsets.only(top: 2, left: 10, right: 10),
+    // // Don't Remove that following code
+    // decoration: BoxDecoration(
+    //     image: DecorationImage(
+    //         fit: BoxFit.cover,
+    //         image: NetworkImage(
+    //             "https://images.pexels.com/photos/1612461/pexels-photo-1612461.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"))),
+    child: ListView(
+      shrinkWrap: true,
+      children: [
+        const SizedBox(
+          height: 10,
         ),
-      );
+        MessagingSection(context: context),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
+    ),
+  );
 }

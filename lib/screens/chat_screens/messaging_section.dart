@@ -47,7 +47,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   @override
   Widget build(BuildContext context) {
     final int _totalChatMessages =
-        Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages();
+    Provider.of<ChatBoxMessagingProvider>(context).getTotalMessages();
 
     return _totalChatMessages > 0
         ? _chatBoxContainingMessages()
@@ -56,11 +56,11 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _commonMessageLayout(
       {required String messageId,
-      required ChatMessageModel messageData,
-      required int index}) {
+        required ChatMessageModel messageData,
+        required int index}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final _selectedMessages =
-        Provider.of<ChatBoxMessagingProvider>(context).getSelectedMessage();
+    Provider.of<ChatBoxMessagingProvider>(context).getSelectedMessage();
 
     return SwipeTo(
       iconColor: AppColors.getIconColor(_isDarkMode),
@@ -138,8 +138,8 @@ class _MessagingSectionState extends State<MessagingSection> {
         messageData.time,
         style: TextStyleCollection.terminalTextStyle.copyWith(
             color: AppColors.getMsgTextColor(
-                    messageData.holder == MessageHolderType.other.toString(),
-                    _isDarkMode)
+                messageData.holder == MessageHolderType.other.toString(),
+                _isDarkMode)
                 .withOpacity(0.8),
             fontWeight: FontWeight.normal),
       ),
@@ -192,22 +192,22 @@ class _MessagingSectionState extends State<MessagingSection> {
               borderRadius: BorderRadius.circular(8.0),
               child: _imagePath == null
                   ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
+                child: CircularProgressIndicator(),
+              )
                   : PhotoView(
-                      enableRotation: false,
-                      backgroundDecoration:
-                          const BoxDecoration(color: AppColors.pureWhiteColor),
-                      imageProvider: _imagePath,
-                      minScale: PhotoViewComputedScale.covered,
-                      errorBuilder: (_, __, ___) => const Center(
-                        child: Text(
-                          "Image Not Found... 😔",
-                          style: TextStyle(
-                              fontSize: 20, color: AppColors.pureWhiteColor),
-                        ),
-                      ),
-                    ),
+                enableRotation: false,
+                backgroundDecoration:
+                const BoxDecoration(color: AppColors.pureWhiteColor),
+                imageProvider: _imagePath,
+                minScale: PhotoViewComputedScale.covered,
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Text(
+                    "Image Not Found... 😔",
+                    style: TextStyle(
+                        fontSize: 20, color: AppColors.pureWhiteColor),
+                  ),
+                ),
+              ),
             ),
           )),
     );
@@ -215,14 +215,14 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _audioMessageSection({required ChatMessageModel messageData}) {
     final bool isSongPlaying =
-        Provider.of<SongManagementProvider>(widget.context).isSongPlaying();
+    Provider.of<SongManagementProvider>(widget.context).isSongPlaying();
 
     final String _getCurrentSongPath =
-        Provider.of<SongManagementProvider>(widget.context).getSongPath();
+    Provider.of<SongManagementProvider>(widget.context).getSongPath();
 
     final double? _currentLoadingTime =
-        Provider.of<SongManagementProvider>(widget.context)
-            .getCurrentLoadingTime();
+    Provider.of<SongManagementProvider>(widget.context)
+        .getCurrentLoadingTime();
 
     final _isLocalFile = _isItLocalFile(messageData.message);
 
@@ -266,7 +266,7 @@ class _MessagingSectionState extends State<MessagingSection> {
                 : Icons.play_arrow,
             color: AppColors.getIconColor(_isDarkMode,
                 isOpposite:
-                    messageData.holder == MessageHolderType.other.toString()),
+                messageData.holder == MessageHolderType.other.toString()),
             size: 30,
           ));
     }
@@ -292,10 +292,10 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _audioPlayingLoadingTime({required ChatMessageModel messageData}) {
     final _currentLoadingTime =
-        Provider.of<SongManagementProvider>(widget.context).getShowingTiming();
+    Provider.of<SongManagementProvider>(widget.context).getShowingTiming();
 
     final String _getCurrentSongPath =
-        Provider.of<SongManagementProvider>(widget.context).getSongPath();
+    Provider.of<SongManagementProvider>(widget.context).getSongPath();
 
     return Positioned(
       bottom: 6,
@@ -312,28 +312,28 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _chatBoxContainingMessages() {
     final bool _isFocused =
-        Provider.of<ChatBoxMessagingProvider>(widget.context)
-            .hasTextFieldFocus(widget.context);
+    Provider.of<ChatBoxMessagingProvider>(widget.context)
+        .hasTextFieldFocus(widget.context);
     final bool _isEmojiSectionActivated =
-        Provider.of<ChatCreationSectionProvider>(widget.context)
-            .getEmojiActivationState();
+    Provider.of<ChatCreationSectionProvider>(widget.context)
+        .getEmojiActivationState();
 
     return SizedBox(
         width: double.maxFinite,
         height: Provider.of<ChatBoxMessagingProvider>(widget.context)
             .getChatMessagingSectionHeight(
-                _isFocused || _isEmojiSectionActivated, widget.context),
+            _isFocused || _isEmojiSectionActivated, widget.context),
         child: ListView.separated(
           controller:
-              Provider.of<ChatScrollProvider>(widget.context).getController(),
+          Provider.of<ChatScrollProvider>(widget.context).getController(),
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemCount: Provider.of<ChatBoxMessagingProvider>(widget.context)
               .getTotalMessages(),
           itemBuilder: (_, index) {
             final messageData = Provider.of<ChatBoxMessagingProvider>(
-                    widget.context,
-                    listen: false)
+                widget.context,
+                listen: false)
                 .getParticularMessage(index);
 
             final realMsg = messageData.values.toList()[0];
@@ -391,7 +391,7 @@ class _MessagingSectionState extends State<MessagingSection> {
               "Messages are End-to-End Encrypted.\nNo other Third Party Person, Organization or even Generation Team can't read your messages",
               textAlign: TextAlign.center,
               style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+              TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
             ),
           ),
           Center(
@@ -418,35 +418,35 @@ class _MessagingSectionState extends State<MessagingSection> {
           maxWidth: MediaQuery.of(widget.context).size.width - 110),
       child: !_isLocalFile
           ? const Center(
-              child: CircularProgressIndicator(),
-            )
+        child: CircularProgressIndicator(),
+      )
           : Stack(
-              children: [
-                _imageMessageSection(messageData: messageData, fromVideo: true),
-                InkWell(
-                  onTap: () async {
-                    print("Ok Video");
-                    await SystemFileManagement.openFile(messageData.message);
-                  },
-                  child: SizedBox(
-                    width: MediaQuery.of(widget.context).size.width - 110,
-                    height: 300,
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.play_circle_outline_outlined,
-                        size: 60,
-                        color: AppColors.darkBorderGreenColor,
-                      ),
-                      onPressed: () async {
-                        print("Message Data: ${messageData.message}");
-                        await SystemFileManagement.openFile(
-                            messageData.message);
-                      },
-                    ),
-                  ),
+        children: [
+          _imageMessageSection(messageData: messageData, fromVideo: true),
+          InkWell(
+            onTap: () async {
+              print("Ok Video");
+              await SystemFileManagement.openFile(messageData.message);
+            },
+            child: SizedBox(
+              width: MediaQuery.of(widget.context).size.width - 110,
+              height: 300,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.play_circle_outline_outlined,
+                  size: 60,
+                  color: AppColors.darkBorderGreenColor,
                 ),
-              ],
+                onPressed: () async {
+                  print("Message Data: ${messageData.message}");
+                  await SystemFileManagement.openFile(
+                      messageData.message);
+                },
+              ),
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -455,57 +455,57 @@ class _MessagingSectionState extends State<MessagingSection> {
     final _isLocalFile = _isItLocalFile(messageData.message);
 
     _pdfMaintainerWidget() => Stack(
-          children: [
-            PdfView(
-              path: messageData.message,
+      children: [
+        PdfView(
+          path: messageData.message,
+        ),
+        Center(
+          child: GestureDetector(
+            child: const Icon(
+              Icons.open_in_new_rounded,
+              size: 40.0,
+              color: Colors.blue,
             ),
-            Center(
-              child: GestureDetector(
-                child: const Icon(
-                  Icons.open_in_new_rounded,
-                  size: 40.0,
-                  color: Colors.blue,
-                ),
-                onTap: () async {
-                  await SystemFileManagement.openFile(messageData.message);
+            onTap: () async {
+              await SystemFileManagement.openFile(messageData.message);
 
-                  /// Make Toast Here to Show message if file not open
-                },
-              ),
-            ),
-          ],
-        );
+              /// Make Toast Here to Show message if file not open
+            },
+          ),
+        ),
+      ],
+    );
 
     _otherDocumentMaintainerWidget() => Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                messageData.message.split("/").last,
-                style: TextStyleCollection.terminalTextStyle
-                    .copyWith(fontSize: 14),
-              ),
-              IconButton(
-                  onPressed: () async {
-                    await SystemFileManagement.openFile(messageData.message);
-
-                    /// Make Toast Here to Show message if file not open
-                  },
-                  icon: const Icon(
-                    Icons.open_in_new,
-                    color: AppColors.pureWhiteColor,
-                  ))
-            ],
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            messageData.message.split("/").last,
+            style: TextStyleCollection.terminalTextStyle
+                .copyWith(fontSize: 14),
           ),
-        );
+          IconButton(
+              onPressed: () async {
+                await SystemFileManagement.openFile(messageData.message);
+
+                /// Make Toast Here to Show message if file not open
+              },
+              icon: const Icon(
+                Icons.open_in_new,
+                color: AppColors.pureWhiteColor,
+              ))
+        ],
+      ),
+    );
 
     return ConstrainedBox(
         constraints: BoxConstraints(
             maxHeight:
-                messageData.additionalData["extension-for-document"] == 'pdf'
-                    ? 300
-                    : 100,
+            messageData.additionalData["extension-for-document"] == 'pdf'
+                ? 300
+                : 100,
             maxWidth: MediaQuery.of(widget.context).size.width - 110),
         child: Card(
           elevation: 2,
@@ -519,15 +519,15 @@ class _MessagingSectionState extends State<MessagingSection> {
           ),
           child: !_isLocalFile
               ? const Center(
-                  child: CircularProgressIndicator(),
-                )
+            child: CircularProgressIndicator(),
+          )
               : ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: messageData.additionalData["extension-for-document"] ==
-                          'pdf'
-                      ? _pdfMaintainerWidget()
-                      : _otherDocumentMaintainerWidget(),
-                ),
+            borderRadius: BorderRadius.circular(8.0),
+            child: messageData.additionalData["extension-for-document"] ==
+                'pdf'
+                ? _pdfMaintainerWidget()
+                : _otherDocumentMaintainerWidget(),
+          ),
         ));
   }
 
@@ -622,15 +622,15 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _phoneNumberManagementSection(
       {required String phoneNumber,
-      String? name,
-      String? label,
-      required ChatMessageModel messageData}) {
+        String? name,
+        String? label,
+        required ChatMessageModel messageData}) {
     final InputOption _inputOption = InputOption(widget.context);
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     _addContactButtonPressed() {
       final TextEditingController _contactNameController =
-          TextEditingController();
+      TextEditingController();
       _contactNameController.text = name ?? "";
 
       _inputOption.takeInputForContactName(

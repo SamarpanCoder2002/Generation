@@ -73,7 +73,7 @@ class LocalStorage {
 
   Future<Database> initializeDatabase() async {
     final storagePermissionResponse =
-        await _permissionManagement.storagePermission();
+    await _permissionManagement.storagePermission();
     if (!storagePermissionResponse) {
       print("Storage Permission Required under local database services");
       return _database;
@@ -82,7 +82,7 @@ class LocalStorage {
       print("Directory Path: ${directory!.path}");
 
       final Directory newDirectory =
-          await Directory(directory.path + "/${FolderData.dbFolder}/").create();
+      await Directory(directory.path + "/${FolderData.dbFolder}/").create();
 
       print("Directory Path: ${newDirectory.path}");
 
@@ -144,7 +144,7 @@ class LocalStorage {
     final Database db = await database;
 
     final List<Map<String, Object?>> result =
-        await db.rawQuery("""SELECT * FROM ${DbData.currUserTable}""");
+    await db.rawQuery("""SELECT * FROM ${DbData.currUserTable}""");
 
     if (result.isEmpty) {
       print("No Current User Data Found From Local Database");
@@ -171,13 +171,13 @@ class LocalStorage {
   /// Insert Or Update Operation for Connection Primary Data Table
   Future<void> insertUpdateConnectionPrimaryData(
       {required String id,
-      required String name,
-      required String profilePic,
-      required String about,
-      required DBOperation dbOperation,
-      dynamic lastMsgData,
-      dynamic notSeenMsgCount,
-      String? wallpaper}) async {
+        required String name,
+        required String profilePic,
+        required String about,
+        required DBOperation dbOperation,
+        dynamic lastMsgData,
+        dynamic notSeenMsgCount,
+        String? wallpaper}) async {
     try{
       final Database db = await database;
 
@@ -216,13 +216,13 @@ class LocalStorage {
     final Database db = await database;
 
     final _rowAffected =
-        await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
+    await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
     if (_rowAffected == 1) {
       deleteDataFromParticularChatConnTable(
           tableName: DataManagement.generateTableNameForNewConnectionChat(id));
       deleteActivity(
           tableName:
-              DataManagement.generateTableNameForNewConnectionActivity(id));
+          DataManagement.generateTableNameForNewConnectionActivity(id));
       return true;
     }
     return false;
@@ -261,14 +261,14 @@ class LocalStorage {
   /// For Insert Or Update Chat Messages
   Future<void> insertUpdateMsgUnderConnectionChatTable(
       {required String chatConTableName,
-      required String id,
-      required String holder,
-      required message,
-      required String date,
-      required String time,
+        required String id,
+        required String holder,
+        required message,
+        required String date,
+        required String time,
         required String type,
-      dynamic additionalData,
-      required DBOperation dbOperation}) async {
+        dynamic additionalData,
+        required DBOperation dbOperation}) async {
     final Database db = await database;
 
     final Map<String, dynamic> _chatData = <String, dynamic>{};
@@ -348,14 +348,14 @@ class LocalStorage {
   /// Insert Data in particular connection Activity Messages
   Future<void> insertUpdateTableForActivity(
       {required String tableName,
-      required String activityId,
-      required String activityHolderId,
-      required String activityType,
-      required String date,
-      required String time,
-      required String msg,
-      required dynamic additionalData,
-      required DBOperation dbOperation}) async {
+        required String activityId,
+        required String activityHolderId,
+        required String activityType,
+        required String date,
+        required String time,
+        required String msg,
+        required dynamic additionalData,
+        required DBOperation dbOperation}) async {
     final Database db = await database;
 
     final Map<String, dynamic> _activityData = <String, dynamic>{};
@@ -372,7 +372,7 @@ class LocalStorage {
     dbOperation == DBOperation.insert
         ? db.insert(tableName, _activityData)
         : db.update(tableName, _activityData,
-            where: """$_activityHolderId = "$activityHolderId" """);
+        where: """$_activityHolderId = "$activityHolderId" """);
   }
 
   deleteActivity({required String tableName, String? activityId}) async {
@@ -400,9 +400,18 @@ class LocalStorage {
     final Database db = await database;
 
     final List<Map<String, Object?>> data =
-        await db.rawQuery("""SELECT COUNT(*) FROM $tableName""");
+    await db.rawQuery("""SELECT COUNT(*) FROM $tableName""");
 
     return int.parse(data[0].values.first.toString());
+  }
+
+  Future<List<Map<String, Object?>>> getOldChatMessages({required String tableName}) async{
+    final Database db = await database;
+
+    final List<Map<String, Object?>> data =
+    await db.rawQuery("""SELECT * FROM $tableName""");
+
+    return data;
   }
 
   storeDataForCurrAccount(_data, String currUserId) async {
@@ -418,7 +427,7 @@ class LocalStorage {
         dbOperation: DBOperation.insert);
 
     await DataManagement.storeStringData(
-            StoredString.accCreatedBefore, DataManagement.toJsonString(_data))
+        StoredString.accCreatedBefore, DataManagement.toJsonString(_data))
         .then((value) => print("Stored Data"));
 
     print(

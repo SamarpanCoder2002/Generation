@@ -31,18 +31,18 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   getMessagesRealtime(String partnerId) {
     _streamSubscription =
         _realTimeOperations.getChatMessages(partnerId).listen((docSnapShot) {
-      final _docData = docSnapShot.data();
+          final _docData = docSnapShot.data();
 
-      if (_docData != null &&
-          _docData.isNotEmpty &&
-          _docData["data"].isNotEmpty) {
-        print("Document Data is: ${_docData["data"]}\n\n");
+          if (_docData != null &&
+              _docData.isNotEmpty &&
+              _docData["data"].isNotEmpty) {
+            print("Document Data is: ${_docData["data"]}\n\n");
 
-        _manageIncomingMessages(_docData["data"]);
+            _manageIncomingMessages(_docData["data"]);
 
-        _dbOperations.resetRemoteOldChatMessages(partnerId);
-      }
-    });
+            _dbOperations.resetRemoteOldChatMessages(partnerId);
+          }
+        });
   }
 
   _manageIncomingMessages(messages) {
@@ -191,7 +191,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   hasTextFieldFocus(context) =>
       _focus.hasFocus &&
-      WidgetsBinding.instance!.window.viewInsets.bottom > 0.0;
+          WidgetsBinding.instance!.window.viewInsets.bottom > 0.0;
 
   unFocusNode() {
     _focus.unfocus();
@@ -345,11 +345,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   /// Making Message Data Ready For Remote
   void _manageMessageForRemote(
       {required message,
-      required msgType,
-      required additionalData,
-      required uniqueMsgId,
-      required msgTime,
-      required msgDate}) async {
+        required msgType,
+        required additionalData,
+        required uniqueMsgId,
+        required msgTime,
+        required msgDate}) async {
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&
         msgType != ChatMessageType.contact.toString() &&
