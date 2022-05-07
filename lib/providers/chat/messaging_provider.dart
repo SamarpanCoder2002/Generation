@@ -64,7 +64,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
       if (_docData != null && _docData.isNotEmpty) {
         setCurrStatus(_docData[DBPath.status]);
-        
+
         _localStorage.insertUpdateConnectionPrimaryData(id: _docData["id"], name: _docData["name"], profilePic: _docData["profilePic"], about: _docData["about"], dbOperation: DBOperation.update);
         Provider.of<ConnectionCollectionProvider>(context, listen: false).updateParticularConnectionData(_docData["id"], _docData);
       }
@@ -78,7 +78,18 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   
   String getCurrStatus(){
     if(_currStatus["status"] == UserStatus.online.toString()) return 'Online';
-    return 'Last Seen ${_currStatus["date"]} at ${_currStatus["time"]}';
+
+    var _dayShow = _currStatus["date"];
+    final _incomingRawDate = DateTime.parse(_currStatus["rawDate"]);
+
+    final _currDateTime = DateTime.now();
+    if(_incomingRawDate.day == _currDateTime.day && _incomingRawDate.month == _currDateTime.month && _incomingRawDate.year == _currDateTime.year){
+      _dayShow = "today";
+    }else if(_incomingRawDate.day == _currDateTime.subtract(const Duration(days: 1)).day) {
+      _dayShow = "yesterday";
+    }
+
+    return 'Last Seen $_dayShow at ${_currStatus["time"]}';
   }
 
   _manageIncomingMessages(messages) {
@@ -299,6 +310,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   Map<String, dynamic> getLastSeenDateTime() {
     Map<String, dynamic> _dateTime = {};
+    _dateTime["rawDate"] = DateTime.now().toString().split(" ").first;
     _dateTime["date"] = getCurrentDate();
     _dateTime["time"] = getCurrentTime();
     _dateTime["status"] = UserStatus.offline.toString();
