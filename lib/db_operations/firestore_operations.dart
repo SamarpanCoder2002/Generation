@@ -13,9 +13,11 @@ import 'package:generation/db_operations/types.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/incoming_request_provider.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/connection_management_provider_collection/sent_request_provider.dart';
+import '../types/types.dart';
 
 class DBOperations {
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
@@ -218,9 +220,8 @@ class DBOperations {
     Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
         .setConnections(_allAvailableUsersData.values.toList());
 
-    print("All Available Users Data: $_allAvailableUsersData");
-
     return _allAvailableUsersData;
+
   }
 
   Future<bool> sendConnectionRequest(
@@ -379,7 +380,7 @@ class DBOperations {
       }
 
       final Reference reference =
-      FirebaseStorage.instance.ref().storage.refFromURL(fileName);
+          FirebaseStorage.instance.ref().storage.refFromURL(fileName);
       print('Reference is: $reference');
 
       await reference.delete();
@@ -388,6 +389,12 @@ class DBOperations {
     } catch (e) {
       print("Delete From Firebase Storage Exception: ${e.toString()}");
     }
+  }
+
+  updateActiveStatus(Map<String,dynamic> status) async {
+    await _getInstance
+        .doc('${DBPath.userCollection}/$currUid')
+        .update({DBPath.status: status});
   }
 }
 
@@ -415,4 +422,8 @@ class RealTimeOperations {
       .doc(
           '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.messages}')
       .snapshots();
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getConnectionData(
+          String partnerId) =>
+      _getInstance.doc('${DBPath.userCollection}/$partnerId').snapshots();
 }

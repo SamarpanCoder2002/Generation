@@ -33,6 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).getOldStoredChatMessages();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).getConnectionDataRealTime(widget.connectionData["id"], context);
 
     changeOnlyContextChatColor(_isDarkMode);
     super.initState();
