@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
@@ -40,8 +42,8 @@ class StorageImageAndVideoCollection extends StatelessWidget {
   }
 
   _particularImage(int index, BuildContext context) {
-    final _extractedData = Provider.of<StorageProvider>(context)
-        .getImagesCollection()[index];
+    final _extractedData =
+        Provider.of<StorageProvider>(context).getImagesCollection()[index];
 
     _onTapped() async {
       if (showVideoPlayIcon) {
@@ -76,8 +78,7 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             image: DecorationImage(
-                fit: BoxFit.cover,
-                image: CachedNetworkImageProvider(_extractedData))));
+                fit: BoxFit.cover, image: _getPerfectImage(_extractedData))));
   }
 
   _forShowingVideoFile(extractedData) {
@@ -97,5 +98,12 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         },
       ),
     );
+  }
+
+  _getPerfectImage(String imagePath) {
+    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+      return CachedNetworkImageProvider(imagePath);
+    }
+    return FileImage(File(imagePath));
   }
 }

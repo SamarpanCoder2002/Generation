@@ -79,6 +79,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   String getCurrStatus(){
     if(_currStatus["status"] == UserStatus.online.toString()) return 'Online';
 
+    if(_currStatus["rawDate"] == null){
+      return 'Last Seen ${_currStatus["date"]} at ${_currStatus["time"]}';
+    }
+
     var _dayShow = _currStatus["date"];
     final _incomingRawDate = DateTime.parse(_currStatus["rawDate"]);
 
