@@ -41,6 +41,6 @@ dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
         toastIconType: ToastIconType.success,
         showFromTop: false,
         toastDuration: 3);
-    Navigation.intent(context, const MainScreen());
+    Navigation.intentStraight(context, const MainScreen());
   });
 }
