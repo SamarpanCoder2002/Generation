@@ -26,9 +26,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     try {
       final _conPrimaryData = await _localStorage.getConnectionPrimaryData();
 
-      for (final connData in _conPrimaryData) {
+      for (Map<String,dynamic> connData in _conPrimaryData) {
         _chatConnectionsDataCollection.add(connData);
-        _localConnectedUsersMap[connData["id"].toString()] = connData;
+        _localConnectedUsersMap[connData["id"].toString()] = {...connData};
         notifyListeners();
       }
 
@@ -40,8 +40,19 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     }
   }
 
+  updateParticularConnectionData(String id, connUpdatedData) {
+    print("Local Data: ${_localConnectedUsersMap[id]}");
+    _localConnectedUsersMap[id]["name"] = connUpdatedData["name"];
+    _localConnectedUsersMap[id]["email"] = connUpdatedData["email"];
+    _localConnectedUsersMap[id]["about"] = connUpdatedData["about"];
+    _localConnectedUsersMap[id]["profilePic"] = connUpdatedData["profilePic"];
+
+    notifyListeners();
+  }
+
   _remoteConnectedDataStream(context) async {
-    _connectedDataStream = _realTimeOperations.getConnectedUsers().listen((querySnapShot) {
+    _connectedDataStream =
+        _realTimeOperations.getConnectedUsers().listen((querySnapShot) {
       final _conPrimaryData = querySnapShot.docs;
 
       for (final connData in _conPrimaryData) {
@@ -61,7 +72,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     });
   }
 
-  destroyConnectedDataStream(){
+  destroyConnectedDataStream() {
     _connectedDataStream.cancel();
     notifyListeners();
   }
@@ -150,7 +161,5 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   getUsersMap(String id) => _localConnectedUsersMap[id];
 
-  getRealTimeLatestData(){
-
-  }
+  getRealTimeLatestData() {}
 }

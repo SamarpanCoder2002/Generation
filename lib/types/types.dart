@@ -81,3 +81,8 @@ enum SendMsgStorage{
   local,
   remote
 }
+
+enum UserStatus{
+  online,
+  offline
+}

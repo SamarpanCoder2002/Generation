@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/db_operations/helper.dart';
+import 'package:generation/db_operations/types.dart';
+import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
@@ -22,8 +24,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   bool _showVoiceIcon = true;
   final Map<String, dynamic> _selectedMessage = {};
   String _partnerUserId = "";
-  StreamSubscription? _streamSubscription;
+  StreamSubscription? _realTimeMessagingSubscription;
+  StreamSubscription? _realTimeConnSubscription;
   late BuildContext context;
+  Map<String,dynamic> _currStatus = {};
 
   FocusNode _focus = FocusNode();
   final LocalStorage _localStorage = LocalStorage();
@@ -38,7 +42,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   getContext() => context;
 
   getMessagesRealtime(String partnerId) {
-    _streamSubscription =
+    _realTimeMessagingSubscription =
         _realTimeOperations.getChatMessages(partnerId).listen((docSnapShot) {
       final _docData = docSnapShot.data();
 
@@ -52,6 +56,29 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         _dbOperations.resetRemoteOldChatMessages(partnerId);
       }
     });
+  }
+
+  getConnectionDataRealTime(String partnerId, BuildContext context) {
+    _realTimeConnSubscription = _realTimeOperations.getConnectionData(partnerId).listen((docSnapShot) {
+      final _docData = docSnapShot.data();
+
+      if (_docData != null && _docData.isNotEmpty) {
+        setCurrStatus(_docData[DBPath.status]);
+        
+        _localStorage.insertUpdateConnectionPrimaryData(id: _docData["id"], name: _docData["name"], profilePic: _docData["profilePic"], about: _docData["about"], dbOperation: DBOperation.update);
+        Provider.of<ConnectionCollectionProvider>(context, listen: false).updateParticularConnectionData(_docData["id"], _docData);
+      }
+    });
+  }
+  
+  setCurrStatus(Map<String,dynamic> updatedStatus){
+    _currStatus = updatedStatus;
+    notifyListeners();
+  }
+  
+  String getCurrStatus(){
+    if(_currStatus["status"] == UserStatus.online.toString()) return 'Online';
+    return 'Last Seen ${_currStatus["date"]} at ${_currStatus["time"]}';
   }
 
   _manageIncomingMessages(messages) {
@@ -156,7 +183,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   destroyRealTimeMessaging() {
-    _streamSubscription?.cancel();
+    _realTimeMessagingSubscription?.cancel();
+    _realTimeConnSubscription?.cancel();
     notifyListeners();
     _removePartnerId();
   }
@@ -240,8 +268,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   setSingleNewMessage(incomingMessageSet) {
     _messageData.add(incomingMessageSet);
-    Provider.of<ChatScrollProvider>(context, listen: false)
-        .animateToBottom();
+    Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
     notifyListeners();
   }
 
@@ -269,6 +296,20 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   getCurrentDate({DateTime? dateTime}) =>
       DateFormat('dd MMMM, yyyy').format(dateTime ?? DateTime.now());
+
+  Map<String, dynamic> getLastSeenDateTime() {
+    Map<String, dynamic> _dateTime = {};
+    _dateTime["date"] = getCurrentDate();
+    _dateTime["time"] = getCurrentTime();
+    _dateTime["status"] = UserStatus.offline.toString();
+    return _dateTime;
+  }
+
+  Map<String, dynamic> getOnlineStatus() {
+    Map<String, dynamic> _dateTime = {};
+    _dateTime["status"] = UserStatus.online.toString();
+    return _dateTime;
+  }
 
   getChatMessagingSectionHeight(bool isKeyboardShowing, BuildContext context) =>
       isKeyboardShowing

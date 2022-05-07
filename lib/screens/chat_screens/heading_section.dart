@@ -69,9 +69,10 @@ class ChatBoxHeaderSection extends StatelessWidget {
 
   _profileShortInformationSection() {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    final _connCurrStatus = Provider.of<ChatBoxMessagingProvider>(context).getCurrStatus();
 
     return Container(
-      width: (MediaQuery.of(context).size.width - 40) / 1.7,
+      width: (MediaQuery.of(context).size.width - 40) / 1.6,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
@@ -91,7 +92,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "Online",
+                _connCurrStatus,
                 style: TextStyleCollection.terminalTextStyle
                     .copyWith(color: AppColors.chatInfoTextColor(_isDarkMode)),
               ),
@@ -102,25 +103,25 @@ class ChatBoxHeaderSection extends StatelessWidget {
     );
   }
 
-  _terminalSection() {
-    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-
-    return InkWell(
-      child: Image.asset(
-        IconImages.videoImagePath,
-        width: 30,
-        color: AppColors.getIconColor(_isDarkMode),
-      ),
-      onTap: () {
-        print("Video clickjed");
-
-        showToast(context,
-            title: "Map will show within few seconds",
-            toastIconType: ToastIconType.info,
-            toastDuration: 12);
-      },
-    );
-  }
+  // _terminalSection() {
+  //   final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+  //
+  //   return InkWell(
+  //     child: Image.asset(
+  //       IconImages.videoImagePath,
+  //       width: 30,
+  //       color: AppColors.getIconColor(_isDarkMode),
+  //     ),
+  //     onTap: () {
+  //       print("Video clickjed");
+  //
+  //       showToast(context,
+  //           title: "Map will show within few seconds",
+  //           toastIconType: ToastIconType.info,
+  //           toastDuration: 12);
+  //     },
+  //   );
+  // }
 
   _backButton() {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
