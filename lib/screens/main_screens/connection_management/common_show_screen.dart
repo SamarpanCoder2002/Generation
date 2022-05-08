@@ -286,9 +286,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         otherUserId: otherUserData["id"],
         otherUserData: otherUserData);
     if (_response) {
-      await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .removeIndexFromSearch(index);
+      await _dbOperations.getAvailableUsersData(context);
       Provider.of<SentConnectionsProvider>(context, listen: false)
           .initialize(update: true);
       showToast(context,
@@ -313,9 +313,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         otherUserId: otherUserData["id"],
         otherUserData: otherUserData);
     if (_response) {
-      await _dbOperations.getAvailableUsersData(context);
       Provider.of<SentConnectionsProvider>(context, listen: false)
           .removeIndexFromSearch(index);
+      await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
       showToast(context,
@@ -340,20 +340,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         otherUserId: otherUserData["id"],
         otherUserData: otherUserData);
     if (_response) {
-      // Provider.of<ConnectionCollectionProvider>(context, listen: false)
-      //     .addNewData(otherUserData);
-
-      // _localStorage.insertUpdateConnectionPrimaryData(
-      //     id: otherUserData["id"],
-      //     name: otherUserData["name"],
-      //     profilePic: otherUserData["profilePic"],
-      //     about: otherUserData["about"],
-      //     dbOperation: DBOperation.insert);
-
-
-      await _dbOperations.getAvailableUsersData(context);
       Provider.of<RequestConnectionsProvider>(context, listen: false)
           .removeFromSearch(index);
+      await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
       Provider.of<ConnectionCollectionProvider>(context, listen: false)
@@ -379,9 +368,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
     final _response = await _dbOperations.rejectIncomingRequest(
         otherUserId: otherUserData["id"]);
     if (_response) {
-      await _dbOperations.getAvailableUsersData(context);
       Provider.of<RequestConnectionsProvider>(context, listen: false)
           .removeFromSearch(index);
+      await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
       showToast(context,

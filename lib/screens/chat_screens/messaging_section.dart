@@ -16,7 +16,6 @@ import 'package:generation/services/system_file_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:swipe_to/swipe_to.dart';
 
@@ -42,6 +41,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   //
   //   super.didChangeDependencies();
   // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -151,9 +151,9 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _getPerfectMessageContainer({required ChatMessageModel messageData}) {
-    if(Provider.of<ChatScrollProvider>(context).getScrollAtFirst) {
+    if (Provider.of<ChatScrollProvider>(context).getScrollAtFirst) {
       Provider.of<ChatScrollProvider>(context, listen: false)
-        .animateToBottom(scrollDuration: 100, updateScrollAtFirstValue: true);
+          .animateToBottom(scrollDuration: 100, updateScrollAtFirstValue: true, extraScroll: 200);
     }
 
     if (messageData.type == ChatMessageType.text.toString()) {
@@ -197,27 +197,16 @@ class _MessagingSectionState extends State<MessagingSection> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: _imagePath == null
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : PhotoView(
-                      enableRotation: false,
-                      backgroundDecoration:
-                          const BoxDecoration(color: AppColors.pureWhiteColor),
-                      imageProvider: _imagePath,
-                      minScale: PhotoViewComputedScale.covered,
-                      errorBuilder: (_, __, ___) => const Center(
-                        child: Text(
-                          "Image Not Found... 😔",
-                          style: TextStyle(
-                              fontSize: 20, color: AppColors.pureWhiteColor),
-                        ),
-                      ),
-                    ),
-            ),
+            child: _imagePath != null
+                ? Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                        image: DecorationImage(
+                            image: _imagePath, fit: BoxFit.cover)),
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(),
+                  ),
           )),
     );
   }
@@ -335,7 +324,6 @@ class _MessagingSectionState extends State<MessagingSection> {
         child: ListView.separated(
           controller:
               Provider.of<ChatScrollProvider>(widget.context).getController(),
-
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemCount: Provider.of<ChatBoxMessagingProvider>(widget.context)

@@ -8,6 +8,7 @@ import 'package:generation/screens/activity/view/activity_controller_screen.dart
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
@@ -275,6 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Provider.of<MainScrollingProvider>(context).getScrollController();
 
     final _commonChatLayout = CommonChatListLayout(context: context);
+    final _totalMessages =
+        Provider.of<ConnectionCollectionProvider>(context).getDataLength();
 
     return Container(
       width: double.maxFinite,
@@ -284,8 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controller: _messageScreenScrollController,
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
-          itemCount: Provider.of<ConnectionCollectionProvider>(context)
-              .getDataLength(),
+          itemCount: _totalMessages,
           itemBuilder: (_, connectionIndex) {
             final _rawData = Provider.of<ConnectionCollectionProvider>(context)
                 .getData()[connectionIndex];
@@ -294,18 +296,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 Provider.of<ConnectionCollectionProvider>(context)
                     .getUsersMap(_rawData["id"]);
 
+            final _lastMsgData = _connectionData["chatLastMsg"] == null
+                ? null
+                : DataManagement.fromJsonString(_connectionData["chatLastMsg"]);
+
             return InkWell(
                 onTap: () => _onChatClicked(_connectionData),
                 onLongPress: () =>
                     _onChatLongPressed(_connectionData, connectionIndex),
                 child: _commonChatLayout.particularChatConnection(
-                    photo: _connectionData["profilePic"],
-                    heading: _connectionData["name"],
-                    subheading:
-                        _connectionData["chatLastMsg"]?["message"] ?? "",
-                    lastMsgTime: _connectionData["chatLastMsg"]?["time"] ?? "",
+                    photo: _connectionData["profilePic"] ?? "",
+                    heading: _connectionData["name"] ?? "",
+                    subheading: _getSubHeading(_lastMsgData),
+                    lastMsgTime: _lastMsgData?["time"] ?? "",
                     currentIndex: connectionIndex,
-                    totalPendingMessages: _connectionData["notSeenMsgCount"]));
+                    totalPendingMessages: _connectionData["notSeenMsgCount"],
+                    bottomMargin:
+                        connectionIndex == _totalMessages - 1 ? 40 : null));
           }),
     );
   }
@@ -314,12 +321,23 @@ class _HomeScreenState extends State<HomeScreen> {
     final _isDarkMode =
         Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
+    Provider.of<ConnectionCollectionProvider>(context, listen: false)
+        .pauseParticularConnSubscription(_connectionData["id"]);
+
+    _afterChatClosed() {
+      changeContextTheme(_isDarkMode);
+      Provider.of<ConnectionCollectionProvider>(context, listen: false)
+          .getAndInsertLastMessage(_connectionData["id"]);
+      Provider.of<ConnectionCollectionProvider>(context, listen: false)
+          .resumeParticularConnSubscription(_connectionData["id"]);
+    }
+
     Navigation.intent(
         context,
         ChatScreen(
           connectionData: _connectionData,
         ),
-        afterWork: () => changeContextTheme(_isDarkMode));
+        afterWork: _afterChatClosed);
   }
 
   _myActivity() {
@@ -536,5 +554,31 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  String _getSubHeading(_lastMsgData) {
+    final _msgData = _lastMsgData?["message"] ?? '';
+    if (_msgData == '') return _msgData;
+
+    if (_lastMsgData["type"] == ChatMessageType.image.toString()) {
+      return '📷   Image';
+    }
+    if (_lastMsgData["type"] == ChatMessageType.video.toString()) {
+      return '📽️   Video';
+    }
+    if (_lastMsgData["type"] == ChatMessageType.location.toString()) {
+      return '🗺️   Location';
+    }
+    if (_lastMsgData["type"] == ChatMessageType.audio.toString()) {
+      return '🎵   Audio';
+    }
+    if (_lastMsgData["type"] == ChatMessageType.document.toString()) {
+      return '📃   Document';
+    }
+    if (_lastMsgData["type"] == ChatMessageType.contact.toString()) {
+      return '💁   Contact';
+    }
+
+    return _msgData;
   }
 }
