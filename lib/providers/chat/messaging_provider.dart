@@ -27,7 +27,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   StreamSubscription? _realTimeMessagingSubscription;
   StreamSubscription? _realTimeConnSubscription;
   late BuildContext context;
-  Map<String,dynamic> _currStatus = {};
+  Map<String, dynamic> _currStatus = {};
 
   FocusNode _focus = FocusNode();
   final LocalStorage _localStorage = LocalStorage();
@@ -59,33 +59,48 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   getConnectionDataRealTime(String partnerId, BuildContext context) {
-    _realTimeConnSubscription = _realTimeOperations.getConnectionData(partnerId).listen((docSnapShot) {
+    _realTimeConnSubscription =
+        _realTimeOperations.getConnectionData(partnerId).listen((docSnapShot) {
       final _docData = docSnapShot.data();
 
       if (_docData != null && _docData.isNotEmpty) {
-        setCurrStatus(_docData[DBPath.status]);
+        setCurrStatus(_docData[DBPath.status] ?? {});
 
-        _localStorage.insertUpdateConnectionPrimaryData(id: _docData["id"], name: _docData["name"], profilePic: _docData["profilePic"], about: _docData["about"], dbOperation: DBOperation.update);
-        Provider.of<ConnectionCollectionProvider>(context, listen: false).updateParticularConnectionData(_docData["id"], _docData);
+        _localStorage.insertUpdateConnectionPrimaryData(
+            id: _docData["id"],
+            name: _docData["name"],
+            profilePic: _docData["profilePic"],
+            about: _docData["about"],
+            dbOperation: DBOperation.update);
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .updateParticularConnectionData(_docData["id"], _docData);
       }
     });
   }
-  
-  setCurrStatus(Map<String,dynamic> updatedStatus){
+
+  setCurrStatus(Map<String, dynamic> updatedStatus) {
     _currStatus = updatedStatus;
     notifyListeners();
   }
-  
-  String getCurrStatus(){
-    if(_currStatus["status"] == UserStatus.online.toString()) return 'Online';
+
+  String getCurrStatus() {
+    if (_currStatus.isEmpty) return '';
+    if (_currStatus["status"] == UserStatus.online.toString()) return 'Online';
+
+    if (_currStatus["rawDate"] == null) {
+      return 'Last Seen ${_currStatus["date"]} at ${_currStatus["time"]}';
+    }
 
     var _dayShow = _currStatus["date"];
     final _incomingRawDate = DateTime.parse(_currStatus["rawDate"]);
 
     final _currDateTime = DateTime.now();
-    if(_incomingRawDate.day == _currDateTime.day && _incomingRawDate.month == _currDateTime.month && _incomingRawDate.year == _currDateTime.year){
+    if (_incomingRawDate.day == _currDateTime.day &&
+        _incomingRawDate.month == _currDateTime.month &&
+        _incomingRawDate.year == _currDateTime.year) {
       _dayShow = "today";
-    }else if(_incomingRawDate.day == _currDateTime.subtract(const Duration(days: 1)).day) {
+    } else if (_incomingRawDate.day ==
+        _currDateTime.subtract(const Duration(days: 1)).day) {
       _dayShow = "yesterday";
     }
 
@@ -501,7 +516,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
       for (final message in oldMessages) {
         _oldMessagesCollection.add({message["id"]: message});
-        //setSingleNewMessage({message["id"]: message});
       }
 
       setMessageData(_oldMessagesCollection);

@@ -18,7 +18,7 @@ class ChatScrollProvider extends ChangeNotifier {
   getController() => _scrollController;
 
   animateToBottom(
-      {scrollDuration = 750, bool shouldNotify = true, int milliSec = 100, bool updateScrollAtFirstValue = false}) {
+      {scrollDuration = 750, bool shouldNotify = true, int milliSec = 100, bool updateScrollAtFirstValue = false, double extraScroll = 0.0}) {
     if (!_scrollController.hasClients || !_scrollController.hasListeners) {
       return;
     }
@@ -28,7 +28,7 @@ class ChatScrollProvider extends ChangeNotifier {
 
       _scrollController
           .animateTo(
-        _scrollController.position.maxScrollExtent,
+        _scrollController.position.maxScrollExtent + extraScroll,
         curve: Curves.fastLinearToSlowEaseIn,
         duration: Duration(milliseconds: scrollDuration),
       )

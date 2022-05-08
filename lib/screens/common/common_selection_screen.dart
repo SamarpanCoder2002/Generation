@@ -109,9 +109,9 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
               connectionData: _connectionData,
               isSelected: _connectionData["isSelected"],
               photo: _connectionData["profilePic"],
-              heading: _connectionData["connectionName"],
-              subheading: _connectionData["latestMessage"]["message"],
-              lastMsgTime: _connectionData["latestMessage"]["time"],
+              heading: _connectionData["name"],
+              subheading: _connectionData["chatLastMsg"]?["message"] ?? "",
+              lastMsgTime: _connectionData["chatLastMsg"]?["time"] ?? "",
               currentIndex: connectionIndex,
               totalPendingMessages:      _connectionData["notSeenMsgCount"].toString()),
         );

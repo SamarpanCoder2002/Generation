@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:generation/config/size_collection.dart';
@@ -186,7 +185,7 @@ class LocalStorage {
       _conData[_conProfilePic] = profilePic;
       _conData[_conChatWallpaperPath] = wallpaper;
       _conData[_conLastMsgData] =
-          lastMsgData == null ? null : json.encode(lastMsgData);
+          lastMsgData == null ? null : DataManagement.toJsonString(lastMsgData);
       _conData[_conNotSeenMsgCount] =
           notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
 
@@ -279,8 +278,6 @@ class LocalStorage {
     _chatData[_msgType] = type;
     _chatData[_msgAdditionalData] = additionalData;
 
-    print("Chat Messgae In Local Storage: $_chatData");
-
     dbOperation == DBOperation.insert
         ? db.insert(chatConTableName, _chatData)
         : db.update(chatConTableName, _chatData, where: """$_msgId = "$id" """);
@@ -321,13 +318,18 @@ class LocalStorage {
 
   /// Get Latest Message For any Chat Message Table
   getLatestChatMessage({required String tableName}) async {
-    final int _totalMessages = await getTotalMessages(tableName: tableName);
+    try{
+      final int _totalMessages = await getTotalMessages(tableName: tableName);
 
-    final Database db = await database;
-    final _msgSet = await db.rawQuery(
-        """ SELECT * FROM $tableName LIMIT ${_totalMessages - 1},1 """);
+      final Database db = await database;
+      final _msgSet = await db.rawQuery(
+          """ SELECT * FROM $tableName LIMIT ${_totalMessages - 1},1 """);
 
-    return _msgSet[0];
+      return _msgSet[0];
+    }catch(e){
+      return null;
+    }
+
   }
 
   /// ** Activity Operation ** //

@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/types/types.dart';
 
@@ -14,6 +16,10 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   final DBOperations _dbOperations = DBOperations();
   final RealTimeOperations _realTimeOperations = RealTimeOperations();
   late StreamSubscription _connectedDataStream;
+  final Map<
+      String,
+      Map<Stream<DocumentSnapshot<Map<String, dynamic>>>,
+          StreamSubscription?>> _realTimeMsgListeners = {};
 
   initialize({bool update = false}) {
     _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
@@ -26,13 +32,17 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     try {
       final _conPrimaryData = await _localStorage.getConnectionPrimaryData();
 
-      for (Map<String,dynamic> connData in _conPrimaryData) {
+      for (Map<String, dynamic> connData in _conPrimaryData) {
         _chatConnectionsDataCollection.add(connData);
         _localConnectedUsersMap[connData["id"].toString()] = {...connData};
+        _realTimeMsgListeners[connData["id"].toString()] = {
+          _realTimeOperations.getChatMessages(connData["id"].toString()): null
+        };
         notifyListeners();
       }
 
       initialize(update: true);
+      _connStreamManagement();
       _remoteConnectedDataStream(context);
       _dbOperations.getAvailableUsersData(context);
     } catch (e) {
@@ -41,7 +51,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   }
 
   updateParticularConnectionData(String id, connUpdatedData) {
-    print("Local Data: ${_localConnectedUsersMap[id]}");
     _localConnectedUsersMap[id]["name"] = connUpdatedData["name"];
     _localConnectedUsersMap[id]["email"] = connUpdatedData["email"];
     _localConnectedUsersMap[id]["about"] = connUpdatedData["about"];
@@ -58,6 +67,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       for (final connData in _conPrimaryData) {
         if (!_localConnectedUsersMap.containsKey(connData.id.toString())) {
           _localConnectedUsersMap[connData.id.toString()] = connData.data();
+          _realTimeMsgListeners[connData.id.toString()] = {
+            _realTimeOperations.getChatMessages(connData.id.toString()): null
+          };
           addNewData(connData.data());
           _localStorage.insertUpdateConnectionPrimaryData(
               id: connData.data()["id"],
@@ -65,6 +77,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
               profilePic: connData.data()["profilePic"],
               about: connData.data()["about"],
               dbOperation: DBOperation.insert);
+          _connStreamManagement();
         }
 
         initialize(update: true);
@@ -74,6 +87,89 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   destroyConnectedDataStream() {
     _connectedDataStream.cancel();
+    for (final particularData in _realTimeMsgListeners.values.toList()) {
+      particularData.values.toList()[0]?.cancel();
+    }
+    notifyListeners();
+  }
+
+  _connStreamManagement() {
+    for (final connId in _realTimeMsgListeners.keys.toList()) {
+      final _particularSteam = _realTimeMsgListeners[connId]?.keys.toList()[0];
+
+      if (_realTimeMsgListeners[connId]?[_particularSteam!] == null) {
+        _makeStreamSubscription(_particularSteam, connId);
+      }
+    }
+  }
+
+  _makeStreamSubscription(_particularSteam, connId) {
+    final _streamSubscription = _particularSteam?.listen((docSnapShot) {
+      final _docData = docSnapShot.data();
+
+      if (_docData != null && _docData.isNotEmpty) {
+        final _incomingMessagesCollection = _docData["data"];
+        _manageStreamData(
+            remoteLatestMsg: _incomingMessagesCollection.isEmpty
+                ? {}
+                : _incomingMessagesCollection.last.values.toList().first,
+            connData: _localConnectedUsersMap[connId],
+            notSeenMessages: _incomingMessagesCollection.length.toString());
+      }
+    });
+
+    _realTimeMsgListeners[connId]?[_particularSteam!] = _streamSubscription;
+    notifyListeners();
+  }
+
+  _manageStreamData(
+      {required Map<String, dynamic> remoteLatestMsg,
+      required Map<String, dynamic> connData,
+      required String notSeenMessages}) async {
+    var _lastMsgDataToInsert = remoteLatestMsg;
+    if (remoteLatestMsg.isEmpty) {
+      _lastMsgDataToInsert = await _localStorage.getLatestChatMessage(
+              tableName: DataManagement.generateTableNameForNewConnectionChat(
+                  connData["id"])) ??
+          {};
+    }
+
+    _localStorage.insertUpdateConnectionPrimaryData(
+        id: connData["id"],
+        name: connData["name"],
+        profilePic: connData["profilePic"],
+        about: connData["about"],
+        dbOperation: DBOperation.update,
+        lastMsgData: _lastMsgDataToInsert,
+        notSeenMsgCount: notSeenMessages);
+
+    connData["chatLastMsg"] = DataManagement.toJsonString(_lastMsgDataToInsert);
+    connData["notSeenMsgCount"] = notSeenMessages;
+
+    _localConnectedUsersMap[connData["id"]] = connData;
+    notifyListeners();
+  }
+
+  pauseParticularConnSubscription(String connId) {
+    _realTimeMsgListeners[connId]?.values.toList().first?.pause();
+    notifyListeners();
+  }
+
+  resumeParticularConnSubscription(String connId) {
+    _realTimeMsgListeners[connId]?.values.toList().first?.resume();
+    notifyListeners();
+  }
+
+  getAndInsertLastMessage(String connId) async {
+    final _getLatestChatMsg = await _localStorage.getLatestChatMessage(
+            tableName:
+                DataManagement.generateTableNameForNewConnectionChat(connId)) ??
+        {};
+    final _connData = _localConnectedUsersMap[connId];
+    _connData["chatLastMsg"] = DataManagement.toJsonString(_getLatestChatMsg);
+    _connData["notSeenMsgCount"] = '0';
+
+    _localConnectedUsersMap[_connData["id"]] = _connData;
     notifyListeners();
   }
 

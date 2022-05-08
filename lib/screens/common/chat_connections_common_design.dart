@@ -23,14 +23,14 @@ class CommonChatListLayout {
       Widget? trailingWidget,
       bool isSelected = false,
       double height = 60.0,
-      double? middleWidth}) {
+      double? middleWidth, double? bottomMargin}) {
 
 
 
     return Container(
       height: height,
       width: double.maxFinite,
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: EdgeInsets.only(bottom: bottomMargin ?? 20),
       child: Row(
         children: [
           if (commonRequirement == CommonRequirement.chatHistory || commonRequirement == CommonRequirement.forwardMsg)
