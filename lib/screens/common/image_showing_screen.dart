@@ -27,8 +27,6 @@ class _ImageShowingScreenState extends State<ImageShowingScreen> {
   @override
   void initState() {
     onlyShowStatusBar();
-
-    //makeNavigationBarTransparent();
     super.initState();
   }
 
@@ -70,6 +68,7 @@ class _ImageShowingScreenState extends State<ImageShowingScreen> {
         return NetworkImage(widget.imgPath);
       case ImageType.asset:
         return ExactAssetImage(widget.imgPath);
+
     }
   }
 }

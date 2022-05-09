@@ -30,8 +30,10 @@ class LocalStorage {
   final String _conUserAbout = "about";
   final String _conProfilePic = "profilePic";
   final String _conChatWallpaperPath = "wallpaper";
+  final String _conChatWallpaperManually = "wallpaperManually";
   final String _conLastMsgData = "chatLastMsg";
   final String _conNotSeenMsgCount = "notSeenMsgCount";
+  final String _conNotification = "notification";
   final String _conChatTableName = "chatTableName";
   final String _conActivityTableName = "connectionTableName";
 
@@ -158,7 +160,7 @@ class LocalStorage {
     final Database db = await database;
     try {
       await db.execute(
-          """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT, $_conLastMsgData TEXT, $_conNotSeenMsgCount TEXT)""");
+          """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT, $_conLastMsgData TEXT, $_conNotSeenMsgCount TEXT, $_conChatWallpaperManually TEXT, $_conNotification TEXT)""");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -174,7 +176,7 @@ class LocalStorage {
       required DBOperation dbOperation,
       dynamic lastMsgData,
       dynamic notSeenMsgCount,
-      String? wallpaper}) async {
+      String? wallpaper, bool? chatWallpaperManually, String? notificationType}) async {
     try {
       final Database db = await database;
 
@@ -184,10 +186,12 @@ class LocalStorage {
       _conData[_conUserAbout] = about;
       _conData[_conProfilePic] = profilePic;
       _conData[_conChatWallpaperPath] = wallpaper;
+      _conData[_conChatWallpaperManually] = chatWallpaperManually.toString();
       _conData[_conLastMsgData] =
           lastMsgData == null ? null : DataManagement.toJsonString(lastMsgData);
       _conData[_conNotSeenMsgCount] =
           notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
+      _conData[_conNotification] = notificationType ?? NotificationType.unMuted.toString();
 
       if (dbOperation == DBOperation.insert) {
         await db.insert(DbData.connectionsTable, _conData);
@@ -200,6 +204,16 @@ class LocalStorage {
         _createTableForConnectionChat(tableName: _conData[_conChatTableName]);
         _createTableForActivity(tableName: _conData[_conActivityTableName]);
       } else {
+        final _oldConnPrimaryData = await getConnectionPrimaryData(id: id);
+
+        if(chatWallpaperManually == null){
+          _conData[_conChatWallpaperManually] = _oldConnPrimaryData[_conChatWallpaperManually];
+        }
+
+        if(notificationType == null){
+          _conData[_conNotification] = _oldConnPrimaryData[_conNotification];
+        }
+
         await db.update(DbData.connectionsTable, _conData,
             where: """$_conId = "$id" """);
       }

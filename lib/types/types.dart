@@ -86,3 +86,8 @@ enum UserStatus{
   online,
   offline
 }
+
+enum NotificationType{
+  muted,
+  unMuted
+}
