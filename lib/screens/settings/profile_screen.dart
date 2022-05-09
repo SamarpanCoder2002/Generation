@@ -7,6 +7,7 @@ import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
@@ -30,8 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
 
   _getProfileData() async {
-    final Map<String, dynamic> _currAccData = await _localStorage
-        .getDataForCurrAccount();
+    final Map<String, dynamic> _currAccData =
+        await _localStorage.getDataForCurrAccount();
 
     print("Current Account data: $_currAccData");
 
@@ -60,14 +61,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.getBgColor(_isDarkMode),
       body: Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width,
-        height: MediaQuery
-            .of(context)
-            .size
-            .height,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
         margin: const EdgeInsets.all(20),
         child: ListView(
           physics: const BouncingScrollPhysics(),
@@ -100,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 showEditSection: false,
                 nameValue: _editableProfileData["email"] ?? ""),
             const SizedBox(height: 30),
-            if(!_isLoading)_saveButton(),
+            if (!_isLoading) _saveButton(),
           ],
         ),
       ),
@@ -109,10 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   _loadingIndicator() {
     return SizedBox(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       height: 3,
       child: const LinearProgressIndicator(
         backgroundColor: AppColors.pureWhiteColor,
@@ -157,13 +149,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _editableProfileData.isEmpty
         ? const Center()
         : Center(
-      child: Stack(
-        children: [
-          _imageSection(),
-          _imagePickingSection(),
-        ],
-      ),
-    );
+            child: Stack(
+              children: [
+                _imageSection(),
+                _imagePickingSection(),
+              ],
+            ),
+          );
   }
 
   _imageSection() {
@@ -171,16 +163,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return InkWell(
       onTap: () async {
-        Navigator.push(
+        Navigation.intent(
             context,
-            MaterialPageRoute(
-                builder: (_) =>
-                    ImageShowingScreen(
-                        imgPath: _editableProfileData["profilePic"],
-                        imageType:
-                        _editableProfileData["profilePic"].startsWith("https")
-                            ? ImageType.network
-                            : ImageType.file))).then((value) {
+            ImageShowingScreen(
+                imgPath: _editableProfileData["profilePic"],
+                imageType:
+                    _editableProfileData["profilePic"].startsWith("https")
+                        ? ImageType.network
+                        : ImageType.file), afterWork: () {
           showStatusAndNavigationBar();
 
           changeOnlyNavigationBarColor(
@@ -197,13 +187,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
             image: _editableProfileData["profilePic"]?.startsWith("https")
                 ? DecorationImage(
-              fit: BoxFit.cover,
-              image: NetworkImage(_editableProfileData["profilePic"]),
-            )
+                    fit: BoxFit.cover,
+                    image: NetworkImage(_editableProfileData["profilePic"]),
+                  )
                 : DecorationImage(
-              fit: BoxFit.cover,
-              image: FileImage(File(_editableProfileData["profilePic"])),
-            )),
+                    fit: BoxFit.cover,
+                    image: FileImage(File(_editableProfileData["profilePic"])),
+                  )),
       ),
     );
   }
@@ -228,37 +218,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  _commonSection({required IconData iconData,
-    required String heading,
-    required String mapKey,
-    required String nameValue,
-    bool showEditSection = true}) {
+  _commonSection(
+      {required IconData iconData,
+      required String heading,
+      required String mapKey,
+      required String nameValue,
+      bool showEditSection = true}) {
     return _editableProfileData.isEmpty
         ? const Center()
         : SizedBox(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _nameLeftSection(
-              iconData: iconData, heading: heading, nameValue: nameValue),
-          showEditSection
-              ? _editSection(
-              previousValue: nameValue,
-              parameterKey: mapKey,
-              editContent: heading)
-              : const Center(),
-        ],
-      ),
-    );
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _nameLeftSection(
+                    iconData: iconData, heading: heading, nameValue: nameValue),
+                showEditSection
+                    ? _editSection(
+                        previousValue: nameValue,
+                        parameterKey: mapKey,
+                        editContent: heading)
+                    : const Center(),
+              ],
+            ),
+          );
   }
 
-  _nameLeftSection({required IconData iconData,
-    required String heading,
-    required String nameValue}) {
+  _nameLeftSection(
+      {required IconData iconData,
+      required String heading,
+      required String nameValue}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return Row(
@@ -274,10 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Column(
           children: [
             SizedBox(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width - 40 - 100,
+              width: MediaQuery.of(context).size.width - 40 - 100,
               child: Text(
                 heading,
                 overflow: TextOverflow.ellipsis,
@@ -286,14 +272,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: _isDarkMode
                         ? AppColors.pureWhiteColor.withOpacity(0.6)
                         : AppColors.lightChatConnectionTextColor
-                        .withOpacity(0.6)),
+                            .withOpacity(0.6)),
               ),
             ),
             SizedBox(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width - 40 - 100,
+              width: MediaQuery.of(context).size.width - 40 - 100,
               child: Text(
                 nameValue,
                 overflow: TextOverflow.ellipsis,
@@ -311,9 +294,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  _editSection({required String editContent,
-    required String previousValue,
-    required String parameterKey}) {
+  _editSection(
+      {required String editContent,
+      required String previousValue,
+      required String parameterKey}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return Container(
@@ -336,11 +320,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   _imageTakingOption() {
     final InputOption _inputOption = InputOption(context);
     final _isDarkMode =
-    Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     _onCameraPressed() async {
       final String? imgPath =
-      await _inputOption.takeImageFromCamera(forChat: false);
+          await _inputOption.takeImageFromCamera(forChat: false);
       if (imgPath == null) return;
 
       if (mounted) {
@@ -367,8 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showModalBottomSheet(
         context: context,
         elevation: 5,
-        builder: (_) =>
-            Container(
+        builder: (_) => Container(
               color: AppColors.getBgColor(_isDarkMode),
               padding: const EdgeInsets.all(10),
               child: Row(
@@ -387,13 +370,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ));
   }
 
-  _editing({required String editContent,
-    required String previousValue,
-    required String parameterKey}) {
+  _editing(
+      {required String editContent,
+      required String previousValue,
+      required String parameterKey}) {
     showDialog(
         context: context,
-        builder: (_) =>
-            AlertDialog(
+        builder: (_) => AlertDialog(
               backgroundColor: AppColors.oppositeMsgDarkModeColor,
               title: Text(
                 editContent,
@@ -437,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     if (_actualProfileData["profilePic"] ==
-        _editableProfileData["profilePic"] &&
+            _editableProfileData["profilePic"] &&
         _actualProfileData["name"] == _editableProfileData["name"] &&
         _actualProfileData["name"] == _editableProfileData["name"] &&
         _actualProfileData["about"] == _editableProfileData["about"] &&

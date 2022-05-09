@@ -561,22 +561,22 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_msgData == '') return _msgData;
 
     if (_lastMsgData["type"] == ChatMessageType.image.toString()) {
-      return '📷   Image';
+      return '📷  Image';
     }
     if (_lastMsgData["type"] == ChatMessageType.video.toString()) {
-      return '📽️   Video';
+      return '📽️  Video';
     }
     if (_lastMsgData["type"] == ChatMessageType.location.toString()) {
-      return '🗺️   Location';
+      return '🗺️  Location';
     }
     if (_lastMsgData["type"] == ChatMessageType.audio.toString()) {
-      return '🎵   Audio';
+      return '🎵  Audio';
     }
     if (_lastMsgData["type"] == ChatMessageType.document.toString()) {
-      return '📃   Document';
+      return '📃  Document';
     }
     if (_lastMsgData["type"] == ChatMessageType.contact.toString()) {
-      return '💁   Contact';
+      return '💁  Contact';
     }
 
     return _msgData;

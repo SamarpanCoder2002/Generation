@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/screens/common/image_showing_screen.dart';
+import 'package:generation/services/navigation_management.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/device_specific_operations.dart';
 
 class CommonChatListLayout {
   final BuildContext context;
@@ -23,19 +29,20 @@ class CommonChatListLayout {
       Widget? trailingWidget,
       bool isSelected = false,
       double height = 60.0,
-      double? middleWidth, double? bottomMargin}) {
-
-
-
+      double? middleWidth,
+      double? bottomMargin}) {
     return Container(
       height: height,
       width: double.maxFinite,
       margin: EdgeInsets.only(bottom: bottomMargin ?? 20),
       child: Row(
         children: [
-          if (commonRequirement == CommonRequirement.chatHistory || commonRequirement == CommonRequirement.forwardMsg)
-            _selectionButton(isSelected, connectionData, currentIndex, commonRequirement),
-          if (commonRequirement != CommonRequirement.normal) const SizedBox(width: 20),
+          if (commonRequirement == CommonRequirement.chatHistory ||
+              commonRequirement == CommonRequirement.forwardMsg)
+            _selectionButton(
+                isSelected, connectionData, currentIndex, commonRequirement),
+          if (commonRequirement != CommonRequirement.normal)
+            const SizedBox(width: 20),
           _chatConnectionImage(photo),
           const SizedBox(
             width: 15,
@@ -50,8 +57,10 @@ class CommonChatListLayout {
           if (commonRequirement == CommonRequirement.normal &&
               trailingWidget == null &&
               lastMsgTime != null &&
-              totalPendingMessages != null && totalPendingMessages != "0")
-            _chatConnectionInformationData(lastMsgTime, totalPendingMessages.toString()),
+              totalPendingMessages != null &&
+              totalPendingMessages != "0")
+            _chatConnectionInformationData(
+                lastMsgTime, totalPendingMessages.toString()),
           if (trailingWidget != null) Expanded(child: trailingWidget)
         ],
       ),
@@ -61,18 +70,26 @@ class CommonChatListLayout {
   _chatConnectionImage(String? photo) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-          color: _isDarkMode
-              ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-              : AppColors.searchBarBgLightMode.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(100),
-          border: Border.all(color: _isDarkMode?AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor, width: 3),
-          image: photo == null
-              ? null
-              : DecorationImage(image: NetworkImage(photo), fit: BoxFit.cover)),
+    return InkWell(
+      onTap: () => _onImageClicked(photo),
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+            color: _isDarkMode
+                ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+                : AppColors.searchBarBgLightMode.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(
+                color: _isDarkMode
+                    ? AppColors.darkBorderGreenColor
+                    : AppColors.lightBorderGreenColor,
+                width: 3),
+            image: photo == null
+                ? null
+                : DecorationImage(
+                    image: NetworkImage(photo), fit: BoxFit.cover)),
+      ),
     );
   }
 
@@ -88,8 +105,11 @@ class CommonChatListLayout {
               alignment: Alignment.centerLeft,
               child: Text(
                 heading,
-                style: TextStyleCollection.activityTitleTextStyle
-                    .copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                    fontSize: 16,
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightChatConnectionTextColor),
               )),
           if (subheading != null && subheading.isNotEmpty)
             Flexible(
@@ -101,7 +121,9 @@ class CommonChatListLayout {
                 maxLines: 2,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     fontSize: 12,
-                    color: _isDarkMode?AppColors.pureWhiteColor.withOpacity(0.8):AppColors.lightLatestMsgTextColor),
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor.withOpacity(0.8)
+                        : AppColors.lightLatestMsgTextColor),
               ),
             )),
         ],
@@ -121,8 +143,11 @@ class CommonChatListLayout {
             Flexible(
               child: Text(
                 lastMsgTime,
-                style: TextStyleCollection.activityTitleTextStyle
-                    .copyWith(fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightBorderGreenColor),
+                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                    fontSize: 14,
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightBorderGreenColor),
               ),
             ),
           const SizedBox(
@@ -133,7 +158,9 @@ class CommonChatListLayout {
               width: 25,
               height: 25,
               decoration: BoxDecoration(
-                  color: _isDarkMode?AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor,
+                  color: _isDarkMode
+                      ? AppColors.darkBorderGreenColor
+                      : AppColors.lightBorderGreenColor,
                   borderRadius: BorderRadius.circular(100)),
               child: Center(
                   child: Text(
@@ -146,29 +173,57 @@ class CommonChatListLayout {
     );
   }
 
-  _selectionButton(
-          bool _isSelected, dynamic connectionData, int currentIndex, CommonRequirement commonRequirement){
+  _selectionButton(bool _isSelected, dynamic connectionData, int currentIndex,
+      CommonRequirement commonRequirement) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return  IconButton(
+    return IconButton(
         onPressed: () {
-          if(commonRequirement == CommonRequirement.chatHistory) {
+          if (commonRequirement == CommonRequirement.chatHistory) {
             connectionData["isSelected"] = !connectionData["isSelected"];
             Provider.of<ConnectionCollectionProvider>(context, listen: false)
                 .updateParticularSelectionData(connectionData, currentIndex);
-          }else{
+          } else {
             connectionData["isSelected"] = !connectionData["isSelected"];
-            Provider.of<ConnectionCollectionProvider>(context, listen: false).selectUnselectMultipleConnection(connectionData, currentIndex);
+            Provider.of<ConnectionCollectionProvider>(context, listen: false)
+                .selectUnselectMultipleConnection(connectionData, currentIndex);
           }
         },
         icon: _isSelected
             ? Icon(
-          Icons.circle,
-          color: AppColors.getIconColor(_isDarkMode),
-        )
+                Icons.circle,
+                color: AppColors.getIconColor(_isDarkMode),
+              )
             : Icon(
-          Icons.circle_outlined,
-          color: AppColors.getIconColor(_isDarkMode),
-        ));
+                Icons.circle_outlined,
+                color: AppColors.getIconColor(_isDarkMode),
+              ));
+  }
+
+  _onImageClicked(String? photo) {
+    if (photo == null) {
+      showToast(context,
+          title: "Image Not Found", toastIconType: ToastIconType.info);
+      return;
+    }
+
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    Navigation.intent(
+        context,
+        ImageShowingScreen(
+            imgPath: photo,
+            imageType: _getPerfectImageType(photo)), afterWork: () {
+      showStatusAndNavigationBar();
+      changeOnlyNavigationBarColor(
+          navigationBarColor: AppColors.getBgColor(_isDarkMode));
+    });
+  }
+
+  _getPerfectImageType(String imagePath) {
+    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+      return ImageType.network;
+    }
+    return ImageType.file;
   }
 }
