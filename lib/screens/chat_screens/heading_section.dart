@@ -9,7 +9,10 @@ import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/device_specific_operations.dart';
+import '../../services/toast_message_show.dart';
 import '../../types/types.dart';
+import '../common/image_showing_screen.dart';
 
 class ChatBoxHeaderSection extends StatelessWidget {
   final Map<String, dynamic> connectionData;
@@ -46,21 +49,24 @@ class ChatBoxHeaderSection extends StatelessWidget {
   _headerProfilePicSection() {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return Container(
-      width: 45,
-      height: 45,
-      margin: const EdgeInsets.only(left: 20),
-      decoration: BoxDecoration(
-          color: _isDarkMode
-              ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-              : AppColors.searchBarBgLightMode.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(100),
-          border: Border.all(color: AppColors.darkBorderGreenColor, width: 2),
-          image: connectionData["profilePic"] == null
-              ? null
-              : DecorationImage(
-                  image: NetworkImage(connectionData["profilePic"]),
-                  fit: BoxFit.cover)),
+    return InkWell(
+      onTap: () =>  _onImageClicked(connectionData["profilePic"]),
+      child: Container(
+        width: 45,
+        height: 45,
+        margin: const EdgeInsets.only(left: 20),
+        decoration: BoxDecoration(
+            color: _isDarkMode
+                ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+                : AppColors.searchBarBgLightMode.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(color: AppColors.darkBorderGreenColor, width: 2),
+            image: connectionData["profilePic"] == null
+                ? null
+                : DecorationImage(
+                    image: NetworkImage(connectionData["profilePic"]),
+                    fit: BoxFit.cover)),
+      ),
     );
   }
 
@@ -192,5 +198,32 @@ class ChatBoxHeaderSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  _onImageClicked(String? photo) {
+    if (photo == null) {
+      showToast(context,
+          title: "Image Not Found", toastIconType: ToastIconType.info);
+      return;
+    }
+
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    Navigation.intent(
+        context,
+        ImageShowingScreen(
+            imgPath: photo,
+            imageType: _getPerfectImageType(photo)), afterWork: () {
+      showStatusAndNavigationBar();
+      changeOnlyNavigationBarColor(
+          navigationBarColor: AppColors.getBgColor(_isDarkMode));
+    });
+  }
+
+  _getPerfectImageType(String imagePath) {
+    if (imagePath.startsWith('http') || imagePath.startsWith('https')) {
+      return ImageType.network;
+    }
+    return ImageType.file;
   }
 }
