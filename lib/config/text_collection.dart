@@ -11,6 +11,7 @@ class DirectoryName {
   static const String videoDir = "videos";
   static const String docDir = "documents";
   static const String thumbnailDir = "thumbnails";
+  static const String wallpaperDir = "wallpaperDir";
 }
 
 class MessageData {

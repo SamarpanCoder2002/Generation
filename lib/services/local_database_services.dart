@@ -22,7 +22,8 @@ class LocalStorage {
   final String _currUserAbout = "about";
   final String _currUserEmail = "email";
   final String _currUserProfilePic = "profilePic";
-  final String _currUserConversationTone = "conversationTone";
+  final String _currGlobalNotification = "notification";
+  final String _currWallpaper = "wallpaper";
 
   /// Connections Primary Data
   final String _conId = "id";
@@ -33,7 +34,7 @@ class LocalStorage {
   final String _conChatWallpaperManually = "wallpaperManually";
   final String _conLastMsgData = "chatLastMsg";
   final String _conNotSeenMsgCount = "notSeenMsgCount";
-  final String _conNotification = "notification";
+  final String _conNotificationManually = "notificationManually";
   final String _conChatTableName = "chatTableName";
   final String _conActivityTableName = "connectionTableName";
 
@@ -100,7 +101,7 @@ class LocalStorage {
     final Database db = await database;
     try {
       await db.execute(
-          """CREATE TABLE ${DbData.currUserTable}($_currUserId TEXT PRIMARY KEY, $_currUserName TEXT, $_currUserProfilePic TEXT, $_currUserAbout TEXT, $_currUserEmail TEXT, $_currUserConversationTone TEXT)""");
+          """CREATE TABLE ${DbData.currUserTable}($_currUserId TEXT PRIMARY KEY, $_currUserName TEXT, $_currUserProfilePic TEXT, $_currUserAbout TEXT, $_currUserEmail TEXT, $_currGlobalNotification TEXT, $_currWallpaper TEXT)""");
 
       _createTableForActivity(tableName: DbData.myActivityTable);
     } catch (e) {
@@ -110,15 +111,15 @@ class LocalStorage {
   }
 
   /// Insert And Update For Current User Data
-  Future<void> insertUpdateDataCurrAccData({
-    required String currUserId,
-    required String currUserName,
-    required String currUserProfilePic,
-    required String currUserAbout,
-    required String currUserEmail,
-    required bool currConTone,
-    required DBOperation dbOperation,
-  }) async {
+  Future<void> insertUpdateDataCurrAccData(
+      {required String currUserId,
+      required String currUserName,
+      required String currUserProfilePic,
+      required String currUserAbout,
+      required String currUserEmail,
+      required DBOperation dbOperation,
+      NotificationType? notificationType,
+      String? wallpaperPath}) async {
     final Database db = await database;
 
     final Map<String, dynamic> _accountData = <String, dynamic>{};
@@ -127,9 +128,22 @@ class LocalStorage {
     _accountData[_currUserEmail] = currUserEmail;
     _accountData[_currUserAbout] = currUserAbout;
     _accountData[_currUserProfilePic] = currUserProfilePic;
-    _accountData[_currUserConversationTone] = currConTone.toString();
+    _accountData[_currGlobalNotification] =
+        '${notificationType ?? NotificationType.unMuted.toString()}';
+    _accountData[_currWallpaper] = wallpaperPath;
 
     if (dbOperation == DBOperation.update) {
+      final _oldCurrAccData = await getDataForCurrAccount();
+
+      if (notificationType == null) {
+        _accountData[_currGlobalNotification] =
+            _oldCurrAccData[_currGlobalNotification];
+      }
+
+      if (wallpaperPath == null) {
+        _accountData[_currWallpaper] = _oldCurrAccData[_currWallpaper];
+      }
+
       await db.update(DbData.currUserTable, _accountData,
           where: """$_currUserId = "$currUserId" """);
       return;
@@ -160,7 +174,7 @@ class LocalStorage {
     final Database db = await database;
     try {
       await db.execute(
-          """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT, $_conLastMsgData TEXT, $_conNotSeenMsgCount TEXT, $_conChatWallpaperManually TEXT, $_conNotification TEXT)""");
+          """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT, $_conLastMsgData TEXT, $_conNotSeenMsgCount TEXT, $_conChatWallpaperManually TEXT, $_conNotificationManually TEXT)""");
     } catch (e) {
       print(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
@@ -176,7 +190,9 @@ class LocalStorage {
       required DBOperation dbOperation,
       dynamic lastMsgData,
       dynamic notSeenMsgCount,
-      String? wallpaper, bool? chatWallpaperManually, String? notificationType}) async {
+      String? wallpaper,
+      String? chatWallpaperManually,
+      String? notificationTypeManually}) async {
     try {
       final Database db = await database;
 
@@ -191,7 +207,8 @@ class LocalStorage {
           lastMsgData == null ? null : DataManagement.toJsonString(lastMsgData);
       _conData[_conNotSeenMsgCount] =
           notSeenMsgCount == null ? '0' : notSeenMsgCount.toString();
-      _conData[_conNotification] = notificationType ?? NotificationType.unMuted.toString();
+      _conData[_conNotificationManually] =
+          notificationTypeManually ?? NotificationType.unMuted.toString();
 
       if (dbOperation == DBOperation.insert) {
         await db.insert(DbData.connectionsTable, _conData);
@@ -206,12 +223,14 @@ class LocalStorage {
       } else {
         final _oldConnPrimaryData = await getConnectionPrimaryData(id: id);
 
-        if(chatWallpaperManually == null){
-          _conData[_conChatWallpaperManually] = _oldConnPrimaryData[_conChatWallpaperManually];
+        if (chatWallpaperManually == null) {
+          _conData[_conChatWallpaperManually] =
+              _oldConnPrimaryData[_conChatWallpaperManually];
         }
 
-        if(notificationType == null){
-          _conData[_conNotification] = _oldConnPrimaryData[_conNotification];
+        if (notificationTypeManually == null) {
+          _conData[_conNotificationManually] =
+              _oldConnPrimaryData[_conNotificationManually];
         }
 
         await db.update(DbData.connectionsTable, _conData,
@@ -332,7 +351,7 @@ class LocalStorage {
 
   /// Get Latest Message For any Chat Message Table
   getLatestChatMessage({required String tableName}) async {
-    try{
+    try {
       final int _totalMessages = await getTotalMessages(tableName: tableName);
 
       final Database db = await database;
@@ -340,10 +359,9 @@ class LocalStorage {
           """ SELECT * FROM $tableName LIMIT ${_totalMessages - 1},1 """);
 
       return _msgSet[0];
-    }catch(e){
+    } catch (e) {
       return null;
     }
-
   }
 
   /// ** Activity Operation ** //
@@ -438,7 +456,6 @@ class LocalStorage {
         currUserProfilePic: _data["profilePic"],
         currUserAbout: _data["about"],
         currUserEmail: _data["email"],
-        currConTone: true,
         dbOperation: DBOperation.insert);
 
     await DataManagement.storeStringData(

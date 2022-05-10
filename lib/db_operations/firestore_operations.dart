@@ -13,11 +13,9 @@ import 'package:generation/db_operations/types.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/incoming_request_provider.dart';
-import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/connection_management_provider_collection/sent_request_provider.dart';
-import '../types/types.dart';
 
 class DBOperations {
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
@@ -221,7 +219,6 @@ class DBOperations {
         .setConnections(_allAvailableUsersData.values.toList());
 
     return _allAvailableUsersData;
-
   }
 
   Future<bool> sendConnectionRequest(
@@ -391,11 +388,28 @@ class DBOperations {
     }
   }
 
-  updateActiveStatus(Map<String,dynamic> status) async {
+  updateActiveStatus(Map<String, dynamic> status) async {
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
         .update({DBPath.status: status});
   }
+
+  updateNotificationStatus(bool updatedNotification) async {
+    await _getInstance
+        .doc('${DBPath.userCollection}/$currUid')
+        .update({DBPath.muted: updatedNotification.toString()});
+  }
+
+  updateParticularConnectionNotificationStatus(
+      String connId, bool updatedNotification) async {
+    await _getInstance
+        .doc(
+            '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$connId')
+        .update({DBPath.muted: updatedNotification.toString()});
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getWallpaperData() async =>
+      await _getInstance.collection(DBPath.wallpaperCollection).get();
 }
 
 class RealTimeOperations {

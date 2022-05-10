@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/wallpaper/wallpaper_provider.dart';
+import 'package:generation/services/download_operations.dart';
+import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +27,8 @@ class ChatWallpaperPreview extends StatefulWidget {
 }
 
 class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
+  final LocalStorage _localStorage = LocalStorage();
+
   @override
   void initState() {
     final _isDarkMode =
@@ -37,8 +42,6 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     return Scaffold(
       backgroundColor: AppColors.getChatBgColor(_isDarkMode),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: _setWallpaperButton(),
       appBar: _headerSection(),
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
@@ -65,6 +68,9 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
       height: MediaQuery.of(context).size.height,
       child: Stack(
         children: [
+          const Center(
+            child: CircularProgressIndicator(),
+          ),
           Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
@@ -78,7 +84,7 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
               leftAligned: false,
               textMsg: "Set Common Wallpaper For Generation",
               top: 80),
-          _setWallpaperButton()
+          _setWallpaperButton(image)
         ],
       ),
     );
@@ -200,7 +206,7 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
     );
   }
 
-  _setWallpaperButton() {
+  _setWallpaperButton(image) {
     return Container(
         alignment: Alignment.bottomCenter,
         margin: const EdgeInsets.only(bottom: 10),
@@ -210,11 +216,33 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
             shape: const RoundedRectangleBorder(
                 side: BorderSide(width: 1, color: AppColors.pureWhiteColor)),
             elevation: 3,
-            onPressed: () {},
+            onPressed: () => _setManualWallpaper(image),
             label: Text(
               "SET WALLPAPER",
               style: TextStyleCollection.secondaryHeadingTextStyle
                   .copyWith(fontSize: 16),
             )));
+  }
+
+  void _setManualWallpaper(image) async {
+    final DownloadOperations _downloadOperations = DownloadOperations();
+    final _downloadedWallpaperPath =
+        await _downloadOperations.downloadWallpaper(image);
+
+    print("Downloaded Wallpaper Path:  $_downloadedWallpaperPath");
+    final _currData = await _localStorage.getDataForCurrAccount();
+    _localStorage.insertUpdateDataCurrAccData(
+        currUserId: _currData["id"],
+        currUserName: _currData["name"],
+        currUserProfilePic: _currData["profilePic"],
+        currUserAbout: _currData["about"],
+        currUserEmail: _currData["email"],
+        dbOperation: DBOperation.update,
+        wallpaperPath: _downloadedWallpaperPath);
+
+    showToast(context,
+        title: "Chat Wallpaper Downloaded Successfully",
+        toastIconType: ToastIconType.success,
+        showFromTop: false);
   }
 }
