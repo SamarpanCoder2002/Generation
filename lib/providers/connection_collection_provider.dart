@@ -76,7 +76,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
               name: connData.data()["name"],
               profilePic: connData.data()["profilePic"],
               about: connData.data()["about"],
-              notificationType: connData.data()["notification"],
               dbOperation: DBOperation.insert);
           _connStreamManagement();
         }
@@ -140,7 +139,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         name: connData["name"],
         profilePic: connData["profilePic"],
         about: connData["about"],
-        notificationType: connData["notification"],
+        notificationTypeManually: connData["notificationManually"],
         dbOperation: DBOperation.update,
         lastMsgData: _lastMsgDataToInsert,
         notSeenMsgCount: notSeenMessages);

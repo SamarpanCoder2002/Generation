@@ -83,3 +83,47 @@ void showPopUpDialog(
             ],
           ));
 }
+
+
+
+void showPopUpDialogManually(
+    BuildContext context, String title, Widget content, VoidCallback onPressed,
+    {String? rightBtnText,
+      String? leftBtnText,
+      bool barrierDismissible = true,
+      bool showCancelBtn = true,
+      VoidCallback? leftOnPressed,
+      Color? bgColor,
+      Color? leftBtnColor}) {
+
+  showDialog(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (_) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+        backgroundColor: bgColor ?? AppColors.splashScreenColor,
+        elevation: 10,
+        title: Center(
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style:
+            TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+          ),
+        ),
+        content: content,
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          if (showCancelBtn)
+            commonTextButton(
+                btnText: leftBtnText ?? "Cancel",
+                onPressed: leftOnPressed ?? () => Navigator.pop(context),
+                borderColor: leftBtnColor ?? AppColors.lightRedColor,
+                textColor: leftBtnColor ?? AppColors.lightRedColor),
+          commonElevatedButton(
+              btnText: rightBtnText ?? "Ok",
+              onPressed: onPressed,
+              bgColor: AppColors.darkBorderGreenColor),
+        ],
+      ));
+}

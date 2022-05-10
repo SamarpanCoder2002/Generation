@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 
@@ -25,18 +26,20 @@ class ConnectionProfileScreen extends StatefulWidget {
 
 class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   final LocalStorage _localStorage = LocalStorage();
+  final DBOperations _dbOperations = DBOperations();
   final bool _isLoading = false;
-  String _notificationStatus = "";
+
+  bool _isActive = false;
 
   _initialize() async {
-    final _connData =
-        await _localStorage.getConnectionPrimaryData(id: widget.connData["id"]);
+    String _oldNotificationStatus =
+        (await _localStorage.getConnectionPrimaryData(
+                id: widget.connData["id"]))["notificationManually"] ??
+            'false';
+
     if (mounted) {
       setState(() {
-        _notificationStatus =
-            _connData["notification"] == NotificationType.muted.toString()
-                ? "Mute"
-                : "Unmute";
+        _isActive = _oldNotificationStatus == 'true';
       });
     }
   }
@@ -84,12 +87,14 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
                 heading: "Email",
                 nameValue: widget.connData["email"] ?? ""),
             const SizedBox(height: 30),
-            _commonSection(
-                iconData: _notificationStatus == "Muted"
-                    ? Icons.notifications_off_outlined
-                    : Icons.notifications_none,
-                heading: "Notification",
-                nameValue: _notificationStatus, onPressed: (){}),
+            // _commonSection(
+            //     iconData: _notificationStatus == "Muted"
+            //         ? Icons.notifications_off_outlined
+            //         : Icons.notifications_none,
+            //     heading: "Notification",
+            //     nameValue: _notificationStatus,
+            //     onPressed: _dialogNotification),
+            _commonToggleSection(),
             const SizedBox(height: 30),
             _commonInputSection(
                 iconData: Icons.wallpaper_outlined,
@@ -208,7 +213,10 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   _commonSection(
       {required IconData iconData,
       required String heading,
-      required String nameValue, VoidCallback? onPressed, IconData? terminalIconData, Color? terminalIconColor}) {
+      required String nameValue,
+      VoidCallback? onPressed,
+      IconData? terminalIconData,
+      Color? terminalIconColor}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return widget.connData.isEmpty
@@ -220,19 +228,16 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
               children: [
                 _nameLeftSection(
                     iconData: iconData, heading: heading, nameValue: nameValue),
-                if(onPressed != null)
+                if (onPressed != null)
                   InkWell(
                       onTap: onPressed,
                       child: Icon(
                         terminalIconData ?? Icons.edit_rounded,
-                        color:
-                        terminalIconColor ?? AppColors.getIconColor(_isDarkMode),
+                        color: terminalIconColor ??
+                            AppColors.getIconColor(_isDarkMode),
                       ))
               ],
-            )
-
-
-          );
+            ));
   }
 
   _nameLeftSection(
@@ -352,5 +357,51 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
         ),
       ],
     );
+  }
+
+  _commonToggleSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _nameLeftSection(
+                iconData:
+                    _isActive ? Icons.notifications_off : Icons.notifications,
+                heading: "Notification",
+                nameValue: _isActive ? "Mute" : "Unmute"),
+            Switch.adaptive(
+              value: _isActive,
+              onChanged: _onNotificationChanged,
+              activeTrackColor: _isDarkMode
+                  ? AppColors.darkBorderGreenColor.withOpacity(0.8)
+                  : AppColors.lightBorderGreenColor.withOpacity(0.8),
+              activeColor: AppColors.locationIconBgColor,
+              inactiveTrackColor: _isDarkMode
+                  ? AppColors.oppositeMsgDarkModeColor
+                  : AppColors.pureBlackColor.withOpacity(0.2),
+            )
+          ],
+        ));
+  }
+
+  void _onNotificationChanged(bool value) {
+    if (mounted) {
+      setState(() {
+        _isActive = value;
+      });
+    }
+
+    _localStorage.insertUpdateConnectionPrimaryData(
+        id: widget.connData["id"],
+        name: widget.connData["name"],
+        profilePic: widget.connData["profilePic"],
+        about: widget.connData["about"],
+        dbOperation: DBOperation.update,
+        notificationTypeManually: value.toString());
+
+    _dbOperations.updateParticularConnectionNotificationStatus(widget.connData["id"], value);
   }
 }

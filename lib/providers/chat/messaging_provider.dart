@@ -71,7 +71,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
             name: _docData["name"],
             profilePic: _docData["profilePic"],
             about: _docData["about"],
-            notificationType: _docData["notification"],
+            notificationTypeManually: _docData["notificationManually"],
             dbOperation: DBOperation.update);
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .updateParticularConnectionData(_docData["id"], _docData);

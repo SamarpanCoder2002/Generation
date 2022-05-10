@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
+import 'package:generation/db_operations/types.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_preview.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/types/types.dart';
@@ -19,6 +21,33 @@ class ChatWallpaperScreen extends StatefulWidget {
 }
 
 class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
+  final DBOperations _dbOperations = DBOperations();
+  bool _isLoading = true;
+
+  _initialize()async{
+    final _wallpaperCollection = await _dbOperations.getWallpaperData();
+    for (final wallpaperCategory in _wallpaperCollection.docs) {
+      if(wallpaperCategory.id == DBPath.brightWallPaper){
+        Provider.of<WallpaperProvider>(context, listen: false).setBrightImagesCollection(wallpaperCategory.data()[DBPath.wallpaperPictureCollection]);
+      }else if(wallpaperCategory.id == DBPath.darkWallPaper){
+        Provider.of<WallpaperProvider>(context, listen: false).setDarkImagesCollection(wallpaperCategory.data()[DBPath.wallpaperPictureCollection]);
+      }else if(wallpaperCategory.id == DBPath.solidColorWallpaper){
+        Provider.of<WallpaperProvider>(context, listen: false).setSolidImagesCollection(wallpaperCategory.data()[DBPath.wallpaperPictureCollection]);
+      }
+    }
+
+    if(mounted){
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    _initialize();
+    super.initState();
+  }
 
 
   @override
@@ -28,7 +57,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
     return Scaffold(
       backgroundColor: AppColors.getBgColor(_isDarkMode),
       appBar: _headerSection(),
-      body: Container(
+      body: _isLoading?const Center():Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),

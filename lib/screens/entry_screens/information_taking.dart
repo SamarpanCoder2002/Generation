@@ -389,7 +389,6 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
         currUserProfilePic: _data["profilePic"],
         currUserAbout: _data["about"],
         currUserEmail: _data["email"],
-        currConTone: true,
         dbOperation: DBOperation.insert);
 
     await DataManagement.storeStringData(

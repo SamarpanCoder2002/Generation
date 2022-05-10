@@ -457,7 +457,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           currUserProfilePic: _updatedData["profilePic"],
           currUserAbout: _updatedData["about"],
           currUserEmail: _editableProfileData["email"],
-          currConTone: _editableProfileData["conversationTone"] == "true",
           dbOperation: DBOperation.update);
     }
 
