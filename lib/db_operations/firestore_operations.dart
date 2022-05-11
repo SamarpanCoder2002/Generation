@@ -95,7 +95,7 @@ class DBOperations {
 
   Future<bool> updateCurrentAccount(updatedData) async {
     try {
-      updatedData["token"] = await _fToken();
+      updatedData[DBPath.token] = await _fToken();
 
       await _getInstance
           .doc('${DBPath.userCollection}/$currUid')
@@ -410,6 +410,14 @@ class DBOperations {
 
   Future<QuerySnapshot<Map<String, dynamic>>> getWallpaperData() async =>
       await _getInstance.collection(DBPath.wallpaperCollection).get();
+
+  updateToken() async {
+    final _getToken = await _fToken();
+    await _getInstance
+        .doc(
+        '${DBPath.userCollection}/$currUid')
+        .update({DBPath.token: _getToken});
+  }
 }
 
 class RealTimeOperations {

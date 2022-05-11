@@ -29,7 +29,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   final DBOperations _dbOperations = DBOperations();
   final bool _isLoading = false;
 
-  bool _isActive = false;
+  bool _isNotificationActive = false;
 
   _initialize() async {
     String _oldNotificationStatus =
@@ -39,7 +39,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
 
     if (mounted) {
       setState(() {
-        _isActive = _oldNotificationStatus == 'true';
+        _isNotificationActive = _oldNotificationStatus == NotificationType.unMuted.toString();
       });
     }
   }
@@ -369,11 +369,11 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
           children: [
             _nameLeftSection(
                 iconData:
-                    _isActive ? Icons.notifications_off : Icons.notifications,
+                    !_isNotificationActive ? Icons.notifications_off : Icons.notifications,
                 heading: "Notification",
-                nameValue: _isActive ? "Mute" : "Unmute"),
+                nameValue: !_isNotificationActive ? "Inactive" : "Active"),
             Switch.adaptive(
-              value: _isActive,
+              value: _isNotificationActive,
               onChanged: _onNotificationChanged,
               activeTrackColor: _isDarkMode
                   ? AppColors.darkBorderGreenColor.withOpacity(0.8)
@@ -390,7 +390,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   void _onNotificationChanged(bool value) {
     if (mounted) {
       setState(() {
-        _isActive = value;
+        _isNotificationActive = value;
       });
     }
 
@@ -400,7 +400,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
         profilePic: widget.connData["profilePic"],
         about: widget.connData["about"],
         dbOperation: DBOperation.update,
-        notificationTypeManually: value.toString());
+        notificationTypeManually: value?NotificationType.unMuted.toString():NotificationType.muted.toString());
 
     _dbOperations.updateParticularConnectionNotificationStatus(widget.connData["id"], value);
   }

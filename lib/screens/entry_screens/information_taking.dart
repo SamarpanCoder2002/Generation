@@ -394,6 +394,8 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     await DataManagement.storeStringData(
         StoredString.accCreatedBefore, DataManagement.toJsonString(_data));
 
+    await _dbOperations.updateToken();
+
     showToast(context,
         title: _response["message"],
         toastIconType: ToastIconType.success,

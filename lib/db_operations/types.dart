@@ -14,4 +14,5 @@ class DBPath{
   static const contents = "contents";
   static const status = "status";
   static const muted = "mute";
+  static const token = "token";
 }
