@@ -18,7 +18,23 @@ class SoundManagementScreen extends StatefulWidget {
 class _SoundManagementScreenState extends State<SoundManagementScreen> {
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
-  bool _isActive = true;
+  bool _isNotificationActive = false;
+
+  _initialize()async{
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+
+    if(mounted){
+      setState(() {
+        _isNotificationActive = _currAccData["notification"] == NotificationType.unMuted.toString();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    _initialize();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +123,7 @@ class _SoundManagementScreenState extends State<SoundManagementScreen> {
         ),
       ),
       trailing: Switch.adaptive(
-        value: _isActive,
+        value: _isNotificationActive,
         onChanged: _onChanged,
         activeTrackColor: _isDarkMode
             ? AppColors.darkBorderGreenColor.withOpacity(0.8)
@@ -123,7 +139,7 @@ class _SoundManagementScreenState extends State<SoundManagementScreen> {
   void _onChanged(bool value) async {
     if (!mounted) return;
     setState(() {
-      _isActive = value;
+      _isNotificationActive = value;
     });
 
     final _currAccData = await _localStorage.getDataForCurrAccount();

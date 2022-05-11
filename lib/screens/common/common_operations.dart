@@ -35,6 +35,7 @@ dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
         _createdBefore["data"], currUserId);
 
     await _dbOperations.updateCurrentAccount(_createdBefore["data"]);
+    await _dbOperations.updateToken();
 
     showToast(context,
         title: "Data Fetched Successfully",
