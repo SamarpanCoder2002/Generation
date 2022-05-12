@@ -209,12 +209,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const CommonSelectionScreen(
                   commonRequirement: CommonRequirement.chatHistory,
                 ))),
-        _commonOption(
-            leadingIconData: Icons.backup_outlined,
-            title: "Chat Backup",
-            terminalIconData: Icons.arrow_forward_ios_outlined,
-            onPressed: () =>
-                Navigation.intent(context, const ChatBackupSettingsScreen())),
+        // _commonOption(
+        //     leadingIconData: Icons.backup_outlined,
+        //     title: "Chat Backup",
+        //     terminalIconData: Icons.arrow_forward_ios_outlined,
+        //     onPressed: () =>
+        //         Navigation.intent(context, const ChatBackupSettingsScreen())),
         _commonOption(
             leadingIconData: Icons.storage,
             title: "Storage",
@@ -239,8 +239,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             terminalIconData: null,
             onPressed: () =>
                 _inputOption.shareTextContent(ShareCommonText.appShareData)),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.08,
+        const SizedBox(
+          height: 60,
         ),
         Center(
           child: Row(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
@@ -24,43 +26,53 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
-    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setContext(context);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setContext(context);
     Provider.of<ChatScrollProvider>(context, listen: false).startListening();
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setPartnerUserId(widget.connectionData["id"]);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setPartnerUserId(widget.connectionData["id"]);
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .disposeTextFieldOperation();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false).initialize();
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).getOldStoredChatMessages();
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).getConnectionDataRealTime(widget.connectionData["id"], context);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getChatWallpaperData(widget.connectionData["id"]);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getOldStoredChatMessages();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getConnectionDataRealTime(widget.connectionData["id"], context);
 
     changeOnlyContextChatColor(_isDarkMode);
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return WillPopScope(
-      onWillPop: () async{
+      onWillPop: () async {
         final bool _isEmojiSectionShowing =
-        Provider.of<ChatCreationSectionProvider>(context, listen: false)
-            .getEmojiActivationState();
+            Provider.of<ChatCreationSectionProvider>(context, listen: false)
+                .getEmojiActivationState();
 
-        if(_isEmojiSectionShowing){
-          Provider.of<ChatCreationSectionProvider>(context, listen: false).updateEmojiActivationState(false);
+        if (_isEmojiSectionShowing) {
+          Provider.of<ChatCreationSectionProvider>(context, listen: false)
+              .updateEmojiActivationState(false);
           Provider.of<ChatCreationSectionProvider>(context, listen: false)
               .backToNormalHeight();
           return false;
         }
 
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false).destroyRealTimeMessaging();
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .destroyRealTimeMessaging();
         Provider.of<ChatScrollProvider>(context, listen: false).stopListening();
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false).clearMessageData();
-        Provider.of<ChatScrollProvider>(context, listen: false).changeScrollAtFirstValue(true);
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .clearMessageData();
+        Provider.of<ChatScrollProvider>(context, listen: false)
+            .changeScrollAtFirstValue(true);
         return true;
       },
       child: Scaffold(
@@ -87,7 +99,7 @@ class _ChatScreenState extends State<ChatScreen> {
   _messageCreationSection() {
     return ScrollToHideWidget(
       scrollController:
-      Provider.of<ChatScrollProvider>(context).getController(),
+          Provider.of<ChatScrollProvider>(context).getController(),
       hideWhenScrollToBottom: false,
       height: Provider.of<ChatCreationSectionProvider>(context)
           .getSectionHeight(context),
@@ -97,32 +109,36 @@ class _ChatScreenState extends State<ChatScreen> {
           backgroundColor: AppColors.transparentColor,
           elevation: 0,
           builder: (_) => MessageCreationSection(
-            context: context,
-          )),
+                context: context,
+              )),
     );
   }
 
-  _chatCollectionSection() => Container(
-    width: MediaQuery.of(context).size.width,
-    height: MediaQuery.of(context).size.height,
-    padding: const EdgeInsets.only(top: 2, left: 10, right: 10),
-    // // Don't Remove that following code
-    // decoration: BoxDecoration(
-    //     image: DecorationImage(
-    //         fit: BoxFit.cover,
-    //         image: NetworkImage(
-    //             "https://images.pexels.com/photos/1612461/pexels-photo-1612461.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"))),
-    child: ListView(
-      shrinkWrap: true,
-      children: [
-        const SizedBox(
-          height: 10,
-        ),
-        MessagingSection(context: context),
-        const SizedBox(
-          height: 10,
-        ),
-      ],
-    ),
-  );
+  _chatCollectionSection() {
+    final _connWallpaper =
+        Provider.of<ChatBoxMessagingProvider>(context).getConnectionWallpaper();
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      padding: const EdgeInsets.only(top: 2, left: 10, right: 10),
+      decoration: _connWallpaper != null && _connWallpaper != ''
+          ? BoxDecoration(
+              image: DecorationImage(
+                  fit: BoxFit.cover, image: FileImage(File(_connWallpaper))))
+          : null,
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          const SizedBox(
+            height: 10,
+          ),
+          MessagingSection(context: context),
+          const SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
+    );
+  }
 }

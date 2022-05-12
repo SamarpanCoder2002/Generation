@@ -465,4 +465,26 @@ class LocalStorage {
     print(
         "stored Data gEr: ${await DataManagement.getStringData(StoredString.accCreatedBefore)}");
   }
+
+  Future<String?> getParticularChatWallpaper(String id) async {
+    final _conPrimaryData =
+        await _localStorageHelper.getConnectionPrimaryData(id: id);
+
+    if (_conPrimaryData[_conChatWallpaperManually] == null.toString()) {
+      final _currAccData = await _localStorageHelper.getDataForCurrAccount();
+      return _currAccData[_currWallpaper];
+    }
+
+    return _conPrimaryData[_conChatWallpaperManually];
+  }
+
+  Future<bool> isThereGlobalChatWallpaper() async{
+    final _currAccData = await _localStorageHelper.getDataForCurrAccount();
+    return _currAccData[_currWallpaper].toString() != null.toString();
+  }
+
+  Future<bool> isThereParticularChatWallpaper(String partnerId) async{
+    final _connPrimaryData = await _localStorageHelper.getConnectionPrimaryData(id: partnerId);
+    return _connPrimaryData[_conChatWallpaperManually].toString() != null.toString();
+  }
 }

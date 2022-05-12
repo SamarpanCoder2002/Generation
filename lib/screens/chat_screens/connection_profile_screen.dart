@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
+import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 
@@ -39,7 +40,8 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
 
     if (mounted) {
       setState(() {
-        _isNotificationActive = _oldNotificationStatus == NotificationType.unMuted.toString();
+        _isNotificationActive =
+            _oldNotificationStatus == NotificationType.unMuted.toString();
       });
     }
   }
@@ -99,7 +101,11 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
             _commonInputSection(
                 iconData: Icons.wallpaper_outlined,
                 text: 'Chat Wallpaper',
-                onPressed: () {}),
+                onPressed: () => Navigation.intent(
+                    context,
+                    const ChatWallpaperScreen(
+                      contentFor: ContentFor.particularConnection,
+                    ))),
             const SizedBox(height: 30),
             _commonInputSection(
                 iconData: Icons.perm_media_outlined,
@@ -368,8 +374,9 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _nameLeftSection(
-                iconData:
-                    !_isNotificationActive ? Icons.notifications_off : Icons.notifications,
+                iconData: !_isNotificationActive
+                    ? Icons.notifications_off
+                    : Icons.notifications,
                 heading: "Notification",
                 nameValue: !_isNotificationActive ? "Inactive" : "Active"),
             Switch.adaptive(
@@ -400,8 +407,11 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
         profilePic: widget.connData["profilePic"],
         about: widget.connData["about"],
         dbOperation: DBOperation.update,
-        notificationTypeManually: value?NotificationType.unMuted.toString():NotificationType.muted.toString());
+        notificationTypeManually: value
+            ? NotificationType.unMuted.toString()
+            : NotificationType.muted.toString());
 
-    _dbOperations.updateParticularConnectionNotificationStatus(widget.connData["id"], value);
+    _dbOperations.updateParticularConnectionNotificationStatus(
+        widget.connData["id"], value);
   }
 }
