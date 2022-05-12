@@ -24,6 +24,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   bool _showVoiceIcon = true;
   final Map<String, dynamic> _selectedMessage = {};
   String _partnerUserId = "";
+  String _localWallpaperPath = '';
   StreamSubscription? _realTimeMessagingSubscription;
   StreamSubscription? _realTimeConnSubscription;
   late BuildContext context;
@@ -40,6 +41,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   getContext() => context;
+
+  getConnectionWallpaper() => _localWallpaperPath;
 
   getMessagesRealtime(String partnerId) {
     _realTimeMessagingSubscription =
@@ -94,8 +97,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
     var _dayShow = _currStatus["date"];
     final _incomingRawDate = DateTime.parse(_currStatus["rawDate"]);
-
     final _currDateTime = DateTime.now();
+
     if (_incomingRawDate.day == _currDateTime.day &&
         _incomingRawDate.month == _currDateTime.month &&
         _incomingRawDate.year == _currDateTime.year) {
@@ -212,6 +215,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   destroyRealTimeMessaging() {
     _realTimeMessagingSubscription?.cancel();
     _realTimeConnSubscription?.cancel();
+    resetLocalWallpaper();
     notifyListeners();
     _removePartnerId();
   }
@@ -523,5 +527,24 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
       getMessagesRealtime(getPartnerUserId());
     });
+  }
+
+  getChatWallpaperData(String partnerId, {String? newWallpaper}) async {
+    if(newWallpaper != null){
+      _localWallpaperPath = newWallpaper;
+      notifyListeners();
+      return;
+    }
+
+    final _wallpaperData =
+        await _localStorage.getParticularChatWallpaper(partnerId);
+    if (_wallpaperData == null || _wallpaperData == null.toString()) return;
+    _localWallpaperPath = _wallpaperData;
+    notifyListeners();
+  }
+
+  void resetLocalWallpaper() {
+    _localWallpaperPath = '';
+    notifyListeners();
   }
 }

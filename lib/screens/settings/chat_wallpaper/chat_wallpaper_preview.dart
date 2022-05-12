@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/providers/wallpaper/wallpaper_provider.dart';
 import 'package:generation/services/download_operations.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -17,9 +18,13 @@ import '../../../services/device_specific_operations.dart';
 class ChatWallpaperPreview extends StatefulWidget {
   final String? imgPath;
   final WallpaperType wallpaperType;
+  final ContentFor contentFor;
 
   const ChatWallpaperPreview(
-      {Key? key, this.imgPath, required this.wallpaperType})
+      {Key? key,
+      this.imgPath,
+      required this.wallpaperType,
+      required this.contentFor})
       : super(key: key);
 
   @override
@@ -225,24 +230,49 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
   }
 
   void _setManualWallpaper(image) async {
-    final DownloadOperations _downloadOperations = DownloadOperations();
-    final _downloadedWallpaperPath =
-        await _downloadOperations.downloadWallpaper(image);
+    String _imageToStore = image ?? widget.imgPath;
 
-    print("Downloaded Wallpaper Path:  $_downloadedWallpaperPath");
-    final _currData = await _localStorage.getDataForCurrAccount();
-    _localStorage.insertUpdateDataCurrAccData(
-        currUserId: _currData["id"],
-        currUserName: _currData["name"],
-        currUserProfilePic: _currData["profilePic"],
-        currUserAbout: _currData["about"],
-        currUserEmail: _currData["email"],
-        dbOperation: DBOperation.update,
-        wallpaperPath: _downloadedWallpaperPath);
+    if (image != null &&
+        (image.toString().startsWith('https') ||
+            image.toString().startsWith('http'))) {
+      final DownloadOperations _downloadOperations = DownloadOperations();
+      final _downloadedWallpaperPath =
+          await _downloadOperations.downloadWallpaper(image);
+      _imageToStore = _downloadedWallpaperPath;
+    }
+
+    if (widget.contentFor == ContentFor.global) {
+      final _currData = await _localStorage.getDataForCurrAccount();
+      _localStorage.insertUpdateDataCurrAccData(
+          currUserId: _currData["id"],
+          currUserName: _currData["name"],
+          currUserProfilePic: _currData["profilePic"],
+          currUserAbout: _currData["about"],
+          currUserEmail: _currData["email"],
+          dbOperation: DBOperation.update,
+          wallpaperPath: _imageToStore);
+    } else {
+      final _partnerUserId =
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .getPartnerUserId();
+      final _particularConnPrimaryData =
+          await _localStorage.getConnectionPrimaryData(id: _partnerUserId);
+      _localStorage.insertUpdateConnectionPrimaryData(
+          id: _particularConnPrimaryData["id"],
+          name: _particularConnPrimaryData["name"],
+          profilePic: _particularConnPrimaryData["profilePic"],
+          about: _particularConnPrimaryData["about"],
+          dbOperation: DBOperation.update,
+          chatWallpaperManually: _imageToStore);
+
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false).getChatWallpaperData(_partnerUserId, newWallpaper: _imageToStore);
+    }
 
     showToast(context,
-        title: "Chat Wallpaper Downloaded Successfully",
+        title: "Chat Wallpaper Set Successfully",
         toastIconType: ToastIconType.success,
         showFromTop: false);
+
+    Navigator.pop(context);
   }
 }

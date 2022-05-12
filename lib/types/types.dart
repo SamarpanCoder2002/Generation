@@ -91,3 +91,8 @@ enum NotificationType{
   muted,
   unMuted
 }
+
+enum ContentFor{
+  global,
+  particularConnection
+}
