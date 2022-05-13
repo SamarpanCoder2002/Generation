@@ -377,7 +377,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   sendMsgManagement(
-      {required String msgType, required message, additionalData}) async {
+      {required String msgType, required message, additionalData, bool forSendMultiple = false, String? incomingConnId}) async {
     /// Collecting Message Corresponding Data
     final _uniqueMsgId = getMsgUniqueId();
     final _msgTime = getCurrentTime();
@@ -530,7 +530,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   getChatWallpaperData(String partnerId, {String? newWallpaper}) async {
-    if(newWallpaper != null){
+    if (newWallpaper != null) {
       _localWallpaperPath = newWallpaper;
       notifyListeners();
       return;
@@ -546,5 +546,45 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   void resetLocalWallpaper() {
     _localWallpaperPath = '';
     notifyListeners();
+  }
+
+  Future<Map<ChatMessageType, dynamic>> getChatHistory(
+      String connId, String connName) async {
+    final _chatMessages = await _localStorage.getOldChatMessages(
+        tableName:
+            DataManagement.generateTableNameForNewConnectionChat(connId));
+    final Map<ChatMessageType, dynamic> _chatHistoryData = {
+      ChatMessageType.text: [],
+      ChatMessageType.image: [],
+      ChatMessageType.video: [],
+      ChatMessageType.audio: [],
+      ChatMessageType.document: [],
+      ChatMessageType.location: [],
+      ChatMessageType.contact: []
+    };
+
+    for (final message in _chatMessages) {
+      if (message['type'] == ChatMessageType.image.toString()) {
+        (_chatHistoryData[ChatMessageType.image] as List<dynamic>).add(message);
+      } else if (message['type'] == ChatMessageType.video.toString()) {
+        (_chatHistoryData[ChatMessageType.video] as List<dynamic>).add(message);
+      } else if (message['type'] == ChatMessageType.audio.toString()) {
+        (_chatHistoryData[ChatMessageType.audio] as List<dynamic>).add(message);
+      } else if (message['type'] == ChatMessageType.document.toString()) {
+        (_chatHistoryData[ChatMessageType.document] as List<dynamic>)
+            .add(message);
+      } else if (message['type'] == ChatMessageType.location.toString()) {
+        (_chatHistoryData[ChatMessageType.location] as List<dynamic>)
+            .add(message);
+      } else if (message['type'] == ChatMessageType.contact.toString()) {
+        (_chatHistoryData[ChatMessageType.contact] as List<dynamic>)
+            .add(message);
+      }
+
+      (_chatHistoryData[ChatMessageType.text] as List<dynamic>).add(
+          """${message['holder'] == MessageHolderType.me.toString() ? 'You' : connName}:  ${message['type'] == ChatMessageType.text.toString() ? message['message'] : '<Non-Text-File>'}\n\n""");
+    }
+
+    return _chatHistoryData;
   }
 }
