@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
@@ -8,6 +6,7 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
+import '../../config/size_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
@@ -27,7 +26,6 @@ class CommonChatListLayout {
       CommonRequirement commonRequirement = CommonRequirement.normal,
       dynamic connectionData,
       Widget? trailingWidget,
-      bool isSelected = false,
       double height = 60.0,
       double? middleWidth,
       double? bottomMargin}) {
@@ -37,10 +35,8 @@ class CommonChatListLayout {
       margin: EdgeInsets.only(bottom: bottomMargin ?? 20),
       child: Row(
         children: [
-          if (commonRequirement == CommonRequirement.chatHistory ||
-              commonRequirement == CommonRequirement.forwardMsg)
-            _selectionButton(
-                isSelected, connectionData, currentIndex, commonRequirement),
+          if (commonRequirement == CommonRequirement.forwardMsg || commonRequirement == CommonRequirement.incomingData)
+            _selectionButton(connectionData, currentIndex, commonRequirement),
           if (commonRequirement != CommonRequirement.normal)
             const SizedBox(width: 20),
           _chatConnectionImage(photo),
@@ -173,20 +169,19 @@ class CommonChatListLayout {
     );
   }
 
-  _selectionButton(bool _isSelected, dynamic connectionData, int currentIndex,
+  _selectionButton(dynamic connectionData, int currentIndex,
       CommonRequirement commonRequirement) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    final _isSelected = Provider.of<ConnectionCollectionProvider>(context)
+        .isConnectionSelected(connectionData["id"]);
 
     return IconButton(
         onPressed: () {
-          if (commonRequirement == CommonRequirement.chatHistory) {
-            connectionData["isSelected"] = !connectionData["isSelected"];
-            Provider.of<ConnectionCollectionProvider>(context, listen: false)
-                .updateParticularSelectionData(connectionData, currentIndex);
-          } else {
-            connectionData["isSelected"] = !connectionData["isSelected"];
-            Provider.of<ConnectionCollectionProvider>(context, listen: false)
-                .selectUnselectMultipleConnection(connectionData, currentIndex);
+          final _response = Provider.of<ConnectionCollectionProvider>(context, listen: false)
+              .onConnectionClick(connectionData["id"]);
+
+          if(!_response){
+            showToast(context, title: 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections', toastIconType: ToastIconType.info, fontSize: 14, showFromTop: false);
           }
         },
         icon: _isSelected
@@ -207,7 +202,8 @@ class CommonChatListLayout {
       return;
     }
 
-    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     Navigation.intent(
         context,

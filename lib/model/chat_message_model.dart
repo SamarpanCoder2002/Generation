@@ -9,6 +9,10 @@ class ChatMessageModel {
   ChatMessageModel(this.type, this.message, this.time, this.holder,
       this.additionalData, this.date);
 
+  factory ChatMessageModel.copy(ChatMessageModel chatMessageModel) =>
+      ChatMessageModel(chatMessageModel.type, chatMessageModel.message, chatMessageModel.time,
+          chatMessageModel.holder, chatMessageModel.additionalData, chatMessageModel.date);
+
   factory ChatMessageModel.toJson(
           {required String type,
           required dynamic message,

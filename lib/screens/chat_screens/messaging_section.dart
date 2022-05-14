@@ -70,9 +70,9 @@ class _MessagingSectionState extends State<MessagingSection> {
       iconColor: AppColors.getIconColor(_isDarkMode),
       onRightSwipe: () => _rightSwipe(messageId, messageData),
       child: InkWell(
-        onTap: () => onMessageTap(messageId, messageData, _selectedMessages),
+        onTap: () => onMessageTap(messageId, ChatMessageModel.copy(messageData), _selectedMessages),
         onLongPress: () =>
-            onMessageLongTap(messageId, messageData, _selectedMessages),
+            onMessageLongTap(messageId, ChatMessageModel.copy(messageData), _selectedMessages),
         child: Container(
           color: AppColors.getSelectedMsgColor(
               _isDarkMode, _selectedMessages[messageId] != null),
@@ -558,6 +558,8 @@ class _MessagingSectionState extends State<MessagingSection> {
   _contactMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final contact = DataManagement.fromJsonString(messageData.message);
+
+    print("Contact is: $contact");
 
     return ConstrainedBox(
         constraints: BoxConstraints(

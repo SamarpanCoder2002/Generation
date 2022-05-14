@@ -23,7 +23,9 @@ Future<String> createImageStoreDir() async => await makeDirectoryOnce(directoryN
 Future<String> createVideoStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.videoDir);
 Future<String> createDocStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.docDir);
 Future<String> createThumbnailStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.thumbnailDir);
-Future<String> createWallpaperStoreDir()  async => await makeDirectoryOnce(directoryName: DirectoryName.wallpaperDir, makeDirPrivate: true, createOnlyOnce: false);
+Future<String> createWallpaperStoreDir()  async => await makeDirectoryOnce(directoryName: DirectoryName.wallpaperDir, makeDirPrivate: true);
+Future<String> createChatHistoryStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.chatHistoryDir, makeDirPrivate: true);
+
 
 
 String createAudioFile({required String dirPath}) => "$dirPath${DateTime.now()}.aac";
@@ -31,3 +33,4 @@ String createImageFile({required String dirPath}) =>  "$dirPath${DateTime.now()}
 String createVideoFile({required String dirPath}) =>  "$dirPath${DateTime.now()}.mp4";
 String createDocFile({required String dirPath, required String extension}) =>  "$dirPath${DateTime.now()}.$extension";
 String createWallpaperFile({required String dirPath}) => "${dirPath}_wallpaper_${DateTime.now()}.png";
+String createChatHistoryFile({required String dirPath, required String connName, required String connId}) => '$dirPath${connName}_$connId.txt';

@@ -9,7 +9,9 @@ import 'package:generation/types/types.dart';
 
 class ConnectionCollectionProvider extends ChangeNotifier {
   List<dynamic> _searchedChatConnectionsDataCollection = [];
-  final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
+
+  //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
+  final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
@@ -174,43 +176,42 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setForSelection() {
-    for (final connection in _chatConnectionsDataCollection) {
-      _selectedSearchedChatConnectionsDataCollection
-          .add({...connection, "isSelected": false});
-    }
-  }
+  // setForSelection() {
+  //   for (final connection in _chatConnectionsDataCollection) {
+  //     _selectedSearchedChatConnectionsDataCollection
+  //         .add({...connection, "isSelected": false});
+  //   }
+  // }
 
-  updateParticularSelectionData(incoming, index) {
-    resetSelectionData();
-    setForSelection();
-    _selectedSearchedChatConnectionsDataCollection[index] = incoming;
-    notifyListeners();
-  }
+  // updateParticularSelectionData(incoming, index) {
+  //   resetSelectionData();
+  //   setForSelection();
+  //   _selectedSearchedChatConnectionsDataCollection[index] = incoming;
+  //   notifyListeners();
+  // }
 
   removeConnectionAtIndex(int index) {
     _searchedChatConnectionsDataCollection.removeAt(index);
     notifyListeners();
   }
 
-  selectUnselectMultipleConnection(incoming, index) {
-    if (_selectedSearchedChatConnectionsDataCollection[index] == null) {
-      _selectedSearchedChatConnectionsDataCollection[index] = incoming;
-    } else {
-      _selectedSearchedChatConnectionsDataCollection.remove(index);
-    }
+  // selectUnselectMultipleConnection(incoming, index) {
+  //   if (_selectedSearchedChatConnectionsDataCollection[index] == null) {
+  //     _selectedSearchedChatConnectionsDataCollection[index] = incoming;
+  //   } else {
+  //     _selectedSearchedChatConnectionsDataCollection.remove(index);
+  //   }
+  //
+  //   notifyListeners();
+  // }
 
-    notifyListeners();
-  }
+  // resetSelectionData() {
+  //   _selectedSearchedChatConnectionsDataCollection.clear();
+  // }
 
-  resetSelectionData() {
-    _selectedSearchedChatConnectionsDataCollection.clear();
-  }
+  //getWillSelectData() => _selectedSearchedChatConnectionsDataCollection;
 
-  getWillSelectData() => _selectedSearchedChatConnectionsDataCollection;
-
-  getWillSelectDataLength() =>
-      _selectedSearchedChatConnectionsDataCollection.length;
+  //getWillSelectDataLength() =>     _selectedSearchedChatConnectionsDataCollection.length;
 
   setFreshData(incomingData) {
     if (incomingData == null) return;
@@ -258,5 +259,54 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   getUsersMap(String id) => _localConnectedUsersMap[id];
 
-  getRealTimeLatestData() {}
+  bool isAnyConnectionSelected() {
+    print("Is Any Connection Selected:  $_selectedConnections");
+    if (_selectedConnections.isEmpty) return false;
+    return _selectedConnections.values.toList().contains(true);
+  }
+
+  bool isConnectionSelected(String connId) =>
+      _selectedConnections[connId] ?? false;
+
+  bool onConnectionClick(String connId) {
+    if(_selectedConnections[connId] != null && _selectedConnections[connId]!){
+      _selectedConnections[connId] = false;
+      notifyListeners();
+      return true;
+    }
+
+    if (_selectedConnections[connId] == null &&
+        getSelectedConnections().length < 3) {
+      _selectedConnections[connId] = true;
+      notifyListeners();
+      return true;
+    }
+
+    if (_selectedConnections[connId] != null &&
+        _selectedConnections[connId] == false &&
+        getSelectedConnections().length < 3) {
+      _selectedConnections[connId] = !(_selectedConnections[connId] ?? false);
+      notifyListeners();
+      return true;
+    }
+
+    notifyListeners();
+    return false;
+  }
+
+  Map<String, dynamic> getSelectedConnections() {
+    Map<String, dynamic> _manuallySelected = {};
+    for (final conn in _selectedConnections.keys.toList()) {
+      if (_selectedConnections[conn]!) {
+        _manuallySelected[conn] = _selectedConnections[conn];
+      }
+    }
+
+    return _manuallySelected;
+  }
+
+  resetSelectionData() {
+    _selectedConnections.clear();
+    notifyListeners();
+  }
 }

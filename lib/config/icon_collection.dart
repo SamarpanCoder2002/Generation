@@ -147,7 +147,7 @@ class ConnectionActionOptions{
         color: AppColors.pureWhiteColor,
         size: 25,
       ),
-      "Delete Chat",
+      "Clear Chat",
       AppColors.cameraIconBgColor,
     ],
     [

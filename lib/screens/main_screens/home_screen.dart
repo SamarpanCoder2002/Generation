@@ -9,6 +9,7 @@ import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
@@ -516,7 +517,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _inputOption.removeConnectedUser(
               _connectionData["id"], _isDarkMode, connectionIndex);
         } else if (index == 1) {
-          _inputOption.activityImageFromCamera();
+          final LocalStorage _localStorage = LocalStorage();
+          _localStorage.deleteDataFromParticularChatConnTable(tableName: DataManagement.generateTableNameForNewConnectionChat(_connectionData["id"]));
         } else if (index == 2) {
           _inputOption.activityImageFromGallery();
         } else if (index == 3) {

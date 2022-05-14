@@ -12,6 +12,7 @@ class DirectoryName {
   static const String docDir = "documents";
   static const String thumbnailDir = "thumbnails";
   static const String wallpaperDir = "wallpaperDir";
+  static const String chatHistoryDir = 'chatHistoryDir';
 }
 
 class MessageData {
