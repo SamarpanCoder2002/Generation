@@ -377,7 +377,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   sendMsgManagement(
-      {required String msgType, required message, additionalData, bool forSendMultiple = false, String? incomingConnId}) async {
+      {required String msgType,
+      required message,
+      additionalData,
+      bool forSendMultiple = false,
+      String? incomingConnId}) async {
     /// Collecting Message Corresponding Data
     final _uniqueMsgId = getMsgUniqueId();
     final _msgTime = getCurrentTime();
@@ -402,7 +406,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
             : additionalData
       }
     };
-    _manageMessageForLocale(_msgLocalData);
+    _manageMessageForLocale(_msgLocalData,
+        forSendMultiple: forSendMultiple, incomingConnId: incomingConnId);
 
     /// ---------------------------------------------------------- ///
 
@@ -413,18 +418,21 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         additionalData: additionalData,
         uniqueMsgId: _uniqueMsgId,
         msgTime: _msgTime,
-        msgDate: _msgDate);
+        msgDate: _msgDate,
+        forSendMultiple: forSendMultiple,
+        incomingConnId: incomingConnId);
   }
 
   /// Making Message Data Ready For Local
-  void _manageMessageForLocale(_msgData) {
+  void _manageMessageForLocale(_msgData,
+      {bool forSendMultiple = false, String? incomingConnId}) {
     print("Message Data to Stoer: $_msgData");
 
-    setSingleNewMessage(_msgData);
+    if (!forSendMultiple) setSingleNewMessage(_msgData);
 
     _localStorage.insertUpdateMsgUnderConnectionChatTable(
         chatConTableName: DataManagement.generateTableNameForNewConnectionChat(
-            getPartnerUserId()),
+            !forSendMultiple ? getPartnerUserId() : incomingConnId),
         id: _msgData.keys.toList()[0],
         holder: _msgData.values.toList()[0][MessageData.holder],
         message: _msgData.values.toList()[0][MessageData.message],
@@ -442,7 +450,9 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       required additionalData,
       required uniqueMsgId,
       required msgTime,
-      required msgDate}) async {
+      required msgDate,
+      bool forSendMultiple = false,
+      String? incomingConnId}) async {
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&
         msgType != ChatMessageType.contact.toString() &&
@@ -481,7 +491,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     };
 
     _dbOperations.sendMessage(
-        partnerId: getPartnerUserId(), msgData: _msgRemoteData);
+        partnerId: !forSendMultiple ? getPartnerUserId() : incomingConnId,
+        msgData: _msgRemoteData);
   }
 
   /// Get Chat Media Storage Reference

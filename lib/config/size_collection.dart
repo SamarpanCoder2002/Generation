@@ -8,4 +8,6 @@ class SizeCollection {
     final sizeInBytes = file.lengthSync();/// Size in Bytes
     return sizeInBytes / (1024 * 1024);
   }
+
+  static const maxConnSelected = 3;
 }

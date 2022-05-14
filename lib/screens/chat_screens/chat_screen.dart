@@ -66,6 +66,16 @@ class _ChatScreenState extends State<ChatScreen> {
           return false;
         }
 
+        final _selectedMessages =
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getSelectedMessage()
+                .isNotEmpty;
+        if (_selectedMessages) {
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .clearSelectedMsgCollection();
+          return false;
+        }
+
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .destroyRealTimeMessaging();
         Provider.of<ChatScrollProvider>(context, listen: false).stopListening();

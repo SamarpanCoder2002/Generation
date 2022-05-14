@@ -9,6 +9,7 @@ import 'package:generation/types/types.dart';
 
 class ConnectionCollectionProvider extends ChangeNotifier {
   List<dynamic> _searchedChatConnectionsDataCollection = [];
+
   //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
@@ -258,21 +259,50 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   getUsersMap(String id) => _localConnectedUsersMap[id];
 
-  bool isAnyConnectionSelected(){
+  bool isAnyConnectionSelected() {
     print("Is Any Connection Selected:  $_selectedConnections");
-    if(_selectedConnections.isEmpty) return false;
+    if (_selectedConnections.isEmpty) return false;
     return _selectedConnections.values.toList().contains(true);
   }
 
-  bool isConnectionSelected(String connId) => _selectedConnections[connId] ?? false;
+  bool isConnectionSelected(String connId) =>
+      _selectedConnections[connId] ?? false;
 
-  onConnectionClick(String connId){
-    if(_selectedConnections[connId] == null){
-      _selectedConnections[connId] = true;
-    }else{
-      _selectedConnections[connId] = !(_selectedConnections[connId] ?? false);
+  bool onConnectionClick(String connId) {
+    if(_selectedConnections[connId] != null && _selectedConnections[connId]!){
+      _selectedConnections[connId] = false;
+      notifyListeners();
+      return true;
     }
+
+    if (_selectedConnections[connId] == null &&
+        getSelectedConnections().length < 3) {
+      _selectedConnections[connId] = true;
+      notifyListeners();
+      return true;
+    }
+
+    if (_selectedConnections[connId] != null &&
+        _selectedConnections[connId] == false &&
+        getSelectedConnections().length < 3) {
+      _selectedConnections[connId] = !(_selectedConnections[connId] ?? false);
+      notifyListeners();
+      return true;
+    }
+
     notifyListeners();
+    return false;
+  }
+
+  Map<String, dynamic> getSelectedConnections() {
+    Map<String, dynamic> _manuallySelected = {};
+    for (final conn in _selectedConnections.keys.toList()) {
+      if (_selectedConnections[conn]!) {
+        _manuallySelected[conn] = _selectedConnections[conn];
+      }
+    }
+
+    return _manuallySelected;
   }
 
   resetSelectionData() {

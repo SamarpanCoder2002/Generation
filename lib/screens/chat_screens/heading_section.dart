@@ -161,13 +161,13 @@ class ChatBoxHeaderSection extends StatelessWidget {
             const SizedBox(
               width: 10,
             ),
-            InkWell(
-              child: Image.asset(
+            IconButton(
+              icon: Image.asset(
                 IconImages.forwardImagePath,
                 width: 20,
                 color: AppColors.getIconColor(_isDarkMode),
               ),
-              onTap: () => Navigation.intent(
+              onPressed: () => Navigation.intent(
                   context,
                   const CommonSelectionScreen(
                       commonRequirement: CommonRequirement.forwardMsg)),

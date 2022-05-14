@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
@@ -8,6 +6,7 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
+import '../../config/size_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
@@ -178,8 +177,12 @@ class CommonChatListLayout {
 
     return IconButton(
         onPressed: () {
-          Provider.of<ConnectionCollectionProvider>(context, listen: false)
+          final _response = Provider.of<ConnectionCollectionProvider>(context, listen: false)
               .onConnectionClick(connectionData["id"]);
+
+          if(!_response){
+            showToast(context, title: 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections', toastIconType: ToastIconType.info, fontSize: 14, showFromTop: false);
+          }
         },
         icon: _isSelected
             ? Icon(
