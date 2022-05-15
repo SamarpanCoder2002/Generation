@@ -96,49 +96,43 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
               height: MediaQuery.of(context).size.height,
               margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
               child: GridView(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 20,
-                    crossAxisSpacing: 20),
+                    crossAxisSpacing: 20, childAspectRatio: MediaQuery.of(context).size.width/430),
                 children: [
                   ...Provider.of<WallpaperProvider>(context)
                       .getWallpaperCategoryCollection()
                       .map((wallpaperData) => InkWell(
                             onTap: () => _imageCategoryTapAction(wallpaperData),
-                            child: SizedBox(
-                              width: 300,
-                              height: 400,
-                              child: Stack(
-                                children: [
-                                  Container(
-                                      height: 150,
-                                      width: 300,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          image: DecorationImage(
-                                              fit: BoxFit.cover,
-                                              image: CachedNetworkImageProvider(
-                                                  wallpaperData["image"])))),
-                                  Container(
-                                    width: 300,
-                                    height: 400,
-                                    alignment: Alignment.bottomCenter,
-                                    child: Text(
-                                      wallpaperData["category"],
-                                      style: TextStyleCollection
-                                          .secondaryHeadingTextStyle
-                                          .copyWith(
-                                        fontSize: 16,
-                                        color: _isDarkMode
-                                            ? AppColors.pureWhiteColor
-                                            : AppColors
-                                                .lightChatConnectionTextColor,
-                                      ),
+                            child: Column(
+                              children: [
+                                Container(
+                                    height: 150,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(8),
+                                        image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: CachedNetworkImageProvider(
+                                                wallpaperData["image"])))),
+                                Container(
+                                  margin: const EdgeInsets.only(top: 10),
+                                  alignment: Alignment.bottomCenter,
+                                  child: Text(
+                                    wallpaperData["category"],
+                                    style: TextStyleCollection
+                                        .secondaryHeadingTextStyle
+                                        .copyWith(
+                                      fontSize: 16,
+                                      color: _isDarkMode
+                                          ? AppColors.pureWhiteColor
+                                          : AppColors
+                                              .lightChatConnectionTextColor,
                                     ),
-                                  )
-                                ],
-                              ),
+                                  ),
+                                )
+                              ],
                             ),
                           )),
                 ],

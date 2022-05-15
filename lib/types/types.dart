@@ -64,7 +64,7 @@ enum CommonRequirement{
   normal,
   localDataStorage,
   forwardMsg,
-  incomingData
+  incomingData,
 }
 
 enum DBOperation{
