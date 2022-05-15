@@ -10,8 +10,8 @@ import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
-import 'package:music_visualizer/music_visualizer.dart';
-import 'package:polls/polls.dart';
+
+//import 'package:polls/polls.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/text_style_collection.dart';
@@ -19,6 +19,7 @@ import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/chat/messaging_provider.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../common/music_visualizer.dart';
 
 class CreateActivity extends StatefulWidget {
   final ActivityContentType activityContentType;
@@ -367,16 +368,16 @@ class _CreateActivityState extends State<CreateActivity> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _pollInstructionSection(),
-            Polls.viewPolls(
-              question: Text(
-                widget.data["question"],
-                style: TextStyleCollection.secondaryHeadingTextStyle,
-              ),
-              children: [
-                ...widget.data["answer"].map((answer) =>
-                    Polls.options(title: answer.keys.toList()[0], value: 0)),
-              ],
-            ),
+            // Polls.viewPolls(
+            //   question: Text(
+            //     widget.data["question"],
+            //     style: TextStyleCollection.secondaryHeadingTextStyle,
+            //   ),
+            //   children: [
+            //     ...widget.data["answer"].map((answer) =>
+            //         Polls.options(title: answer.keys.toList()[0], value: 0)),
+            //   ],
+            // ),
           ],
         ),
       );

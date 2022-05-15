@@ -10,6 +10,7 @@ import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/providers/video_management/video_editing_provider.dart';
+import 'package:generation/providers/video_management/video_show_provider.dart';
 import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
 import 'package:generation/screens/common/button.dart';
@@ -20,7 +21,6 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/types/types.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:music_visualizer/music_visualizer.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -32,6 +32,7 @@ import '../providers/connection_collection_provider.dart';
 import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
+import '../screens/common/music_visualizer.dart';
 import '../screens/common/video_editor_common.dart';
 import 'local_data_management.dart';
 import 'navigation_management.dart';
@@ -490,6 +491,8 @@ class InputOption {
   Future<void> shareTextContent(String textToShare) async =>
       await Share.share(textToShare);
 
+  Future<void> shareFile(File file) async => await Share.shareFiles([file.path]);
+
   _onGalleryPressed() async {
     final data =
         await pickVideoFromCameraAndGallery(fromCamera: false, forChat: false);
@@ -529,8 +532,7 @@ class InputOption {
   }
 
   _commonVideoNavigationForActivity(dynamic data, VideoType videoType) async {
-    final duration =
-        await Provider.of<VideoEditingProvider>(context, listen: false)
+    final duration = Provider.of<VideoShowProvider>(context, listen: false)
             .getVideoDuration(File(data["videoPath"]));
 
     if (duration.inSeconds <= Timings.videoDurationInSec) {
@@ -542,12 +544,13 @@ class InputOption {
             "duration": duration.inSeconds.ceil().toString()
           }));
     } else {
-      Navigation.intent(
-          context,
-          VideoEditingScreen(
-              path: data["videoPath"],
-              videoType: videoType,
-              thumbnailPath: data["thumbnail"]));
+      // Navigation.intent(
+      //     context,
+      //     VideoEditingScreen(
+      //         path: data["videoPath"],
+      //         videoType: videoType,
+      //         thumbnailPath: data["thumbnail"]));
+      showToast(context, title: TextCollection.videoDurationAlert, toastIconType: ToastIconType.info);
     }
   }
 

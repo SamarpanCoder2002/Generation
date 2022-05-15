@@ -125,8 +125,8 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Center(
               child: Image.asset(
-                AppImages.splashScreenLogo,
-                width: MediaQuery.of(context).size.width / 2,
+                AppImages.mainSplashScreenLogo,
+                width: MediaQuery.of(context).size.width / 2.3,
               ),
             ),
             const SizedBox(

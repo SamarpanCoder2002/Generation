@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/size_collection.dart';
+import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/settings/storage/storage_screen.dart';
 import 'package:generation/services/directory_management.dart';
+import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
@@ -198,6 +200,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     await _chatHistoryStoreFile.writeAsString(_historyTextData);
 
     print(await _chatHistoryStoreFile.readAsString());
+
+    _showShareOptions(_chatHistoryStoreFile);
   }
 
   _sendSelectedMessagesToSelectedConnections() async {
@@ -243,24 +247,43 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     Navigator.pop(context);
   }
 
-// _getProperType(element) {
-//   if (element["type"] == IncomingMediaType.image.toString()) {
-//     return ChatMessageType.image.toString();
-//   }
-//   if (element["type"] == IncomingMediaType.video.toString()) {
-//     return ChatMessageType.video.toString();
-//   }
-//   if (element["type"] == IncomingMediaType.file.toString()) {
-//     return ChatMessageType.document.toString();
-//   }
-// }
-//
-// _getThumbnail(element) async {
-//   if (element["type"] == IncomingMediaType.video.toString()) {
-//     return await NativeCallback()
-//         .getTheVideoThumbnail(videoPath: File(element["path"]).path);
-//   }
-//
-//   return "";
-// }
+  void _showShareOptions(File chatHistoryStoreFile) {
+    final InputOption _inputOption = InputOption(context);
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    showModalBottomSheet(
+        context: context,
+        builder: (_) => Container(
+              width: MediaQuery.of(context).size.width,
+              height: 140,
+              color: AppColors.getModalColorSecondary(_isDarkMode),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Center(
+                      child: Text(
+                        "Share Chat History With",
+                        style: TextStyleCollection.secondaryHeadingTextStyle
+                            .copyWith(fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(height: 20,),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          commonElevatedButton(
+                              btnText: 'Connections', onPressed: () {}),
+                          commonElevatedButton(
+                              btnText: 'Other Apps', onPressed: () => _inputOption.shareFile(chatHistoryStoreFile)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ));
+  }
 }

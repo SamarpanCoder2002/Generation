@@ -46,7 +46,7 @@ class ThemeProvider extends ChangeNotifier {
     if (_themeModeType == ThemeModeTypes.lightMode) return false;
 
     final Brightness brightness =
-        SchedulerBinding.instance!.window.platformBrightness;
+        SchedulerBinding.instance.window.platformBrightness;
 
     return brightness == Brightness.dark;
   }

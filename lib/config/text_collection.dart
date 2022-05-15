@@ -1,3 +1,5 @@
+import 'package:generation/config/time_collection.dart';
+
 class AppText {
   static const String appName = "Generation";
   static const String activityHeading = "Activities";
@@ -48,7 +50,9 @@ class FolderData{
   static const dbFolder = ".Databases";
 }
 
-class ShareCommonText{
+class TextCollection{
   /// Terminal Link Should be Replaced by this app link after published to the playstore
   static const String appShareData = "Enjoy Private Chat Message Experience with Modern UI with Free Video Call In Generation\nhttps://generation-launch-page.netlify.app/";
+
+  static const String videoDurationAlert = "Video duration should be within ${Timings.videoDurationInSec} seconds";
 }

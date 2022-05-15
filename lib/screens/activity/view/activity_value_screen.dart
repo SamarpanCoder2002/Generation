@@ -10,15 +10,14 @@ import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/poll_show_provider.dart';
 import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/types/types.dart';
-import 'package:music_visualizer/music_visualizer.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:polls/polls.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../config/time_collection.dart';
 import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/sound_provider.dart';
+import '../../common/music_visualizer.dart';
 
 class ActivityViewer extends StatefulWidget {
   final ActivityModel activityData;
@@ -93,10 +92,11 @@ class _ActivityViewerState extends State<ActivityViewer> {
     } else if (widget.activityData.type ==
         ActivityContentType.audio.toString()) {
       return _audioActivityShow();
-    } else if (widget.activityData.type ==
-        ActivityContentType.poll.toString()) {
-      return _pollActivityShow();
     }
+    // else if (widget.activityData.type ==
+    //     ActivityContentType.poll.toString()) {
+    //   return _pollActivityShow();
+    // }
   }
 
   _textActivityShow() {
@@ -185,14 +185,14 @@ class _ActivityViewerState extends State<ActivityViewer> {
     );
   }
 
-  _pollActivityShow() {
-    return Stack(
-      children: [
-        _pollShowScreen(),
-        _bottomExtraTextSection(),
-      ],
-    );
-  }
+  // _pollActivityShow() {
+  //   return Stack(
+  //     children: [
+  //       _pollShowScreen(),
+  //       _bottomExtraTextSection(),
+  //     ],
+  //   );
+  // }
 
   _pollShowScreen() {
     final _pollShowProvider = Provider.of<PollShowProvider>(context);
@@ -208,25 +208,25 @@ class _ActivityViewerState extends State<ActivityViewer> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Polls(
-            backgroundColor: AppColors.pureWhiteColor,
-            currentUser: _pollShowProvider.getCurrentUser(),
-            voteData: _pollShowProvider.getUsersVoted(),
-            creatorID: '1',
-            children: [
-              ..._pollAnsCollection.map((answer) => Polls.options(
-                  title: answer,
-                  value: _pollShowProvider.getIndexedAnswerValue(
-                      _pollAnsCollection.indexOf(answer))))
-            ],
-            question: Text(
-              _pollShowProvider.getPollQuestion(),
-              style: TextStyleCollection.secondaryHeadingTextStyle,
-            ),
-            onVote: (choice) =>
-                Provider.of<PollShowProvider>(context, listen: false)
-                    .increaseIndexedAnswerValue(choice - 1),
-          ),
+          // Polls(
+          //   backgroundColor: AppColors.pureWhiteColor,
+          //   currentUser: _pollShowProvider.getCurrentUser(),
+          //   voteData: _pollShowProvider.getUsersVoted(),
+          //   creatorID: '1',
+          //   children: [
+          //     // ..._pollAnsCollection.map((answer) => Polls.options(
+          //     //     title: answer,
+          //     //     value: _pollShowProvider.getIndexedAnswerValue(
+          //     //         _pollAnsCollection.indexOf(answer))))
+          //   ],
+          //   question: Text(
+          //     _pollShowProvider.getPollQuestion(),
+          //     style: TextStyleCollection.secondaryHeadingTextStyle,
+          //   ),
+          //   onVote: (choice) =>
+          //       Provider.of<PollShowProvider>(context, listen: false)
+          //           .increaseIndexedAnswerValue(choice - 1),
+          // ),
         ],
       ),
     );
