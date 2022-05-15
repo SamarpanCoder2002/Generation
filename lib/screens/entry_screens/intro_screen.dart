@@ -128,8 +128,8 @@ class _IntroScreensState extends State<IntroScreens> {
   _logoSection() {
     return Center(
       child: Image.asset(
-        AppImages.splashScreenLogo,
-        width: MediaQuery.of(context).size.width / 2.5,
+        AppImages.mainSplashScreenLogo,
+        width: MediaQuery.of(context).size.width / 2.7,
       ),
     );
   }

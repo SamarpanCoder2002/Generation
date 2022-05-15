@@ -266,7 +266,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   hasTextFieldFocus(context) =>
       _focus.hasFocus &&
-      WidgetsBinding.instance!.window.viewInsets.bottom > 0.0;
+      WidgetsBinding.instance.window.viewInsets.bottom > 0.0;
 
   unFocusNode() {
     _focus.unfocus();

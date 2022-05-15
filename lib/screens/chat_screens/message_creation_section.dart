@@ -1,4 +1,3 @@
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/icon_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
@@ -10,7 +9,6 @@ import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:provider/provider.dart';
-import 'package:music_visualizer/music_visualizer.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
@@ -18,6 +16,7 @@ import '../../providers/chat/chat_scroll_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../types/types.dart';
 import '../common/button.dart';
+import '../common/music_visualizer.dart';
 
 class MessageCreationSection extends StatelessWidget {
   final BuildContext context;
@@ -63,7 +62,7 @@ class MessageCreationSection extends StatelessWidget {
             _messageAndVoiceSendButton(),
           ],
         ),
-        if (_isEmojiSectionShowing) _emojiCollectionWidget(),
+        //if (_isEmojiSectionShowing) _emojiCollectionWidget(),
       ],
     );
   }
@@ -367,45 +366,45 @@ class MessageCreationSection extends StatelessWidget {
     );
   }
 
-  Widget _emojiCollectionWidget() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      height: 250,
-      child: EmojiPicker(
-        onEmojiSelected: (category, emoji) {
-          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .insertEmoji(emoji.emoji);
-        },
-        onBackspacePressed: () {
-          // Backspace-Button tapped logic
-          // Remove this line to also remove the button in the UI
-        },
-        config: const Config(
-            columns: 7,
-            emojiSizeMax: 32,
-            // Issue: https://github.com/flutter/flutter/issues/28894
-            verticalSpacing: 0,
-            horizontalSpacing: 0,
-            initCategory: Category.RECENT,
-            bgColor: AppColors.chatDarkBackgroundColor,
-            indicatorColor: Colors.blue,
-            iconColor: Colors.grey,
-            iconColorSelected: Colors.blue,
-            progressIndicatorColor: Colors.blue,
-            backspaceColor: Colors.blue,
-            skinToneDialogBgColor: Colors.white,
-            skinToneIndicatorColor: Colors.grey,
-            enableSkinTones: true,
-            showRecentsTab: true,
-            recentsLimit: 28,
-            noRecentsText: "No Recents",
-            noRecentsStyle: TextStyle(fontSize: 20, color: Colors.black26),
-            tabIndicatorAnimDuration: kTabScrollDuration,
-            categoryIcons: CategoryIcons(),
-            buttonMode: ButtonMode.MATERIAL),
-      ),
-    );
-  }
+  // Widget _emojiCollectionWidget() {
+  //   return SizedBox(
+  //     width: MediaQuery.of(context).size.width,
+  //     height: 250,
+  //     child: EmojiPicker(
+  //       onEmojiSelected: (category, emoji) {
+  //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+  //             .insertEmoji(emoji.emoji);
+  //       },
+  //       onBackspacePressed: () {
+  //         // Backspace-Button tapped logic
+  //         // Remove this line to also remove the button in the UI
+  //       },
+  //       config: const Config(
+  //           columns: 7,
+  //           emojiSizeMax: 32,
+  //           // Issue: https://github.com/flutter/flutter/issues/28894
+  //           verticalSpacing: 0,
+  //           horizontalSpacing: 0,
+  //           initCategory: Category.RECENT,
+  //           bgColor: AppColors.chatDarkBackgroundColor,
+  //           indicatorColor: Colors.blue,
+  //           iconColor: Colors.grey,
+  //           iconColorSelected: Colors.blue,
+  //           progressIndicatorColor: Colors.blue,
+  //           backspaceColor: Colors.blue,
+  //           skinToneDialogBgColor: Colors.white,
+  //           skinToneIndicatorColor: Colors.grey,
+  //           enableSkinTones: true,
+  //           showRecentsTab: true,
+  //           recentsLimit: 28,
+  //           noRecentsText: "No Recents",
+  //           noRecentsStyle: TextStyle(fontSize: 20, color: Colors.black26),
+  //           tabIndicatorAnimDuration: kTabScrollDuration,
+  //           categoryIcons: CategoryIcons(),
+  //           buttonMode: ButtonMode.MATERIAL),
+  //     ),
+  //   );
+  // }
 
   void _manageTextMessage() {
     final TextEditingController? _messageController =

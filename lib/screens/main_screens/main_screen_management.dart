@@ -33,7 +33,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         .getOnlineStatus();
     _dbOperations.updateActiveStatus(_onlineStatus);
 
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _dbOperations.getAvailableUsersData(context);
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .fetchLocalConnectedUsers(context);
@@ -66,7 +66,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

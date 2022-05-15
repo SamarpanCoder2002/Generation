@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_font_icons/flutter_font_icons.dart';
 import 'colors_collection.dart';
 
 class IconCollection {
@@ -117,15 +117,15 @@ class ActivityIconCollection{
       "Audio",
       AppColors.audioIconBgColor
     ],
-    [
-      const Icon(
-        Icons.poll_outlined,
-        color: AppColors.pureWhiteColor,
-        size: 30,
-      ),
-      "Poll",
-      AppColors.personIconBgColor
-    ],
+    // [
+    //   const Icon(
+    //     Icons.poll_outlined,
+    //     color: AppColors.pureWhiteColor,
+    //     size: 30,
+    //   ),
+    //   "Poll",
+    //   AppColors.personIconBgColor
+    // ],
   ];
 }
 

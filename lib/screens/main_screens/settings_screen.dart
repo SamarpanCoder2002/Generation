@@ -238,7 +238,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: "Invite a Friend",
             terminalIconData: null,
             onPressed: () =>
-                _inputOption.shareTextContent(ShareCommonText.appShareData)),
+                _inputOption.shareTextContent(TextCollection.appShareData)),
         const SizedBox(
           height: 60,
         ),

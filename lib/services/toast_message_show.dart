@@ -87,7 +87,7 @@ void showPopUpDialog(
 
 
 void showPopUpDialogManually(
-    BuildContext context, String title, Widget content, VoidCallback onPressed,
+    BuildContext context, String title, Widget? content, VoidCallback onPressed,
     {String? rightBtnText,
       String? leftBtnText,
       bool barrierDismissible = true,

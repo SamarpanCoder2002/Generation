@@ -31,21 +31,16 @@ dependencies:
     sdk: flutter
   provider: ^6.0.2
   shared_preferences: ^2.0.13
-  animations: ^2.0.2
+  flutter_font_icons: ^2.2.5
+  percent_indicator: ^4.2.2
   photo_view: ^0.13.0
-  percent_indicator: ^3.4.0
   just_audio: ^0.9.20
   flutter_linkify: ^5.0.2
   url_launcher: ^6.0.20
   permission_handler: ^9.2.0
   path_provider: ^2.0.9
-  music_visualizer: ^1.0.2
   record: ^3.0.3
   intl: ^0.17.0
-  flutter_icons:
-    git:
-      url: git://github.com/jibiel/flutter-icons.git
-      ref: master
   image_picker: ^0.8.4+10
   open_file: ^3.2.1
   file_picker: ^4.5.0
@@ -53,15 +48,17 @@ dependencies:
   geolocator: ^8.2.0
   google_maps_flutter: ^2.1.2
   contacts_service: ^0.6.3
-  emoji_picker_flutter: ^1.1.2
   fluttertoast: ^8.0.9
-  cached_network_image: ^3.2.0
+  cached_network_image:
+    git:
+      url: https://github.com/XuannThucc/flutter_cached_network_image.git
+      path: cached_network_image
+      ref: ff72f00f142f13d889d7549e013af91cb0b523ab
   flutter_dotenv: ^5.0.2
   razorpay_flutter: ^1.2.9
   share_plus: ^4.0.2
   flutter_colorpicker: ^1.0.3
-  video_editor: ^1.2.4
-  polls: ^1.0.1
+  video_player: ^2.4.2
   smooth_page_indicator: ^1.0.0+2
   swipe_to: ^1.0.2
   receive_sharing_intent: ^1.4.5
@@ -80,8 +77,8 @@ dependencies:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
+  #  flutter_test:
+  #    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
