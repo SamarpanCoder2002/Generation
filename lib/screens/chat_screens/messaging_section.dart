@@ -474,29 +474,17 @@ class _MessagingSectionState extends State<MessagingSection> {
           ],
         );
 
-    _otherDocumentMaintainerWidget() => Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                messageData.message.split("/").last,
-                style: TextStyleCollection.terminalTextStyle
-                    .copyWith(fontSize: 14),
-              ),
-              IconButton(
-                  onPressed: () async {
-                    await SystemFileManagement.openFile(messageData.message);
-
-                    /// Make Toast Here to Show message if file not open
-                  },
-                  icon: const Icon(
-                    Icons.open_in_new,
-                    color: AppColors.pureWhiteColor,
-                  ))
-            ],
+    _otherDocumentMaintainerWidget() => InkWell(
+      onTap: () async => await SystemFileManagement.openFile(messageData.message),
+      child: Padding(
+            padding: const EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
+            child: Text(
+              messageData.message.split("/").last,
+              style: TextStyleCollection.terminalTextStyle
+                  .copyWith(fontSize: 14),
+            ),
           ),
-        );
+    );
 
     return ConstrainedBox(
         constraints: BoxConstraints(

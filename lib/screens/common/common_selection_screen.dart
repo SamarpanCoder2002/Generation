@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/size_collection.dart';
+import 'package:generation/model/chat_message_model.dart';
+import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/settings/storage/storage_screen.dart';
 import 'package:generation/services/directory_management.dart';
@@ -148,11 +150,15 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
       }
       return;
     }
-    return _navigateToLocalStorageSection(_connectionData);
+    if(widget.commonRequirement == CommonRequirement.localDataStorage) {
+      return _navigateToLocalStorageSection(_connectionData);
+    }
+    return {};
   }
 
   _sendBtn() {
-    if (widget.commonRequirement != CommonRequirement.forwardMsg) return;
+    if (widget.commonRequirement != CommonRequirement.forwardMsg &&
+        widget.commonRequirement != CommonRequirement.incomingData) return;
 
     final _isAnyConnectionSelected =
         Provider.of<ConnectionCollectionProvider>(context)
@@ -166,7 +172,16 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     return FloatingActionButton(
       onPressed: () async {
         if (widget.commonRequirement == CommonRequirement.forwardMsg) {
-          await _sendSelectedMessagesToSelectedConnections();
+          final _selectedMessages =
+              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                  .getSelectedMessage();
+          final _messagesCollection = _selectedMessages.values.toList();
+          await _sendMessagesToSelectedConnections(_messagesCollection);
+        } else if (widget.commonRequirement == CommonRequirement.incomingData) {
+          final _messagesCollection =
+              Provider.of<MainScreenNavigationProvider>(context, listen: false)
+                  .getIncomingData();
+          await _sendMessagesToSelectedConnections(_messagesCollection);
         }
       },
       backgroundColor: AppColors.getElevatedBtnColor(_isDarkMode),
@@ -204,12 +219,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     _showShareOptions(_chatHistoryStoreFile);
   }
 
-  _sendSelectedMessagesToSelectedConnections() async {
-    final _selectedMessages =
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .getSelectedMessage();
-    final _messagesCollection = _selectedMessages.values.toList();
-
+  _sendMessagesToSelectedConnections(_messagesCollection) async {
     final _selectedConnections =
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .getSelectedConnections();
@@ -243,13 +253,15 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
         .clearSelectedMsgCollection();
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .resetSelectionData();
+
     Navigator.pop(context);
     Navigator.pop(context);
   }
 
   void _showShareOptions(File chatHistoryStoreFile) {
     final InputOption _inputOption = InputOption(context);
-    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     showModalBottomSheet(
         context: context,
@@ -268,16 +280,22 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                             .copyWith(fontSize: 18),
                       ),
                     ),
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           commonElevatedButton(
-                              btnText: 'Connections', onPressed: () {}),
+                              btnText: 'Connections',
+                              onPressed: () => _sendChatHistoryToConnections(
+                                  chatHistoryStoreFile)),
                           commonElevatedButton(
-                              btnText: 'Other Apps', onPressed: () => _inputOption.shareFile(chatHistoryStoreFile)),
+                              btnText: 'Other Apps',
+                              onPressed: () =>
+                                  _inputOption.shareFile(chatHistoryStoreFile)),
                         ],
                       ),
                     ),
@@ -285,5 +303,31 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                 ),
               ),
             ));
+  }
+
+  _sendChatHistoryToConnections(File chatHistoryStoreFile) {
+    final _date = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getCurrentDate();
+    final _time = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getCurrentTime();
+
+    Provider.of<MainScreenNavigationProvider>(context, listen: false)
+        .setIncomingData([
+      ChatMessageModel.toJson(
+          type: ChatMessageType.document.toString(),
+          message: chatHistoryStoreFile.path,
+          date: _date,
+          time: _time,
+          holder: MessageHolderType.me.toString(),
+          additionalData:
+              DataManagement.toJsonString({"extension-for-document": 'txt'}))
+    ]);
+
+    Navigator.pop(context);
+
+    Navigation.intent(
+        context,
+        const CommonSelectionScreen(
+            commonRequirement: CommonRequirement.incomingData));
   }
 }

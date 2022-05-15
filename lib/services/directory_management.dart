@@ -32,5 +32,5 @@ String createAudioFile({required String dirPath}) => "$dirPath${DateTime.now()}.
 String createImageFile({required String dirPath}) =>  "$dirPath${DateTime.now()}.png";
 String createVideoFile({required String dirPath}) =>  "$dirPath${DateTime.now()}.mp4";
 String createDocFile({required String dirPath, required String extension}) =>  "$dirPath${DateTime.now()}.$extension";
-String createWallpaperFile({required String dirPath}) => "${dirPath}_wallpaper_${DateTime.now()}.png";
-String createChatHistoryFile({required String dirPath, required String connName, required String connId}) => """$dirPath${connName}_Chat History_$connId.txt""";
+String createWallpaperFile({required String dirPath}) => "${dirPath}_chat_wallpaper_${DateTime.now()}.png";
+String createChatHistoryFile({required String dirPath, required String connName, required String connId}) => """$dirPath$connName Chat History.txt""";
