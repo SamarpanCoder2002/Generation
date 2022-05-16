@@ -349,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _commonChatLayout.particularChatConnection(
                     photo: _connectionData["profilePic"] ?? "",
                     heading: _connectionData["name"] ?? "",
-                    subheading: _getSubHeading(_lastMsgData),
+                    subheading: _getSubHeading(_lastMsgData, (_connectionData['name'] ?? '').toString().split(' ').first),
                     lastMsgTime: _lastMsgData?["time"] ?? "",
                     currentIndex: connectionIndex,
                     totalPendingMessages: _connectionData["notSeenMsgCount"],
@@ -622,29 +622,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _getSubHeading(_lastMsgData) {
+  String _getSubHeading(_lastMsgData, String connFirstName) {
     final _msgData = _lastMsgData?["message"] ?? '';
-    if (_msgData == '') return _msgData;
+    var _msgHolder = _lastMsgData?['holder'] ?? MessageHolderType.other.toString();
+    _msgHolder = _msgHolder == MessageHolderType.other.toString()?connFirstName:'Me';
+
+    if (_msgData == '') return '';
 
     if (_lastMsgData["type"] == ChatMessageType.image.toString()) {
-      return '📷  Image';
+      return '$_msgHolder:  📷 Image';
     }
     if (_lastMsgData["type"] == ChatMessageType.video.toString()) {
-      return '📽️  Video';
+      return '$_msgHolder:  📽️ Video';
     }
     if (_lastMsgData["type"] == ChatMessageType.location.toString()) {
-      return '🗺️  Location';
+      return '$_msgHolder:  🗺️ Location';
     }
     if (_lastMsgData["type"] == ChatMessageType.audio.toString()) {
-      return '🎵  Audio';
+      return '$_msgHolder:  🎵 Audio';
     }
     if (_lastMsgData["type"] == ChatMessageType.document.toString()) {
-      return '📃  Document';
+      return '$_msgHolder:  📃 Document';
     }
     if (_lastMsgData["type"] == ChatMessageType.contact.toString()) {
-      return '💁  Contact';
+      return '$_msgHolder:  💁 Contact';
     }
 
-    return _msgData;
+    return '$_msgHolder:  $_msgData';
   }
 }
