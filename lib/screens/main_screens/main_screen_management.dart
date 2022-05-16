@@ -8,7 +8,6 @@ import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
-import 'package:generation/types/types.dart';
 import 'package:provider/provider.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/main_scrolling_provider.dart';

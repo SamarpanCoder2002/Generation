@@ -48,7 +48,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         child: Column(
           children: [
             const SizedBox(height: 15),
-            _searchBar(),
+            if (_getItemCount() != 0) _searchBar(),
             const SizedBox(height: 15),
             _collectionsSection(),
           ],
@@ -106,6 +106,8 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
   }
 
   _collectionsSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     if (_getItemCount() == 0) {
       print("Here");
       return Container(
@@ -114,8 +116,8 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           alignment: Alignment.center,
           child: Text(
             "Not Found",
-            style: TextStyleCollection.secondaryHeadingTextStyle
-                .copyWith(fontSize: 16),
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
           ));
     }
 

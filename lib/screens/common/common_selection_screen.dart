@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/connection_collection_provider.dart';
+import '../../providers/storage/storage_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'chat_connections_common_design.dart';
@@ -126,8 +127,20 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     );
   }
 
-  _navigateToLocalStorageSection(connectionData) {
-    //Navigator.push(context, MaterialPageRoute(builder: (_) => const LocalStorageScreen()));
+  _navigateToLocalStorageSection(connectionData) async{
+
+
+    final _chatHistoryData =
+        await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getChatHistory(connectionData["id"], connectionData["name"]);
+
+    print("Connection Data:   $_chatHistoryData");
+
+    Provider.of<StorageProvider>(context, listen: false).setImagesCollection(_chatHistoryData[ChatMessageType.image]);
+    Provider.of<StorageProvider>(context, listen: false).setVideosCollection(_chatHistoryData[ChatMessageType.video]);
+    Provider.of<StorageProvider>(context, listen: false).setDocumentCollection(_chatHistoryData[ChatMessageType.document]);
+    Provider.of<StorageProvider>(context, listen: false).setAudioCollection(_chatHistoryData[ChatMessageType.audio]);
+
     Navigation.intent(context, const LocalStorageScreen());
   }
 
@@ -188,7 +201,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
       child: Image.asset(
         IconImages.sendImagePath,
         width: 35,
-        color: AppColors.getIconColor(_isDarkMode),
+        color: AppColors.pureWhiteColor,
       ),
     );
   }
@@ -277,7 +290,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                       child: Text(
                         "Share Chat History With",
                         style: TextStyleCollection.secondaryHeadingTextStyle
-                            .copyWith(fontSize: 18),
+                            .copyWith(fontSize: 18, color: AppColors.getModalTextColor(_isDarkMode)),
                       ),
                     ),
                     const SizedBox(
@@ -290,10 +303,12 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                         children: [
                           commonElevatedButton(
                               btnText: 'Connections',
+                              bgColor: AppColors.getTextButtonColor(_isDarkMode, true),
                               onPressed: () => _sendChatHistoryToConnections(
                                   chatHistoryStoreFile)),
                           commonElevatedButton(
                               btnText: 'Other Apps',
+                              bgColor: AppColors.getTextButtonColor(_isDarkMode, true),
                               onPressed: () =>
                                   _inputOption.shareFile(chatHistoryStoreFile)),
                         ],

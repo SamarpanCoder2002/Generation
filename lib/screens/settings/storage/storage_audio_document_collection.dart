@@ -19,30 +19,50 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.getBgColor(_isDarkMode),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        margin: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 10),
-        child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: Provider.of<StorageProvider>(context)
-              .getImagesCollection()
-              .length,
-          itemBuilder: (_, index) => _particularAudioData(index, context),
-        ),
+      body: _getBody(context),
+    );
+  }
+
+  _getBody(BuildContext context) {
+    if (isAudio &&
+        Provider.of<StorageProvider>(context).getAudioCollection().isEmpty) {
+      print("here");
+      return _emptyMedia('No Audios Found', context);
+    }
+
+    if (!isAudio &&
+        Provider.of<StorageProvider>(context).getDocumentCollection().isEmpty) {
+      return _emptyMedia('No Documents Found', context);
+    }
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      margin: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 10),
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: isAudio
+            ? Provider.of<StorageProvider>(context).getAudioCollection().length
+            : Provider.of<StorageProvider>(context)
+                .getDocumentCollection()
+                .length,
+        itemBuilder: (_, index) => _particularData(index, context),
       ),
     );
   }
 
-  _particularAudioData(int index, BuildContext context) {
-    final String _audioFile =
-        Provider.of<StorageProvider>(context).getImagesCollection()[index];
+  _particularData(int index, BuildContext context) {
+    final String _audioDocFile = isAudio
+        ? Provider.of<StorageProvider>(context).getAudioCollection()[index]
+            ['message']
+        : Provider.of<StorageProvider>(context).getDocumentCollection()[index]
+            ['message'];
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return InkWell(
-      onTap: () async => await SystemFileManagement.openFile(_audioFile),
+      onTap: () async => await SystemFileManagement.openFile(_audioDocFile),
       child: Container(
         width: double.maxFinite,
         margin: const EdgeInsets.only(bottom: 20),
@@ -58,16 +78,33 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
                           : "assets/images/document.png"))),
             ),
             const SizedBox(
-              width: 20,
+              width: 5,
             ),
-            Text(
-              _audioFile.split("/").last.split("?").first,
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 80,
+              child: Text(
+                _audioDocFile.split("/").last,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                style: TextStyleCollection.terminalTextStyle.copyWith(
+                    fontSize: 16,
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightChatConnectionTextColor),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  _emptyMedia(String title, BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    return Center(
+        child: Text(title,
+            style: TextStyleCollection.terminalTextStyle.copyWith(
+                fontSize: 16,
+                color: AppColors.getModalTextColor(_isDarkMode))));
   }
 }

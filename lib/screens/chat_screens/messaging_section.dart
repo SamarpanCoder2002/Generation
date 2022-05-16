@@ -42,7 +42,6 @@ class _MessagingSectionState extends State<MessagingSection> {
   //   super.didChangeDependencies();
   // }
 
-
   @override
   Widget build(BuildContext context) {
     final int _totalChatMessages =
@@ -66,16 +65,23 @@ class _MessagingSectionState extends State<MessagingSection> {
     final _selectedMessages =
         Provider.of<ChatBoxMessagingProvider>(context).getSelectedMessage();
 
+    final _isLastMessage = index ==
+        Provider.of<ChatBoxMessagingProvider>(widget.context)
+                .getTotalMessages() -
+            1;
+
     return SwipeTo(
       iconColor: AppColors.getIconColor(_isDarkMode),
       onRightSwipe: () => _rightSwipe(messageId, messageData),
       child: InkWell(
-        onTap: () => onMessageTap(messageId, ChatMessageModel.copy(messageData), _selectedMessages),
-        onLongPress: () =>
-            onMessageLongTap(messageId, ChatMessageModel.copy(messageData), _selectedMessages),
+        onTap: () => onMessageTap(
+            messageId, ChatMessageModel.copy(messageData), _selectedMessages),
+        onLongPress: () => onMessageLongTap(
+            messageId, ChatMessageModel.copy(messageData), _selectedMessages),
         child: Container(
           color: AppColors.getSelectedMsgColor(
               _isDarkMode, _selectedMessages[messageId] != null),
+          margin: EdgeInsets.only(bottom: _isLastMessage ? 10 : 0),
           child: Align(
             alignment: messageData.holder == MessageHolderType.other.toString()
                 ? Alignment.centerLeft
@@ -116,7 +122,7 @@ class _MessagingSectionState extends State<MessagingSection> {
         text: messageData.message,
         onOpen: (link) async {
           try {
-            await launch(link.url);
+            await launchUrl(Uri.parse(link.url));
           } catch (e) {
             throw 'Could not launch $link';
           }
@@ -152,8 +158,10 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _getPerfectMessageContainer({required ChatMessageModel messageData}) {
     if (Provider.of<ChatScrollProvider>(context).getScrollAtFirst) {
-      Provider.of<ChatScrollProvider>(context, listen: false)
-          .animateToBottom(scrollDuration: 100, updateScrollAtFirstValue: true, extraScroll: 200);
+      Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom(
+          scrollDuration: 100,
+          updateScrollAtFirstValue: true,
+          extraScroll: 200);
     }
 
     if (messageData.type == ChatMessageType.text.toString()) {
@@ -475,16 +483,18 @@ class _MessagingSectionState extends State<MessagingSection> {
         );
 
     _otherDocumentMaintainerWidget() => InkWell(
-      onTap: () async => await SystemFileManagement.openFile(messageData.message),
-      child: Padding(
-            padding: const EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
+          onTap: () async =>
+              await SystemFileManagement.openFile(messageData.message),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(bottom: 20, left: 10, right: 10, top: 10),
             child: Text(
               messageData.message.split("/").last,
-              style: TextStyleCollection.terminalTextStyle
-                  .copyWith(fontSize: 14),
+              style:
+                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
             ),
           ),
-    );
+        );
 
     return ConstrainedBox(
         constraints: BoxConstraints(

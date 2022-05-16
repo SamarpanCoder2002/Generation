@@ -560,7 +560,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   Future<Map<ChatMessageType, dynamic>> getChatHistory(
-      String connId, String connName) async {
+      String connId, String? connName) async {
     final _chatMessages = await _localStorage.getOldChatMessages(
         tableName:
             DataManagement.generateTableNameForNewConnectionChat(connId));
@@ -593,7 +593,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       }
 
       (_chatHistoryData[ChatMessageType.text] as List<dynamic>).add(
-          """${message['holder'] == MessageHolderType.me.toString() ? 'You' : connName}:  ${message['type'] == ChatMessageType.text.toString() ? message['message'] : '<Non-Text-File>'}\n\n""");
+          """${message['holder'] == MessageHolderType.me.toString() ? 'You' : connName ?? ''}:  ${message['type'] == ChatMessageType.text.toString() ? message['message'] : '<Non-Text-File>'}\n\n""");
     }
 
     return _chatHistoryData;

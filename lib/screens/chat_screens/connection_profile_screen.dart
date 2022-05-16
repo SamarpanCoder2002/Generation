@@ -8,11 +8,14 @@ import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../providers/chat/messaging_provider.dart';
+import '../../providers/storage/storage_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
 import '../../types/types.dart';
 import '../common/image_showing_screen.dart';
+import '../settings/storage/storage_screen.dart';
 
 class ConnectionProfileScreen extends StatefulWidget {
   final Map<String, dynamic> connData;
@@ -110,7 +113,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
             _commonInputSection(
                 iconData: Icons.perm_media_outlined,
                 text: 'Media',
-                onPressed: () {}),
+                onPressed: _navigateToLocalStorageScreen),
             const SizedBox(height: 30),
             _commonInputSection(
                 iconData: Icons.person_add_disabled,
@@ -413,5 +416,24 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
 
     _dbOperations.updateParticularConnectionNotificationStatus(
         widget.connData["id"], value);
+  }
+
+  void _navigateToLocalStorageScreen() async {
+    final _chatHistoryData =
+        await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getChatHistory(widget.connData["id"], widget.connData["name"]);
+
+    print("Connection Data:   $_chatHistoryData");
+
+    Provider.of<StorageProvider>(context, listen: false)
+        .setImagesCollection(_chatHistoryData[ChatMessageType.image]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setVideosCollection(_chatHistoryData[ChatMessageType.video]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setDocumentCollection(_chatHistoryData[ChatMessageType.document]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setAudioCollection(_chatHistoryData[ChatMessageType.audio]);
+
+    Navigation.intent(context, const LocalStorageScreen());
   }
 }

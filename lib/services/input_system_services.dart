@@ -9,7 +9,6 @@ import 'package:generation/config/time_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
-import 'package:generation/providers/video_management/video_editing_provider.dart';
 import 'package:generation/providers/video_management/video_show_provider.dart';
 import 'package:generation/screens/chat_screens/contacts_management/contacts_collection.dart';
 import 'package:generation/screens/chat_screens/maps_support/map_large_showing_dialog.dart';
@@ -24,6 +23,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../config/images_path_collection.dart';
 import '../providers/chat/chat_scroll_provider.dart';
@@ -33,7 +33,6 @@ import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
 import '../screens/common/music_visualizer.dart';
-import '../screens/common/video_editor_common.dart';
 import 'local_data_management.dart';
 import 'navigation_management.dart';
 import '../types/types.dart';
@@ -402,7 +401,7 @@ class InputOption {
       {required String phoneNumber, required bool isDarkMode}) {
     openSms() async {
       try {
-        await launch("sms:$phoneNumber");
+        await launchUrlString("sms:$phoneNumber");
         Navigator.pop(context);
       } catch (e) {
         /// Show Error Toast
@@ -411,7 +410,7 @@ class InputOption {
 
     callToNumber() async {
       try {
-        await launch("tel:$phoneNumber");
+        await launchUrlString("tel:$phoneNumber");
         Navigator.pop(context);
       } catch (e) {
         /// Show Error Toast
@@ -420,7 +419,7 @@ class InputOption {
 
     openInWhatsapp() async {
       try {
-        await launch("whatsapp://send?phone=$phoneNumber");
+        await launchUrlString("whatsapp://send?phone=$phoneNumber");
         Navigator.pop(context);
       } catch (e) {
         /// Show Error Toast
@@ -472,8 +471,6 @@ class InputOption {
   Future sendSupportMail(String subject, String body) async {
     final supportMail = DataManagement.getEnvData(EnvFileKey.supportMail);
 
-    print("Support Mail: $supportMail");
-
     final Uri params = Uri(
       scheme: 'mailto',
       path: supportMail,
@@ -482,7 +479,7 @@ class InputOption {
 
     final String url = params.toString();
     try {
-      await launch(url);
+      await launchUrl(Uri.parse(url));
     } catch (e) {
       debugPrint('Support Mail Sending Error: ${e.toString()}');
     }
@@ -492,6 +489,14 @@ class InputOption {
       await Share.share(textToShare);
 
   Future<void> shareFile(File file) async => await Share.shareFiles([file.path]);
+
+  openUrl(String url){
+    try{
+      launchUrl(Uri.parse(url));
+    }catch(e){
+      print("Error in Open Url:  $e");
+    }
+  }
 
   _onGalleryPressed() async {
     final data =

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
-import 'package:generation/screens/settings/chat_backup.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
 import 'package:generation/screens/settings/sound_management.dart';
 import 'package:generation/screens/settings/support/support_management.dart';
@@ -54,7 +53,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         margin: const EdgeInsets.only(left: 23),
         child: Text(
           "Settings",
-          style: TextStyleCollection.headingTextStyle.copyWith(fontSize: 20,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+          style: TextStyleCollection.headingTextStyle.copyWith(
+              fontSize: 20,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor),
         ));
   }
 
@@ -62,7 +65,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return Theme(
-      data: Theme.of(context).copyWith(backgroundColor: AppColors.getBgColor(_isDarkMode), dividerColor: AppColors.transparentColor),
+      data: Theme.of(context).copyWith(
+          backgroundColor: AppColors.getBgColor(_isDarkMode),
+          dividerColor: AppColors.transparentColor),
       child: ExpansionTile(
         backgroundColor: AppColors.getBgColor(_isDarkMode),
         leading: Icon(
@@ -71,8 +76,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(
           "App theme",
-          style: TextStyleCollection.secondaryHeadingTextStyle
-              .copyWith(fontSize: 16,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor,fontWeight: FontWeight.normal,),
+          style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+            fontSize: 16,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor,
+            fontWeight: FontWeight.normal,
+          ),
         ),
         trailing: Icon(
           Icons.arrow_drop_down_outlined,
@@ -105,7 +115,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               await Provider.of<ThemeProvider>(context, listen: false)
                   .setThemeData(correspondingTheme);
           changeContextTheme(_isDarkMode);
-
         },
         child: ListTile(
           visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
@@ -120,7 +129,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           contentPadding: const EdgeInsets.only(left: 20),
           title: Text(
             tileText,
-            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                color: _isDarkMode
+                    ? AppColors.pureWhiteColor
+                    : AppColors.lightChatConnectionTextColor),
           ),
         ));
   }
@@ -152,8 +164,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 Text(
                   title,
-                  style: TextStyleCollection.secondaryHeadingTextStyle
-                      .copyWith(fontSize: 16, fontWeight: FontWeight.normal,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+                  style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                      color: _isDarkMode
+                          ? AppColors.pureWhiteColor
+                          : AppColors.lightChatConnectionTextColor),
                 )
               ],
             ),
@@ -240,23 +256,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () =>
                 _inputOption.shareTextContent(TextCollection.appShareData)),
         const SizedBox(
-          height: 60,
+          height: 40,
         ),
         Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Created By ",
-                  style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
-              Text(
-                "Samarpan Dasgupta",
-                style: TextStyleCollection.secondaryHeadingTextStyle
-                    .copyWith(color: AppColors.normalBlueColor),
+                  style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                      color: _isDarkMode
+                          ? AppColors.pureWhiteColor
+                          : AppColors.lightChatConnectionTextColor)),
+              InkWell(
+                onTap: _onClickMyName,
+                child: Text(
+                  "Samarpan Dasgupta",
+                  style: TextStyleCollection.secondaryHeadingTextStyle
+                      .copyWith(color: AppColors.normalBlueColor),
+                ),
               )
             ],
           ),
         )
       ],
     );
+  }
+
+  void _onClickMyName() {
+    final InputOption _inputOption = InputOption(context);
+    _inputOption.openUrl(TextCollection.myWebsite);
   }
 }

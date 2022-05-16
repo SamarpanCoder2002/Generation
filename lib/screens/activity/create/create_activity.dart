@@ -57,8 +57,6 @@ class _CreateActivityState extends State<CreateActivity> {
 
   @override
   Widget build(BuildContext context) {
-    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-
     return WillPopScope(
       onWillPop: () async {
         if (widget.activityContentType == ActivityContentType.audio) {
