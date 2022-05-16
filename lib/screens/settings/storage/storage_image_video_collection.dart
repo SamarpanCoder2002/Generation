@@ -3,13 +3,15 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/storage/storage_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:generation/types/types.dart';
+import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/theme_provider.dart';
-import '../../../providers/wallpaper/wallpaper_provider.dart';
 import '../../../services/device_specific_operations.dart';
 
 class StorageImageAndVideoCollection extends StatelessWidget {
@@ -25,38 +27,63 @@ class StorageImageAndVideoCollection extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.getBgColor(_isDarkMode),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, mainAxisSpacing: 20, crossAxisSpacing: 20),
-          itemCount: Provider.of<StorageProvider>(context)
-              .getImagesCollection()
-              .length,
-          itemBuilder: (_, index) => _particularImage(index, context),
-        ),
+      body: _getBody(context),
+    );
+  }
+
+  _getBody(BuildContext context) {
+    if (showVideoPlayIcon &&
+        Provider.of<StorageProvider>(context).getVideosCollection().isEmpty) {
+      return _emptyMedia('No Videos Found', context);
+    }
+
+    if (!showVideoPlayIcon &&
+        Provider.of<StorageProvider>(context).getImagesCollection().isEmpty) {
+      return _emptyMedia('No Images Found', context);
+    }
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3, mainAxisSpacing: 20, crossAxisSpacing: 20),
+        itemCount: showVideoPlayIcon
+            ? Provider.of<StorageProvider>(context).getVideosCollection().length
+            : Provider.of<StorageProvider>(context)
+                .getImagesCollection()
+                .length,
+        itemBuilder: (_, index) => _particularData(index, context),
       ),
     );
   }
 
-  _particularImage(int index, BuildContext context) {
-    final _extractedData =
-        Provider.of<StorageProvider>(context).getImagesCollection()[index];
+  _emptyMedia(String title, BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    return Center(
+        child: Text(title,
+            style: TextStyleCollection.terminalTextStyle.copyWith(
+                fontSize: 16,
+                color: AppColors.getModalTextColor(_isDarkMode))));
+  }
+
+  _particularData(int index, BuildContext context) {
+    final _extractedData = showVideoPlayIcon
+        ? Provider.of<StorageProvider>(context).getVideosCollection()[index]
+        : Provider.of<StorageProvider>(context).getImagesCollection()[index];
 
     _onTapped() async {
       if (showVideoPlayIcon) {
-        /// When Integrate Functions later, Open Video from phone app write here
-        /// await OpenFile.open("give_local_video_file_path_here");
+        await OpenFile.open(_extractedData['message']);
       } else {
         makeStatusBarTransparent();
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (_) => ImageShowingScreen(
-                      imgPath: _extractedData,
-                      imageType: ImageType.network,
+                      imgPath: _extractedData['message'],
+                      imageType: ImageType.file,
                       isCovered: true,
                     ))).then((value) => showStatusAndNavigationBar());
       }
@@ -66,8 +93,12 @@ class StorageImageAndVideoCollection extends StatelessWidget {
       onTap: _onTapped,
       child: Stack(
         children: [
-          _onlyImageSection(_extractedData),
-          if (showVideoPlayIcon) _forShowingVideoFile(_extractedData),
+          _onlyImageSection(showVideoPlayIcon
+              ? DataManagement.fromJsonString(
+                  _extractedData['additionalData'])['thumbnail']
+              : _extractedData['message']),
+          if (showVideoPlayIcon)
+            _forShowingVideoFile(_extractedData['message']),
         ],
       ),
     );
@@ -92,9 +123,9 @@ class StorageImageAndVideoCollection extends StatelessWidget {
           size: 40,
           color: AppColors.darkBorderGreenColor,
         ),
-        onPressed: () {
+        onPressed: () async {
           /// When Integrate Functions later, Open Video from phone app write here
-          /// await OpenFile.open("give_local_video_file_path_here");
+          await OpenFile.open(extractedData);
         },
       ),
     );
