@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generation/config/text_collection.dart';
 import 'package:generation/db_operations/db_models.dart';
 import 'package:generation/db_operations/helper.dart';
 import 'package:generation/db_operations/types.dart';
@@ -16,8 +18,11 @@ import 'package:generation/providers/connection_management_provider_collection/i
 import 'package:provider/provider.dart';
 
 import '../providers/connection_management_provider_collection/sent_request_provider.dart';
+import '../services/local_data_management.dart';
 
 class DBOperations {
+  final MessagingOperation _messagingOperation = MessagingOperation();
+
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
 
   String get currUid => FirebaseAuth.instance.currentUser?.uid ?? "";
@@ -341,7 +346,11 @@ class DBOperations {
   }
 
   Future<bool> sendMessage(
-      {required String partnerId, required dynamic msgData}) async {
+      {required String partnerId,
+      required dynamic msgData,
+      required String token,
+      required String title,
+      required String body}) async {
     try {
       await _getInstance
           .doc(
@@ -349,6 +358,10 @@ class DBOperations {
           .set({
         DBPath.data: FieldValue.arrayUnion([msgData])
       }, SetOptions(merge: true));
+
+      _messagingOperation.sendNotification(
+          deviceToken: token, title: title, body: body);
+
       return true;
     } catch (e) {
       print("ERROR in send MSg: $e");
@@ -414,8 +427,7 @@ class DBOperations {
   updateToken() async {
     final _getToken = await _fToken();
     await _getInstance
-        .doc(
-        '${DBPath.userCollection}/$currUid')
+        .doc('${DBPath.userCollection}/$currUid')
         .update({DBPath.token: _getToken});
   }
 }
@@ -448,4 +460,25 @@ class RealTimeOperations {
   Stream<DocumentSnapshot<Map<String, dynamic>>> getConnectionData(
           String partnerId) =>
       _getInstance.doc('${DBPath.userCollection}/$partnerId').snapshots();
+}
+
+class MessagingOperation {
+  Future<int> sendNotification(
+      {required String deviceToken,
+      required String title,
+      required String body}) async {
+    final String _serverKey =
+        DataManagement.getEnvData(EnvFileKey.serverKey) ?? '';
+
+    final Response response = await post(
+      Uri.parse(NotifyManagement.sendNotificationUrl),
+      headers: NotifyManagement.sendNotificationHeader(_serverKey),
+      body: NotifyManagement.bodyData(
+          title: title, body: body, deviceToken: deviceToken),
+    );
+
+    print('Response is: ${response.statusCode}    ${response.body}');
+
+    return response.statusCode;
+  }
 }

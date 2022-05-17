@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
@@ -11,8 +12,9 @@ import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _initializeFirebase();
   await DataManagement.loadEnvData();
+  _initializeFirebase();
+
   runApp(const GenerationEntry());
 }
 
@@ -40,6 +42,41 @@ class GenerationEntry extends StatelessWidget {
   }
 }
 
-_initializeFirebase(){
-  Firebase.initializeApp();
+_initializeFirebase() async {
+  await Firebase.initializeApp();
+  await notificationInitialize();
+
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+
+  /// For Background Message Handling
+  FirebaseMessaging.onBackgroundMessage(backgroundMsgAction);
+
+  /// For Foreground Message Handling
+  FirebaseMessaging.onMessage.listen(foregroundMessageAction);
+}
+
+Future<void> notificationInitialize() async {
+  print(
+      "Topic :  ${DataManagement.getEnvData(EnvFileKey.firebaseMessagingTopic)}");
+
+  /// Important to subscribe a topic to send and receive message using FCM via http
+  await FirebaseMessaging.instance.subscribeToTopic(
+      DataManagement.getEnvData(EnvFileKey.firebaseMessagingTopic) ?? '');
+
+  /// Foreground Notification Options Enabled
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  print("FIREBASE MESSAGING:  ${FirebaseMessaging.instance}");
+}
+
+Future<void> backgroundMsgAction(RemoteMessage message) async {
+  print("Background MEssage is: ${message.data}");
+}
+
+void foregroundMessageAction(RemoteMessage event) {
+  print("Foreground Message data is: ${event.data}");
 }
