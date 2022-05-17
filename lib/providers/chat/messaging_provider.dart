@@ -24,6 +24,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   bool _showVoiceIcon = true;
   final Map<String, dynamic> _selectedMessage = {};
   String _partnerUserId = "";
+  String _connToken = "";
   String _localWallpaperPath = '';
   StreamSubscription? _realTimeMessagingSubscription;
   StreamSubscription? _realTimeConnSubscription;
@@ -66,6 +67,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         _realTimeOperations.getConnectionData(partnerId).listen((docSnapShot) {
       final _docData = docSnapShot.data();
 
+      print("Connection Document Data: $_docData");
+
+      setToken(_docData!['token']);
+
       if (_docData != null && _docData.isNotEmpty) {
         setCurrStatus(_docData[DBPath.status] ?? {});
 
@@ -80,6 +85,18 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
             .updateParticularConnectionData(_docData["id"], _docData);
       }
     });
+  }
+
+  setToken(String token) {
+    _connToken = token;
+    notifyListeners();
+  }
+
+  getToken() => _connToken;
+
+  clearToken() {
+    _connToken = '';
+    notifyListeners();
   }
 
   setCurrStatus(Map<String, dynamic> updatedStatus) {
@@ -216,6 +233,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _realTimeMessagingSubscription?.cancel();
     _realTimeConnSubscription?.cancel();
     resetLocalWallpaper();
+    clearToken();
     notifyListeners();
     _removePartnerId();
   }
@@ -265,8 +283,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   getFocusNode() => _focus;
 
   hasTextFieldFocus(context) =>
-      _focus.hasFocus &&
-      WidgetsBinding.instance.window.viewInsets.bottom > 0.0;
+      _focus.hasFocus && WidgetsBinding.instance.window.viewInsets.bottom > 0.0;
 
   unFocusNode() {
     _focus.unfocus();
@@ -490,9 +507,12 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       }
     };
 
+    final _notificationData = _rendererForNotification(msgType, _remoteMsg);
+
     _dbOperations.sendMessage(
         partnerId: !forSendMultiple ? getPartnerUserId() : incomingConnId,
-        msgData: _msgRemoteData);
+        msgData: _msgRemoteData,
+        token: getToken(), title: _notificationData['title'], body: _notificationData['body']);
   }
 
   /// Get Chat Media Storage Reference
@@ -597,5 +617,40 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     }
 
     return _chatHistoryData;
+  }
+
+  Map<String, dynamic> _rendererForNotification(String _msgType, String msgData) {
+    final _currUserName =
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .getCurrAccData()['name'];
+    Map<String, dynamic> _notificationData = {
+      'title': """$_currUserName send you a """,
+      'body': '',
+    };
+
+    if (_msgType == ChatMessageType.text.toString()) {
+      _notificationData['title'] += 'Message';
+      _notificationData['body'] = msgData;
+    } else if (_msgType == ChatMessageType.image.toString()) {
+      _notificationData['title'] += 'Image';
+
+    } else if (_msgType == ChatMessageType.video.toString()) {
+      _notificationData['title'] += 'Video';
+
+    } else if (_msgType == ChatMessageType.audio.toString()) {
+      _notificationData['title'] += 'Audio';
+
+    } else if (_msgType == ChatMessageType.document.toString()) {
+      _notificationData['title'] += 'Document';
+
+    } else if (_msgType == ChatMessageType.location.toString()) {
+      _notificationData['title'] += 'Location';
+
+    } else if (_msgType == ChatMessageType.contact.toString()) {
+      _notificationData['title'] += 'Contact';
+
+    }
+
+    return _notificationData;
   }
 }

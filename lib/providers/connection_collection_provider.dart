@@ -22,11 +22,21 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       String,
       Map<Stream<DocumentSnapshot<Map<String, dynamic>>>,
           StreamSubscription?>> _realTimeMsgListeners = {};
+  Map<String, dynamic> _currAccData = {};
 
   initialize({bool update = false}) {
     _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
+    _fetchCurrAccData(update: update);
     if (update) notifyListeners();
   }
+
+  _fetchCurrAccData({bool update = false}) async{
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+    this._currAccData = _currAccData;
+    if (update) notifyListeners();
+  }
+
+  getCurrAccData() => _currAccData;
 
   getAllChatConnectionData() => _chatConnectionsDataCollection;
 
@@ -269,7 +279,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       _selectedConnections[connId] ?? false;
 
   bool onConnectionClick(String connId) {
-    if(_selectedConnections[connId] != null && _selectedConnections[connId]!){
+    if (_selectedConnections[connId] != null && _selectedConnections[connId]!) {
       _selectedConnections[connId] = false;
       notifyListeners();
       return true;

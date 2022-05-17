@@ -1,4 +1,5 @@
 import 'package:generation/config/time_collection.dart';
+import 'package:generation/services/local_data_management.dart';
 
 class AppText {
   static const String appName = "Generation";
@@ -37,6 +38,8 @@ class EnvFileKey{
   static const rzpAPIKEY = "RZP_API_KEY";
   static const dbName = "DATABASE_NAME";
   static const baseUrl = "BASE_URL";
+  static const firebaseMessagingTopic = "topicToSubscribe";
+  static const serverKey = "serverKey";
 }
 
 class DbData{
@@ -55,4 +58,36 @@ class TextCollection{
   static const String appShareData = "Enjoy Private Chat Message Experience with Modern UI with Free Video Call In Generation\nhttps://generation-launch-page.netlify.app/";
   static const String videoDurationAlert = "Video duration should be within ${Timings.videoDurationInSec} seconds";
   static const String myWebsite = 'https://samarpandasgupta.com/';
+}
+
+class NotifyManagement{
+  static const String sendNotificationUrl = 'https://fcm.googleapis.com/fcm/send';
+
+  static sendNotificationHeader(_serverKey){
+    return <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'key=$_serverKey',
+    };
+  }
+
+  static bodyData({required String title, required String body, required String deviceToken}){
+    return DataManagement.toJsonString(<String, dynamic>{
+      'notification': <String, dynamic>{
+        'body': body,
+        'title': title,
+        "android_channel_id": "high_importance_channel",
+        "sound": "default",
+        "priority": "high",
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+      },
+      'priority': 'high',
+      'data': <String, dynamic>{
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+        'id': '1',
+        'status': 'done',
+        "collapse_key": "type_a",
+      },
+      'to': deviceToken,
+    });
+  }
 }
