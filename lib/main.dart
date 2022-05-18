@@ -4,9 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/providers/providers_collection.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
+import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
 
@@ -56,9 +58,6 @@ _initializeFirebase() async {
 }
 
 Future<void> notificationInitialize() async {
-  print(
-      "Topic :  ${DataManagement.getEnvData(EnvFileKey.firebaseMessagingTopic)}");
-
   /// Important to subscribe a topic to send and receive message using FCM via http
   await FirebaseMessaging.instance.subscribeToTopic(
       DataManagement.getEnvData(EnvFileKey.firebaseMessagingTopic) ?? '');
@@ -69,14 +68,23 @@ Future<void> notificationInitialize() async {
     badge: true,
     sound: true,
   );
-
-  print("FIREBASE MESSAGING:  ${FirebaseMessaging.instance}");
 }
 
 Future<void> backgroundMsgAction(RemoteMessage message) async {
   print("Background MEssage is: ${message.data}");
 }
 
-void foregroundMessageAction(RemoteMessage event) {
-  print("Foreground Message data is: ${event.data}");
+void foregroundMessageAction(RemoteMessage msgEvent) async {
+  final _currChatPartnerId =
+      await DataManagement.getStringData(StoredString.currChatPartnerId);
+
+  if (_currChatPartnerId != null &&
+      _currChatPartnerId == msgEvent.data['connId']) return;
+
+  final NotificationManagement _notificationManagement =
+      NotificationManagement();
+  _notificationManagement.showNotification(
+      title: msgEvent.notification!.title ?? '',
+      body: msgEvent.notification!.body ?? '',
+      image: msgEvent.data['image']);
 }

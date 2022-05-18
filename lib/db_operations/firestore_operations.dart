@@ -350,7 +350,7 @@ class DBOperations {
       required dynamic msgData,
       required String token,
       required String title,
-      required String body}) async {
+      required String body, String? image}) async {
     try {
       await _getInstance
           .doc(
@@ -360,7 +360,7 @@ class DBOperations {
       }, SetOptions(merge: true));
 
       _messagingOperation.sendNotification(
-          deviceToken: token, title: title, body: body);
+          deviceToken: token, title: title, body: body, image: image, connId: currUid);
 
       return true;
     } catch (e) {
@@ -410,7 +410,7 @@ class DBOperations {
   updateNotificationStatus(bool updatedNotification) async {
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.muted: updatedNotification.toString()});
+        .update({DBPath.notification: updatedNotification.toString()});
   }
 
   updateParticularConnectionNotificationStatus(
@@ -418,7 +418,7 @@ class DBOperations {
     await _getInstance
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$connId')
-        .update({DBPath.muted: updatedNotification.toString()});
+        .update({DBPath.notification: updatedNotification.toString()});
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> getWallpaperData() async =>
@@ -466,7 +466,7 @@ class MessagingOperation {
   Future<int> sendNotification(
       {required String deviceToken,
       required String title,
-      required String body}) async {
+      required String body, String? image, required String connId}) async {
     final String _serverKey =
         DataManagement.getEnvData(EnvFileKey.serverKey) ?? '';
 
@@ -474,7 +474,7 @@ class MessagingOperation {
       Uri.parse(NotifyManagement.sendNotificationUrl),
       headers: NotifyManagement.sendNotificationHeader(_serverKey),
       body: NotifyManagement.bodyData(
-          title: title, body: body, deviceToken: deviceToken),
+          title: title, body: body, deviceToken: deviceToken, image: image, connId: connId),
     );
 
     print('Response is: ${response.statusCode}    ${response.body}');
