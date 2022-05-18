@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:generation/config/colors_collection.dart';
+import 'package:http/http.dart';
 
 void showStatusAndNavigationBar() =>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
@@ -90,13 +94,74 @@ changeOnlyIconBrightness(bool dark) =>
         systemNavigationBarIconBrightness:
             dark ? Brightness.light : Brightness.dark));
 
-changeOnlyContextChatColor(bool dark) =>  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor:
-    dark ? AppColors.chatDarkBackgroundColor : AppColors.chatLightBackgroundColor,
-    systemNavigationBarColor:
-    dark ? AppColors.chatDarkBackgroundColor : AppColors.chatLightBackgroundColor,
-    statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
-    systemNavigationBarIconBrightness:
-    dark ? Brightness.light : Brightness.dark));
+changeOnlyContextChatColor(bool dark) =>
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: dark
+            ? AppColors.chatDarkBackgroundColor
+            : AppColors.chatLightBackgroundColor,
+        systemNavigationBarColor: dark
+            ? AppColors.chatDarkBackgroundColor
+            : AppColors.chatLightBackgroundColor,
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarIconBrightness:
+            dark ? Brightness.light : Brightness.dark));
 
 closeYourApp() => SystemNavigator.pop();
+
+class NotificationManagement {
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  final AndroidInitializationSettings _androidInitializationSettings =
+      const AndroidInitializationSettings('app_icon');
+
+  NotificationManagement() {
+    final InitializationSettings _initializationSettings =
+        InitializationSettings(android: _androidInitializationSettings);
+
+    _initAll(_initializationSettings);
+  }
+
+  _initAll(InitializationSettings initializationSettings) async {
+    final response = await _flutterLocalNotificationsPlugin.initialize(
+        initializationSettings, onSelectNotification: (payload) async {
+      print("Payload is: $payload");
+    });
+
+    print('Local Notification Initialization Status: $response');
+  }
+
+  showNotification(
+      {required String title, required String body, String? image}) async {
+    try {
+      BigPictureStyleInformation? bigPictureStyleInformation;
+
+      if (image != null) {
+        final ByteArrayAndroidBitmap bigPicture =
+            ByteArrayAndroidBitmap(await _getByteArrayFromUrl(image));
+
+        bigPictureStyleInformation = BigPictureStyleInformation(bigPicture,
+            htmlFormatContentTitle: true, htmlFormatSummaryText: true);
+      }
+
+      final AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+              "high_importance_channel", "FLUTTER_NOTIFICATION_CLICK",
+              importance: Importance.max,
+              priority: Priority.max,
+              styleInformation: bigPictureStyleInformation);
+
+      final NotificationDetails generalNotificationDetails =
+          NotificationDetails(android: androidDetails);
+
+      await _flutterLocalNotificationsPlugin
+          .show(0, title, body, generalNotificationDetails, payload: title);
+    } catch (e) {
+      print("Notification Showing Error: $e");
+    }
+  }
+
+  Future<Uint8List> _getByteArrayFromUrl(String url) async {
+    final Response response = await get(Uri.parse(url));
+    return response.bodyBytes;
+  }
+}

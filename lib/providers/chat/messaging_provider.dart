@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/db_operations/helper.dart';
 import 'package:generation/db_operations/types.dart';
@@ -241,12 +242,14 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   setPartnerUserId(String partnerUserId, {bool update = false}) {
     _partnerUserId = partnerUserId;
     if (update) notifyListeners();
+    DataManagement.storeStringData(StoredString.currChatPartnerId, partnerUserId);
   }
 
   getPartnerUserId() => _partnerUserId;
 
   _removePartnerId() {
     _partnerUserId = "";
+    DataManagement.storeStringData(StoredString.currChatPartnerId, '');
     notifyListeners();
   }
 
@@ -512,7 +515,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _dbOperations.sendMessage(
         partnerId: !forSendMultiple ? getPartnerUserId() : incomingConnId,
         msgData: _msgRemoteData,
-        token: getToken(), title: _notificationData['title'], body: _notificationData['body']);
+        token: getToken(),
+        title: _notificationData['title'],
+        body: _notificationData['body'],
+        image: _notificationData['image']);
   }
 
   /// Get Chat Media Storage Reference
@@ -619,7 +625,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     return _chatHistoryData;
   }
 
-  Map<String, dynamic> _rendererForNotification(String _msgType, String msgData) {
+  Map<String, dynamic> _rendererForNotification(
+      String _msgType, String msgData) {
     final _currUserName =
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .getCurrAccData()['name'];
@@ -633,22 +640,20 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       _notificationData['body'] = msgData;
     } else if (_msgType == ChatMessageType.image.toString()) {
       _notificationData['title'] += 'Image';
-
+      _notificationData['body'] = 'Expand to see the image';
+      _notificationData['image'] = msgData;
     } else if (_msgType == ChatMessageType.video.toString()) {
       _notificationData['title'] += 'Video';
-
     } else if (_msgType == ChatMessageType.audio.toString()) {
       _notificationData['title'] += 'Audio';
-
     } else if (_msgType == ChatMessageType.document.toString()) {
       _notificationData['title'] += 'Document';
-
     } else if (_msgType == ChatMessageType.location.toString()) {
       _notificationData['title'] += 'Location';
-
     } else if (_msgType == ChatMessageType.contact.toString()) {
       _notificationData['title'] += 'Contact';
-
+      _notificationData['body'] =
+          DataManagement.fromJsonString(msgData)[PhoneNumberData.name];
     }
 
     return _notificationData;

@@ -70,8 +70,8 @@ class NotifyManagement{
     };
   }
 
-  static bodyData({required String title, required String body, required String deviceToken}){
-    return DataManagement.toJsonString(<String, dynamic>{
+  static bodyData({required String title, required String body, required String deviceToken, String? image,required String connId}){
+    final _notifyBody = <String, dynamic>{
       'notification': <String, dynamic>{
         'body': body,
         'title': title,
@@ -86,8 +86,18 @@ class NotifyManagement{
         'id': '1',
         'status': 'done',
         "collapse_key": "type_a",
+        "sound": "default",
+        "connId": connId,
       },
       'to': deviceToken,
-    });
+    };
+
+    if(image != null){
+      _notifyBody['notification']['image'] = image;
+      _notifyBody['data']['image'] = image;
+    }
+
+
+    return DataManagement.toJsonString(_notifyBody);
   }
 }
