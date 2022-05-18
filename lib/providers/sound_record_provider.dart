@@ -23,7 +23,7 @@ class SoundRecorderProvider extends ChangeNotifier {
 
     print("Voice Store Dir Path: $_voiceStoreDirPath");
 
-    final _voiceStoreFilePath = createAudioFile(dirPath: _voiceStoreDirPath!);
+    final _voiceStoreFilePath = createAudioFile(dirPath: _voiceStoreDirPath!, name: 'Voice Message');
 
     print("Voice Store File PAth: $_voiceStoreFilePath");
 

@@ -153,18 +153,22 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
     if (_msgType == ChatMessageType.image.toString()) {
       final _dirPath = await createImageStoreDir();
-      _mediaStorePath = createImageFile(dirPath: _dirPath);
+      _mediaStorePath = createImageFile(
+          dirPath: _dirPath, name: _msgData.toString().split('/').last);
     } else if (_msgType == ChatMessageType.video.toString()) {
       final _dirPath = await createVideoStoreDir();
-      _mediaStorePath = createVideoFile(dirPath: _dirPath);
+      _mediaStorePath = createVideoFile(
+          dirPath: _dirPath, name: _msgData.toString().split('/').last);
     } else if (_msgType == ChatMessageType.audio.toString()) {
       final _dirPath = await createVoiceStoreDir();
-      _mediaStorePath = createAudioFile(dirPath: _dirPath);
+      _mediaStorePath = createAudioFile(
+          dirPath: _dirPath, name: _msgData.toString().split('/').last);
     } else if (_msgType == ChatMessageType.document.toString()) {
       final _dirPath = await createDocStoreDir();
       _mediaStorePath = createDocFile(
           dirPath: _dirPath,
-          extension: _msgAdditionalData["extension-for-document"]);
+          extension: _msgAdditionalData["extension-for-document"],
+          name: _msgData.toString().split('/').last);
     }
 
     print("Media Message Data is:   $_mediaStorePath\n\n");
@@ -187,7 +191,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   _incomingMsgThumbnailManagement(_msgAdditionalData, message) async {
     final _dirPath = await createThumbnailStoreDir();
-    final _thumbnailPath = createImageFile(dirPath: _dirPath);
+    final _thumbnailPath =
+        createImageFile(dirPath: _dirPath, name: 'thumbnail');
 
     _dio
         .download(_msgAdditionalData["thumbnail"], _thumbnailPath)
@@ -242,7 +247,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   setPartnerUserId(String partnerUserId, {bool update = false}) {
     _partnerUserId = partnerUserId;
     if (update) notifyListeners();
-    DataManagement.storeStringData(StoredString.currChatPartnerId, partnerUserId);
+    DataManagement.storeStringData(
+        StoredString.currChatPartnerId, partnerUserId);
   }
 
   getPartnerUserId() => _partnerUserId;
@@ -644,12 +650,16 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       _notificationData['image'] = msgData;
     } else if (_msgType == ChatMessageType.video.toString()) {
       _notificationData['title'] += 'Video';
+      _notificationData['body'] = "New Video File";
     } else if (_msgType == ChatMessageType.audio.toString()) {
       _notificationData['title'] += 'Audio';
+      _notificationData['body'] = "New Audio File";
     } else if (_msgType == ChatMessageType.document.toString()) {
       _notificationData['title'] += 'Document';
+      _notificationData['body'] = "New Document File";
     } else if (_msgType == ChatMessageType.location.toString()) {
       _notificationData['title'] += 'Location';
+      _notificationData['body'] = '🗺️ Map';
     } else if (_msgType == ChatMessageType.contact.toString()) {
       _notificationData['title'] += 'Contact';
       _notificationData['body'] =
