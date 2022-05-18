@@ -34,13 +34,7 @@ class MessagingSection extends StatefulWidget {
 }
 
 class _MessagingSectionState extends State<MessagingSection> {
-  // @override
-  // void didChangeDependencies() {
-  //   Provider.of<ChatScrollProvider>(context, listen: false)
-  //       .animateToBottom(scrollDuration: 1000);
-  //
-  //   super.didChangeDependencies();
-  // }
+
 
   @override
   Widget build(BuildContext context) {
