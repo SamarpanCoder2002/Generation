@@ -659,6 +659,8 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _rightSwipe(String messageId, ChatMessageModel messageData) {
     print("Reply to This Message");
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setReplyHolderMsg(messageData);
+    Provider.of<ChatCreationSectionProvider>(context, listen: false).setSectionHeightForReply();
   }
 
   onMessageTap(

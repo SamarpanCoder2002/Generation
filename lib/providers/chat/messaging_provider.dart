@@ -6,6 +6,7 @@ import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/db_operations/helper.dart';
 import 'package:generation/db_operations/types.dart';
+import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -31,6 +32,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   StreamSubscription? _realTimeConnSubscription;
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
+  ChatMessageModel? _replyHolderMsg;
 
   FocusNode _focus = FocusNode();
   final LocalStorage _localStorage = LocalStorage();
@@ -41,6 +43,21 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   setContext(context) {
     this.context = context;
   }
+
+  setReplyHolderMsg(ChatMessageModel incoming){
+    _replyHolderMsg = incoming;
+    notifyListeners();
+  }
+
+  ChatMessageModel? getReplyHolderMsg() => _replyHolderMsg;
+
+  removeReplyMsg(){
+    if(!isThereReplyMsg) return;
+    _replyHolderMsg = null;
+    notifyListeners();
+  }
+
+  bool get isThereReplyMsg => _replyHolderMsg != null;
 
   getContext() => context;
 
@@ -242,6 +259,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     clearToken();
     notifyListeners();
     _removePartnerId();
+    removeReplyMsg();
   }
 
   setPartnerUserId(String partnerUserId, {bool update = false}) {

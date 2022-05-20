@@ -137,7 +137,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const SizedBox(
-          width: 20,
+          width: 10,
         ),
         Text(
           _selectedMessages.length.toString(),
@@ -147,7 +147,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          width: 30,
+          width: 18,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

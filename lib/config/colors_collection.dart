@@ -106,7 +106,7 @@ class AppColors {
   static getModalColorSecondary(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : chatLightBackgroundColor;
 
-  static getModalTextColor(bool _isDarkMode) =>
+  static Color getModalTextColor(bool _isDarkMode) =>
       _isDarkMode ? pureWhiteColor : lightChatConnectionTextColor;
 
   static getTextButtonColor(bool _isDarkMode, bool isOpposite) {
