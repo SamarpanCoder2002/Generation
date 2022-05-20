@@ -12,10 +12,9 @@ class ChatCreationSectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  getSectionHeight(context)=> _sectionHeight;
+  getSectionHeight(context) => _sectionHeight;
 
-
-  setSectionHeight() {
+  setSectionHeightForEmoji() {
     if (_sectionHeight > 60) return;
     _sectionHeight += 260;
     _isEmojiActivated = true;
@@ -23,7 +22,7 @@ class ChatCreationSectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  backToNormalHeight() {
+  backToNormalHeightForEmoji() {
     if (_sectionHeight == 60 || _sectionHeight == 60 + 45) return;
     _sectionHeight -= 260;
     _isEmojiActivated = false;
@@ -31,7 +30,15 @@ class ChatCreationSectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // increaseHeightDueBehindHideProblem() {
-  //   if (_sectionHeight < 100) _sectionHeight += 45;
-  // }
+  setSectionHeightForReply() {
+    if (_sectionHeight > 60) return;
+    _sectionHeight += 70;
+    notifyListeners();
+  }
+
+  backToNormalHeightForReply() {
+    if (_sectionHeight == 60) return;
+    _sectionHeight -= 70;
+    notifyListeners();
+  }
 }

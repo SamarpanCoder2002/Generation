@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/icon_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/time_collection.dart';
+import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/chat/chat_creation_section_provider.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/providers/sound_record_provider.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/input_system_services.dart';
+import 'package:gugor_emoji/emoji_picker_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
@@ -53,8 +54,12 @@ class MessageCreationSection extends StatelessWidget {
         Provider.of<ChatCreationSectionProvider>(context)
             .getEmojiActivationState();
 
+    final bool _isThereReplyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context).isThereReplyMsg;
+
     return Column(
       children: [
+        if (_isThereReplyMsg) _replyMsgContainer(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -62,7 +67,7 @@ class MessageCreationSection extends StatelessWidget {
             _messageAndVoiceSendButton(),
           ],
         ),
-        //if (_isEmojiSectionShowing) _emojiCollectionWidget(),
+        if (_isEmojiSectionShowing) _emojiCollectionWidget(),
       ],
     );
   }
@@ -104,7 +109,9 @@ class MessageCreationSection extends StatelessWidget {
                     .stopRecording();
 
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                .sendMsgManagement(msgType: ChatMessageType.audio.toString(), message: _voiceRecordPath);
+                .sendMsgManagement(
+                    msgType: ChatMessageType.audio.toString(),
+                    message: _voiceRecordPath);
 
             Provider.of<ChatScrollProvider>(context, listen: false)
                 .animateToBottom();
@@ -132,10 +139,10 @@ class MessageCreationSection extends StatelessWidget {
         onPressed: () {
           if (_isEmojiSectionShowing) {
             Provider.of<ChatCreationSectionProvider>(context, listen: false)
-                .backToNormalHeight();
+                .backToNormalHeightForEmoji();
           } else {
             Provider.of<ChatCreationSectionProvider>(context, listen: false)
-                .setSectionHeight();
+                .setSectionHeightForEmoji();
           }
         },
         color: _isDarkMode
@@ -165,7 +172,7 @@ class MessageCreationSection extends StatelessWidget {
             : AppColors.lightChatConnectionTextColor.withOpacity(0.6),
         onTap: () {
           Provider.of<ChatCreationSectionProvider>(context, listen: false)
-              .backToNormalHeight();
+              .backToNormalHeightForEmoji();
         },
         onChanged: (inputVal) {
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -366,45 +373,41 @@ class MessageCreationSection extends StatelessWidget {
     );
   }
 
-  // Widget _emojiCollectionWidget() {
-  //   return SizedBox(
-  //     width: MediaQuery.of(context).size.width,
-  //     height: 250,
-  //     child: EmojiPicker(
-  //       onEmojiSelected: (category, emoji) {
-  //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-  //             .insertEmoji(emoji.emoji);
-  //       },
-  //       onBackspacePressed: () {
-  //         // Backspace-Button tapped logic
-  //         // Remove this line to also remove the button in the UI
-  //       },
-  //       config: const Config(
-  //           columns: 7,
-  //           emojiSizeMax: 32,
-  //           // Issue: https://github.com/flutter/flutter/issues/28894
-  //           verticalSpacing: 0,
-  //           horizontalSpacing: 0,
-  //           initCategory: Category.RECENT,
-  //           bgColor: AppColors.chatDarkBackgroundColor,
-  //           indicatorColor: Colors.blue,
-  //           iconColor: Colors.grey,
-  //           iconColorSelected: Colors.blue,
-  //           progressIndicatorColor: Colors.blue,
-  //           backspaceColor: Colors.blue,
-  //           skinToneDialogBgColor: Colors.white,
-  //           skinToneIndicatorColor: Colors.grey,
-  //           enableSkinTones: true,
-  //           showRecentsTab: true,
-  //           recentsLimit: 28,
-  //           noRecentsText: "No Recents",
-  //           noRecentsStyle: TextStyle(fontSize: 20, color: Colors.black26),
-  //           tabIndicatorAnimDuration: kTabScrollDuration,
-  //           categoryIcons: CategoryIcons(),
-  //           buttonMode: ButtonMode.MATERIAL),
-  //     ),
-  //   );
-  // }
+  Widget _emojiCollectionWidget() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 250,
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .insertEmoji(emoji.emoji);
+        },
+        onBackspacePressed: () {},
+        config: const Config(
+            columns: 7,
+            emojiSizeMax: 32,
+            verticalSpacing: 0,
+            horizontalSpacing: 0,
+            initCategory: Category.RECENT,
+            bgColor: AppColors.chatDarkBackgroundColor,
+            indicatorColor: Colors.blue,
+            iconColor: Colors.grey,
+            iconColorSelected: Colors.blue,
+            progressIndicatorColor: Colors.blue,
+            backspaceColor: Colors.blue,
+            skinToneDialogBgColor: Colors.white,
+            skinToneIndicatorColor: Colors.grey,
+            enableSkinTones: true,
+            showRecentsTab: true,
+            recentsLimit: 28,
+            noRecentsText: "No Recents",
+            noRecentsStyle: TextStyle(fontSize: 20, color: Colors.black26),
+            tabIndicatorAnimDuration: kTabScrollDuration,
+            categoryIcons: CategoryIcons(),
+            buttonMode: ButtonMode.MATERIAL),
+      ),
+    );
+  }
 
   void _manageTextMessage() {
     final TextEditingController? _messageController =
@@ -427,5 +430,109 @@ class MessageCreationSection extends StatelessWidget {
 
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setShowVoiceIcon(true);
+  }
+
+  _replyMsgContainer() {
+    bool _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        width: MediaQuery.of(context).size.width - 80,
+        height: 70,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _isDarkMode?AppColors.splashScreenColor:AppColors.lightBorderGreenColor)),
+        child: Column(
+          children: [
+            _replyMsgContainerUpperSection(),
+            _replyMsgContainerData(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _replyMsgContainerUpperSection() {
+    bool _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Container(
+      width: double.maxFinite,
+      padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Reply',
+            style: TextStyleCollection.terminalTextStyle.copyWith(
+                color:
+                    AppColors.getModalTextColor(_isDarkMode).withOpacity(0.6),
+                fontSize: 10),
+          ),
+          InkWell(
+            onTap: () {
+              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                  .removeReplyMsg();
+              Provider.of<ChatCreationSectionProvider>(context, listen: false)
+                  .backToNormalHeightForReply();
+            },
+            child: Icon(
+              Icons.cancel_outlined,
+              color: AppColors.getModalTextColor(_isDarkMode).withOpacity(0.6),
+              size: 16,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  _replyMsgContainerData() {
+    final _msgData =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyHolderMsg();
+
+    if (_msgData == null) return const Center();
+
+    bool _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Padding(
+        padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 0.5),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(_optimizedShowReplyMessage(_msgData),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyleCollection.terminalTextStyle
+                  .copyWith(color: AppColors.getModalTextColor(_isDarkMode))),
+        ));
+  }
+
+  String _optimizedShowReplyMessage(ChatMessageModel? _msgData) {
+    if (_msgData == null) return '';
+
+    if (_msgData.type == ChatMessageType.text.toString()) {
+      return _msgData.message;
+    }
+    if (_msgData.type == ChatMessageType.image.toString()) {
+      return '📷 Image';
+    }
+    if (_msgData.type == ChatMessageType.video.toString()) {
+      return '📽️ Video';
+    }
+    if (_msgData.type == ChatMessageType.location.toString()) {
+      return '🗺️ Location';
+    }
+    if (_msgData.type == ChatMessageType.audio.toString()) {
+      return '🎵 Audio';
+    }
+    if (_msgData.type == ChatMessageType.document.toString()) {
+      return '📃 Document';
+    }
+    if (_msgData.type == ChatMessageType.contact.toString()) {
+      return '💁 Contact';
+    }
+
+    return '';
   }
 }

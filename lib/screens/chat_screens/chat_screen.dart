@@ -62,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Provider.of<ChatCreationSectionProvider>(context, listen: false)
               .updateEmojiActivationState(false);
           Provider.of<ChatCreationSectionProvider>(context, listen: false)
-              .backToNormalHeight();
+              .backToNormalHeightForEmoji();
           return false;
         }
 
@@ -73,6 +73,16 @@ class _ChatScreenState extends State<ChatScreen> {
         if (_selectedMessages) {
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
               .clearSelectedMsgCollection();
+          return false;
+        }
+
+        final _isThereReplyMsg =
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false).isThereReplyMsg;
+        if (_isThereReplyMsg) {
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .removeReplyMsg();
+          Provider.of<ChatCreationSectionProvider>(context, listen: false)
+              .backToNormalHeightForReply();
           return false;
         }
 
