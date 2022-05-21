@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/contacts_provider.dart';
 import 'package:generation/screens/common/contact_card_design.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/images_path_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
+import '../../../providers/chat/chat_creation_section_provider.dart';
 import '../../../providers/chat/chat_scroll_provider.dart';
 import '../../../providers/chat/messaging_provider.dart';
 import '../../../types/types.dart';
@@ -200,17 +202,33 @@ class _ContactsCollectionState extends State<ContactsCollection> {
 
         Provider.of<ContactsProvider>(context, listen: false).resetData();
 
+        final _replyMsg =
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getReplyModifiedMsg();
+
         for (final filterContact in _filteredContacts) {
           final _phoneNumbersCollection = filterContact.phones;
 
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .sendMsgManagement(msgType: ChatMessageType.contact.toString(), message: {
-            PhoneNumberData.number: _phoneNumbersCollection!.isNotEmpty
-                ? _phoneNumbersCollection[0].value ?? ""
-                : "",
-            PhoneNumberData.name: filterContact.displayName,
-            PhoneNumberData.numberLabel: _phoneNumbersCollection[0].label
-          });
+              .sendMsgManagement(
+                  msgType: ChatMessageType.contact.toString(),
+                  message: {
+                    PhoneNumberData.number: _phoneNumbersCollection!.isNotEmpty
+                        ? _phoneNumbersCollection[0].value ?? ""
+                        : "",
+                    PhoneNumberData.name: filterContact.displayName,
+                    PhoneNumberData.numberLabel:
+                        _phoneNumbersCollection[0].label
+                  },
+                  additionalData:
+                      _replyMsg.isEmpty ? null : {'reply': DataManagement.toJsonString(_replyMsg)});
+        }
+
+        if (_replyMsg.isNotEmpty) {
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .removeReplyMsg();
+          Provider.of<ChatCreationSectionProvider>(context, listen: false)
+              .backToNormalHeightForReply();
         }
 
         Provider.of<ChatScrollProvider>(context, listen: false)

@@ -32,7 +32,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   StreamSubscription? _realTimeConnSubscription;
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
-  ChatMessageModel? _replyHolderMsg;
+  Map<String, ChatMessageModel?> _replyHolderMsg = {};
 
   FocusNode _focus = FocusNode();
   final LocalStorage _localStorage = LocalStorage();
@@ -44,20 +44,42 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     this.context = context;
   }
 
-  setReplyHolderMsg(ChatMessageModel incoming){
-    _replyHolderMsg = incoming;
+  setReplyHolderMsg(String msgId, ChatMessageModel incoming) {
+    _replyHolderMsg = {msgId: incoming};
     notifyListeners();
   }
 
-  ChatMessageModel? getReplyHolderMsg() => _replyHolderMsg;
+  Map<String, ChatMessageModel?> getReplyHolderMsg() => _replyHolderMsg;
 
-  removeReplyMsg(){
-    if(!isThereReplyMsg) return;
-    _replyHolderMsg = null;
+  Map<String, dynamic> getReplyModifiedMsg() {
+    if(_replyHolderMsg.isEmpty) return {};
+
+    Map<String, dynamic> _msgData = {};
+
+    final _msgId = _replyHolderMsg.keys.toList()[0];
+    final _msgOldData = _replyHolderMsg.values.toList()[0];
+
+    _msgData = {
+      _msgId: {
+        MessageData.holder: _msgOldData?.holder,
+        MessageData.message: _msgOldData?.message,
+        MessageData.type: _msgOldData?.type,
+        MessageData.date: _msgOldData?.date,
+        MessageData.time: _msgOldData?.time,
+        MessageData.additionalData: _msgOldData?.additionalData
+      }
+    };
+
+    return _msgData;
+  }
+
+  removeReplyMsg() {
+    if (!isThereReplyMsg) return;
+    _replyHolderMsg.clear();
     notifyListeners();
   }
 
-  bool get isThereReplyMsg => _replyHolderMsg != null;
+  bool get isThereReplyMsg => _replyHolderMsg.isNotEmpty;
 
   getContext() => context;
 

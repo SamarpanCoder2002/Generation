@@ -127,19 +127,21 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     );
   }
 
-  _navigateToLocalStorageSection(connectionData) async{
-
-
+  _navigateToLocalStorageSection(connectionData) async {
     final _chatHistoryData =
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .getChatHistory(connectionData["id"], connectionData["name"]);
+            .getChatHistory(connectionData["id"], connectionData["name"]);
 
     print("Connection Data:   $_chatHistoryData");
 
-    Provider.of<StorageProvider>(context, listen: false).setImagesCollection(_chatHistoryData[ChatMessageType.image]);
-    Provider.of<StorageProvider>(context, listen: false).setVideosCollection(_chatHistoryData[ChatMessageType.video]);
-    Provider.of<StorageProvider>(context, listen: false).setDocumentCollection(_chatHistoryData[ChatMessageType.document]);
-    Provider.of<StorageProvider>(context, listen: false).setAudioCollection(_chatHistoryData[ChatMessageType.audio]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setImagesCollection(_chatHistoryData[ChatMessageType.image]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setVideosCollection(_chatHistoryData[ChatMessageType.video]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setDocumentCollection(_chatHistoryData[ChatMessageType.document]);
+    Provider.of<StorageProvider>(context, listen: false)
+        .setAudioCollection(_chatHistoryData[ChatMessageType.audio]);
 
     Navigation.intent(context, const LocalStorageScreen());
   }
@@ -163,7 +165,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
       }
       return;
     }
-    if(widget.commonRequirement == CommonRequirement.localDataStorage) {
+    if (widget.commonRequirement == CommonRequirement.localDataStorage) {
       return _navigateToLocalStorageSection(_connectionData);
     }
     return {};
@@ -290,7 +292,10 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                       child: Text(
                         "Share Chat History With",
                         style: TextStyleCollection.secondaryHeadingTextStyle
-                            .copyWith(fontSize: 18, color: AppColors.getModalTextColor(_isDarkMode)),
+                            .copyWith(
+                                fontSize: 18,
+                                color:
+                                    AppColors.getModalTextColor(_isDarkMode)),
                       ),
                     ),
                     const SizedBox(
@@ -303,12 +308,14 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                         children: [
                           commonElevatedButton(
                               btnText: 'Connections',
-                              bgColor: AppColors.getTextButtonColor(_isDarkMode, true),
+                              bgColor: AppColors.getTextButtonColor(
+                                  _isDarkMode, true),
                               onPressed: () => _sendChatHistoryToConnections(
                                   chatHistoryStoreFile)),
                           commonElevatedButton(
                               btnText: 'Other Apps',
-                              bgColor: AppColors.getTextButtonColor(_isDarkMode, true),
+                              bgColor: AppColors.getTextButtonColor(
+                                  _isDarkMode, true),
                               onPressed: () =>
                                   _inputOption.shareFile(chatHistoryStoreFile)),
                         ],

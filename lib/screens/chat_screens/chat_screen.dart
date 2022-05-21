@@ -6,7 +6,6 @@ import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
-import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:provider/provider.dart';
 
@@ -77,7 +76,8 @@ class _ChatScreenState extends State<ChatScreen> {
         }
 
         final _isThereReplyMsg =
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false).isThereReplyMsg;
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .isThereReplyMsg;
         if (_isThereReplyMsg) {
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
               .removeReplyMsg();
@@ -117,21 +117,30 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   _messageCreationSection() {
-    return ScrollToHideWidget(
-      scrollController:
-          Provider.of<ChatScrollProvider>(context).getController(),
-      hideWhenScrollToBottom: false,
-      height: Provider.of<ChatCreationSectionProvider>(context)
-          .getSectionHeight(context),
-      child: BottomSheet(
-          enableDrag: false,
-          onClosing: () {},
-          backgroundColor: AppColors.transparentColor,
-          elevation: 0,
-          builder: (_) => MessageCreationSection(
-                context: context,
-              )),
-    );
+    return BottomSheet(
+        enableDrag: false,
+        onClosing: () {},
+        backgroundColor: AppColors.transparentColor,
+        elevation: 0,
+        builder: (_) => MessageCreationSection(
+              context: context,
+            ));
+
+    // return ScrollToHideWidget(
+    //   scrollController:
+    //       Provider.of<ChatScrollProvider>(context).getController(),
+    //   hideWhenScrollToBottom: false,
+    //   height: Provider.of<ChatCreationSectionProvider>(context)
+    //       .getSectionHeight(context),
+    //   child: BottomSheet(
+    //       enableDrag: false,
+    //       onClosing: () {},
+    //       backgroundColor: AppColors.transparentColor,
+    //       elevation: 0,
+    //       builder: (_) => MessageCreationSection(
+    //             context: context,
+    //           )),
+    // );
   }
 
   _chatCollectionSection() {
@@ -153,7 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(
             height: 10,
           ),
-          MessagingSection(context: context),
+          MessagingSection(context: context, connData: widget.connectionData,),
           const SizedBox(
             height: 10,
           ),

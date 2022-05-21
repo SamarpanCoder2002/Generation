@@ -64,13 +64,13 @@ class AppColors {
   static getBgColor(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : backgroundLightMode;
 
-  static getChatBgColor(bool _isDarkMode) =>
+  static Color getChatBgColor(bool _isDarkMode) =>
       _isDarkMode ? chatDarkBackgroundColor : chatLightBackgroundColor;
 
   static getBgSecondaryColor(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : backgroundLightSecondaryMode;
 
-  static getMsgColor(bool _isDarkMode, bool _isOppositeMsg) {
+  static Color getMsgColor(bool _isDarkMode, bool _isOppositeMsg) {
     if (_isDarkMode) {
       return _isOppositeMsg ? oppositeMsgDarkModeColor : myMsgDarkModeColor;
     } else {

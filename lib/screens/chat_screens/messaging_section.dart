@@ -26,16 +26,17 @@ import '../../providers/theme_provider.dart';
 
 class MessagingSection extends StatefulWidget {
   final BuildContext context;
+  final Map<String, dynamic> connData;
 
-  const MessagingSection({Key? key, required this.context}) : super(key: key);
+  const MessagingSection(
+      {Key? key, required this.context, required this.connData})
+      : super(key: key);
 
   @override
   State<MessagingSection> createState() => _MessagingSectionState();
 }
 
 class _MessagingSectionState extends State<MessagingSection> {
-
-
   @override
   Widget build(BuildContext context) {
     final int _totalChatMessages =
@@ -82,7 +83,7 @@ class _MessagingSectionState extends State<MessagingSection> {
                 : Alignment.centerRight,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(widget.context).size.width - 45,
+                  maxWidth: MediaQuery.of(widget.context).size.width - 110,
                   minWidth: 100),
               child: Card(
                 elevation: 0,
@@ -93,7 +94,15 @@ class _MessagingSectionState extends State<MessagingSection> {
                     messageData.holder == MessageHolderType.other.toString()),
                 child: Stack(
                   children: [
-                    _getPerfectMessageContainer(messageData: messageData),
+                    if (_checkIfReplyMsgExist(messageData))
+                      _replyMsgContainer(
+                          _getReplyMsg(messageData), messageData),
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: _checkIfReplyMsgExist(messageData) ? 60 : 0),
+                      child:
+                          _getPerfectMessageContainer(messageData: messageData),
+                    ),
                     _messageTimingAndStatus(messageData: messageData),
                     if (messageData.type == ChatMessageType.audio.toString())
                       _audioPlayingLoadingTime(messageData: messageData),
@@ -183,6 +192,10 @@ class _MessagingSectionState extends State<MessagingSection> {
         ? messageData.additionalData["thumbnail"] ?? ""
         : messageData.message);
 
+    final _isReplyExist = _checkIfReplyMsgExist(messageData);
+
+    print("is Reply Msg Exist: $_isReplyExist");
+
     return InkWell(
       onTap: () async {
         await SystemFileManagement.openFile(messageData.message);
@@ -197,12 +210,20 @@ class _MessagingSectionState extends State<MessagingSection> {
             margin: EdgeInsets.zero,
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: !_isReplyExist
+                  ? BorderRadius.circular(8.0)
+                  : const BorderRadius.only(
+                      bottomLeft: Radius.circular(8),
+                      bottomRight: Radius.circular(8)),
             ),
             child: _imagePath != null
                 ? Container(
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: !_isReplyExist
+                            ? BorderRadius.circular(8.0)
+                            : const BorderRadius.only(
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8)),
                         image: DecorationImage(
                             image: _imagePath, fit: BoxFit.cover)),
                   )
@@ -271,6 +292,8 @@ class _MessagingSectionState extends State<MessagingSection> {
           ));
     }
 
+    final _isReplyExist = _checkIfReplyMsgExist(messageData);
+
     return ConstrainedBox(
       constraints: BoxConstraints(
           maxWidth: MediaQuery.of(widget.context).size.width - 110),
@@ -279,7 +302,13 @@ class _MessagingSectionState extends State<MessagingSection> {
         height: 50,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(
+          borderRadius: !_isReplyExist
+              ? BorderRadius.circular(8.0)
+              : const BorderRadius.only(
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(8)),
+        ),
         child: Row(
           children: [
             _controllingButton(),
@@ -453,6 +482,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   _documentMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final _isLocalFile = _isItLocalFile(messageData.message);
+    final _isReplyExist = _checkIfReplyMsgExist(messageData);
 
     _pdfMaintainerWidget() => Stack(
           children: [
@@ -505,7 +535,11 @@ class _MessagingSectionState extends State<MessagingSection> {
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: !_isReplyExist
+                ? BorderRadius.circular(8.0)
+                : const BorderRadius.only(
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
           ),
           child: !_isLocalFile
               ? const Center(
@@ -524,6 +558,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   _locationMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final message = DataManagement.fromJsonString(messageData.message);
+    final _isReplyExist = _checkIfReplyMsgExist(messageData);
 
     return ConstrainedBox(
         constraints: BoxConstraints(
@@ -540,7 +575,11 @@ class _MessagingSectionState extends State<MessagingSection> {
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: !_isReplyExist
+                ? BorderRadius.circular(8.0)
+                : const BorderRadius.only(
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
             child: showMapSection(
                 latitude: message["latitude"], longitude: message["longitude"]),
           ),
@@ -550,8 +589,7 @@ class _MessagingSectionState extends State<MessagingSection> {
   _contactMessageSection({required ChatMessageModel messageData}) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final contact = DataManagement.fromJsonString(messageData.message);
-
-    print("Contact is: $contact");
+    final _isReplyExist = _checkIfReplyMsgExist(messageData);
 
     return ConstrainedBox(
         constraints: BoxConstraints(
@@ -565,10 +603,18 @@ class _MessagingSectionState extends State<MessagingSection> {
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: !_isReplyExist
+                ? BorderRadius.circular(8.0)
+                : const BorderRadius.only(
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: !_isReplyExist
+                ? BorderRadius.circular(8.0)
+                : const BorderRadius.only(
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8)),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -659,8 +705,10 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _rightSwipe(String messageId, ChatMessageModel messageData) {
     print("Reply to This Message");
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).setReplyHolderMsg(messageData);
-    Provider.of<ChatCreationSectionProvider>(context, listen: false).setSectionHeightForReply();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setReplyHolderMsg(messageId, messageData);
+    Provider.of<ChatCreationSectionProvider>(context, listen: false)
+        .setSectionHeightForReply();
   }
 
   onMessageTap(
@@ -688,4 +736,77 @@ class _MessagingSectionState extends State<MessagingSection> {
 
   _isItLocalFile(String message) =>
       !message.startsWith('http') && !message.startsWith('https');
+
+  _replyMsgContainer(_replyMsgData, realMsgData) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.only(left: 10, right: 15, top: 8, bottom: 28),
+      decoration: BoxDecoration(
+        color: AppColors.getChatBgColor(_isDarkMode).withOpacity(0.4),
+        borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+        border: Border.all(
+            color: AppColors.getMsgColor(_isDarkMode,
+                realMsgData.holder == MessageHolderType.other.toString())),
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+            """${realMsgData.holder == MessageHolderType.other.toString() ? '${widget.connData['name']}' : 'You'} : ${_optimizedShowReplyMessage(_replyMsgData.values.toList()[0])}""",
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyleCollection.terminalTextStyle
+                .copyWith(color: AppColors.getModalTextColor(_isDarkMode))),
+      ),
+    );
+  }
+
+  String _optimizedShowReplyMessage(_msgData) {
+    if (_msgData == null) return '';
+
+    if (_msgData["type"] == ChatMessageType.text.toString()) {
+      return _msgData['message'];
+    }
+    if (_msgData["type"] == ChatMessageType.image.toString()) {
+      return '📷 Image';
+    }
+    if (_msgData["type"] == ChatMessageType.video.toString()) {
+      return '📽️ Video';
+    }
+    if (_msgData["type"] == ChatMessageType.location.toString()) {
+      return '🗺️ Location';
+    }
+    if (_msgData["type"] == ChatMessageType.audio.toString()) {
+      return '🎵 Audio';
+    }
+    if (_msgData["type"] == ChatMessageType.document.toString()) {
+      return '📃 Document';
+    }
+    if (_msgData["type"] == ChatMessageType.contact.toString()) {
+      return '💁 Contact';
+    }
+
+    return '';
+  }
+
+  bool _checkIfReplyMsgExist(ChatMessageModel chatMsgObj) {
+    bool _isReplyMsgExist = chatMsgObj.additionalData != null;
+
+    if (!_isReplyMsgExist) return _isReplyMsgExist;
+
+    if (chatMsgObj.additionalData['reply'] == null) {
+      _isReplyMsgExist = false;
+    } else {
+      final _replyMsg =
+          DataManagement.fromJsonString(chatMsgObj.additionalData['reply']);
+      _isReplyMsgExist = _replyMsg != null;
+    }
+
+    return _isReplyMsgExist;
+  }
+
+  _getReplyMsg(ChatMessageModel messageData) =>
+      DataManagement.fromJsonString(messageData.additionalData['reply']);
 }
