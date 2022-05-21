@@ -26,6 +26,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../config/images_path_collection.dart';
+import '../providers/chat/chat_creation_section_provider.dart';
 import '../providers/chat/chat_scroll_provider.dart';
 import '../providers/chat/messaging_provider.dart';
 import '../providers/connection_collection_provider.dart';
@@ -55,11 +56,25 @@ class InputOption {
 
     Navigator.pop(context);
 
+    final _replyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyModifiedMsg();
+
     for (final pickedImage in _pickedImagesCollection) {
       Provider.of<ChatBoxMessagingProvider>(context, listen: false)
           .sendMsgManagement(
               msgType: ChatMessageType.image.toString(),
-              message: File(pickedImage.path).path);
+              message: File(pickedImage.path).path,
+              additionalData: _replyMsg.isEmpty
+                  ? null
+                  : {'reply': DataManagement.toJsonString(_replyMsg)});
+    }
+
+    if (_replyMsg.isNotEmpty) {
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .removeReplyMsg();
+      Provider.of<ChatCreationSectionProvider>(context, listen: false)
+          .backToNormalHeightForReply();
     }
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
@@ -93,10 +108,24 @@ class InputOption {
       return File(pickedImage.path).path;
     }
 
+    final _replyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyModifiedMsg();
+
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .sendMsgManagement(
             msgType: ChatMessageType.image.toString(),
-            message: File(pickedImage.path).path);
+            message: File(pickedImage.path).path,
+            additionalData: _replyMsg.isEmpty
+                ? null
+                : {'reply': DataManagement.toJsonString(_replyMsg)});
+
+    if (_replyMsg.isNotEmpty) {
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .removeReplyMsg();
+      Provider.of<ChatCreationSectionProvider>(context, listen: false)
+          .backToNormalHeightForReply();
+    }
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
@@ -126,30 +155,26 @@ class InputOption {
       return data;
     }
 
+    final _replyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyModifiedMsg();
+
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .sendMsgManagement(
             msgType: ChatMessageType.video.toString(),
             message: File(pickedVideo.path).path,
-            additionalData: {"thumbnail": thumbnailImage});
+            additionalData: {
+          "thumbnail": thumbnailImage,
+          'reply':
+              _replyMsg.isEmpty ? null : DataManagement.toJsonString(_replyMsg)
+        });
 
-    // Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-    //     .setSingleNewMessage({
-    //   DateTime.now().toString(): {
-    //     MessageData.type: ChatMessageType.video.toString(),
-    //     MessageData.message: File(pickedVideo.path).path,
-    //     MessageData.holder:
-    //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-    //             .getMessageHolderType()
-    //             .toString(),
-    //     MessageData.time:
-    //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-    //             .getCurrentTime(),
-    //     MessageData.date:
-    //         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-    //             .getCurrentDate(),
-    //     MessageData.additionalData: {"thumbnail": thumbnailImage}
-    //   }
-    // });
+    if (_replyMsg.isNotEmpty) {
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .removeReplyMsg();
+      Provider.of<ChatCreationSectionProvider>(context, listen: false)
+          .backToNormalHeightForReply();
+    }
 
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
   }
@@ -214,6 +239,10 @@ class InputOption {
 
       Navigator.pop(context);
 
+      final _replyMsg =
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .getReplyModifiedMsg();
+
       for (final pickedFile in filePickerResult.files) {
         if (_allowedExtensions.contains(pickedFile.extension) &&
             pickedFile.path != null) {
@@ -223,9 +252,19 @@ class InputOption {
                   msgType: chatMessageType.toString(),
                   message: File(pickedFile.path!).path,
                   additionalData: {
-                "extension-for-document": pickedFile.extension.toString()
+                "extension-for-document": pickedFile.extension.toString(),
+                'reply': _replyMsg.isEmpty
+                    ? null
+                    : DataManagement.toJsonString(_replyMsg)
               });
         }
+      }
+
+      if (_replyMsg.isNotEmpty) {
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .removeReplyMsg();
+        Provider.of<ChatCreationSectionProvider>(context, listen: false)
+            .backToNormalHeightForReply();
       }
 
       Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
@@ -285,11 +324,25 @@ class InputOption {
   sendLocationService(double _latitude, double _longitude) {
     Navigator.pop(context);
 
+    final _replyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyModifiedMsg();
+
     /// Message Send Management
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .sendMsgManagement(
             msgType: ChatMessageType.location.toString(),
-            message: {"latitude": _latitude, "longitude": _longitude});
+            message: {"latitude": _latitude, "longitude": _longitude},
+            additionalData: _replyMsg.isEmpty
+                ? null
+                : {'reply': DataManagement.toJsonString(_replyMsg)});
+
+    if (_replyMsg.isNotEmpty) {
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .removeReplyMsg();
+      Provider.of<ChatCreationSectionProvider>(context, listen: false)
+          .backToNormalHeightForReply();
+    }
 
     Navigator.pop(context);
     Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
@@ -488,12 +541,13 @@ class InputOption {
   Future<void> shareTextContent(String textToShare) async =>
       await Share.share(textToShare);
 
-  Future<void> shareFile(File file) async => await Share.shareFiles([file.path]);
+  Future<void> shareFile(File file) async =>
+      await Share.shareFiles([file.path]);
 
-  openUrl(String url){
-    try{
+  openUrl(String url) {
+    try {
       launchUrl(Uri.parse(url));
-    }catch(e){
+    } catch (e) {
       print("Error in Open Url:  $e");
     }
   }
@@ -538,7 +592,7 @@ class InputOption {
 
   _commonVideoNavigationForActivity(dynamic data, VideoType videoType) async {
     final duration = Provider.of<VideoShowProvider>(context, listen: false)
-            .getVideoDuration(File(data["videoPath"]));
+        .getVideoDuration(File(data["videoPath"]));
 
     if (duration.inSeconds <= Timings.videoDurationInSec) {
       Navigation.intent(
@@ -555,7 +609,9 @@ class InputOption {
       //         path: data["videoPath"],
       //         videoType: videoType,
       //         thumbnailPath: data["thumbnail"]));
-      showToast(context, title: TextCollection.videoDurationAlert, toastIconType: ToastIconType.info);
+      showToast(context,
+          title: TextCollection.videoDurationAlert,
+          toastIconType: ToastIconType.info);
     }
   }
 

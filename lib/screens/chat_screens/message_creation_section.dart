@@ -15,6 +15,7 @@ import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/chat/chat_scroll_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/local_data_management.dart';
 import '../../types/types.dart';
 import '../common/button.dart';
 import '../common/music_visualizer.dart';
@@ -31,7 +32,7 @@ class MessageCreationSection extends StatelessWidget {
         Provider.of<SoundRecorderProvider>(context).getRecordingStatus();
 
     return Container(
-      width: double.maxFinite,
+      width: MediaQuery.of(context).size.width,
       height: Provider.of<ChatCreationSectionProvider>(context)
           .getSectionHeight(context),
       decoration: BoxDecoration(
@@ -108,10 +109,23 @@ class MessageCreationSection extends StatelessWidget {
                 await Provider.of<SoundRecorderProvider>(context, listen: false)
                     .stopRecording();
 
+            final _replyMsg =
+                Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                    .getReplyModifiedMsg();
+
             Provider.of<ChatBoxMessagingProvider>(context, listen: false)
                 .sendMsgManagement(
                     msgType: ChatMessageType.audio.toString(),
-                    message: _voiceRecordPath);
+                    message: _voiceRecordPath,
+                    additionalData:
+                        _replyMsg.isEmpty ? null : {'reply': DataManagement.toJsonString(_replyMsg)});
+
+            if (_replyMsg.isNotEmpty) {
+              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                  .removeReplyMsg();
+              Provider.of<ChatCreationSectionProvider>(context, listen: false)
+                  .backToNormalHeightForReply();
+            }
 
             Provider.of<ChatScrollProvider>(context, listen: false)
                 .animateToBottom();
@@ -170,10 +184,7 @@ class MessageCreationSection extends StatelessWidget {
         cursorColor: _isDarkMode
             ? AppColors.pureWhiteColor
             : AppColors.lightChatConnectionTextColor.withOpacity(0.6),
-        onTap: () {
-          Provider.of<ChatCreationSectionProvider>(context, listen: false)
-              .backToNormalHeightForEmoji();
-        },
+        onTap: _onInputSectionTap,
         onChanged: (inputVal) {
           Provider.of<ChatBoxMessagingProvider>(context, listen: false)
               .setShowVoiceIcon(inputVal.isEmpty);
@@ -416,11 +427,23 @@ class MessageCreationSection extends StatelessWidget {
 
     if (_messageController!.text.isEmpty) return;
 
+    final _replyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyModifiedMsg();
+
     /// Message Send Management
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .sendMsgManagement(
             msgType: ChatMessageType.text.toString(),
-            message: _messageController.text);
+            message: _messageController.text,
+            additionalData: _replyMsg.isEmpty ? null : {'reply': DataManagement.toJsonString(_replyMsg)});
+
+    if (_replyMsg.isNotEmpty) {
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .removeReplyMsg();
+      Provider.of<ChatCreationSectionProvider>(context, listen: false)
+          .backToNormalHeightForReply();
+    }
 
     /// POST Operation after managing local messages
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -441,8 +464,12 @@ class MessageCreationSection extends StatelessWidget {
         width: MediaQuery.of(context).size.width - 80,
         height: 70,
         decoration: BoxDecoration(
+            color: AppColors.getChatBgColor(_isDarkMode),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _isDarkMode?AppColors.splashScreenColor:AppColors.lightBorderGreenColor)),
+            border: Border.all(
+                color: _isDarkMode
+                    ? AppColors.splashScreenColor
+                    : AppColors.lightBorderGreenColor)),
         child: Column(
           children: [
             _replyMsgContainerUpperSection(),
@@ -492,15 +519,16 @@ class MessageCreationSection extends StatelessWidget {
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getReplyHolderMsg();
 
-    if (_msgData == null) return const Center();
+    if (_msgData.isEmpty) return const Center();
 
     bool _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return Padding(
-        padding: const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 0.5),
+        padding:
+            const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 0.5),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: Text(_optimizedShowReplyMessage(_msgData),
+          child: Text(_optimizedShowReplyMessage(_msgData.values.toList()[0]),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyleCollection.terminalTextStyle
@@ -534,5 +562,16 @@ class MessageCreationSection extends StatelessWidget {
     }
 
     return '';
+  }
+
+  void _onInputSectionTap() {
+    final bool _isEmojiSectionShowing =
+        Provider.of<ChatCreationSectionProvider>(context, listen: false)
+            .getEmojiActivationState();
+
+    if (!_isEmojiSectionShowing) return;
+
+    Provider.of<ChatCreationSectionProvider>(context, listen: false)
+        .backToNormalHeightForEmoji();
   }
 }
