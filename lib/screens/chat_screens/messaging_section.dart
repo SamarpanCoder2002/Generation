@@ -194,8 +194,6 @@ class _MessagingSectionState extends State<MessagingSection> {
 
     final _isReplyExist = _checkIfReplyMsgExist(messageData);
 
-    print("is Reply Msg Exist: $_isReplyExist");
-
     return InkWell(
       onTap: () async {
         await SystemFileManagement.openFile(messageData.message);
@@ -454,7 +452,6 @@ class _MessagingSectionState extends State<MessagingSection> {
                 _imageMessageSection(messageData: messageData, fromVideo: true),
                 InkWell(
                   onTap: () async {
-                    print("Ok Video");
                     await SystemFileManagement.openFile(messageData.message);
                   },
                   child: SizedBox(
@@ -467,7 +464,6 @@ class _MessagingSectionState extends State<MessagingSection> {
                         color: AppColors.darkBorderGreenColor,
                       ),
                       onPressed: () async {
-                        print("Message Data: ${messageData.message}");
                         await SystemFileManagement.openFile(
                             messageData.message);
                       },
@@ -704,7 +700,6 @@ class _MessagingSectionState extends State<MessagingSection> {
   }
 
   _rightSwipe(String messageId, ChatMessageModel messageData) {
-    print("Reply to This Message");
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setReplyHolderMsg(messageId, messageData);
     Provider.of<ChatCreationSectionProvider>(context, listen: false)
@@ -742,7 +737,7 @@ class _MessagingSectionState extends State<MessagingSection> {
 
     return Container(
       height: 60,
-      padding: const EdgeInsets.only(left: 10, right: 15, top: 8, bottom: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
         color: AppColors.getChatBgColor(_isDarkMode).withOpacity(0.4),
         borderRadius: const BorderRadius.only(

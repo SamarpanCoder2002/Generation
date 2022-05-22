@@ -33,12 +33,25 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
   Map<String, ChatMessageModel?> _replyHolderMsg = {};
+//  Map<String, dynamic> _partnerData = {};
 
   FocusNode _focus = FocusNode();
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
   final RealTimeOperations _realTimeOperations = RealTimeOperations();
   final Dio _dio = Dio();
+
+  // setPartnerData(incoming, {bool update = false}) {
+  //   _partnerData = incoming;
+  //   if (update) notifyListeners();
+  // }
+
+  // Map<String, dynamic> getPartnerData() => _partnerData;
+  //
+  // _removePartnerData() {
+  //   _partnerData.clear();
+  //   notifyListeners();
+  // }
 
   setContext(context) {
     this.context = context;
@@ -52,7 +65,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   Map<String, ChatMessageModel?> getReplyHolderMsg() => _replyHolderMsg;
 
   Map<String, dynamic> getReplyModifiedMsg() {
-    if(_replyHolderMsg.isEmpty) return {};
+    if (_replyHolderMsg.isEmpty) return {};
 
     Map<String, dynamic> _msgData = {};
 
@@ -93,8 +106,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       if (_docData != null &&
           _docData.isNotEmpty &&
           _docData["data"].isNotEmpty) {
-        print("Document Data is: ${_docData["data"]}\n\n");
-
         _manageIncomingMessages(_docData["data"]);
 
         _dbOperations.resetRemoteOldChatMessages(partnerId);
@@ -105,24 +116,24 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   getConnectionDataRealTime(String partnerId, BuildContext context) {
     _realTimeConnSubscription =
         _realTimeOperations.getConnectionData(partnerId).listen((docSnapShot) {
-      final _docData = docSnapShot.data();
+      final Map<String, dynamic>? _docData = docSnapShot.data();
 
-      print("Connection Document Data: $_docData");
+      if (_docData != null) {
+        setToken(_docData['token']);
 
-      setToken(_docData!['token']);
+        if (_docData.isNotEmpty) {
+          setCurrStatus(_docData[DBPath.status] ?? {});
 
-      if (_docData != null && _docData.isNotEmpty) {
-        setCurrStatus(_docData[DBPath.status] ?? {});
-
-        _localStorage.insertUpdateConnectionPrimaryData(
-            id: _docData["id"],
-            name: _docData["name"],
-            profilePic: _docData["profilePic"],
-            about: _docData["about"],
-            notificationTypeManually: _docData["notificationManually"],
-            dbOperation: DBOperation.update);
-        Provider.of<ConnectionCollectionProvider>(context, listen: false)
-            .updateParticularConnectionData(_docData["id"], _docData);
+          _localStorage.insertUpdateConnectionPrimaryData(
+              id: _docData["id"],
+              name: _docData["name"],
+              profilePic: _docData["profilePic"],
+              about: _docData["about"],
+              notificationTypeManually: _docData["notificationManually"],
+              dbOperation: DBOperation.update);
+          Provider.of<ConnectionCollectionProvider>(context, listen: false)
+              .updateParticularConnectionData(_docData["id"], _docData);
+        }
       }
     });
   }
@@ -281,6 +292,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     clearToken();
     notifyListeners();
     _removePartnerId();
+    //_removePartnerData();
     removeReplyMsg();
   }
 
@@ -492,8 +504,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   /// Making Message Data Ready For Local
   void _manageMessageForLocale(_msgData,
       {bool forSendMultiple = false, String? incomingConnId}) {
-    print("Message Data to Stoer: $_msgData");
-
     if (!forSendMultiple) setSingleNewMessage(_msgData);
 
     _localStorage.insertUpdateMsgUnderConnectionChatTable(

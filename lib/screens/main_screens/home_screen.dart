@@ -108,8 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             child: TextField(
-              cursorColor: AppColors.pureWhiteColor,
-              style: TextStyleCollection.searchTextStyle,
+              cursorColor: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightTextColor.withOpacity(0.8),
+              style: TextStyleCollection.searchTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightTextColor.withOpacity(0.8)),
               onChanged: (inputVal) =>
                   Provider.of<ConnectionCollectionProvider>(context,
                           listen: false)
@@ -190,7 +195,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
-        onTap: () => Navigation.intent(context, const ActivityController(), afterWork: () => changeContextTheme(_isDarkMode)),
+        onTap: () => Navigation.intent(context, const ActivityController(),
+            afterWork: () => changeContextTheme(_isDarkMode)),
         child: Column(
           children: [
             Container(
@@ -207,8 +213,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 border: Border.all(
                     color: _currentActivityData["isActive"]
                         ? _isDarkMode
-                        ? AppColors.darkBorderGreenColor
-                        : AppColors.lightBorderGreenColor
+                            ? AppColors.darkBorderGreenColor
+                            : AppColors.lightBorderGreenColor
                         : AppColors.imageDarkBgColor,
                     width: 3),
               ),
@@ -349,7 +355,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: _commonChatLayout.particularChatConnection(
                     photo: _connectionData["profilePic"] ?? "",
                     heading: _connectionData["name"] ?? "",
-                    subheading: _getSubHeading(_lastMsgData, (_connectionData['name'] ?? '').toString().split(' ').first),
+                    subheading: _getSubHeading(
+                        _lastMsgData,
+                        (_connectionData['name'] ?? '')
+                            .toString()
+                            .split(' ')
+                            .first),
                     lastMsgTime: _lastMsgData?["time"] ?? "",
                     currentIndex: connectionIndex,
                     totalPendingMessages: _connectionData["notSeenMsgCount"],
@@ -413,7 +424,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
-        onTap: () => Navigation.intent(context, const ActivityController(), afterWork: () => changeContextTheme(_isDarkMode)),
+        onTap: () => Navigation.intent(context, const ActivityController(),
+            afterWork: () => changeContextTheme(_isDarkMode)),
         child: Column(
           children: [
             // OpenContainer(
@@ -458,8 +470,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     border: Border.all(
                         color: _currentActivityData["isActive"]
                             ? _isDarkMode
-                            ? AppColors.darkBorderGreenColor
-                            : AppColors.lightBorderGreenColor
+                                ? AppColors.darkBorderGreenColor
+                                : AppColors.lightBorderGreenColor
                             : AppColors.imageDarkBgColor,
                         width: 3),
                     image: DecorationImage(
@@ -582,7 +594,9 @@ class _HomeScreenState extends State<HomeScreen> {
               _connectionData["id"], _isDarkMode, connectionIndex);
         } else if (index == 1) {
           final LocalStorage _localStorage = LocalStorage();
-          _localStorage.deleteDataFromParticularChatConnTable(tableName: DataManagement.generateTableNameForNewConnectionChat(_connectionData["id"]));
+          _localStorage.deleteDataFromParticularChatConnTable(
+              tableName: DataManagement.generateTableNameForNewConnectionChat(
+                  _connectionData["id"]));
         } else if (index == 2) {
           _inputOption.activityImageFromGallery();
         } else if (index == 3) {
@@ -624,8 +638,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _getSubHeading(_lastMsgData, String connFirstName) {
     final _msgData = _lastMsgData?["message"] ?? '';
-    var _msgHolder = _lastMsgData?['holder'] ?? MessageHolderType.other.toString();
-    _msgHolder = _msgHolder == MessageHolderType.other.toString()?connFirstName:'Me';
+    var _msgHolder =
+        _lastMsgData?['holder'] ?? MessageHolderType.other.toString();
+    _msgHolder =
+        _msgHolder == MessageHolderType.other.toString() ? connFirstName : 'Me';
 
     if (_msgData == '') return '';
 

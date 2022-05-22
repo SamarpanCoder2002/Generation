@@ -30,7 +30,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     if (update) notifyListeners();
   }
 
-  _fetchCurrAccData({bool update = false}) async{
+  _fetchCurrAccData({bool update = false}) async {
     final _currAccData = await _localStorage.getDataForCurrAccount();
     this._currAccData = _currAccData;
     if (update) notifyListeners();
@@ -42,6 +42,18 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   fetchLocalConnectedUsers(context) async {
     try {
+      //Map<String, dynamic> _localPriorityManagementData = {};
+
+      // _notSeenMsgStore(connData) {
+      //   if (connData["notSeenMsgCount"] != null &&
+      //       int.parse(connData["notSeenMsgCount"]) > 0) {
+      //     _localPriorityManagementData[connData["id"]] = {
+      //       "count": int.parse(connData["notSeenMsgCount"]),
+      //       "data": connData
+      //     };
+      //   }
+      // }
+
       final _conPrimaryData = await _localStorage.getConnectionPrimaryData();
 
       for (Map<String, dynamic> connData in _conPrimaryData) {
@@ -50,10 +62,12 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         _realTimeMsgListeners[connData["id"].toString()] = {
           _realTimeOperations.getChatMessages(connData["id"].toString()): null
         };
+        //_notSeenMsgStore(connData);
         notifyListeners();
       }
 
       initialize(update: true);
+      //_manageConnOnRemainingMessages(_localPriorityManagementData);
       _connStreamManagement();
       _remoteConnectedDataStream(context);
       _dbOperations.getAvailableUsersData(context);
@@ -61,6 +75,17 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       print("Error in Fetch Local Connected Users: $e");
     }
   }
+
+  // _manageConnOnRemainingMessages(Map<String, dynamic> connMap) {
+  //   final _allData = connMap.values.toList();
+  //   _allData.sort((first, second) => second["count"] > first["count"] ? 0 : 1);
+  //
+  //   print("All Data Length: ${_allData.length}");
+  //
+  //   for (final particularConnMap in _allData) {
+  //     //_makeConnPriority(particularConnMap["data"]);
+  //   }
+  // }
 
   updateParticularConnectionData(String id, connUpdatedData) {
     _localConnectedUsersMap[id]["name"] = connUpdatedData["name"];
@@ -160,6 +185,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     connData["notSeenMsgCount"] = notSeenMessages;
 
     _localConnectedUsersMap[connData["id"]] = connData;
+    if (connData["notSeenMsgCount"] != null &&
+        int.parse(connData["notSeenMsgCount"]) > 0) makeConnPriority(connData);
+    notifyListeners();
+  }
+
+  makeConnPriority(oldConnData) {
+    _searchedChatConnectionsDataCollection.removeWhere(
+        (connDataIterate) => connDataIterate["id"] == oldConnData["id"]);
+    _searchedChatConnectionsDataCollection.insert(0, oldConnData);
     notifyListeners();
   }
 
@@ -186,42 +220,10 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // setForSelection() {
-  //   for (final connection in _chatConnectionsDataCollection) {
-  //     _selectedSearchedChatConnectionsDataCollection
-  //         .add({...connection, "isSelected": false});
-  //   }
-  // }
-
-  // updateParticularSelectionData(incoming, index) {
-  //   resetSelectionData();
-  //   setForSelection();
-  //   _selectedSearchedChatConnectionsDataCollection[index] = incoming;
-  //   notifyListeners();
-  // }
-
   removeConnectionAtIndex(int index) {
     _searchedChatConnectionsDataCollection.removeAt(index);
     notifyListeners();
   }
-
-  // selectUnselectMultipleConnection(incoming, index) {
-  //   if (_selectedSearchedChatConnectionsDataCollection[index] == null) {
-  //     _selectedSearchedChatConnectionsDataCollection[index] = incoming;
-  //   } else {
-  //     _selectedSearchedChatConnectionsDataCollection.remove(index);
-  //   }
-  //
-  //   notifyListeners();
-  // }
-
-  // resetSelectionData() {
-  //   _selectedSearchedChatConnectionsDataCollection.clear();
-  // }
-
-  //getWillSelectData() => _selectedSearchedChatConnectionsDataCollection;
-
-  //getWillSelectDataLength() =>     _selectedSearchedChatConnectionsDataCollection.length;
 
   setFreshData(incomingData) {
     if (incomingData == null) return;
@@ -270,7 +272,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   getUsersMap(String id) => _localConnectedUsersMap[id];
 
   bool isAnyConnectionSelected() {
-    print("Is Any Connection Selected:  $_selectedConnections");
     if (_selectedConnections.isEmpty) return false;
     return _selectedConnections.values.toList().contains(true);
   }
