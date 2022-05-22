@@ -186,11 +186,11 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
     _localConnectedUsersMap[connData["id"]] = connData;
     if (connData["notSeenMsgCount"] != null &&
-        int.parse(connData["notSeenMsgCount"]) > 0) _makeConnPriority(connData);
+        int.parse(connData["notSeenMsgCount"]) > 0) makeConnPriority(connData);
     notifyListeners();
   }
 
-  _makeConnPriority(oldConnData) {
+  makeConnPriority(oldConnData) {
     _searchedChatConnectionsDataCollection.removeWhere(
         (connDataIterate) => connDataIterate["id"] == oldConnData["id"]);
     _searchedChatConnectionsDataCollection.insert(0, oldConnData);

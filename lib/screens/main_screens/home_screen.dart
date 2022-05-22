@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             child: TextField(
-              cursorColor:  _isDarkMode
+              cursorColor: _isDarkMode
                   ? AppColors.pureWhiteColor
                   : AppColors.lightTextColor.withOpacity(0.8),
               style: TextStyleCollection.searchTextStyle.copyWith(

@@ -28,8 +28,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    final _onlineStatus = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .getOnlineStatus();
+    final _onlineStatus =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getOnlineStatus();
     _dbOperations.updateActiveStatus(_onlineStatus);
 
     WidgetsBinding.instance.addObserver(this);
@@ -50,8 +51,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      final _onlineStatus = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-          .getOnlineStatus();
+      final _onlineStatus =
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .getOnlineStatus();
       _dbOperations.updateActiveStatus(_onlineStatus);
     } else {
       final _latestStatus =
