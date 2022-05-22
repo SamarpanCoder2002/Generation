@@ -9,7 +9,7 @@ import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';

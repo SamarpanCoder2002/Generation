@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:generation/config/stored_string_collection.dart';
 
 import '../services/local_data_management.dart';
-import '../types/types.dart';
+import '../config/types.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeModeTypes _themeModeType = ThemeModeTypes.systemMode;

@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
 import '../../services/local_data_management.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import 'chat_scroll_provider.dart';
 
 class ChatBoxMessagingProvider extends ChangeNotifier {
@@ -60,6 +60,14 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   setReplyHolderMsg(String msgId, ChatMessageModel incoming) {
     _replyHolderMsg = {msgId: incoming};
     notifyListeners();
+  }
+
+  popUpScreen(){
+    try{
+      Navigator.pop(context);
+    }catch(e){
+      print("Error in Pop Up Screen:  $e");
+    }
   }
 
   Map<String, ChatMessageModel?> getReplyHolderMsg() => _replyHolderMsg;

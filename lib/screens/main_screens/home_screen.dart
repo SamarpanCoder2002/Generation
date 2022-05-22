@@ -10,7 +10,7 @@ import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
-        .initialize();
+        .initialize(context: context);
     Provider.of<MainScrollingProvider>(context, listen: false).startListening();
     super.initState();
   }

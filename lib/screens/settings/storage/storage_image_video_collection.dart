@@ -7,7 +7,7 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/storage/storage_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/services/local_data_management.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 

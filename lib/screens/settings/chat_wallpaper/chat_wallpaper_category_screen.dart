@@ -9,7 +9,7 @@ import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_preview.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_database_services.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/theme_provider.dart';

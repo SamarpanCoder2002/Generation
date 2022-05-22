@@ -16,7 +16,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/chat/chat_scroll_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/local_data_management.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import '../common/button.dart';
 import '../common/music_visualizer.dart';
 

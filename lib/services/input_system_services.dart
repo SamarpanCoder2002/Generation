@@ -17,7 +17,7 @@ import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -36,7 +36,7 @@ import '../screens/activity/create/create_activity.dart';
 import '../screens/common/music_visualizer.dart';
 import 'local_data_management.dart';
 import 'navigation_management.dart';
-import '../types/types.dart';
+import '../config/types.dart';
 
 class InputOption {
   final BuildContext context;

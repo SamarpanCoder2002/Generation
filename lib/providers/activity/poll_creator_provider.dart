@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 class PollCreatorProvider extends ChangeNotifier {
   final TextEditingController _questionController = TextEditingController();

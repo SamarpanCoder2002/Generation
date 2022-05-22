@@ -13,7 +13,7 @@ import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/show_google_map.dart';
 import 'package:generation/services/system_file_management.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:pdf_viewer_plugin/pdf_viewer_plugin.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';

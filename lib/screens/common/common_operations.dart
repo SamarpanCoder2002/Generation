@@ -5,7 +5,7 @@ import 'package:generation/services/local_database_services.dart';
 
 import '../../services/navigation_management.dart';
 import '../../services/toast_message_show.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import '../main_screens/main_screen_management.dart';
 
 storagePermissionForStoreCurrAccData(

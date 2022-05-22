@@ -1,6 +1,13 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:generation/config/stored_string_collection.dart';
+import 'package:generation/config/types.dart';
+import 'package:generation/screens/entry_screens/splash_screen.dart';
+import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/native_operations.dart';
+import 'package:generation/services/navigation_management.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:http/http.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +29,8 @@ import '../services/local_data_management.dart';
 
 class DBOperations {
   final MessagingOperation _messagingOperation = MessagingOperation();
+  final NativeCallback _nativeCallback = NativeCallback();
+  final LocalStorage _localStorage = LocalStorage();
 
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
 
@@ -30,6 +39,26 @@ class DBOperations {
   String get currEmail => FirebaseAuth.instance.currentUser?.email ?? "";
 
   FirebaseStorage get _storageInstance => FirebaseStorage.instance;
+
+  isConnectedToDB(context) async {
+    final _isNetworkPresent = await _nativeCallback.checkInternet();
+    if (!_isNetworkPresent) {
+      print("Network not found");
+      showToast(context,
+          title: 'Network Not Found', toastIconType: ToastIconType.error);
+      return;
+    }
+
+    final _isCreatedBefore = await isAccountCreatedBefore();
+    if (_isCreatedBefore['success']) return;
+
+    showToast(context,
+        title: "Account Not Found", toastIconType: ToastIconType.info);
+
+    DataManagement.clearSharedStorage();
+    _localStorage.closeDatabase();
+    Navigation.intentStraight(context, const SplashScreen());
+  }
 
   Future<String> _fToken() async =>
       await FirebaseMessaging.instance.getToken() ?? "";
@@ -321,6 +350,13 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid')
           .delete();
+
+      // _getInstance
+      //     .doc(
+      //         '${DBPath.userCollection}/$otherUserId/${DBPath.specialRequest}/${DBPath.removeConn}')
+      //     .set({
+      //   DBPath.data: FieldValue.arrayUnion([currUid]),
+      // }, SetOptions(merge: true));
       return true;
     } catch (e) {
       print("ERROR in Remove Connected User: $e");
@@ -350,7 +386,8 @@ class DBOperations {
       required dynamic msgData,
       required String token,
       required String title,
-      required String body, String? image}) async {
+      required String body,
+      String? image}) async {
     try {
       await _getInstance
           .doc(
@@ -360,7 +397,11 @@ class DBOperations {
       }, SetOptions(merge: true));
 
       _messagingOperation.sendNotification(
-          deviceToken: token, title: title, body: body, image: image, connId: currUid);
+          deviceToken: token,
+          title: title,
+          body: body,
+          image: image,
+          connId: currUid);
 
       return true;
     } catch (e) {
@@ -430,6 +471,13 @@ class DBOperations {
         .doc('${DBPath.userCollection}/$currUid')
         .update({DBPath.token: _getToken});
   }
+
+  resetRemoveSpecialRequest() {
+    _getInstance
+        .doc(
+            '${DBPath.userCollection}/$currUid/${DBPath.specialRequest}/${DBPath.removeConn}')
+        .set({DBPath.data: []});
+  }
 }
 
 class RealTimeOperations {
@@ -460,13 +508,23 @@ class RealTimeOperations {
   Stream<DocumentSnapshot<Map<String, dynamic>>> getConnectionData(
           String partnerId) =>
       _getInstance.doc('${DBPath.userCollection}/$partnerId').snapshots();
+
+  Stream<
+      DocumentSnapshot<
+          Map<String,
+              dynamic>>> getRemoveConnectionRequestData() => _getInstance
+      .doc(
+          '${DBPath.userCollection}/$currUid/${DBPath.specialRequest}/${DBPath.removeConn}')
+      .snapshots();
 }
 
 class MessagingOperation {
   Future<int> sendNotification(
       {required String deviceToken,
       required String title,
-      required String body, String? image, required String connId}) async {
+      required String body,
+      String? image,
+      required String connId}) async {
     final String _serverKey =
         DataManagement.getEnvData(EnvFileKey.serverKey) ?? '';
 
@@ -474,7 +532,11 @@ class MessagingOperation {
       Uri.parse(NotifyManagement.sendNotificationUrl),
       headers: NotifyManagement.sendNotificationHeader(_serverKey),
       body: NotifyManagement.bodyData(
-          title: title, body: body, deviceToken: deviceToken, image: image, connId: connId),
+          title: title,
+          body: body,
+          deviceToken: deviceToken,
+          image: image,
+          connId: connId),
     );
 
     print('Response is: ${response.statusCode}    ${response.body}');

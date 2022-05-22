@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/screens/common/button.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 Color _getColor(ToastIconType toastIconType) {
   switch (toastIconType) {

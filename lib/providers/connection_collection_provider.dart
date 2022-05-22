@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 class ConnectionCollectionProvider extends ChangeNotifier {
   List<dynamic> _searchedChatConnectionsDataCollection = [];
@@ -18,16 +18,22 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   final DBOperations _dbOperations = DBOperations();
   final RealTimeOperations _realTimeOperations = RealTimeOperations();
   late StreamSubscription _connectedDataStream;
+
+  //late StreamSubscription _removeConnectionStream;
   final Map<
       String,
       Map<Stream<DocumentSnapshot<Map<String, dynamic>>>,
           StreamSubscription?>> _realTimeMsgListeners = {};
   Map<String, dynamic> _currAccData = {};
 
-  initialize({bool update = false}) {
+  initialize({bool update = false, BuildContext? context}) {
     _searchedChatConnectionsDataCollection = _chatConnectionsDataCollection;
     _fetchCurrAccData(update: update);
-    if (update) notifyListeners();
+    if (update) {
+      notifyListeners();
+    } else {
+      if (context != null) _dbOperations.isConnectedToDB(context);
+    }
   }
 
   _fetchCurrAccData({bool update = false}) async {
@@ -70,6 +76,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       //_manageConnOnRemainingMessages(_localPriorityManagementData);
       _connStreamManagement();
       _remoteConnectedDataStream(context);
+      //_managingRemoveConnRequest(context);
       _dbOperations.getAvailableUsersData(context);
     } catch (e) {
       print("Error in Fetch Local Connected Users: $e");
@@ -124,6 +131,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   destroyConnectedDataStream() {
     _connectedDataStream.cancel();
+    //_removeConnectionStream.cancel();
     for (final particularData in _realTimeMsgListeners.values.toList()) {
       particularData.values.toList()[0]?.cancel();
     }
@@ -144,7 +152,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     final _streamSubscription = _particularSteam?.listen((docSnapShot) {
       final _docData = docSnapShot.data();
 
-      if (_docData != null && _docData.isNotEmpty) {
+      if (_docData != null &&
+          _docData.isNotEmpty &&
+          _localConnectedUsersMap[connId] != null) {
         final _incomingMessagesCollection = _docData["data"];
         _manageStreamData(
             remoteLatestMsg: _incomingMessagesCollection.isEmpty
@@ -213,6 +223,8 @@ class ConnectionCollectionProvider extends ChangeNotifier {
                 DataManagement.generateTableNameForNewConnectionChat(connId)) ??
         {};
     final _connData = _localConnectedUsersMap[connId];
+    if (_connData == null) return;
+
     _connData["chatLastMsg"] = DataManagement.toJsonString(_getLatestChatMsg);
     _connData["notSeenMsgCount"] = '0';
 
@@ -320,4 +332,41 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     _selectedConnections.clear();
     notifyListeners();
   }
+
+// void _managingRemoveConnRequest(BuildContext context) {
+//   _removeConnectionStream = _realTimeOperations
+//       .getRemoveConnectionRequestData()
+//       .listen((DocumentSnapshot<Map<String, dynamic>> docSnapShot) {
+//     final _data = docSnapShot.data();
+//     if (_data == null) return;
+//     if (_data[DBPath.data] == null) return;
+//     if (_data[DBPath.data].isEmpty) return;
+//
+//     for (final _connId in _data[DBPath.data]) {
+//
+//
+//       if (Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+//               .getPartnerUserId() ==
+//           _connId) {
+//         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+//             .popUpScreen();
+//       }
+//
+//       showToast(context,
+//           title:
+//               '${_localConnectedUsersMap[_connId]["name"]} ${TextCollection.removeYou}',
+//           toastIconType: ToastIconType.info,
+//           showFromTop: false);
+//
+//       _chatConnectionsDataCollection
+//           .removeWhere((connData) => connData["id"] == _connId);
+//       _localConnectedUsersMap.remove(_connId);
+//       initialize(update: true);
+//
+//       _localStorage.deleteConnectionPrimaryData(id: _connId);
+//     }
+//
+//     _dbOperations.resetRemoveSpecialRequest();
+//   });
+// }
 }

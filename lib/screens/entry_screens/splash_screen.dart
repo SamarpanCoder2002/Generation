@@ -17,7 +17,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../config/stored_string_collection.dart';
 import '../../services/local_data_management.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);

@@ -12,7 +12,7 @@ import '../../../config/text_style_collection.dart';
 import '../../../providers/chat/chat_creation_section_provider.dart';
 import '../../../providers/chat/chat_scroll_provider.dart';
 import '../../../providers/chat/messaging_provider.dart';
-import '../../../types/types.dart';
+import '../../../config/types.dart';
 
 class ContactsCollection extends StatefulWidget {
   const ContactsCollection({Key? key}) : super(key: key);

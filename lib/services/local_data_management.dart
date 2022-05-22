@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,4 +34,13 @@ class DataManagement {
 
   static generateTableNameForNewConnectionChat(String id) => "__${id}__";
   static generateTableNameForNewConnectionActivity(String id) => "__${id}__activity__";
+
+  static clearSharedStorage()async{
+    final instance = await SharedPreferences.getInstance();
+    instance.clear();
+  }
+
+  static deleteParticularDir(String dirPath){
+    Directory(dirPath).delete();
+  }
 }

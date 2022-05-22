@@ -7,7 +7,7 @@ import 'package:generation/screens/main_screens/main_screen_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';

@@ -3,7 +3,7 @@ import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
 import '../../config/size_collection.dart';

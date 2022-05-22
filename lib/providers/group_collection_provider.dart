@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 class GroupCollectionProvider extends ChangeNotifier {
   List<dynamic> _searchedData = [];

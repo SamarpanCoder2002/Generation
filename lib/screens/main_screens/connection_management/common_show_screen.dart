@@ -12,7 +12,7 @@ import '../../../providers/connection_management_provider_collection/sent_reques
 import '../../../providers/main_scrolling_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../services/toast_message_show.dart';
-import '../../../types/types.dart';
+import '../../../config/types.dart';
 import '../../common/chat_connections_common_design.dart';
 
 class CommonUsersShowScreen extends StatefulWidget {

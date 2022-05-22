@@ -5,7 +5,7 @@ import 'package:generation/config/time_collection.dart';
 import 'package:generation/providers/activity/poll_creator_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/input_system_services.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/theme_provider.dart';

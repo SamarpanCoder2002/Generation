@@ -3,7 +3,7 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 

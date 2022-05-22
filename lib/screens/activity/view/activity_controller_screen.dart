@@ -7,7 +7,7 @@ import 'package:generation/providers/activity/activity_screen_provider.dart';
 import 'package:generation/providers/activity/poll_show_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 import '../../../config/size_collection.dart';
 import '../../../providers/sound_provider.dart';
