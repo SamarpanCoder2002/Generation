@@ -247,6 +247,9 @@ class LocalStorage {
 
     final _rowAffected =
         await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
+
+    print("row Affected:  $_rowAffected");
+
     if (_rowAffected == 1) {
       deleteDataFromParticularChatConnTable(
           tableName: DataManagement.generateTableNameForNewConnectionChat(id));
@@ -323,6 +326,7 @@ class LocalStorage {
 
     if (msgId == null) {
       await db.delete(tableName);
+      print("Deletion done chat");
     } else {
       await db.delete(tableName, where: """$_msgId = "$msgId" """);
     }
@@ -412,6 +416,7 @@ class LocalStorage {
 
     if (activityId == null) {
       await db.delete(tableName);
+      print("Delete Activity");
     } else {
       await db.delete(tableName, where: """$_activityId = "$activityId" """);
     }
