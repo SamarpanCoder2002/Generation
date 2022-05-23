@@ -242,7 +242,7 @@ class LocalStorage {
   }
 
   /// Delete particular connection
-  Future<bool> deleteConnectionPrimaryData({required String id}) async {
+  Future<bool> deleteConnectionPrimaryData({required String id, bool allowDeleteOtherRelatedTable = false}) async {
     final Database db = await database;
 
     final _rowAffected =
@@ -250,7 +250,7 @@ class LocalStorage {
 
     print("row Affected:  $_rowAffected");
 
-    if (_rowAffected == 1) {
+    if (_rowAffected == 1 && allowDeleteOtherRelatedTable) {
       deleteDataFromParticularChatConnTable(
           tableName: DataManagement.generateTableNameForNewConnectionChat(id));
       deleteActivity(

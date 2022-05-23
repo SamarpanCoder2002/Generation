@@ -17,4 +17,5 @@ class DBPath{
   static const token = "token";
   static const specialRequest = "special_request";
   static const removeConn = "remove_connection";
+  static const notificationDeactivated = "notification_deactivated";
 }

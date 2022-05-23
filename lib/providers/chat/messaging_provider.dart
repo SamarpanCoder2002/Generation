@@ -33,6 +33,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
   Map<String, ChatMessageModel?> _replyHolderMsg = {};
+
 //  Map<String, dynamic> _partnerData = {};
 
   FocusNode _focus = FocusNode();
@@ -62,10 +63,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  popUpScreen(){
-    try{
+  popUpScreen() {
+    try {
       Navigator.pop(context);
-    }catch(e){
+    } catch (e) {
       print("Error in Pop Up Screen:  $e");
     }
   }
@@ -537,6 +538,13 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       required msgDate,
       bool forSendMultiple = false,
       String? incomingConnId}) async {
+    final bool _isNotificationPermitted =
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .notificationPermitted(
+                !forSendMultiple ? getPartnerUserId() : incomingConnId);
+
+    print("Is notification Permitted:  $_isNotificationPermitted");
+
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&
         msgType != ChatMessageType.contact.toString() &&
@@ -582,7 +590,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         token: getToken(),
         title: _notificationData['title'],
         body: _notificationData['body'],
-        image: _notificationData['image']);
+        image: _notificationData['image'],
+        isNotificationPermitted: _isNotificationPermitted);
   }
 
   /// Get Chat Media Storage Reference

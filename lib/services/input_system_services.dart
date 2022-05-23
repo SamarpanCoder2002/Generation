@@ -850,4 +850,25 @@ class InputOption {
         showCancelBtn: true,
         bgColor: AppColors.getChatBgColor(_isDarkMode));
   }
+
+  clearChatData(connData, bool _isDarkMode) {
+    _clearChatAllRows() {
+      _localStorage.deleteDataFromParticularChatConnTable(
+          tableName: DataManagement.generateTableNameForNewConnectionChat(
+              connData["id"]));
+
+      Provider.of<ConnectionCollectionProvider>(context, listen: false)
+          .afterClearChatMessages(connData);
+
+      Navigator.pop(context);
+      Navigator.pop(context);
+      showToast(context,
+          title: "Chat Messages Deletion Done",
+          toastIconType: ToastIconType.success);
+    }
+
+    showPopUpDialog(context, "Clear Chat Data?",
+        "You can't restore deleted chat messages", _clearChatAllRows,
+        showCancelBtn: true, bgColor: AppColors.getChatBgColor(_isDarkMode));
+  }
 }

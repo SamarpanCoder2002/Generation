@@ -415,7 +415,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
             : NotificationType.muted.toString());
 
     _dbOperations.updateParticularConnectionNotificationStatus(
-        widget.connData["id"], value);
+        widget.connData["id"], !value);
   }
 
   void _navigateToLocalStorageScreen() async {

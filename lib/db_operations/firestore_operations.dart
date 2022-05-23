@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/config/types.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -351,12 +350,12 @@ class DBOperations {
               '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid')
           .delete();
 
-      // _getInstance
-      //     .doc(
-      //         '${DBPath.userCollection}/$otherUserId/${DBPath.specialRequest}/${DBPath.removeConn}')
-      //     .set({
-      //   DBPath.data: FieldValue.arrayUnion([currUid]),
-      // }, SetOptions(merge: true));
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.specialRequest}/${DBPath.removeConn}')
+          .set({
+        DBPath.data: FieldValue.arrayUnion([currUid]),
+      }, SetOptions(merge: true));
       return true;
     } catch (e) {
       print("ERROR in Remove Connected User: $e");
@@ -387,6 +386,7 @@ class DBOperations {
       required String token,
       required String title,
       required String body,
+      bool isNotificationPermitted = false,
       String? image}) async {
     try {
       await _getInstance
@@ -396,12 +396,14 @@ class DBOperations {
         DBPath.data: FieldValue.arrayUnion([msgData])
       }, SetOptions(merge: true));
 
-      _messagingOperation.sendNotification(
-          deviceToken: token,
-          title: title,
-          body: body,
-          image: image,
-          connId: currUid);
+      if (isNotificationPermitted) {
+        _messagingOperation.sendNotification(
+            deviceToken: token,
+            title: title,
+            body: body,
+            image: image,
+            connId: currUid);
+      }
 
       return true;
     } catch (e) {
@@ -456,10 +458,11 @@ class DBOperations {
 
   updateParticularConnectionNotificationStatus(
       String connId, bool updatedNotification) async {
-    await _getInstance
-        .doc(
-            '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$connId')
-        .update({DBPath.notification: updatedNotification.toString()});
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update({
+      DBPath.notificationDeactivated: updatedNotification
+          ? FieldValue.arrayUnion([connId])
+          : FieldValue.arrayRemove([connId])
+    });
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> getWallpaperData() async =>

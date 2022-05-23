@@ -593,10 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _inputOption.removeConnectedUser(
               _connectionData["id"], _isDarkMode, connectionIndex);
         } else if (index == 1) {
-          final LocalStorage _localStorage = LocalStorage();
-          _localStorage.deleteDataFromParticularChatConnTable(
-              tableName: DataManagement.generateTableNameForNewConnectionChat(
-                  _connectionData["id"]));
+          _inputOption.clearChatData(_connectionData, _isDarkMode);
         } else if (index == 2) {
           _inputOption.activityImageFromGallery();
         } else if (index == 3) {
