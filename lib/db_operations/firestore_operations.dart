@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:generation/config/types.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
 import 'package:generation/services/local_database_services.dart';
-import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:http/http.dart';
@@ -24,11 +23,11 @@ import 'package:generation/providers/connection_management_provider_collection/i
 import 'package:provider/provider.dart';
 
 import '../providers/connection_management_provider_collection/sent_request_provider.dart';
+import '../providers/network_management_provider.dart';
 import '../services/local_data_management.dart';
 
 class DBOperations {
   final MessagingOperation _messagingOperation = MessagingOperation();
-  final NativeCallback _nativeCallback = NativeCallback();
   final LocalStorage _localStorage = LocalStorage();
 
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
@@ -40,11 +39,13 @@ class DBOperations {
   FirebaseStorage get _storageInstance => FirebaseStorage.instance;
 
   isConnectedToDB(context) async {
-    final _isNetworkPresent = await _nativeCallback.checkInternet();
+    final _isNetworkPresent =
+        await Provider.of<NetworkManagementProvider>(context, listen: false)
+            .isNetworkActive;
     if (!_isNetworkPresent) {
       print("Network not found");
-      showToast(context,
-          title: 'Network Not Found', toastIconType: ToastIconType.error);
+      Provider.of<NetworkManagementProvider>(context, listen: false)
+          .noNetworkMsg(context, showCenterToast: true);
       return;
     }
 

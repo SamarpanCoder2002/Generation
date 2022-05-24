@@ -8,6 +8,7 @@ import 'package:generation/db_operations/helper.dart';
 import 'package:generation/db_operations/types.dart';
 import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/providers/network_management_provider.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
@@ -469,6 +470,13 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       additionalData,
       bool forSendMultiple = false,
       String? incomingConnId}) async {
+    if (!(await Provider.of<NetworkManagementProvider>(context, listen: false)
+        .isNetworkActive)) {
+      Provider.of<NetworkManagementProvider>(context, listen: false)
+          .noNetworkMsg(context);
+      return;
+    }
+
     /// Collecting Message Corresponding Data
     final _uniqueMsgId = getMsgUniqueId();
     final _msgTime = getCurrentTime();
