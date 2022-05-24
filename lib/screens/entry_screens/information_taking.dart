@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
@@ -11,7 +12,7 @@ import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/icon_collection.dart';
@@ -377,30 +378,38 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
   // }
 
   _onAccCreatedSuccessfully(_response) async {
-    final _data = _response["data"];
+    try {
+      final _data = _response["data"];
 
-    print("Data to Store: $_data");
+      print("Data to Store: $_data");
 
-    await _localStorage.createTableForStorePrimaryData();
-    _localStorage.createTableForConnectionsPrimaryData();
-    await _localStorage.insertUpdateDataCurrAccData(
-        currUserId: _data["id"],
-        currUserName: _data["name"],
-        currUserProfilePic: _data["profilePic"],
-        currUserAbout: _data["about"],
-        currUserEmail: _data["email"],
-        dbOperation: DBOperation.insert);
+      await _localStorage.createTableForStorePrimaryData();
+      _localStorage.createTableForConnectionsPrimaryData();
+      await _localStorage.insertUpdateDataCurrAccData(
+          currUserId: _data["id"],
+          currUserName: _data["name"],
+          currUserProfilePic: _data["profilePic"],
+          currUserAbout: _data["about"],
+          currUserEmail: _data["email"],
+          dbOperation: DBOperation.insert);
 
-    await DataManagement.storeStringData(
-        StoredString.accCreatedBefore, DataManagement.toJsonString(_data));
+      await DataManagement.storeStringData(
+          StoredString.accCreatedBefore, DataManagement.toJsonString(_data));
 
-    await _dbOperations.updateToken();
+      await _dbOperations.updateToken();
 
-    showToast(context,
-        title: _response["message"],
-        toastIconType: ToastIconType.success,
-        showFromTop: false);
+      showToast(context,
+          title: _response["message"],
+          toastIconType: ToastIconType.success,
+          showFromTop: false);
 
-    Navigation.intentStraight(context, const MainScreen());
+      Navigation.intentStraight(context, const MainScreen());
+    } catch (e) {
+      showPopUpDialog(
+          context,
+          "There is some issue while processing data",
+          "Please clear this app data from settings and reopen the app.",
+          () => SystemNavigator.pop(animated: true));
+    }
   }
 }

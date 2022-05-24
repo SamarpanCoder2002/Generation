@@ -11,6 +11,7 @@ import '../../../config/colors_collection.dart';
 import '../../../config/text_collection.dart';
 import '../../../config/text_style_collection.dart';
 import '../../../providers/main_scrolling_provider.dart';
+import '../../../providers/network_management_provider.dart';
 import '../../../providers/theme_provider.dart';
 
 class ConnectionManagementScreen extends StatefulWidget {
@@ -26,12 +27,23 @@ class _ConnectionManagementScreenState extends State<ConnectionManagementScreen>
   TabController? _tabController;
   final DBOperations _dbOperations = DBOperations();
 
+  _checkForNetwork() async {
+    if (!(await Provider.of<NetworkManagementProvider>(context, listen: false)
+        .isNetworkActive)) {
+      Provider.of<NetworkManagementProvider>(context, listen: false)
+          .noNetworkMsg(context, showCenterToast: true);
+      return;
+    }
+  }
 
   @override
   void initState() {
     _dbOperations.getAvailableUsersData(context);
-    final _tabLength = Provider.of<ConnectionManagementProvider>(context, listen: false).getTabsCollectionLength();
-    _tabController = TabController(length: _tabLength, vsync: this, initialIndex: 0);
+    final _tabLength =
+        Provider.of<ConnectionManagementProvider>(context, listen: false)
+            .getTabsCollectionLength();
+    _tabController =
+        TabController(length: _tabLength, vsync: this, initialIndex: 0);
     _tabController?.addListener(_tabMovementListener);
     Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
         .initialize();
@@ -39,6 +51,7 @@ class _ConnectionManagementScreenState extends State<ConnectionManagementScreen>
         .initialize();
     Provider.of<SentConnectionsProvider>(context, listen: false).initialize();
     Provider.of<MainScrollingProvider>(context, listen: false).startListening();
+    _checkForNetwork();
     super.initState();
   }
 
@@ -138,13 +151,13 @@ class _ConnectionManagementScreenState extends State<ConnectionManagementScreen>
   }
 
   void _tabMovementListener() {
-    if(!_tabController!.indexIsChanging) return;
+    if (!_tabController!.indexIsChanging) return;
 
-    if(_tabController?.index == 0){
+    if (_tabController?.index == 0) {
       _dbOperations.getAvailableUsersData(context);
-    }else if(_tabController?.index == 1){
+    } else if (_tabController?.index == 1) {
       _dbOperations.getReceivedRequestUsersData(context);
-    }else{
+    } else {
       _dbOperations.getSentRequestUsersData(context);
     }
   }

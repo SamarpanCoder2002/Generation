@@ -8,6 +8,7 @@ import 'package:generation/db_operations/helper.dart';
 import 'package:generation/db_operations/types.dart';
 import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
+import 'package:generation/providers/network_management_provider.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +17,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
 import '../../services/local_data_management.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import 'chat_scroll_provider.dart';
 
 class ChatBoxMessagingProvider extends ChangeNotifier {
@@ -33,6 +34,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
   Map<String, ChatMessageModel?> _replyHolderMsg = {};
+
 //  Map<String, dynamic> _partnerData = {};
 
   FocusNode _focus = FocusNode();
@@ -60,6 +62,14 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   setReplyHolderMsg(String msgId, ChatMessageModel incoming) {
     _replyHolderMsg = {msgId: incoming};
     notifyListeners();
+  }
+
+  popUpScreen() {
+    try {
+      Navigator.pop(context);
+    } catch (e) {
+      print("Error in Pop Up Screen:  $e");
+    }
   }
 
   Map<String, ChatMessageModel?> getReplyHolderMsg() => _replyHolderMsg;
@@ -460,6 +470,13 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       additionalData,
       bool forSendMultiple = false,
       String? incomingConnId}) async {
+    if (!(await Provider.of<NetworkManagementProvider>(context, listen: false)
+        .isNetworkActive)) {
+      Provider.of<NetworkManagementProvider>(context, listen: false)
+          .noNetworkMsg(context);
+      return;
+    }
+
     /// Collecting Message Corresponding Data
     final _uniqueMsgId = getMsgUniqueId();
     final _msgTime = getCurrentTime();
@@ -529,6 +546,13 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       required msgDate,
       bool forSendMultiple = false,
       String? incomingConnId}) async {
+    final bool _isNotificationPermitted =
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .notificationPermitted(
+                !forSendMultiple ? getPartnerUserId() : incomingConnId);
+
+    print("Is notification Permitted:  $_isNotificationPermitted");
+
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&
         msgType != ChatMessageType.contact.toString() &&
@@ -574,7 +598,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         token: getToken(),
         title: _notificationData['title'],
         body: _notificationData['body'],
-        image: _notificationData['image']);
+        image: _notificationData['image'],
+        isNotificationPermitted: _isNotificationPermitted);
   }
 
   /// Get Chat Media Storage Reference

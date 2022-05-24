@@ -9,7 +9,7 @@ import 'package:generation/providers/activity/poll_creator_provider.dart';
 import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 
 //import 'package:polls/polls.dart';
 import 'package:provider/provider.dart';

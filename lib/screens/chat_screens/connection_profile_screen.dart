@@ -13,7 +13,7 @@ import '../../providers/storage/storage_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import '../common/image_showing_screen.dart';
 import '../settings/storage/storage_screen.dart';
 
@@ -415,7 +415,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
             : NotificationType.muted.toString());
 
     _dbOperations.updateParticularConnectionNotificationStatus(
-        widget.connData["id"], value);
+        widget.connData["id"], !value);
   }
 
   void _navigateToLocalStorageScreen() async {

@@ -11,7 +11,7 @@ import '../../providers/chat/messaging_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/toast_message_show.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import '../common/image_showing_screen.dart';
 
 class ChatBoxHeaderSection extends StatelessWidget {

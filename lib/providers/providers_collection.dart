@@ -26,6 +26,7 @@ import 'connection_management_provider_collection/incoming_request_provider.dart
 import 'connection_management_provider_collection/sent_request_provider.dart';
 import 'incoming_data_provider.dart';
 import 'main_screen_provider.dart';
+import 'network_management_provider.dart';
 
 List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => MainScrollingProvider()),
@@ -47,7 +48,7 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => ActivityProvider()),
   ChangeNotifierProvider(create: (_) => WallpaperProvider()),
   ChangeNotifierProvider(create: (_) => StorageProvider()),
-  //ChangeNotifierProvider(create: (_) => VideoEditingProvider()),
+  ChangeNotifierProvider(create: (_) => NetworkManagementProvider()),
   ChangeNotifierProvider(create: (_) => TimeProvider()),
   ChangeNotifierProvider(create: (_) => VideoShowProvider()),
   ChangeNotifierProvider(create: (_) => PollCreatorProvider()),

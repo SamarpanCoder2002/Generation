@@ -12,7 +12,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
-import '../../types/types.dart';
+import '../../config/types.dart';
 import '../settings/about.dart';
 import '../common/common_selection_screen.dart';
 import '../settings/profile_screen.dart';

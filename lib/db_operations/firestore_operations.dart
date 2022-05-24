@@ -1,6 +1,11 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:generation/config/types.dart';
+import 'package:generation/screens/entry_screens/splash_screen.dart';
+import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/navigation_management.dart';
+import 'package:generation/services/toast_message_show.dart';
 import 'package:http/http.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,10 +23,12 @@ import 'package:generation/providers/connection_management_provider_collection/i
 import 'package:provider/provider.dart';
 
 import '../providers/connection_management_provider_collection/sent_request_provider.dart';
+import '../providers/network_management_provider.dart';
 import '../services/local_data_management.dart';
 
 class DBOperations {
   final MessagingOperation _messagingOperation = MessagingOperation();
+  final LocalStorage _localStorage = LocalStorage();
 
   FirebaseFirestore get _getInstance => FirebaseFirestore.instance;
 
@@ -30,6 +37,28 @@ class DBOperations {
   String get currEmail => FirebaseAuth.instance.currentUser?.email ?? "";
 
   FirebaseStorage get _storageInstance => FirebaseStorage.instance;
+
+  isConnectedToDB(context) async {
+    final _isNetworkPresent =
+        await Provider.of<NetworkManagementProvider>(context, listen: false)
+            .isNetworkActive;
+    if (!_isNetworkPresent) {
+      print("Network not found");
+      Provider.of<NetworkManagementProvider>(context, listen: false)
+          .noNetworkMsg(context, showCenterToast: true);
+      return;
+    }
+
+    final _isCreatedBefore = await isAccountCreatedBefore();
+    if (_isCreatedBefore['success']) return;
+
+    showToast(context,
+        title: "Account Not Found", toastIconType: ToastIconType.info);
+
+    DataManagement.clearSharedStorage();
+    _localStorage.closeDatabase();
+    Navigation.intentStraight(context, const SplashScreen());
+  }
 
   Future<String> _fToken() async =>
       await FirebaseMessaging.instance.getToken() ?? "";
@@ -321,6 +350,13 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid')
           .delete();
+
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$otherUserId/${DBPath.specialRequest}/${DBPath.removeConn}')
+          .set({
+        DBPath.data: FieldValue.arrayUnion([currUid]),
+      }, SetOptions(merge: true));
       return true;
     } catch (e) {
       print("ERROR in Remove Connected User: $e");
@@ -350,7 +386,9 @@ class DBOperations {
       required dynamic msgData,
       required String token,
       required String title,
-      required String body, String? image}) async {
+      required String body,
+      bool isNotificationPermitted = false,
+      String? image}) async {
     try {
       await _getInstance
           .doc(
@@ -359,8 +397,14 @@ class DBOperations {
         DBPath.data: FieldValue.arrayUnion([msgData])
       }, SetOptions(merge: true));
 
-      _messagingOperation.sendNotification(
-          deviceToken: token, title: title, body: body, image: image, connId: currUid);
+      if (isNotificationPermitted) {
+        _messagingOperation.sendNotification(
+            deviceToken: token,
+            title: title,
+            body: body,
+            image: image,
+            connId: currUid);
+      }
 
       return true;
     } catch (e) {
@@ -415,10 +459,11 @@ class DBOperations {
 
   updateParticularConnectionNotificationStatus(
       String connId, bool updatedNotification) async {
-    await _getInstance
-        .doc(
-            '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$connId')
-        .update({DBPath.notification: updatedNotification.toString()});
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update({
+      DBPath.notificationDeactivated: updatedNotification
+          ? FieldValue.arrayUnion([connId])
+          : FieldValue.arrayRemove([connId])
+    });
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> getWallpaperData() async =>
@@ -429,6 +474,13 @@ class DBOperations {
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
         .update({DBPath.token: _getToken});
+  }
+
+  resetRemoveSpecialRequest() {
+    _getInstance
+        .doc(
+            '${DBPath.userCollection}/$currUid/${DBPath.specialRequest}/${DBPath.removeConn}')
+        .set({DBPath.data: []});
   }
 }
 
@@ -460,13 +512,23 @@ class RealTimeOperations {
   Stream<DocumentSnapshot<Map<String, dynamic>>> getConnectionData(
           String partnerId) =>
       _getInstance.doc('${DBPath.userCollection}/$partnerId').snapshots();
+
+  Stream<
+      DocumentSnapshot<
+          Map<String,
+              dynamic>>> getRemoveConnectionRequestData() => _getInstance
+      .doc(
+          '${DBPath.userCollection}/$currUid/${DBPath.specialRequest}/${DBPath.removeConn}')
+      .snapshots();
 }
 
 class MessagingOperation {
   Future<int> sendNotification(
       {required String deviceToken,
       required String title,
-      required String body, String? image, required String connId}) async {
+      required String body,
+      String? image,
+      required String connId}) async {
     final String _serverKey =
         DataManagement.getEnvData(EnvFileKey.serverKey) ?? '';
 
@@ -474,7 +536,11 @@ class MessagingOperation {
       Uri.parse(NotifyManagement.sendNotificationUrl),
       headers: NotifyManagement.sendNotificationHeader(_serverKey),
       body: NotifyManagement.bodyData(
-          title: title, body: body, deviceToken: deviceToken, image: image, connId: connId),
+          title: title,
+          body: body,
+          deviceToken: deviceToken,
+          image: image,
+          connId: connId),
     );
 
     print('Response is: ${response.statusCode}    ${response.body}');

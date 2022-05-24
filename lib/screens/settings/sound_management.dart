@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/services/local_database_services.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';

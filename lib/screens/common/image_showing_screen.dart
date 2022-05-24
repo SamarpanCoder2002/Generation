@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/services/device_specific_operations.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ImageShowingScreen extends StatefulWidget {

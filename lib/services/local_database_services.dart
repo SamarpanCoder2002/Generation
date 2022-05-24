@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:generation/config/size_collection.dart';
 import 'package:generation/services/permission_management.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -242,12 +242,15 @@ class LocalStorage {
   }
 
   /// Delete particular connection
-  Future<bool> deleteConnectionPrimaryData({required String id}) async {
+  Future<bool> deleteConnectionPrimaryData({required String id, bool allowDeleteOtherRelatedTable = false}) async {
     final Database db = await database;
 
     final _rowAffected =
         await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
-    if (_rowAffected == 1) {
+
+    print("row Affected:  $_rowAffected");
+
+    if (_rowAffected == 1 && allowDeleteOtherRelatedTable) {
       deleteDataFromParticularChatConnTable(
           tableName: DataManagement.generateTableNameForNewConnectionChat(id));
       deleteActivity(
@@ -323,6 +326,7 @@ class LocalStorage {
 
     if (msgId == null) {
       await db.delete(tableName);
+      print("Deletion done chat");
     } else {
       await db.delete(tableName, where: """$_msgId = "$msgId" """);
     }
@@ -412,6 +416,7 @@ class LocalStorage {
 
     if (activityId == null) {
       await db.delete(tableName);
+      print("Delete Activity");
     } else {
       await db.delete(tableName, where: """$_activityId = "$activityId" """);
     }
@@ -478,13 +483,20 @@ class LocalStorage {
     return _conPrimaryData[_conChatWallpaperManually];
   }
 
-  Future<bool> isThereGlobalChatWallpaper() async{
+  Future<bool> isThereGlobalChatWallpaper() async {
     final _currAccData = await _localStorageHelper.getDataForCurrAccount();
     return _currAccData[_currWallpaper].toString() != null.toString();
   }
 
-  Future<bool> isThereParticularChatWallpaper(String partnerId) async{
-    final _connPrimaryData = await _localStorageHelper.getConnectionPrimaryData(id: partnerId);
-    return _connPrimaryData[_conChatWallpaperManually].toString() != null.toString();
+  Future<bool> isThereParticularChatWallpaper(String partnerId) async {
+    final _connPrimaryData =
+        await _localStorageHelper.getConnectionPrimaryData(id: partnerId);
+    return _connPrimaryData[_conChatWallpaperManually].toString() !=
+        null.toString();
+  }
+
+  closeDatabase() async {
+    final Database db = await database;
+    await db.close();
   }
 }

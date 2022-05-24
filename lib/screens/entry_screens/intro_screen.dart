@@ -6,7 +6,7 @@ import 'package:generation/operation/google_auth.dart';
 import 'package:generation/screens/entry_screens/sign_in_screen.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/toast_message_show.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 

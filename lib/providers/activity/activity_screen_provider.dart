@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:provider/provider.dart';
 
-import '../../types/types.dart';
+import '../../config/types.dart';
 import '../sound_provider.dart';
 
 class ActivityProvider extends ChangeNotifier {

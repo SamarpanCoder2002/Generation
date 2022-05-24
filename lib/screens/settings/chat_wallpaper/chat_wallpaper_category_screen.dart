@@ -5,13 +5,13 @@ import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/db_operations/types.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
-import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_preview.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_database_services.dart';
-import 'package:generation/types/types.dart';
+import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 
+import '../../../providers/network_management_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/wallpaper/wallpaper_provider.dart';
 import '../../../services/device_specific_operations.dart';
@@ -33,6 +33,11 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
   bool _isThereChatWallpaper = false;
 
   _initialize() async {
+    if(!(await Provider.of<NetworkManagementProvider>(context, listen: false).isNetworkActive)){
+      Provider.of<NetworkManagementProvider>(context, listen: false).noNetworkMsg(context);
+      return;
+    }
+
     final _wallpaperCollection = await _dbOperations.getWallpaperData();
     for (final wallpaperCategory in _wallpaperCollection.docs) {
       if (wallpaperCategory.id == DBPath.brightWallPaper) {
