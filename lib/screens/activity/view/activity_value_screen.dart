@@ -103,7 +103,8 @@ class _ActivityViewerState extends State<ActivityViewer> {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
-      color: widget.activityData.additionalThings["backgroundColor"],
+      color: _getColorForm(
+          widget.activityData.additionalThings["backgroundColor"]),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -114,7 +115,8 @@ class _ActivityViewerState extends State<ActivityViewer> {
             textAlign: TextAlign.center,
             style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
                 fontSize: 20,
-                color: widget.activityData.additionalThings["textColor"]),
+                color: _getColorForm(
+                    widget.activityData.additionalThings["textColor"])),
           ),
         ),
       ),
@@ -122,6 +124,8 @@ class _ActivityViewerState extends State<ActivityViewer> {
   }
 
   _imageActivityShow() {
+    print("Image data is: ${widget.activityData.message}");
+
     return Stack(
       children: [
         Container(
@@ -207,7 +211,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
       padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+        children: const [
           // Polls(
           //   backgroundColor: AppColors.pureWhiteColor,
           //   currentUser: _pollShowProvider.getCurrentUser(),
@@ -271,4 +275,10 @@ class _ActivityViewerState extends State<ActivityViewer> {
               )),
         ));
   }
+
+  Color _getColorForm(Map<String, dynamic> color) => Color.fromRGBO(
+      int.parse(color['red']),
+      int.parse(color['green']),
+      int.parse(color['blue']),
+      double.parse(color['opacity']));
 }

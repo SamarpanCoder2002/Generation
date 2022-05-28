@@ -329,10 +329,10 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.messages}')
           .delete();
-      _getInstance
-          .doc(
-              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.activities}')
-          .delete();
+      // _getInstance
+      //     .doc(
+      //         '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId/${DBPath.data}/${DBPath.activities}')
+      //     .delete();
       await _getInstance
           .doc(
               '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$otherUserId')
@@ -342,10 +342,10 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.messages}')
           .delete();
-      _getInstance
-          .doc(
-              '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.activities}')
-          .delete();
+      // _getInstance
+      //     .doc(
+      //         '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid/${DBPath.data}/${DBPath.activities}')
+      //     .delete();
       _getInstance
           .doc(
               '${DBPath.userCollection}/$otherUserId/${DBPath.userConnections}/$currUid')
@@ -481,6 +481,22 @@ class DBOperations {
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.specialRequest}/${DBPath.removeConn}')
         .set({DBPath.data: []});
+  }
+
+  addActivity(Map<String, dynamic> data) async {
+    if (data['type'] != ActivityContentType.text.toString()) {
+      data["message"] = await uploadMediaToStorage(
+          DBHelper.activityPath(
+              currUid, data["message"].toString().split("/").last),
+          File(data["message"]),
+          reference: StorageHelper.activityRef(currUid));
+    }
+    await _getInstance
+        .doc(
+            '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
+        .set({
+      DBPath.data: FieldValue.arrayUnion([data]),
+    }, SetOptions(merge: true));
   }
 }
 

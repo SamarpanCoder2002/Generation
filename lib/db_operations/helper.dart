@@ -4,6 +4,7 @@ import '../config/size_collection.dart';
 
 class DBHelper{
   static profileImgPath(uid) => '$uid-profile-pic.png';
+  static activityPath(uid, String fileName) => '${uid}_${DateTime.now()}_$fileName';
 }
 
 class StorageHelper{
@@ -14,6 +15,7 @@ class StorageHelper{
   static chatVideoRef(String currId, String partnerId) => "chat/$currId-$partnerId/videos/";
   static chatDocRef(String currId, String partnerId) => "chat/$currId-$partnerId/documents/";
   static chatVideoThumbnailRef(String currId, String partnerId) => "chat/$currId-$partnerId/thumbnails/";
+  static activityRef(String currId) => "activity/$currId/media/";
 
   static const otherRef = "media/other";
 }
