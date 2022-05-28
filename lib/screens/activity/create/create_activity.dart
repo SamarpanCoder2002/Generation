@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/time_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/activity/poll_creator_provider.dart';
 import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
-//import 'package:polls/polls.dart';
 import 'package:provider/provider.dart';
 
 import '../../../config/text_style_collection.dart';
@@ -36,6 +37,8 @@ class CreateActivity extends StatefulWidget {
 class _CreateActivityState extends State<CreateActivity> {
   Color pickColor = AppColors.normalBlueColor;
   final TextEditingController _textActivityController = TextEditingController();
+  final DBOperations _dbOperation = DBOperations();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -57,25 +60,30 @@ class _CreateActivityState extends State<CreateActivity> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.activityContentType == ActivityContentType.audio) {
-          print("At Here on Will Pop");
-          Provider.of<SongManagementProvider>(context, listen: false)
-              .stopSong();
-        }
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.pureBlackColor,
-        floatingActionButton:
-            widget.activityContentType == ActivityContentType.text
-                ? _textActivityMakeButton()
-                : null,
-        body: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: _getRealBody(),
+    return LoadingOverlay(
+      isLoading: _isLoading,
+      color: AppColors.pureBlackColor.withOpacity(0.6),
+      progressIndicator: const CircularProgressIndicator(color: AppColors.lightBorderGreenColor,),
+      child: WillPopScope(
+        onWillPop: () async {
+          if (widget.activityContentType == ActivityContentType.audio) {
+            print("At Here on Will Pop");
+            Provider.of<SongManagementProvider>(context, listen: false)
+                .stopSong();
+          }
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.pureBlackColor,
+          floatingActionButton:
+              widget.activityContentType == ActivityContentType.text
+                  ? _textActivityMakeButton()
+                  : null,
+          body: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: _getRealBody(),
+          ),
         ),
       ),
     );
@@ -239,27 +247,39 @@ class _CreateActivityState extends State<CreateActivity> {
         child: _otherActivityMakeSection(),
       );
 
-  void _onSendButtonPressed() {
+  void _onSendButtonPressed() async{
+    if(!mounted) return;
+
+    setState((){
+      _isLoading = true;
+    });
+
     final Map<String, dynamic> map = {};
     final DateTime _dateTime = DateTime.now();
     map["type"] = widget.activityContentType.toString();
-    // map["date"] =
-    //     "${_dateTime.day} ${Provider.of<ActivityProvider>(context, listen: false).getParticularMonth(_dateTime.month)}, ${_dateTime.year}";
     map["time"] = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .getCurrentTime(dateTime: _dateTime);
     map["date"] = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .getCurrentDate(dateTime: _dateTime);
     map["holderId"] = _dateTime.toString();
-
-    /// Change Activity Id later
     map["id"] = DateTime.now().toString();
 
     switch (widget.activityContentType) {
       case ActivityContentType.text:
         map["message"] = _textActivityController.text;
         map["additionalThings"] = {
-          "backgroundColor": pickColor,
-          "textColor": AppColors.pureWhiteColor
+          "backgroundColor": {
+            'red': pickColor.red.toString(),
+            'green': pickColor.green.toString(),
+            'blue': pickColor.blue.toString(),
+            'opacity': pickColor.opacity.toString()
+          },
+          "textColor": {
+            'red': AppColors.pureWhiteColor.red.toString(),
+            'green': AppColors.pureWhiteColor.green.toString(),
+            'blue': AppColors.pureWhiteColor.blue.toString(),
+            'opacity': AppColors.pureWhiteColor.opacity.toString()
+          }
         };
         break;
       case ActivityContentType.image:
@@ -293,6 +313,14 @@ class _CreateActivityState extends State<CreateActivity> {
     }
 
     Provider.of<ActivityProvider>(context, listen: false).addNewActivity(map);
+    await _dbOperation.addActivity({...map});
+
+    if(mounted){
+      setState((){
+        _isLoading = false;
+      });
+    }
+
     showToast(context,
         title: "Activity Added",
         toastIconType: ToastIconType.success,
