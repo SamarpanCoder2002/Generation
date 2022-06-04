@@ -242,7 +242,8 @@ class LocalStorage {
   }
 
   /// Delete particular connection
-  Future<bool> deleteConnectionPrimaryData({required String id, bool allowDeleteOtherRelatedTable = false}) async {
+  Future<bool> deleteConnectionPrimaryData(
+      {required String id, bool allowDeleteOtherRelatedTable = false}) async {
     final Database db = await database;
 
     final _rowAffected =
@@ -375,7 +376,7 @@ class LocalStorage {
     final Database db = await database;
     try {
       await db.execute(
-          """CREATE TABLE $tableName($_activityHolderId TEXT PRIMARY KEY, $_activityId TEXT, $_activityMessage TEXT, $_activityType TEXT, $_activityDate TEXT, $_activityTime TEXT, $_activityAdditionalThings TEXT)""");
+          """CREATE TABLE $tableName($_activityHolderId TEXT, $_activityId TEXT PRIMARY KEY, $_activityMessage TEXT, $_activityType TEXT, $_activityDate TEXT, $_activityTime TEXT, $_activityAdditionalThings TEXT)""");
     } catch (e) {
       print("Error in _createTableForActivity Chat: ${e.toString()}");
     }
