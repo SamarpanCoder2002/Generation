@@ -50,11 +50,11 @@ class _CreateActivityState extends State<CreateActivity> {
 
   @override
   void dispose() {
-    final _isDarkMode =
-        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    // final _isDarkMode =
+    //     Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
     _textActivityController.dispose();
     changeOnlyNavigationBarColor(
-        navigationBarColor: AppColors.getBgColor(_isDarkMode));
+        navigationBarColor: AppColors.getBgColor(true));
     super.dispose();
   }
 
@@ -261,7 +261,7 @@ class _CreateActivityState extends State<CreateActivity> {
         .getCurrentTime(dateTime: _dateTime);
     map["date"] = Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .getCurrentDate(dateTime: _dateTime);
-    map["holderId"] = _dateTime.toString();
+    map["holderId"] = _dbOperation.currUid;
     map["id"] = DateTime.now().toString();
 
     switch (widget.activityContentType) {
@@ -312,7 +312,7 @@ class _CreateActivityState extends State<CreateActivity> {
         break;
     }
 
-    Provider.of<ActivityProvider>(context, listen: false).addNewActivity(map);
+    Provider.of<ActivityProvider>(context, listen: false).addNewActivity({...map},map["holderId"]);
     await _dbOperation.addActivity({...map});
 
     if(mounted){

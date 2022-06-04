@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:generation/config/text_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/model/activity_model.dart';
+import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/types.dart';
@@ -9,13 +13,15 @@ class ActivityProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   int _animationBarCurrentIndex = 0;
   final PageController _pageController = PageController();
+  final LocalStorage _localStorage = LocalStorage();
+  final DBOperations _dbOperation = DBOperations();
   late AnimationController _animationController;
   late BuildContext context;
   bool _replyBtnClicked = false;
 
   isReplyBtnClicked() => _replyBtnClicked;
 
-  updateReplyBtnClicked(bool status){
+  updateReplyBtnClicked(bool status) {
     _replyBtnClicked = status;
     notifyListeners();
   }
@@ -91,9 +97,20 @@ class ActivityProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  addNewActivity(incoming) {
-    _activityCollection.add(incoming);
-    notifyListeners();
+  addNewActivity(Map<String, dynamic> map, String holderId) {
+    _localStorage.insertUpdateTableForActivity(
+        tableName: holderId == _dbOperation.currUid
+            ? DbData.myActivityTable
+            : DataManagement.generateTableNameForNewConnectionActivity(
+                holderId),
+        activityId: map["id"],
+        activityHolderId: map["holderId"],
+        activityType: map["type"],
+        date: map["date"],
+        time: map["time"],
+        msg: map["message"],
+        additionalData: DataManagement.toJsonString(map["additionalThings"]),
+        dbOperation: DBOperation.insert);
   }
 
   getPageController() => _pageController;
@@ -137,7 +154,8 @@ class ActivityProvider extends ChangeNotifier {
         date: _activityData["date"],
         time: _activityData["time"],
         message: _activityData["message"],
-        additionalThings: _activityData["additionalThings"] ?? {}, id: _activityData["id"]);
+        additionalThings: _activityData["additionalThings"] ?? {},
+        id: _activityData["id"]);
   }
 
   pauseActivityAnimation() {
