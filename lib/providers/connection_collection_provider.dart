@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/services/local_data_management.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../config/text_collection.dart';
 import '../db_operations/types.dart';
+import '../services/directory_management.dart';
 import '../services/toast_message_show.dart';
 import 'chat/messaging_provider.dart';
 
@@ -23,6 +25,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
   final RealTimeOperations _realTimeOperations = RealTimeOperations();
+  final Dio _dio = Dio();
   late StreamSubscription _connectedDataStream;
 
   late StreamSubscription _removeConnectionStream;
@@ -30,6 +33,10 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       String,
       Map<Stream<DocumentSnapshot<Map<String, dynamic>>>,
           StreamSubscription?>> _realTimeMsgListeners = {};
+  final Map<
+      String,
+      Map<Stream<DocumentSnapshot<Map<String, dynamic>>>,
+          StreamSubscription?>> _realTimeActivityListeners = {};
   Map<String, dynamic> _currAccData = {};
 
   initialize({bool update = false, BuildContext? context}) {
@@ -54,18 +61,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   fetchLocalConnectedUsers(context) async {
     try {
-      //Map<String, dynamic> _localPriorityManagementData = {};
-
-      // _notSeenMsgStore(connData) {
-      //   if (connData["notSeenMsgCount"] != null &&
-      //       int.parse(connData["notSeenMsgCount"]) > 0) {
-      //     _localPriorityManagementData[connData["id"]] = {
-      //       "count": int.parse(connData["notSeenMsgCount"]),
-      //       "data": connData
-      //     };
-      //   }
-      // }
-
       final _conPrimaryData = await _localStorage.getConnectionPrimaryData();
 
       for (Map<String, dynamic> connData in _conPrimaryData) {
@@ -73,6 +68,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         _localConnectedUsersMap[connData["id"].toString()] = {...connData};
         _realTimeMsgListeners[connData["id"].toString()] = {
           _realTimeOperations.getChatMessages(connData["id"].toString()): null
+        };
+        _realTimeActivityListeners[connData["id"].toString()] = {
+          _realTimeOperations.getActivityData(connData["id"].toString()): null
         };
         //_notSeenMsgStore(connData);
         notifyListeners();
@@ -88,17 +86,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       print("Error in Fetch Local Connected Users: $e");
     }
   }
-
-  // _manageConnOnRemainingMessages(Map<String, dynamic> connMap) {
-  //   final _allData = connMap.values.toList();
-  //   _allData.sort((first, second) => second["count"] > first["count"] ? 0 : 1);
-  //
-  //   print("All Data Length: ${_allData.length}");
-  //
-  //   for (final particularConnMap in _allData) {
-  //     //_makeConnPriority(particularConnMap["data"]);
-  //   }
-  // }
 
   updateParticularConnectionData(String id, connUpdatedData) {
     _localConnectedUsersMap[id]["name"] = connUpdatedData["name"];
@@ -145,20 +132,28 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     for (final particularData in _realTimeMsgListeners.values.toList()) {
       particularData.values.toList()[0]?.cancel();
     }
+    for (final particularActivityData
+        in _realTimeActivityListeners.values.toList()) {
+      particularActivityData.values.toList()[0]?.cancel();
+    }
     notifyListeners();
   }
 
   _connStreamManagement() {
     for (final connId in _realTimeMsgListeners.keys.toList()) {
-      final _particularSteam = _realTimeMsgListeners[connId]?.keys.toList()[0];
+      final _particularMessageSteam =
+          _realTimeMsgListeners[connId]?.keys.toList()[0];
+      final _particularActivityStream =
+          _realTimeActivityListeners[connId]?.keys.toList()[0];
 
-      if (_realTimeMsgListeners[connId]?[_particularSteam!] == null) {
-        _makeStreamSubscription(_particularSteam, connId);
+      if (_realTimeMsgListeners[connId]?[_particularMessageSteam!] == null) {
+        _makeMessageStreamSubscription(_particularMessageSteam, connId);
+        _makeActivityStreamSubscription(_particularActivityStream, connId);
       }
     }
   }
 
-  _makeStreamSubscription(_particularSteam, connId) {
+  _makeMessageStreamSubscription(_particularSteam, connId) {
     final _streamSubscription = _particularSteam?.listen((docSnapShot) {
       final _docData = docSnapShot.data();
 
@@ -166,7 +161,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
           _docData.isNotEmpty &&
           _localConnectedUsersMap[connId] != null) {
         final _incomingMessagesCollection = _docData["data"];
-        _manageStreamData(
+        _manageMsgStreamData(
             remoteLatestMsg: _incomingMessagesCollection.isEmpty
                 ? {}
                 : _incomingMessagesCollection.last.values.toList().first,
@@ -179,7 +174,86 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  _manageStreamData(
+  _makeActivityStreamSubscription(_particularSteam, connId) {
+    final _streamSubscription = _particularSteam?.listen((docSnapShot) {
+      final _docData = docSnapShot.data();
+
+      if (_docData != null &&
+          _docData.isNotEmpty &&
+          _localConnectedUsersMap[connId] != null) {
+        final _activityCollection = _docData[DBPath.data] ?? [];
+        _storeActivityData(_activityCollection, connId);
+      }
+    });
+
+    _realTimeActivityListeners[connId]?[_particularSteam!] =
+        _streamSubscription;
+    notifyListeners();
+  }
+
+  _storeActivityData(List<dynamic> activityCollection, String connId) async {
+    for (final activity in activityCollection) {
+      final _oldParticularData = await _localStorage.getAllActivity(
+          tableName:
+              DataManagement.generateTableNameForNewConnectionActivity(connId),
+          activityId: activity["id"]);
+
+      print('Old Particular Activity Data:  $_oldParticularData');
+
+      if (_oldParticularData.isEmpty) {
+        await _storeActivityInLocalStorage(activity, connId);
+
+        if (activity['type'] == ActivityContentType.image.toString() ||
+            activity['type'] == ActivityContentType.audio.toString() ||
+            activity['type'] == ActivityContentType.video.toString()) {
+          _downloadActivityContentWithUpdate(activity, connId);
+        }
+      }
+    }
+  }
+
+  _downloadActivityContentWithUpdate(activity, connId) async {
+    String _mediaStorePath = "";
+
+    if (activity['type'] == ActivityContentType.image.toString()) {
+      final _dirPath = await createImageStoreDir();
+      _mediaStorePath =
+          createImageFile(dirPath: _dirPath, name: DateTime.now().toString());
+    } else if (activity['type'] == ActivityContentType.video.toString()) {
+      final _dirPath = await createVideoStoreDir();
+      _mediaStorePath =
+          createVideoFile(dirPath: _dirPath, name: DateTime.now().toString());
+    } else if (activity['type'] == ActivityContentType.audio.toString()) {
+      final _dirPath = await createVoiceStoreDir();
+      _mediaStorePath =
+          createAudioFile(dirPath: _dirPath, name: DateTime.now().toString());
+    }
+
+    _dio.download(activity['message'], _mediaStorePath).whenComplete(() async {
+      print("${activity['type']} Activity Media Download Completed");
+      activity['message'] = _mediaStorePath;
+
+      _storeActivityInLocalStorage(activity, connId, insert: false);
+    });
+  }
+
+  Future<bool> _storeActivityInLocalStorage(activity, connId,
+      {bool insert = true}) async {
+    return await _localStorage.insertUpdateTableForActivity(
+        tableName:
+            DataManagement.generateTableNameForNewConnectionActivity(connId),
+        activityId: activity["id"],
+        activityHolderId: activity["holderId"],
+        activityType: activity['type'],
+        date: activity['date'],
+        time: activity['time'],
+        msg: activity['message'],
+        additionalData:
+            DataManagement.toJsonString(activity["additionalThings"]),
+        dbOperation: insert ? DBOperation.insert : DBOperation.update);
+  }
+
+  _manageMsgStreamData(
       {required Map<String, dynamic> remoteLatestMsg,
       required Map<String, dynamic> connData,
       required String notSeenMessages}) async {
@@ -296,8 +370,10 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   bool notificationPermitted(String connId) {
     print("notification checkid id: $connId");
 
-    print("notification: ${_localConnectedUsersMap[connId][DBPath.notification]}");
-    print("notification list: ${_localConnectedUsersMap[connId][DBPath.notificationDeactivated]}");
+    print(
+        "notification: ${_localConnectedUsersMap[connId][DBPath.notification]}");
+    print(
+        "notification list: ${_localConnectedUsersMap[connId][DBPath.notificationDeactivated]}");
 
     bool _checkInNotificationDeactivatedList() {
       final _notificationDeactivatedList =

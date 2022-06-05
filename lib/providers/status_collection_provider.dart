@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:generation/services/local_database_services.dart';
 
 class StatusCollectionProvider extends ChangeNotifier {
+  final LocalStorage _localStorage = LocalStorage();
+  Map<String,dynamic> _currAccData = {};
   List<dynamic> _activityDataCollection = [
     {
       "id": 1,
@@ -116,6 +119,13 @@ class StatusCollectionProvider extends ChangeNotifier {
     },
   ];
 
+  initialize()async{
+    final _currAccData = await _localStorage.getDataForCurrAccount();
+    this._currAccData = _currAccData;
+  }
+
+  getCurrentAccData() => _currAccData;
+
   setFreshData(incomingActivityData) {
     if (incomingActivityData == null) return;
 
@@ -133,4 +143,6 @@ class StatusCollectionProvider extends ChangeNotifier {
   getData() => _activityDataCollection;
 
   getDataLength() => _activityDataCollection.length;
+
+
 }
