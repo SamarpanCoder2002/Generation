@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
+    Provider.of<StatusCollectionProvider>(context, listen: false).initialize();
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .initialize(context: context);
     Provider.of<MainScrollingProvider>(context, listen: false).startListening();
@@ -394,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _myActivity() {
     final _currentActivityData =
-        Provider.of<StatusCollectionProvider>(context).getData()[3];
+        Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
@@ -427,36 +428,6 @@ class _HomeScreenState extends State<HomeScreen> {
             afterWork: () => changeContextTheme(_isDarkMode)),
         child: Column(
           children: [
-            // OpenContainer(
-            //   closedElevation: 0.0,
-            //   transitionType: ContainerTransitionType.fadeThrough,
-            //   transitionDuration: const Duration(milliseconds: 500),
-            //   closedColor: AppColors.getBgColor(_isDarkMode),
-            //   middleColor: AppColors.getBgColor(_isDarkMode),
-            //   openColor: AppColors.getBgColor(_isDarkMode),
-            //   onClosed: (_) => changeContextTheme(_isDarkMode),
-            //   openBuilder: (_, __) => const ActivityController(),
-            //   closedBuilder: (_, __) => Container(
-            //       width: 80,
-            //       height: 80,
-            //       alignment: Alignment.bottomRight,
-            //       decoration: BoxDecoration(
-            //           color: _isDarkMode
-            //               ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-            //               : AppColors.searchBarBgLightMode.withOpacity(0.5),
-            //           borderRadius: BorderRadius.circular(100),
-            //           border: Border.all(
-            //               color: _currentActivityData["isActive"]
-            //                   ? _isDarkMode
-            //                       ? AppColors.darkBorderGreenColor
-            //                       : AppColors.lightBorderGreenColor
-            //                   : AppColors.imageDarkBgColor,
-            //               width: 3),
-            //           image: DecorationImage(
-            //               image: NetworkImage(_currentActivityData["profilePic"]),
-            //               fit: BoxFit.cover)),
-            //       child: _addActivityIcon()),
-            // ),
             Container(
                 width: 80,
                 height: 80,
@@ -467,11 +438,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         : AppColors.searchBarBgLightMode.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(
-                        color: _currentActivityData["isActive"]
-                            ? _isDarkMode
-                                ? AppColors.darkBorderGreenColor
-                                : AppColors.lightBorderGreenColor
-                            : AppColors.imageDarkBgColor,
+                        color: _isDarkMode
+                            ? AppColors.darkBorderGreenColor
+                            : AppColors.lightBorderGreenColor,
                         width: 3),
                     image: DecorationImage(
                         image: NetworkImage(_currentActivityData["profilePic"]),
@@ -480,7 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               margin: const EdgeInsets.only(top: 10),
               child: Text(
-                "Daefon",
+                _currentActivityData['name'],
                 overflow: TextOverflow.ellipsis,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     color: _isDarkMode

@@ -11,6 +11,7 @@ import 'package:generation/screens/main_screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
+import '../../providers/status_collection_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import 'connection_management/connection_management.dart';
@@ -37,6 +38,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     _dbOperations.getAvailableUsersData(context);
     Provider.of<ConnectionCollectionProvider>(context, listen: false)
         .fetchLocalConnectedUsers(context);
+    Provider.of<StatusCollectionProvider>(context, listen: false).initialize();
 
     final _isDarkMode =
         Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();

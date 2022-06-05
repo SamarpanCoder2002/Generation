@@ -191,19 +191,24 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  _storeActivityData(List<dynamic> activityCollection, String connId) async{
+  _storeActivityData(List<dynamic> activityCollection, String connId) async {
     for (final activity in activityCollection) {
-      final _insertionDone = await _storeActivityInLocalStorage(activity, connId);
+      final _oldParticularData = await _localStorage.getAllActivity(
+          tableName:
+              DataManagement.generateTableNameForNewConnectionActivity(connId),
+          activityId: activity["id"]);
 
-      if(_insertionDone){
+      print('Old Particular Activity Data:  $_oldParticularData');
+
+      if (_oldParticularData.isEmpty) {
+        await _storeActivityInLocalStorage(activity, connId);
+
         if (activity['type'] == ActivityContentType.image.toString() ||
             activity['type'] == ActivityContentType.audio.toString() ||
             activity['type'] == ActivityContentType.video.toString()) {
           _downloadActivityContentWithUpdate(activity, connId);
         }
       }
-
-
     }
   }
 
@@ -232,7 +237,8 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     });
   }
 
-  Future<bool> _storeActivityInLocalStorage(activity, connId, {bool insert = true}) async{
+  Future<bool> _storeActivityInLocalStorage(activity, connId,
+      {bool insert = true}) async {
     return await _localStorage.insertUpdateTableForActivity(
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
@@ -244,7 +250,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         msg: activity['message'],
         additionalData:
             DataManagement.toJsonString(activity["additionalThings"]),
-        dbOperation: insert? DBOperation.insert: DBOperation.update);
+        dbOperation: insert ? DBOperation.insert : DBOperation.update);
   }
 
   _manageMsgStreamData(

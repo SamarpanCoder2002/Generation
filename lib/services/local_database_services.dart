@@ -407,6 +407,8 @@ class LocalStorage {
       _activityData[_activityAdditionalThings] =
           DataManagement.toJsonString(additionalData);
 
+      print('Activity Data:  $_activityData');
+
       dbOperation == DBOperation.insert
           ? db.insert(tableName, _activityData)
           : db.update(tableName, _activityData,
@@ -432,11 +434,11 @@ class LocalStorage {
   }
 
   getAllActivity(
-      {required String tableName, required String activityHolderId}) async {
+      {required String tableName, required String activityId}) async {
     final Database db = await database;
 
     final _activitySet = await db.rawQuery(
-        """ SELECT * FROM $tableName WHERE $_activityHolderId = "$activityHolderId" """);
+        """ SELECT * FROM $tableName WHERE $_activityId = "$activityId" """);
 
     return _activitySet;
   }
