@@ -525,6 +525,14 @@ class RealTimeOperations {
           '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.messages}')
       .snapshots();
 
+  Stream<
+      DocumentSnapshot<
+          Map<String,
+              dynamic>>> getActivityData(String partnerId) => _getInstance
+      .doc(
+          '${DBPath.userCollection}/$partnerId/${DBPath.activities}/${DBPath.data}')
+      .snapshots();
+
   Stream<DocumentSnapshot<Map<String, dynamic>>> getConnectionData(
           String partnerId) =>
       _getInstance.doc('${DBPath.userCollection}/$partnerId').snapshots();

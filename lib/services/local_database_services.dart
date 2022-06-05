@@ -383,7 +383,7 @@ class LocalStorage {
   }
 
   /// Insert Data in particular connection Activity Messages
-  Future<void> insertUpdateTableForActivity(
+  Future<bool> insertUpdateTableForActivity(
       {required String tableName,
       required String activityId,
       required String activityHolderId,
@@ -393,23 +393,31 @@ class LocalStorage {
       required String msg,
       required dynamic additionalData,
       required DBOperation dbOperation}) async {
-    final Database db = await database;
+    try{
+      final Database db = await database;
 
-    final Map<String, dynamic> _activityData = <String, dynamic>{};
+      final Map<String, dynamic> _activityData = <String, dynamic>{};
 
-    _activityData[_activityId] = activityId;
-    _activityData[_activityHolderId] = activityHolderId;
-    _activityData[_activityType] = activityType;
-    _activityData[_activityDate] = date;
-    _activityData[_activityTime] = time;
-    _activityData[_activityMessage] = msg;
-    _activityData[_activityAdditionalThings] =
-        DataManagement.toJsonString(additionalData);
+      _activityData[_activityId] = activityId;
+      _activityData[_activityHolderId] = activityHolderId;
+      _activityData[_activityType] = activityType;
+      _activityData[_activityDate] = date;
+      _activityData[_activityTime] = time;
+      _activityData[_activityMessage] = msg;
+      _activityData[_activityAdditionalThings] =
+          DataManagement.toJsonString(additionalData);
 
-    dbOperation == DBOperation.insert
-        ? db.insert(tableName, _activityData)
-        : db.update(tableName, _activityData,
-            where: """$_activityHolderId = "$activityHolderId" """);
+      dbOperation == DBOperation.insert
+          ? db.insert(tableName, _activityData)
+          : db.update(tableName, _activityData,
+          where: """$_activityId = "$activityId" """);
+
+      return true;
+    }catch(e){
+      print('Error in Insert or update Activity Data: $e');
+      return false;
+    }
+
   }
 
   deleteActivity({required String tableName, String? activityId}) async {
