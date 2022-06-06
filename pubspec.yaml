@@ -73,6 +73,7 @@ dependencies:
   flutter_local_notifications: ^9.5.3+1
   gugor_emoji: ^0.0.4
   loading_overlay: ^0.3.0
+  drift: ^1.6.0
 
 
   # The following adds the Cupertino Icons font to your application.

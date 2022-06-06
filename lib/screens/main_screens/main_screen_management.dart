@@ -8,6 +8,7 @@ import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
@@ -26,6 +27,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   var activeSlideIndex = 0;
   final DBOperations _dbOperations = DBOperations();
+  final LocalStorage _localStorage = LocalStorage();
 
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getOnlineStatus();
     _dbOperations.updateActiveStatus(_onlineStatus);
+    _localStorage.storeDbInstance(context);
 
     WidgetsBinding.instance.addObserver(this);
     _dbOperations.getAvailableUsersData(context);

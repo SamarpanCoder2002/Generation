@@ -8,6 +8,7 @@ import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late InputOption _inputOption;
+  final LocalStorage _localStorage = LocalStorage();
 
   @override
   void initState() {
@@ -135,6 +137,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _activitiesSection() {
+    final _currentActivityData =
+        Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
+
+    if (_currentActivityData.isEmpty) {
+      return const Center();
+    }
+
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return SizedBox(
@@ -165,7 +174,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _horizontalActivitySection() {
     final _activityHolderCollection =
-        Provider.of<StatusCollectionProvider>(context).getData();
+        Provider.of<ConnectionCollectionProvider>(context)
+            .getActivityConnectionData();
 
     return SizedBox(
       width: MediaQuery.of(context).size.width - 40,
@@ -188,52 +198,73 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _activityParticularData(int index) {
     final _currentActivityData =
-        Provider.of<StatusCollectionProvider>(context).getData()[index];
+        Provider.of<ConnectionCollectionProvider>(context).getData()[index];
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return Container(
-      margin: const EdgeInsets.only(right: 15),
-      child: InkWell(
-        onTap: () => Navigation.intent(context, const ActivityController(),
-            afterWork: () => changeContextTheme(_isDarkMode)),
-        child: Column(
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: _isDarkMode
-                    ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-                    : AppColors.searchBarBgLightMode.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(100),
-                image: DecorationImage(
-                    image: NetworkImage(_currentActivityData["profilePic"]),
-                    fit: BoxFit.cover),
-                border: Border.all(
-                    color: _currentActivityData["isActive"]
-                        ? _isDarkMode
-                            ? AppColors.darkBorderGreenColor
-                            : AppColors.lightBorderGreenColor
-                        : AppColors.imageDarkBgColor,
-                    width: 3),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 10),
-              child: Text(
-                _currentActivityData["connectionName"],
-                overflow: TextOverflow.ellipsis,
-                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+    return StreamBuilder(
+      stream: _localStorage.getAllActivityStream(
+          tableName: DataManagement.generateTableNameForNewConnectionActivity(
+              _currentActivityData['id']),
+          context: context),
+      builder:
+          (streamContext, AsyncSnapshot<List<Map<String, Object?>>> snapshot) {
+        if (!snapshot.hasData) {
+          return const Center();
+        }
+
+        print("${_currentActivityData['name']}:   ${snapshot.data}");
+
+        if(snapshot.data?.isEmpty ?? true){
+          return const Center();
+        }
+
+
+
+        return Container(
+          margin: const EdgeInsets.only(right: 15),
+          child: InkWell(
+            onTap: () => Navigation.intent(context, const ActivityController(),
+                afterWork: () => changeContextTheme(_isDarkMode)),
+            child: Column(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
                     color: _isDarkMode
-                        ? AppColors.pureWhiteColor
-                        : AppColors.lightActivityTextColor),
-              ),
-            )
-          ],
-        ),
-      ),
+                        ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+                        : AppColors.searchBarBgLightMode.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(100),
+                    image: DecorationImage(
+                        image: NetworkImage(_currentActivityData["profilePic"]),
+                        fit: BoxFit.cover),
+                    border: Border.all(
+                        color: _isDarkMode
+                            ? AppColors.darkBorderGreenColor
+                            : AppColors.lightBorderGreenColor,
+                        width: 3),
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 10),
+                  child: Text(
+                    _currentActivityData["name"] ?? '',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                        color: _isDarkMode
+                            ? AppColors.pureWhiteColor
+                            : AppColors.lightActivityTextColor),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
+
+
 
     // return OpenContainer(
     //   closedElevation: 0.0,
@@ -396,6 +427,8 @@ class _HomeScreenState extends State<HomeScreen> {
   _myActivity() {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
+
+    print("Current Activity Data: $_currentActivityData");
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 

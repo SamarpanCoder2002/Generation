@@ -25,6 +25,7 @@ import 'activity/poll_show_provider.dart';
 import 'connection_management_provider_collection/incoming_request_provider.dart';
 import 'connection_management_provider_collection/sent_request_provider.dart';
 import 'incoming_data_provider.dart';
+import 'local_storage_provider.dart';
 import 'main_screen_provider.dart';
 import 'network_management_provider.dart';
 
@@ -54,4 +55,6 @@ List<SingleChildWidget> providersCollection = [
   ChangeNotifierProvider(create: (_) => PollCreatorProvider()),
   ChangeNotifierProvider(create: (_) => PollShowProvider()),
   ChangeNotifierProvider(create: (_) => IncomingDataProvider()),
+  ChangeNotifierProvider(create: (_) => LocalStorageProvider()),
 ];
+

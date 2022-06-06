@@ -21,6 +21,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
+  List<dynamic> _activityConnDataCollection = [];
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
@@ -59,12 +60,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   getAllChatConnectionData() => _chatConnectionsDataCollection;
 
+  getActivityConnectionData() => _activityConnDataCollection;
+
   fetchLocalConnectedUsers(context) async {
     try {
       final _conPrimaryData = await _localStorage.getConnectionPrimaryData();
 
       for (Map<String, dynamic> connData in _conPrimaryData) {
         _chatConnectionsDataCollection.add(connData);
+        _activityConnDataCollection.add(connData);
         _localConnectedUsersMap[connData["id"].toString()] = {...connData};
         _realTimeMsgListeners[connData["id"].toString()] = {
           _realTimeOperations.getChatMessages(connData["id"].toString()): null
@@ -193,7 +197,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
     for (final activity in activityCollection) {
-      final _oldParticularData = await _localStorage.getAllActivity(
+      final _oldParticularData = await _localStorage.getParticularActivity(
           tableName:
               DataManagement.generateTableNameForNewConnectionActivity(connId),
           activityId: activity["id"]);
@@ -237,9 +241,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     });
   }
 
-  Future<bool> _storeActivityInLocalStorage(activity, connId,
+  Future<void> _storeActivityInLocalStorage(activity, connId,
       {bool insert = true}) async {
-    return await _localStorage.insertUpdateTableForActivity(
+    final response = await _localStorage.insertUpdateTableForActivity(
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
         activityId: activity["id"],
@@ -251,6 +255,18 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         additionalData:
             DataManagement.toJsonString(activity["additionalThings"]),
         dbOperation: insert ? DBOperation.insert : DBOperation.update);
+
+    if (response && insert) {
+      _activityConnDataCollection.where((conn) {
+        if (conn['id'] == connId) {
+          _activityConnDataCollection.remove(conn);
+          _activityConnDataCollection.insert(0, conn);
+          return true;
+        }
+
+        return false;
+      });
+    }
   }
 
   _manageMsgStreamData(
@@ -335,6 +351,10 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     _chatConnectionsDataCollection = [
       incomingNewData,
       ..._chatConnectionsDataCollection,
+    ];
+    _activityConnDataCollection = [
+      ..._activityConnDataCollection,
+      incomingNewData
     ];
     notifyListeners();
   }
