@@ -29,7 +29,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late InputOption _inputOption;
-  final LocalStorage _localStorage = LocalStorage();
 
   @override
   void initState() {
@@ -197,74 +196,59 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _activityParticularData(int index) {
+    final _connId = Provider.of<ConnectionCollectionProvider>(context)
+        .getActivityConnectionData()[index];
     final _currentActivityData =
-        Provider.of<ConnectionCollectionProvider>(context).getData()[index];
+        Provider.of<ConnectionCollectionProvider>(context).getUsersMap(_connId);
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return StreamBuilder(
-      stream: _localStorage.getAllActivityStream(
-          tableName: DataManagement.generateTableNameForNewConnectionActivity(
-              _currentActivityData['id']),
-          context: context),
-      builder:
-          (streamContext, AsyncSnapshot<List<Map<String, Object?>>> snapshot) {
-        if (!snapshot.hasData) {
-          return const Center();
-        }
+    final _connName = (_currentActivityData["name"] ?? '').toString();
 
-        print("${_currentActivityData['name']}:   ${snapshot.data}");
+    print('Connname: $_connName');
 
-        if(snapshot.data?.isEmpty ?? true){
-          return const Center();
-        }
-
-
-
-        return Container(
-          margin: const EdgeInsets.only(right: 15),
-          child: InkWell(
-            onTap: () => Navigation.intent(context, const ActivityController(),
-                afterWork: () => changeContextTheme(_isDarkMode)),
-            child: Column(
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
+    return Container(
+      margin: const EdgeInsets.only(right: 15),
+      child: InkWell(
+        onTap: () => Navigation.intent(context, const ActivityController(),
+            afterWork: () => changeContextTheme(_isDarkMode)),
+        child: Column(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: _isDarkMode
+                    ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
+                    : AppColors.searchBarBgLightMode.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(100),
+                image: DecorationImage(
+                    image: NetworkImage(_currentActivityData["profilePic"]),
+                    fit: BoxFit.cover),
+                border: Border.all(
                     color: _isDarkMode
-                        ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-                        : AppColors.searchBarBgLightMode.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(100),
-                    image: DecorationImage(
-                        image: NetworkImage(_currentActivityData["profilePic"]),
-                        fit: BoxFit.cover),
-                    border: Border.all(
-                        color: _isDarkMode
-                            ? AppColors.darkBorderGreenColor
-                            : AppColors.lightBorderGreenColor,
-                        width: 3),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    _currentActivityData["name"] ?? '',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyleCollection.activityTitleTextStyle.copyWith(
-                        color: _isDarkMode
-                            ? AppColors.pureWhiteColor
-                            : AppColors.lightActivityTextColor),
-                  ),
-                )
-              ],
+                        ? AppColors.darkBorderGreenColor
+                        : AppColors.lightBorderGreenColor,
+                    width: 3),
+              ),
             ),
-          ),
-        );
-      },
+            Container(
+              margin: const EdgeInsets.only(top: 10),
+              child: Text(
+                _connName.length > 8
+                    ? '${_connName.substring(0, 9)}...'
+                    : _connName,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyleCollection.activityTitleTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor
+                        : AppColors.lightActivityTextColor),
+              ),
+            )
+          ],
+        ),
+      ),
     );
-
-
 
     // return OpenContainer(
     //   closedElevation: 0.0,
@@ -432,6 +416,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
+    final _connName = (_currentActivityData["name"] ?? '').toString();
+
+    print('Connname: $_connName');
+
     _addActivityIcon() {
       return InkWell(
         onTap: () {
@@ -482,7 +470,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               margin: const EdgeInsets.only(top: 10),
               child: Text(
-                _currentActivityData['name'],
+                _connName.length > 8
+                    ? '${_connName.substring(0, 9)}...'
+                    : _connName,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     color: _isDarkMode

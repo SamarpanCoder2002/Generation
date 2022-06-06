@@ -8,8 +8,6 @@ import 'package:generation/config/types.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 
 import '../config/stored_string_collection.dart';
 import '../config/text_collection.dart';
@@ -408,6 +406,8 @@ class LocalStorage {
 
       final Map<String, dynamic> _activityData = <String, dynamic>{};
 
+      print('Suspected Activity id Low: ${activityId}');
+
       _activityData[_activityId] = activityId;
       _activityData[_activityHolderId] = activityHolderId;
       _activityData[_activityType] = activityType;
@@ -417,7 +417,7 @@ class LocalStorage {
       _activityData[_activityAdditionalThings] =
           DataManagement.toJsonString(additionalData);
 
-      print('Activity Data:  $_activityData');
+      print('Activity Data:  $_activityData     dbOperation: ${dbOperation}');
 
       dbOperation == DBOperation.insert
           ? db.insert(tableName, _activityData)
@@ -462,6 +462,17 @@ class LocalStorage {
     // (await _localStorage.getAllActivityStream(tableName: DataManagement.generateTableNameForNewConnectionActivity(connId))).listen((event) {
     //
     // });
+  }
+
+  getAllActivity({required String tableName})async{
+    try{
+      final Database db = await database;
+      return await db.rawQuery(""" SELECT * FROM $tableName """);
+    }catch(e){
+      print('Get all activity error :${e}');
+      return [];
+    }
+
   }
 
   /// Get Total Messages from Any Table

@@ -21,7 +21,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
-  List<dynamic> _activityConnDataCollection = [];
+  List<String> _activityConnDataCollection = [];
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
@@ -68,7 +68,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
       for (Map<String, dynamic> connData in _conPrimaryData) {
         _chatConnectionsDataCollection.add(connData);
-        _activityConnDataCollection.add(connData);
         _localConnectedUsersMap[connData["id"].toString()] = {...connData};
         _realTimeMsgListeners[connData["id"].toString()] = {
           _realTimeOperations.getChatMessages(connData["id"].toString()): null
@@ -76,12 +75,13 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         _realTimeActivityListeners[connData["id"].toString()] = {
           _realTimeOperations.getActivityData(connData["id"].toString()): null
         };
+        _manageHavingActivity(connData["id"]);
         //_notSeenMsgStore(connData);
         notifyListeners();
       }
 
       initialize(update: true);
-      //_manageConnOnRemainingMessages(_localPriorityManagementData);
+
       _connStreamManagement();
       _remoteConnectedDataStream(context);
       _managingRemoveConnRequest(context);
@@ -89,6 +89,20 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     } catch (e) {
       print("Error in Fetch Local Connected Users: $e");
     }
+  }
+
+  _manageHavingActivity(connId) {
+    _localStorage
+        .getAllActivity(
+            tableName: DataManagement.generateTableNameForNewConnectionActivity(
+                connId))
+        .then((data) {
+      if (data == null) return;
+      if (data.isEmpty) return;
+
+      _activityConnDataCollection.add(connId);
+      notifyListeners();
+    });
   }
 
   updateParticularConnectionData(String id, connUpdatedData) {
@@ -196,15 +210,29 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   }
 
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
+    print('Activity Collection length: ${activityCollection.length}');
+
     for (final activity in activityCollection) {
       final _oldParticularData = await _localStorage.getParticularActivity(
           tableName:
               DataManagement.generateTableNameForNewConnectionActivity(connId),
           activityId: activity["id"]);
 
+      print('Suspected Activity id Top: ${activity["id"]}');
+
       print('Old Particular Activity Data:  $_oldParticularData');
 
       if (_oldParticularData.isEmpty) {
+        if (_activityConnDataCollection.isEmpty) {
+          _activityConnDataCollection.add(connId);
+        } else {
+          if (_activityConnDataCollection.contains(connId)) {
+            _activityConnDataCollection.remove(connId);
+          }
+          _activityConnDataCollection.insert(0, connId);
+        }
+        notifyListeners();
+
         await _storeActivityInLocalStorage(activity, connId);
 
         if (activity['type'] == ActivityContentType.image.toString() ||
@@ -255,18 +283,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         additionalData:
             DataManagement.toJsonString(activity["additionalThings"]),
         dbOperation: insert ? DBOperation.insert : DBOperation.update);
-
-    if (response && insert) {
-      _activityConnDataCollection.where((conn) {
-        if (conn['id'] == connId) {
-          _activityConnDataCollection.remove(conn);
-          _activityConnDataCollection.insert(0, conn);
-          return true;
-        }
-
-        return false;
-      });
-    }
   }
 
   _manageMsgStreamData(
@@ -352,11 +368,19 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       incomingNewData,
       ..._chatConnectionsDataCollection,
     ];
-    _activityConnDataCollection = [
-      ..._activityConnDataCollection,
-      incomingNewData
-    ];
     notifyListeners();
+
+    _activityStreamForNewConnection(incomingNewData);
+  }
+
+  _activityStreamForNewConnection(incomingNewData) {
+    final _newStream =
+        _realTimeOperations.getActivityData(incomingNewData["id"].toString());
+    _realTimeActivityListeners[incomingNewData["id"].toString()] = {
+      _newStream: null
+    };
+    notifyListeners();
+    //_makeActivityStreamSubscription(_newStream, incomingNewData['id']);
   }
 
   operateOnSearch(searchKeyword) {
