@@ -124,7 +124,7 @@ class StatusCollectionProvider extends ChangeNotifier {
     this._currAccData = _currAccData;
   }
 
-  getCurrentAccData() => _currAccData;
+  Map<String,dynamic> getCurrentAccData() => _currAccData;
 
   setFreshData(incomingActivityData) {
     if (incomingActivityData == null) return;

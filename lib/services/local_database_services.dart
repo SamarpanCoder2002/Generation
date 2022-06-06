@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:generation/config/size_collection.dart';
+import 'package:generation/providers/local_storage_provider.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/config/types.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../config/stored_string_collection.dart';
@@ -92,6 +95,11 @@ class LocalStorage {
       final Database getDatabase = await openDatabase(path, version: 1);
       return getDatabase;
     }
+  }
+
+  storeDbInstance(context) async {
+    final Database db = await database;
+    Provider.of<LocalStorageProvider>(context, listen: false).setDb(db);
   }
 
   /// ** Current User Data Operation ** ///
@@ -393,10 +401,12 @@ class LocalStorage {
       required String msg,
       required dynamic additionalData,
       required DBOperation dbOperation}) async {
-    try{
+    try {
       final Database db = await database;
 
       final Map<String, dynamic> _activityData = <String, dynamic>{};
+
+      print('Suspected Activity id Low: ${activityId}');
 
       _activityData[_activityId] = activityId;
       _activityData[_activityHolderId] = activityHolderId;
@@ -407,19 +417,18 @@ class LocalStorage {
       _activityData[_activityAdditionalThings] =
           DataManagement.toJsonString(additionalData);
 
-      print('Activity Data:  $_activityData');
+      print('Activity Data:  $_activityData     dbOperation: ${dbOperation}');
 
       dbOperation == DBOperation.insert
           ? db.insert(tableName, _activityData)
           : db.update(tableName, _activityData,
-          where: """$_activityId = "$activityId" """);
+              where: """$_activityId = "$activityId" """);
 
       return true;
-    }catch(e){
+    } catch (e) {
       print('Error in Insert or update Activity Data: $e');
       return false;
     }
-
   }
 
   deleteActivity({required String tableName, String? activityId}) async {
@@ -433,7 +442,7 @@ class LocalStorage {
     }
   }
 
-  getAllActivity(
+  getParticularActivity(
       {required String tableName, required String activityId}) async {
     final Database db = await database;
 
@@ -441,6 +450,29 @@ class LocalStorage {
         """ SELECT * FROM $tableName WHERE $_activityId = "$activityId" """);
 
     return _activitySet;
+  }
+
+  Stream<List<Map<String, Object?>>> getAllActivityStream(
+      {required String tableName, required BuildContext context}) {
+    final Database db =
+        Provider.of<LocalStorageProvider>(context, listen: false).getDb;
+
+    return db.rawQuery(""" SELECT * FROM $tableName """).asStream();
+
+    // (await _localStorage.getAllActivityStream(tableName: DataManagement.generateTableNameForNewConnectionActivity(connId))).listen((event) {
+    //
+    // });
+  }
+
+  getAllActivity({required String tableName})async{
+    try{
+      final Database db = await database;
+      return await db.rawQuery(""" SELECT * FROM $tableName """);
+    }catch(e){
+      print('Get all activity error :${e}');
+      return [];
+    }
+
   }
 
   /// Get Total Messages from Any Table

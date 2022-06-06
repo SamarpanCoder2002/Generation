@@ -8,6 +8,7 @@ import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
@@ -135,6 +136,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _activitiesSection() {
+    final _currentActivityData =
+        Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
+
+    if (_currentActivityData.isEmpty) {
+      return const Center();
+    }
+
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return SizedBox(
@@ -165,7 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _horizontalActivitySection() {
     final _activityHolderCollection =
-        Provider.of<StatusCollectionProvider>(context).getData();
+        Provider.of<ConnectionCollectionProvider>(context)
+            .getActivityConnectionData();
 
     return SizedBox(
       width: MediaQuery.of(context).size.width - 40,
@@ -187,10 +196,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _activityParticularData(int index) {
+    final _connId = Provider.of<ConnectionCollectionProvider>(context)
+        .getActivityConnectionData()[index];
     final _currentActivityData =
-        Provider.of<StatusCollectionProvider>(context).getData()[index];
+        Provider.of<ConnectionCollectionProvider>(context).getUsersMap(_connId);
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    final _connName = (_currentActivityData["name"] ?? '').toString();
+
+    print('Connname: $_connName');
 
     return Container(
       margin: const EdgeInsets.only(right: 15),
@@ -211,18 +226,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     image: NetworkImage(_currentActivityData["profilePic"]),
                     fit: BoxFit.cover),
                 border: Border.all(
-                    color: _currentActivityData["isActive"]
-                        ? _isDarkMode
-                            ? AppColors.darkBorderGreenColor
-                            : AppColors.lightBorderGreenColor
-                        : AppColors.imageDarkBgColor,
+                    color: _isDarkMode
+                        ? AppColors.darkBorderGreenColor
+                        : AppColors.lightBorderGreenColor,
                     width: 3),
               ),
             ),
             Container(
               margin: const EdgeInsets.only(top: 10),
               child: Text(
-                _currentActivityData["connectionName"],
+                _connName.length > 8
+                    ? '${_connName.substring(0, 9)}...'
+                    : _connName,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     color: _isDarkMode
@@ -397,7 +412,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
 
+    print("Current Activity Data: $_currentActivityData");
+
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    final _connName = (_currentActivityData["name"] ?? '').toString();
+
+    print('Connname: $_connName');
 
     _addActivityIcon() {
       return InkWell(
@@ -449,7 +470,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               margin: const EdgeInsets.only(top: 10),
               child: Text(
-                _currentActivityData['name'],
+                _connName.length > 8
+                    ? '${_connName.substring(0, 9)}...'
+                    : _connName,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyleCollection.activityTitleTextStyle.copyWith(
                     color: _isDarkMode

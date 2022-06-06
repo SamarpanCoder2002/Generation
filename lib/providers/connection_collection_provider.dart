@@ -21,6 +21,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
+  List<String> _activityConnDataCollection = [];
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
@@ -59,6 +60,8 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   getAllChatConnectionData() => _chatConnectionsDataCollection;
 
+  getActivityConnectionData() => _activityConnDataCollection;
+
   fetchLocalConnectedUsers(context) async {
     try {
       final _conPrimaryData = await _localStorage.getConnectionPrimaryData();
@@ -72,12 +75,13 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         _realTimeActivityListeners[connData["id"].toString()] = {
           _realTimeOperations.getActivityData(connData["id"].toString()): null
         };
+        _manageHavingActivity(connData["id"]);
         //_notSeenMsgStore(connData);
         notifyListeners();
       }
 
       initialize(update: true);
-      //_manageConnOnRemainingMessages(_localPriorityManagementData);
+
       _connStreamManagement();
       _remoteConnectedDataStream(context);
       _managingRemoveConnRequest(context);
@@ -85,6 +89,20 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     } catch (e) {
       print("Error in Fetch Local Connected Users: $e");
     }
+  }
+
+  _manageHavingActivity(connId) {
+    _localStorage
+        .getAllActivity(
+            tableName: DataManagement.generateTableNameForNewConnectionActivity(
+                connId))
+        .then((data) {
+      if (data == null) return;
+      if (data.isEmpty) return;
+
+      _activityConnDataCollection.add(connId);
+      notifyListeners();
+    });
   }
 
   updateParticularConnectionData(String id, connUpdatedData) {
@@ -192,15 +210,29 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   }
 
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
+    print('Activity Collection length: ${activityCollection.length}');
+
     for (final activity in activityCollection) {
-      final _oldParticularData = await _localStorage.getAllActivity(
+      final _oldParticularData = await _localStorage.getParticularActivity(
           tableName:
               DataManagement.generateTableNameForNewConnectionActivity(connId),
           activityId: activity["id"]);
 
+      print('Suspected Activity id Top: ${activity["id"]}');
+
       print('Old Particular Activity Data:  $_oldParticularData');
 
       if (_oldParticularData.isEmpty) {
+        if (_activityConnDataCollection.isEmpty) {
+          _activityConnDataCollection.add(connId);
+        } else {
+          if (_activityConnDataCollection.contains(connId)) {
+            _activityConnDataCollection.remove(connId);
+          }
+          _activityConnDataCollection.insert(0, connId);
+        }
+        notifyListeners();
+
         await _storeActivityInLocalStorage(activity, connId);
 
         if (activity['type'] == ActivityContentType.image.toString() ||
@@ -237,9 +269,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     });
   }
 
-  Future<bool> _storeActivityInLocalStorage(activity, connId,
+  Future<void> _storeActivityInLocalStorage(activity, connId,
       {bool insert = true}) async {
-    return await _localStorage.insertUpdateTableForActivity(
+    final response = await _localStorage.insertUpdateTableForActivity(
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
         activityId: activity["id"],
@@ -337,6 +369,18 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       ..._chatConnectionsDataCollection,
     ];
     notifyListeners();
+
+    _activityStreamForNewConnection(incomingNewData);
+  }
+
+  _activityStreamForNewConnection(incomingNewData) {
+    final _newStream =
+        _realTimeOperations.getActivityData(incomingNewData["id"].toString());
+    _realTimeActivityListeners[incomingNewData["id"].toString()] = {
+      _newStream: null
+    };
+    notifyListeners();
+    //_makeActivityStreamSubscription(_newStream, incomingNewData['id']);
   }
 
   operateOnSearch(searchKeyword) {
