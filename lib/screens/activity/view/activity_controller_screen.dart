@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
@@ -8,6 +9,8 @@ import 'package:generation/providers/activity/poll_show_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/config/types.dart';
+import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 import '../../../config/size_collection.dart';
 import '../../../providers/sound_provider.dart';
@@ -34,7 +37,6 @@ class _ActivityControllerState extends State<ActivityController>
     Provider.of<ActivityProvider>(context, listen: false)
         .initializeAnimationController(this, context);
 
-
     super.initState();
   }
 
@@ -48,7 +50,7 @@ class _ActivityControllerState extends State<ActivityController>
 
   _onReplySectionRemovedAction() {
     final _activityProvider =
-        Provider.of<ActivityProvider>(context, listen: false);
+    Provider.of<ActivityProvider>(context, listen: false);
 
     final _currentActivityData = _activityProvider
         .getParticularActivity(_activityProvider.getPageIndex());
@@ -86,8 +88,14 @@ class _ActivityControllerState extends State<ActivityController>
       child: Scaffold(
         backgroundColor: AppColors.pureWhiteColor,
         body: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
           child: _activityPagination(),
         ),
       ),
@@ -97,7 +105,7 @@ class _ActivityControllerState extends State<ActivityController>
   _activityPagination() {
     final _activityProvider = Provider.of<ActivityProvider>(context);
     final int _totalActivityData =
-        _activityProvider.getLengthOfActivityCollection();
+    _activityProvider.getLengthOfActivityCollection();
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
@@ -106,7 +114,10 @@ class _ActivityControllerState extends State<ActivityController>
           navigationBarColor: AppColors.getBgColor(_isDarkMode));
       return Container(
         width: double.maxFinite,
-        height: MediaQuery.of(context).size.height,
+        height: MediaQuery
+            .of(context)
+            .size
+            .height,
         color: AppColors.getBgColor(_isDarkMode),
         alignment: Alignment.center,
         child: Text(
@@ -119,7 +130,10 @@ class _ActivityControllerState extends State<ActivityController>
 
     return SizedBox(
       width: double.maxFinite,
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height,
       child: PageView.builder(
         physics: const NeverScrollableScrollPhysics(),
         controller: Provider.of<ActivityProvider>(context).getPageController(),
@@ -142,6 +156,9 @@ class _ActivityControllerState extends State<ActivityController>
                 .setPollData(_currentActivityData.message, update: false);
           }
 
+          print('Current Activity Data: ${_currentActivityData
+              .additionalThings}');
+
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -160,32 +177,49 @@ class _ActivityControllerState extends State<ActivityController>
 
   Widget _activityAnimation() {
     final _dataCollection =
-        Provider.of<ActivityProvider>(context).getActivityCollection();
+    Provider.of<ActivityProvider>(context).getActivityCollection();
+
+    print('Data Collection: $_dataCollection');
+
     return Positioned(
       top: 30.0,
       left: 5.0,
       right: 5.0,
       child: Row(
         children: [
-          ..._dataCollection.map((data) => AnimatedBar(
+          ..._dataCollection
+              .asMap()
+              .entries
+              .map((dataMap) =>
+              AnimatedBar(
                 animController: Provider.of<ActivityProvider>(context)
                     .getAnimationController(),
-                position: _dataCollection.indexOf(data),
+                position: dataMap.key,
                 currentIndex:
-                    Provider.of<ActivityProvider>(context).getPageIndex(),
+                Provider.of<ActivityProvider>(context).getPageIndex(),
               ))
         ],
       ),
     );
   }
 
-  _transparentNavigatingWidget(activityModel) => Container(
-        width: MediaQuery.of(context).size.width,
+  _transparentNavigatingWidget(activityModel) =>
+      Container(
+        width: MediaQuery
+            .of(context)
+            .size
+            .width,
         height: activityModel.type != ActivityContentType.text.toString()
-            ? MediaQuery.of(context).size.height -
-                SizeCollection.activityBottomTextHeight -
-                50
-            : MediaQuery.of(context).size.height,
+            ? MediaQuery
+            .of(context)
+            .size
+            .height -
+            SizeCollection.activityBottomTextHeight -
+            50
+            : MediaQuery
+            .of(context)
+            .size
+            .height,
         color: AppColors.transparentColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -196,8 +230,14 @@ class _ActivityControllerState extends State<ActivityController>
                     .forwardOrBackwardActivity(false, context);
               },
               child: Container(
-                width: MediaQuery.of(context).size.width / 6,
-                height: MediaQuery.of(context).size.height,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width / 6,
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height,
                 color: AppColors.transparentColor,
               ),
             ),
@@ -237,7 +277,10 @@ class _ActivityControllerState extends State<ActivityController>
                 },
                 child: Container(
                   color: AppColors.transparentColor,
-                  height: MediaQuery.of(context).size.height,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .height,
                 ),
               ),
             ),
@@ -247,8 +290,14 @@ class _ActivityControllerState extends State<ActivityController>
                     .forwardOrBackwardActivity(true, context);
               },
               child: Container(
-                width: MediaQuery.of(context).size.width / 6,
-                height: MediaQuery.of(context).size.height,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width / 6,
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height,
                 color: AppColors.transparentColor,
               ),
             ),
@@ -258,8 +307,10 @@ class _ActivityControllerState extends State<ActivityController>
 
   _replyButton(_currentActivityData) {
     _getBgColor() {
+      print('Additional Things: ${_currentActivityData.additionalThings}');
+
       return _currentActivityData.additionalThings["text"] == null ||
-              _currentActivityData.additionalThings["text"] == ""
+          _currentActivityData.additionalThings["text"] == ""
           ? AppColors.transparentColor
           : AppColors.pureBlackColor.withOpacity(0.2);
     }
@@ -309,7 +360,8 @@ class _ActivityControllerState extends State<ActivityController>
     );
   }
 
-  _replySection() => Align(
+  _replySection() =>
+      Align(
         alignment: Alignment.bottomCenter,
         child: Container(
           decoration: const BoxDecoration(
@@ -343,7 +395,10 @@ class _ActivityControllerState extends State<ActivityController>
   _containerToInput() {
     return Container(
       height: 40,
-      width: MediaQuery.of(context).size.width - 80,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width - 80,
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(100),
@@ -354,7 +409,10 @@ class _ActivityControllerState extends State<ActivityController>
 
   _textMessageWritingSection() {
     return SizedBox(
-      width: MediaQuery.of(context).size.width - 180,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width - 180,
       child: TextField(
         autofocus: true,
         controller: textEditingController,

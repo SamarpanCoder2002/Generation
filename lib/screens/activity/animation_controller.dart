@@ -15,6 +15,7 @@ class AnimatedBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+
     return Flexible(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -28,18 +29,18 @@ class AnimatedBar extends StatelessWidget {
               ),
               position == currentIndex
                   ? AnimatedBuilder(
-                animation: animController,
-                builder: (context, child) {
-                  return _buildLoadingContainer(
-                    constraints.maxWidth * animController.value,
-                    null,
-                    linearGradient: const LinearGradient(colors: [
-                      Colors.lightGreenAccent,
-                      Colors.lightGreenAccent,
-                    ]),
-                  );
-                },
-              )
+                      animation: animController,
+                      builder: (context, child) {
+                        return _buildLoadingContainer(
+                          constraints.maxWidth * animController.value,
+                          null,
+                          linearGradient: const LinearGradient(colors: [
+                            Colors.lightGreenAccent,
+                            Colors.lightGreenAccent,
+                          ]),
+                        );
+                      },
+                    )
                   : const SizedBox.shrink(),
             ],
           );

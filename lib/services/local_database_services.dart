@@ -464,15 +464,14 @@ class LocalStorage {
     // });
   }
 
-  getAllActivity({required String tableName})async{
-    try{
+  getAllActivity({required String tableName}) async {
+    try {
       final Database db = await database;
       return await db.rawQuery(""" SELECT * FROM $tableName """);
-    }catch(e){
+    } catch (e) {
       print('Get all activity error :${e}');
       return [];
     }
-
   }
 
   /// Get Total Messages from Any Table

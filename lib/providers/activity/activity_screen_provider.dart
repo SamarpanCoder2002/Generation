@@ -18,6 +18,7 @@ class ActivityProvider extends ChangeNotifier {
   late AnimationController _animationController;
   late BuildContext context;
   bool _replyBtnClicked = false;
+  List<dynamic> _activityCollection = [];
 
   isReplyBtnClicked() => _replyBtnClicked;
 
@@ -90,13 +91,6 @@ class ActivityProvider extends ChangeNotifier {
 
   getAnimationController() => _animationController;
 
-  List<dynamic> _activityCollection = [];
-
-  setActivityCollection(List<dynamic> incoming) {
-    _activityCollection = incoming;
-    notifyListeners();
-  }
-
   addNewActivity(Map<String, dynamic> map, String holderId) {
     _localStorage.insertUpdateTableForActivity(
         tableName: holderId == _dbOperation.currUid
@@ -109,7 +103,7 @@ class ActivityProvider extends ChangeNotifier {
         date: map["date"],
         time: map["time"],
         msg: map["message"],
-        additionalData: DataManagement.toJsonString(map["additionalThings"]),
+        additionalData: map["additionalThings"],
         dbOperation: DBOperation.insert);
   }
 
@@ -140,9 +134,19 @@ class ActivityProvider extends ChangeNotifier {
     setUpdatedIndex(isForward ? _currentPageIndex + 1 : _currentPageIndex - 1);
   }
 
-  getActivityCollection() => _activityCollection;
+  setActivityCollection(List<dynamic> incoming) {
+    _activityCollection = incoming;
+    notifyListeners();
+  }
 
-  getLengthOfActivityCollection() => _activityCollection.length;
+  List<dynamic> getActivityCollection() => _activityCollection;
+
+  int getLengthOfActivityCollection() => _activityCollection.length;
+
+  clearActivityCollection() {
+    _activityCollection.clear();
+    notifyListeners();
+  }
 
   ActivityModel? getParticularActivity(index) {
     if (index > _activityCollection.length - 1) return null;
@@ -154,7 +158,9 @@ class ActivityProvider extends ChangeNotifier {
         date: _activityData["date"],
         time: _activityData["time"],
         message: _activityData["message"],
-        additionalThings: _activityData["additionalThings"] ?? {},
+        additionalThings: _activityData["additionalThings"] == null
+            ? {}
+            : DataManagement.fromJsonString(_activityData["additionalThings"]),
         id: _activityData["id"]);
   }
 

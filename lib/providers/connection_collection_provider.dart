@@ -271,7 +271,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   Future<void> _storeActivityInLocalStorage(activity, connId,
       {bool insert = true}) async {
-    final response = await _localStorage.insertUpdateTableForActivity(
+     await _localStorage.insertUpdateTableForActivity(
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
         activityId: activity["id"],
@@ -280,8 +280,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         date: activity['date'],
         time: activity['time'],
         msg: activity['message'],
-        additionalData:
-            DataManagement.toJsonString(activity["additionalThings"]),
+        additionalData: activity["additionalThings"],
         dbOperation: insert ? DBOperation.insert : DBOperation.update);
   }
 
