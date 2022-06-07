@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/data_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
-import 'package:generation/operation/google_auth.dart';
+import 'package:generation/auth/google_auth.dart';
 import 'package:generation/screens/entry_screens/sign_in_screen.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/toast_message_show.dart';
