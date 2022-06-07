@@ -11,7 +11,7 @@ import 'package:generation/config/types.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
-import '../../operation/email_auth.dart';
+import '../../auth/email_auth.dart';
 import '../common/button.dart';
 import '../common/common_operations.dart';
 

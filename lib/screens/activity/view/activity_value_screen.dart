@@ -34,6 +34,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
 
   @override
   void initState() {
+    print('Activity: ${widget.activityData}');
     _scrollController.addListener(_scrollListener);
 
     if (widget.activityData.type == ActivityContentType.audio.toString()) {

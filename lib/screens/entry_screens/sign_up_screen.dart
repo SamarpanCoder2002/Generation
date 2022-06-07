@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/regex_collection.dart';
-import 'package:generation/operation/email_auth.dart';
-import 'package:generation/screens/entry_screens/sign_in_screen.dart';
+import 'package:generation/auth/email_auth.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
-import '../../services/navigation_management.dart';
 import '../common/button.dart';
 
 class SignUpScreen extends StatefulWidget {
