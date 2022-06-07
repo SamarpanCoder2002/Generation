@@ -336,6 +336,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _messagesCollectionSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     if (Provider.of<ConnectionCollectionProvider>(context).getDataLength() ==
         0) {
       return Container(
@@ -345,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Text(
             "No Connection Found",
             style: TextStyleCollection.secondaryHeadingTextStyle
-                .copyWith(fontSize: 16),
+                .copyWith(fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
           ));
     }
 
