@@ -58,6 +58,7 @@ class LocalStorage {
   final String _activityTime = "time";
   final String _activityMessage = "message";
   final String _activityAdditionalThings = "additionalThings";
+  final String _activityVisited = "visited";
 
   final PermissionManagement _permissionManagement = PermissionManagement();
 
@@ -384,7 +385,7 @@ class LocalStorage {
     final Database db = await database;
     try {
       await db.execute(
-          """CREATE TABLE $tableName($_activityHolderId TEXT, $_activityId TEXT PRIMARY KEY, $_activityMessage TEXT, $_activityType TEXT, $_activityDate TEXT, $_activityTime TEXT, $_activityAdditionalThings TEXT)""");
+          """CREATE TABLE $tableName($_activityHolderId TEXT, $_activityId TEXT PRIMARY KEY, $_activityMessage TEXT, $_activityType TEXT, $_activityDate TEXT, $_activityTime TEXT, $_activityAdditionalThings TEXT, $_activityVisited TEXT)""");
     } catch (e) {
       print("Error in _createTableForActivity Chat: ${e.toString()}");
     }
@@ -400,7 +401,8 @@ class LocalStorage {
       required String time,
       required String msg,
       required dynamic additionalData,
-      required DBOperation dbOperation}) async {
+      required DBOperation dbOperation,
+      bool? activityVisited}) async {
     try {
       final Database db = await database;
 
@@ -416,6 +418,7 @@ class LocalStorage {
       _activityData[_activityMessage] = msg;
       _activityData[_activityAdditionalThings] =
           DataManagement.toJsonString(additionalData);
+      _activityData[_activityVisited] = "${activityVisited ?? 'false'}";
 
       print('Activity Data:  $_activityData     dbOperation: ${dbOperation}');
 
@@ -468,6 +471,18 @@ class LocalStorage {
     try {
       final Database db = await database;
       return await db.rawQuery(""" SELECT * FROM $tableName """);
+    } catch (e) {
+      print('Get all activity error :${e}');
+      return [];
+    }
+  }
+
+  getAllSeenUnseenActivity(
+      {required String tableName, bool seen = true}) async {
+    try {
+      final Database db = await database;
+      return await db.rawQuery(
+          """ SELECT * FROM $tableName WHERE $_activityVisited = ${seen ? "true" : "false"} """);
     } catch (e) {
       print('Get all activity error :${e}');
       return [];
