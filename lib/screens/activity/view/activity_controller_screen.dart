@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
@@ -10,9 +9,9 @@ import 'package:generation/providers/status_collection_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/config/types.dart';
-import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
+
 import '../../../config/size_collection.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
@@ -20,7 +19,12 @@ import '../../../providers/video_management/video_show_provider.dart';
 import '../animation_controller.dart';
 
 class ActivityController extends StatefulWidget {
-  const ActivityController({Key? key}) : super(key: key);
+  final String tableName;
+  final int startingIndex;
+
+  const ActivityController(
+      {Key? key, required this.tableName, required this.startingIndex})
+      : super(key: key);
 
   @override
   State<ActivityController> createState() => _ActivityControllerState();
@@ -29,6 +33,7 @@ class ActivityController extends StatefulWidget {
 class _ActivityControllerState extends State<ActivityController>
     with TickerProviderStateMixin {
   final TextEditingController textEditingController = TextEditingController();
+  final LocalStorage _localStorage = LocalStorage();
 
   @override
   void initState() {
@@ -148,6 +153,11 @@ class _ActivityControllerState extends State<ActivityController>
                 .setPollData(_currentActivityData.message, update: false);
           }
 
+          _activityVisited(_currentActivityData);
+
+          // final _animController = Provider.of<ActivityProvider>(context, listen: false).getAnimationController();
+          // _animController.forward();
+
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -171,7 +181,12 @@ class _ActivityControllerState extends State<ActivityController>
     final _dataCollection =
         Provider.of<ActivityProvider>(context).getActivityCollection();
 
-    print('Data Collection: $_dataCollection');
+    if (widget.startingIndex > 0 &&
+        Provider.of<ActivityProvider>(context).getPageIndex() ==
+            widget.startingIndex) {
+      Provider.of<ActivityProvider>(context)
+          .resumeAnimationForNewest(widget.startingIndex);
+    }
 
     return Positioned(
       top: 30.0,
@@ -417,5 +432,19 @@ class _ActivityControllerState extends State<ActivityController>
     }
 
     return const Center();
+  }
+
+  void _activityVisited(ActivityModel _currentActivityData) {
+    _localStorage.insertUpdateTableForActivity(
+        tableName: widget.tableName,
+        activityId: _currentActivityData.id,
+        activityHolderId: _currentActivityData.holderId,
+        activityType: _currentActivityData.type,
+        date: _currentActivityData.date,
+        time: _currentActivityData.time,
+        msg: _currentActivityData.message,
+        additionalData: _currentActivityData.additionalThings,
+        activityVisited: true,
+        dbOperation: DBOperation.update);
   }
 }

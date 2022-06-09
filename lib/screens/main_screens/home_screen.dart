@@ -207,25 +207,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final _connName = (_currentActivityData["name"] ?? '').toString();
 
-    _onConnActivityTap() async {
-      final LocalStorage _localStorage = LocalStorage();
-
-      final _activityData = await _localStorage.getAllActivity(
-          tableName: DataManagement.generateTableNameForNewConnectionActivity(
-              _connId));
-      Provider.of<ActivityProvider>(context, listen: false)
-          .setActivityCollection(_activityData);
-
-      Timer(const Duration(milliseconds: 500), () {
-        Navigation.intent(context, const ActivityController(),
-            afterWork: () => changeContextTheme(_isDarkMode));
-      });
-    }
-
     return Container(
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
-        onTap: _onConnActivityTap,
+        onTap: () => _switchToActivity(
+            tableName: DataManagement.generateTableNameForNewConnectionActivity(
+                _connId),
+            isDarkMode: _isDarkMode),
         child: Column(
           children: [
             Container(
@@ -346,8 +334,8 @@ class _HomeScreenState extends State<HomeScreen> {
           alignment: Alignment.center,
           child: Text(
             "No Connection Found",
-            style: TextStyleCollection.secondaryHeadingTextStyle
-                .copyWith(fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
           ));
     }
 
@@ -458,22 +446,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    _onMyActivityTap() async {
-      final LocalStorage _localStorage = LocalStorage();
-
-      final _activityData =
-          await _localStorage.getAllActivity(tableName: DbData.myActivityTable);
-      Provider.of<ActivityProvider>(context, listen: false)
-          .setActivityCollection(_activityData);
-
-      Navigation.intent(context, const ActivityController(),
-          afterWork: () => changeContextTheme(_isDarkMode));
-    }
-
     return Container(
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
-        onTap: _onMyActivityTap,
+        onTap: () => _switchToActivity(
+            tableName: DbData.myActivityTable, isDarkMode: _isDarkMode),
         child: Column(
           children: [
             Container(
@@ -680,5 +657,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return '$_msgHolder:  $_msgData';
+  }
+
+  _switchToActivity(
+      {required String tableName, required bool isDarkMode}) async {
+    final LocalStorage _localStorage = LocalStorage();
+
+    final _activityData =
+        await _localStorage.getAllActivity(tableName: tableName);
+    Provider.of<ActivityProvider>(context, listen: false)
+        .setActivityCollection(_activityData);
+
+    final _visitedData =
+        await _localStorage.getAllSeenUnseenActivity(tableName: tableName);
+
+    Provider.of<ActivityProvider>(context, listen: false).startFrom(
+        _visitedData.length == _activityData.length ? 0 : _visitedData.length);
+
+    Timer(const Duration(milliseconds: 500), () {
+      Navigation.intent(
+          context,
+          ActivityController(
+              tableName: tableName,
+              startingIndex: _visitedData.length == _activityData.length
+                  ? 0
+                  : _visitedData.length),
+          afterWork: () => changeContextTheme(isDarkMode));
+    });
   }
 }
