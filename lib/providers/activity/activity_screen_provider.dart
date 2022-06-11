@@ -31,7 +31,7 @@ class ActivityProvider extends ChangeNotifier {
 
   int get getStartingIndex => _startFrom;
 
-  isReplyBtnClicked() => _replyBtnClicked;
+  bool isReplyBtnClicked() => _replyBtnClicked;
 
   updateReplyBtnClicked(bool status) {
     _replyBtnClicked = status;

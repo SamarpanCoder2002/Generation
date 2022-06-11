@@ -251,55 +251,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-
-    // return OpenContainer(
-    //   closedElevation: 0.0,
-    //   transitionType: ContainerTransitionType.fadeThrough,
-    //   transitionDuration: const Duration(milliseconds: 500),
-    //   closedColor: AppColors.getBgColor(_isDarkMode),
-    //   middleColor: AppColors.getBgColor(_isDarkMode),
-    //   openColor: AppColors.getBgColor(_isDarkMode),
-    //   onClosed: (_) => changeContextTheme(_isDarkMode),
-    //   openBuilder: (_, __) => const ActivityController(),
-    //   closedBuilder: (_, __) => Container(
-    //     margin: const EdgeInsets.only(right: 15),
-    //     child: Column(
-    //       children: [
-    //         Container(
-    //           width: 80,
-    //           height: 80,
-    //           decoration: BoxDecoration(
-    //             color: _isDarkMode
-    //                 ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-    //                 : AppColors.searchBarBgLightMode.withOpacity(0.5),
-    //             borderRadius: BorderRadius.circular(100),
-    //             image: DecorationImage(
-    //                 image: NetworkImage(_currentActivityData["profilePic"]),
-    //                 fit: BoxFit.cover),
-    //             border: Border.all(
-    //                 color: _currentActivityData["isActive"]
-    //                     ? _isDarkMode
-    //                         ? AppColors.darkBorderGreenColor
-    //                         : AppColors.lightBorderGreenColor
-    //                     : AppColors.imageDarkBgColor,
-    //                 width: 3),
-    //           ),
-    //         ),
-    //         Container(
-    //           margin: const EdgeInsets.only(top: 10),
-    //           child: Text(
-    //             _currentActivityData["connectionName"],
-    //             overflow: TextOverflow.ellipsis,
-    //             style: TextStyleCollection.activityTitleTextStyle.copyWith(
-    //                 color: _isDarkMode
-    //                     ? AppColors.pureWhiteColor
-    //                     : AppColors.lightActivityTextColor),
-    //           ),
-    //         )
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 
   _messagesSection() {
@@ -415,14 +366,8 @@ class _HomeScreenState extends State<HomeScreen> {
   _myActivity() {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
-
-    print("Current Activity Data: $_currentActivityData");
-
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-
     final _connName = (_currentActivityData["name"] ?? '').toString();
-
-    print('Connname: $_connName');
 
     _addActivityIcon() {
       return InkWell(
