@@ -271,7 +271,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
   Future<void> _storeActivityInLocalStorage(activity, connId,
       {bool insert = true}) async {
-     await _localStorage.insertUpdateTableForActivity(
+    await _localStorage.insertUpdateTableForActivity(
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
         activityId: activity["id"],

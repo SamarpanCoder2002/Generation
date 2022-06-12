@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/config/size_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/providers/main_screen_provider.dart';
@@ -9,12 +10,19 @@ import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
 import 'package:generation/services/local_database_services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:workmanager/workmanager.dart';
+
+import '../../config/data_collection.dart';
+import '../../config/text_collection.dart';
+import '../../config/types.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/status_collection_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
+import '../../services/local_data_management.dart';
 import 'connection_management/connection_management.dart';
 
 class MainScreen extends StatefulWidget {
@@ -49,6 +57,41 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     showStatusAndNavigationBar();
     makeStatusBarTransparent();
     changeContextTheme(_isDarkMode);
+
+    // BackgroundService().initialize();
+    // BackgroundService().deleteOwnActivityTask();
+    //BackgroundService.deleteConnectionsActivityTask();
+
+    // _localStorage.deleteOwnExpiredActivity();
+
+    Workmanager().initialize(
+        bgTaskTopLevel, // The top level function, aka callbackDispatcher
+        isInDebugMode: true);
+
+    Workmanager().registerPeriodicTask(
+      BgTask.deleteOwnActivityData['taskId'] ?? "1",
+      BgTask.deleteOwnActivityData['task'] ?? BgTask.deleteOwnActivity,
+      initialDelay: Duration(
+          seconds: int.parse(
+              BgTask.deleteOwnActivityData['initialDelayInSec'] ?? '30')),
+      frequency: Duration(
+          minutes: int.parse(
+              BgTask.deleteOwnActivityData['frequencyInMin'] ?? '15')),
+    );
+
+    Workmanager().registerPeriodicTask(
+      BgTask.deleteConnectionActivities['taskId'] ?? "2",
+      BgTask.deleteConnectionActivities['task'] ??
+          BgTask.deleteConnectionsActivity,
+      initialDelay: Duration(
+          seconds: int.parse(
+              BgTask.deleteConnectionActivities['initialDelayInSec'] ?? '30')),
+      frequency: Duration(
+          minutes: int.parse(
+              BgTask.deleteConnectionActivities['frequencyInMin'] ?? '15')),
+    );
+
+    //deleteOwnExpiredActivity(stop: true);
 
     super.initState();
   }
@@ -216,4 +259,133 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
     return true;
   }
+}
+
+bgTaskTopLevel() {
+  Workmanager().executeTask((taskName, inputData) async {
+    switch (taskName) {
+      case BgTask.deleteOwnActivity:
+        print('Delete Own Activity');
+        await deleteOwnExpiredActivity(tableName: DbData.myActivityTable);
+        break;
+      case BgTask.deleteConnectionsActivity:
+        await manageDeleteConnectionsExpiredActivity();
+        break;
+    }
+
+    return true;
+  });
+}
+
+deleteOwnExpiredActivity(
+    {String tableName = DbData.myActivityTable, bool stop = false}) async {
+  //try {
+  print('Entry 1');
+  final LocalStorage _localStorage = LocalStorage();
+
+  print('Entry 2');
+  final DBOperations _dbOperations = DBOperations();
+  print('Entry 3');
+  final _activities = await _localStorage.getAllActivity(
+      tableName: tableName, withStoragePermission: false);
+  print('Entry 4');
+  final _currDateTime = DateTime.now();
+
+  print('All Activities Collection: $_activities');
+
+  if (stop) return;
+
+  for (final activity in _activities) {
+    final _additionalThings = activity["additionalThings"] ?? "";
+    print('Additional Things: $_additionalThings');
+    final _remoteData = DataManagement.fromJsonString(
+        (DataManagement.fromJsonString(
+                _additionalThings.toString())["remoteData"]) ??
+            "");
+
+    await _dbOperations.initializeFirebase();
+
+    if (activity["type"] != ActivityContentType.text.toString()) {
+      await _dbOperations
+          .deleteMediaFromFirebaseStorage(_remoteData['message']);
+    }
+
+    await _dbOperations.deleteParticularActivity(_remoteData);
+    await _deleteEligibleActivities(
+        activity: activity, currDateTime: _currDateTime, tableName: tableName);
+  }
+  // } catch (e) {
+  //   print('deleteMyExpiredActivity error :$e');
+  //   return [];
+  // }
+}
+
+manageDeleteConnectionsExpiredActivity() async {
+  final LocalStorage _localStorage = LocalStorage();
+  final _connectionsData = await _localStorage.getConnectionPrimaryData(
+      withStoragePermission: false);
+
+  print('Connections Data: $_connectionsData');
+
+  if (_connectionsData.isEmpty) return;
+
+  Map<String, List<dynamic>> _connData = {};
+
+  for (final conn in _connectionsData) {
+    try {
+      final _activities = await _localStorage.getAllActivity(
+          tableName: DataManagement.generateTableNameForNewConnectionActivity(
+              conn["id"]),
+          withStoragePermission: false);
+      _connData[conn["id"]] = _activities;
+
+      print('Connection Data Map: $_connData');
+    } catch (e) {
+      debugPrint('Error in Get Ids: $e');
+    }
+  }
+
+  final _currDateTime = DateTime.now();
+
+  for (final connId in _connData.keys.toList()) {
+    for (final activity in (_connData[connId] ?? [])) {
+      await _deleteEligibleActivities(
+          activity: activity,
+          currDateTime: _currDateTime,
+          tableName:
+              DataManagement.generateTableNameForNewConnectionActivity(connId));
+    }
+  }
+}
+
+_deleteEligibleActivities(
+    {required activity,
+    required currDateTime,
+    required String tableName}) async {
+  //try {
+  final _date = activity["date"];
+  final _time = activity["time"];
+  final LocalStorage _localStorage = LocalStorage();
+
+  print('Activity date and time: $_date  $_time');
+
+  DateFormat format = DateFormat("dd MMMM, yyyy hh:mm a");
+  var formattedDateTime = format.parse('$_date $_time');
+  final Duration _diffDateTime = currDateTime.difference(formattedDateTime);
+
+  print('Diff Time Date Time: $_diffDateTime');
+
+  if (_diffDateTime.inHours >= SizeCollection.activitySustainTimeInHour) {
+    print('Activity Deleting Msg: $activity');
+    await _localStorage.deleteActivity(
+        tableName: tableName,
+        activityId: activity["id"],
+        withStoragePermission: false);
+    print('Activity Deleted');
+  }
+
+  print('Activity Deletion Completed Background $activity');
+  // } catch (e) {
+  //   print('Error in _deleteEligibleActivities: $e');
+  // }
 }
