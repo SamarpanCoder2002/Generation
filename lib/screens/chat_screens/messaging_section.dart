@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -11,6 +12,7 @@ import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/show_google_map.dart';
 import 'package:generation/services/system_file_management.dart';
 import 'package:generation/config/types.dart';
@@ -21,8 +23,12 @@ import 'package:swipe_to/swipe_to.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../providers/activity/activity_screen_provider.dart';
 import '../../providers/sound_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/device_specific_operations.dart';
+import '../../services/navigation_management.dart';
+import '../activity/view/activity_controller_screen.dart';
 
 class MessagingSection extends StatefulWidget {
   final BuildContext context;
@@ -732,30 +738,75 @@ class _MessagingSectionState extends State<MessagingSection> {
   _isItLocalFile(String message) =>
       !message.startsWith('http') && !message.startsWith('https');
 
-  _replyMsgContainer(_replyMsgData, realMsgData) {
+  _replyMsgContainer(_replyMsgData, ChatMessageModel realMsgData) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppColors.getChatBgColor(_isDarkMode).withOpacity(0.4),
-        borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-        border: Border.all(
-            color: AppColors.getMsgColor(_isDarkMode,
-                realMsgData.holder == MessageHolderType.other.toString())),
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-            """${realMsgData.holder == MessageHolderType.other.toString() ? '${widget.connData['name']}' : 'You'} : ${_optimizedShowReplyMessage(_replyMsgData.values.toList()[0])}""",
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyleCollection.terminalTextStyle
-                .copyWith(color: AppColors.getModalTextColor(_isDarkMode))),
+    String _getReplyMsgData() {
+      if (_replyMsgData["activityReply"] != null) {
+        final _activityHolder = _replyMsgData["activityHolderId"] ==
+                Provider.of<ChatBoxMessagingProvider>(context)
+                    .getPartnerUserId()
+            ? """${widget.connData['name']}'s"""
+            : 'Your';
+        return """${_replyMsgData["activityHolderId"] != null ? _activityHolder : ''} activity : click here to view""";
+      }
+
+      return """${realMsgData.holder == MessageHolderType.other.toString() ? '${widget.connData['name']}' : 'You'} : ${_optimizedShowReplyMessage(_replyMsgData.values.toList()[0])}""";
+    }
+
+    return InkWell(
+      onTap: () => _onReplyTap(_replyMsgData, _isDarkMode),
+      child: Container(
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(
+          color: AppColors.getChatBgColor(_isDarkMode).withOpacity(0.4),
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+          border: Border.all(
+              color: AppColors.getMsgColor(_isDarkMode,
+                  realMsgData.holder == MessageHolderType.other.toString())),
+        ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(_getReplyMsgData(),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyleCollection.terminalTextStyle
+                  .copyWith(color: AppColors.getModalTextColor(_isDarkMode))),
+        ),
       ),
     );
+  }
+
+  _onReplyTap(_replyMsgData, _isDarkMode) async {
+    if (_replyMsgData["activityReply"] == null ||
+        _replyMsgData["activityHolderId"] == null ||
+        _replyMsgData["activityId"] == null) return;
+
+    final LocalStorage _localStorage = LocalStorage();
+    final tableName = _replyMsgData["activityHolderId"] ==
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId()
+        ? DataManagement.generateTableNameForNewConnectionActivity(
+            _replyMsgData["activityHolderId"])
+        : DbData.myActivityTable;
+
+    final _activityData = await _localStorage.getParticularActivity(
+        tableName: tableName, activityId: _replyMsgData["activityId"]);
+
+    Provider.of<ActivityProvider>(context, listen: false)
+        .setActivityCollection(_activityData);
+
+    Timer(const Duration(milliseconds: 500), () {
+      Navigation.intent(
+          context,
+          ActivityController(
+            tableName: tableName,
+            startingIndex: 0,
+            showReplySection: false,
+          ),
+          afterWork: () => changeContextTheme(_isDarkMode));
+    });
   }
 
   String _optimizedShowReplyMessage(_msgData) {

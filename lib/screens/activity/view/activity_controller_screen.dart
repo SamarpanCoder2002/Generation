@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/config/text_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
@@ -10,17 +9,27 @@ import 'package:generation/providers/status_collection_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/config/types.dart';
-import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/toast_message_show.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:provider/provider.dart';
+
 import '../../../config/size_collection.dart';
+import '../../../providers/chat/messaging_provider.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/video_management/video_show_provider.dart';
+import '../../../services/local_data_management.dart';
 import '../animation_controller.dart';
 
 class ActivityController extends StatefulWidget {
-  const ActivityController({Key? key}) : super(key: key);
+  final String tableName;
+  final int startingIndex;
+  final bool showReplySection;
+
+  const ActivityController(
+      {Key? key, required this.tableName, required this.startingIndex, this.showReplySection = true})
+      : super(key: key);
 
   @override
   State<ActivityController> createState() => _ActivityControllerState();
@@ -29,14 +38,19 @@ class ActivityController extends StatefulWidget {
 class _ActivityControllerState extends State<ActivityController>
     with TickerProviderStateMixin {
   final TextEditingController textEditingController = TextEditingController();
+  final LocalStorage _localStorage = LocalStorage();
+
+  bool _isLoading = false;
 
   @override
   void initState() {
     changeSystemNavigationAndStatusBarColor(
-        statusBarColor: AppColors.transparentColor,
-        navigationBarColor: Colors.black12.withOpacity(0));
+        statusBarColor: AppColors.pureBlackColor,
+        navigationBarColor: AppColors.pureBlackColor);
     Provider.of<ActivityProvider>(context, listen: false)
         .initializeAnimationController(this, context);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setContext(context);
 
     super.initState();
   }
@@ -75,23 +89,30 @@ class _ActivityControllerState extends State<ActivityController>
   Widget build(BuildContext context) {
     final _activityProvider = Provider.of<ActivityProvider>(context);
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (_activityProvider.isReplyBtnClicked()) {
-          _onReplySectionRemovedAction();
-          return false;
-        }
+    return LoadingOverlay(
+      isLoading: _isLoading,
+      color: AppColors.pureBlackColor.withOpacity(0.6),
+      progressIndicator: const CircularProgressIndicator(
+        color: AppColors.lightBorderGreenColor,
+      ),
+      child: WillPopScope(
+        onWillPop: () async {
+          if (_activityProvider.isReplyBtnClicked()) {
+            _onReplySectionRemovedAction();
+            return false;
+          }
 
-        Provider.of<ActivityProvider>(context, listen: false)
-            .disposeAnimationController();
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.pureWhiteColor,
-        body: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: _activityPagination(),
+          Provider.of<ActivityProvider>(context, listen: false)
+              .disposeAnimationController();
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.pureWhiteColor,
+          body: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: _activityPagination(),
+          ),
         ),
       ),
     );
@@ -148,18 +169,23 @@ class _ActivityControllerState extends State<ActivityController>
                 .setPollData(_currentActivityData.message, update: false);
           }
 
+          _activityVisited(_currentActivityData);
+
+          // final _animController = Provider.of<ActivityProvider>(context, listen: false).getAnimationController();
+          // _animController.forward();
+
           return Stack(
             clipBehavior: Clip.none,
             children: [
               ActivityViewer(activityData: _currentActivityData),
               _activityAnimation(),
               _forNavigation(_currentActivityData),
-              if (_currentActivityData.holderId != _currUserId &&
+              if (widget.showReplySection && _currentActivityData.holderId != _currUserId &&
                   !_activityProvider.isReplyBtnClicked())
                 _replyButton(_currentActivityData),
-              if (_currentActivityData.holderId != _currUserId &&
+              if (widget.showReplySection && _currentActivityData.holderId != _currUserId &&
                   _activityProvider.isReplyBtnClicked())
-                _replySection(),
+                _replySection(_currentActivityData),
             ],
           );
         },
@@ -171,7 +197,12 @@ class _ActivityControllerState extends State<ActivityController>
     final _dataCollection =
         Provider.of<ActivityProvider>(context).getActivityCollection();
 
-    print('Data Collection: $_dataCollection');
+    if (widget.startingIndex > 0 &&
+        Provider.of<ActivityProvider>(context).getPageIndex() ==
+            widget.startingIndex) {
+      Provider.of<ActivityProvider>(context)
+          .resumeAnimationForNewest(widget.startingIndex);
+    }
 
     return Positioned(
       top: 30.0,
@@ -268,9 +299,9 @@ class _ActivityControllerState extends State<ActivityController>
         ),
       );
 
-  _replyButton(_currentActivityData) {
+  _replyButton(ActivityModel? _currentActivityData) {
     _getBgColor() {
-      print('Additional Things: ${_currentActivityData.additionalThings}');
+      print('Additional Things: ${_currentActivityData!.additionalThings}');
 
       return _currentActivityData.additionalThings["text"] == null ||
               _currentActivityData.additionalThings["text"] == ""
@@ -285,13 +316,16 @@ class _ActivityControllerState extends State<ActivityController>
       Provider.of<ActivityProvider>(context, listen: false)
           .updateReplyBtnClicked(true);
 
-      if (_currentActivityData.type == ActivityContentType.video.toString()) {
+      if (_currentActivityData!.type == ActivityContentType.video.toString()) {
         Provider.of<VideoShowProvider>(context, listen: false).pauseVideo();
       }
 
       if (_currentActivityData.type == ActivityContentType.audio.toString()) {
         Provider.of<SongManagementProvider>(context, listen: false).pauseSong();
       }
+
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .setReplyActivity(_currentActivityData.id, _currentActivityData.holderId);
     }
 
     return Align(
@@ -323,7 +357,7 @@ class _ActivityControllerState extends State<ActivityController>
     );
   }
 
-  _replySection() => Align(
+  _replySection(ActivityModel? _currentActivityData) => Align(
         alignment: Alignment.bottomCenter,
         child: Container(
           decoration: const BoxDecoration(
@@ -334,21 +368,23 @@ class _ActivityControllerState extends State<ActivityController>
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _replyContainerToInput(),
+                _replyContainerToInput(_currentActivityData),
               ],
             ),
           ),
         ),
       );
 
-  _replyContainerToInput() {
+  _replyContainerToInput(ActivityModel? _currentActivityData) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _containerToInput(),
-          _sendButton(bgColor: AppColors.messageWritingSectionColor)
+          _sendButton(
+              bgColor: AppColors.messageWritingSectionColor,
+              currentActivityData: _currentActivityData)
         ],
       ),
     );
@@ -386,11 +422,11 @@ class _ActivityControllerState extends State<ActivityController>
     );
   }
 
-  _sendButton({Color bgColor = AppColors.darkBorderGreenColor}) {
+  _sendButton(
+      {Color bgColor = AppColors.darkBorderGreenColor,
+      ActivityModel? currentActivityData}) {
     return InkWell(
-      onTap: () {
-        textEditingController.clear();
-      },
+      onTap: () => _sendActivityReplyMsg(currentActivityData),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         child: Container(
@@ -417,5 +453,61 @@ class _ActivityControllerState extends State<ActivityController>
     }
 
     return const Center();
+  }
+
+  void _activityVisited(ActivityModel _currentActivityData) {
+    _localStorage.insertUpdateTableForActivity(
+        tableName: widget.tableName,
+        activityId: _currentActivityData.id,
+        activityHolderId: _currentActivityData.holderId,
+        activityType: _currentActivityData.type,
+        date: _currentActivityData.date,
+        time: _currentActivityData.time,
+        msg: _currentActivityData.message,
+        additionalData: _currentActivityData.additionalThings,
+        activityVisited: true,
+        dbOperation: DBOperation.update);
+  }
+
+  _sendActivityReplyMsg(ActivityModel? _currentActivityData) async {
+    print('At Reply Activity');
+
+    final _replyMsg =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getReplyHolderMsg;
+
+    if (_replyMsg.isEmpty) return;
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    /// Message Send Management
+    await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .sendMsgManagement(
+            msgType: ChatMessageType.text.toString(),
+            message: textEditingController.text,
+            incomingConnId: _currentActivityData!.holderId,
+            storeOnMsgBox: false,
+            additionalData: _replyMsg.isEmpty
+                ? null
+                : {'reply': DataManagement.toJsonString(_replyMsg)});
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false).removeReplyMsg();
+
+    if (mounted) {
+      setState(() {
+        textEditingController.clear();
+        _isLoading = false;
+        _onReplySectionRemovedAction();
+      });
+    }
+
+    showToast(context,
+        title: 'Reply Send Successfully',
+        toastIconType: ToastIconType.success,
+        showCenterToast: true);
   }
 }

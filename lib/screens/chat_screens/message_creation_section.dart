@@ -517,7 +517,7 @@ class MessageCreationSection extends StatelessWidget {
   _replyMsgContainerData() {
     final _msgData =
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .getReplyHolderMsg();
+            .getReplyHolderMsg;
 
     if (_msgData.isEmpty) return const Center();
 
@@ -528,7 +528,7 @@ class MessageCreationSection extends StatelessWidget {
             const EdgeInsets.only(left: 10, right: 10, top: 3, bottom: 0.5),
         child: Align(
           alignment: Alignment.centerLeft,
-          child: Text(_optimizedShowReplyMessage(_msgData.values.toList()[0]),
+          child: Text(_optimizedShowReplyMessage(_msgData),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyleCollection.terminalTextStyle
@@ -536,7 +536,13 @@ class MessageCreationSection extends StatelessWidget {
         ));
   }
 
-  String _optimizedShowReplyMessage(ChatMessageModel? _msgData) {
+  String _optimizedShowReplyMessage(_msgData) {
+    if(_msgData["activityReply"] != null){
+      return "Activity : Click here to view";
+    }
+
+
+    _msgData = _msgData.values.toList()[0];
     if (_msgData == null) return '';
 
     if (_msgData.type == ChatMessageType.text.toString()) {

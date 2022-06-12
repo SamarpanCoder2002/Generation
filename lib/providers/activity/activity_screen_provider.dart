@@ -12,7 +12,8 @@ import '../sound_provider.dart';
 class ActivityProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   int _animationBarCurrentIndex = 0;
-  final PageController _pageController = PageController();
+  int _startFrom = 0;
+  PageController _pageController = PageController();
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperation = DBOperations();
   late AnimationController _animationController;
@@ -20,7 +21,17 @@ class ActivityProvider extends ChangeNotifier {
   bool _replyBtnClicked = false;
   List<dynamic> _activityCollection = [];
 
-  isReplyBtnClicked() => _replyBtnClicked;
+  startFrom(int incoming) {
+    _startFrom = incoming;
+    _pageController = PageController(initialPage: incoming);
+    _currentPageIndex = incoming;
+    _animationBarCurrentIndex = incoming;
+    notifyListeners();
+  }
+
+  int get getStartingIndex => _startFrom;
+
+  bool isReplyBtnClicked() => _replyBtnClicked;
 
   updateReplyBtnClicked(bool status) {
     _replyBtnClicked = status;
@@ -89,7 +100,7 @@ class ActivityProvider extends ChangeNotifier {
     });
   }
 
-  getAnimationController() => _animationController;
+  AnimationController getAnimationController() => _animationController;
 
   addNewActivity(Map<String, dynamic> map, String holderId) {
     _localStorage.insertUpdateTableForActivity(
@@ -109,7 +120,7 @@ class ActivityProvider extends ChangeNotifier {
 
   getPageController() => _pageController;
 
-  getPageIndex() => _currentPageIndex;
+  int getPageIndex() => _currentPageIndex;
 
   setUpdatedIndex(int changedPageIndex) {
     _currentPageIndex = changedPageIndex;
@@ -172,6 +183,29 @@ class ActivityProvider extends ChangeNotifier {
   resumeActivityAnimation() {
     _animationController.forward();
     notifyListeners();
+  }
+
+  resumeAnimationForNewest(int newestIndex) {
+    final _newestActivityData = Provider.of<ActivityProvider>(context)
+        .getParticularActivity(newestIndex);
+
+    int durationInSec = 5;
+
+    if (_newestActivityData != null) {
+      if (_newestActivityData.type == ActivityContentType.video.toString() ||
+          _newestActivityData.type == ActivityContentType.audio.toString() ||
+          _newestActivityData.type == ActivityContentType.poll.toString()) {
+        durationInSec =
+            int.parse(_newestActivityData.additionalThings["duration"]);
+
+        if (_newestActivityData.type == ActivityContentType.audio.toString()) {
+          durationInSec += 1;
+        }
+      }
+    }
+
+    _animationController.duration = Duration(seconds: durationInSec);
+    _animationController.forward();
   }
 
   void _stopCurrentPlayingActivitySong() {

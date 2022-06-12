@@ -482,7 +482,7 @@ class LocalStorage {
     try {
       final Database db = await database;
       return await db.rawQuery(
-          """ SELECT * FROM $tableName WHERE $_activityVisited = ${seen ? "true" : "false"} """);
+          """ SELECT * FROM $tableName WHERE $_activityVisited = "$seen" """);
     } catch (e) {
       print('Get all activity error :${e}');
       return [];

@@ -33,7 +33,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   StreamSubscription? _realTimeConnSubscription;
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
-  Map<String, ChatMessageModel?> _replyHolderMsg = {};
+  Map<String, dynamic> _replyHolderMsg = {};
 
 //  Map<String, dynamic> _partnerData = {};
 
@@ -64,6 +64,15 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  setReplyActivity(String activityId, String activityHolderId) {
+    _replyHolderMsg = {
+      "activityReply": true,
+      "activityId": activityId,
+      "activityHolderId": activityHolderId,
+    };
+    notifyListeners();
+  }
+
   popUpScreen() {
     try {
       Navigator.pop(context);
@@ -72,7 +81,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     }
   }
 
-  Map<String, ChatMessageModel?> getReplyHolderMsg() => _replyHolderMsg;
+  Map<String, dynamic> get getReplyHolderMsg => _replyHolderMsg;
 
   Map<String, dynamic> getReplyModifiedMsg() {
     if (_replyHolderMsg.isEmpty) return {};
@@ -469,6 +478,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       required message,
       additionalData,
       bool forSendMultiple = false,
+      bool storeOnMsgBox = true,
       String? incomingConnId}) async {
     if (!(await Provider.of<NetworkManagementProvider>(context, listen: false)
         .isNetworkActive)) {
@@ -502,7 +512,9 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       }
     };
     _manageMessageForLocale(_msgLocalData,
-        forSendMultiple: forSendMultiple, incomingConnId: incomingConnId);
+        forSendMultiple: forSendMultiple,
+        incomingConnId: incomingConnId,
+        storeOnMsgBox: storeOnMsgBox);
 
     /// ---------------------------------------------------------- ///
 
@@ -514,18 +526,19 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         uniqueMsgId: _uniqueMsgId,
         msgTime: _msgTime,
         msgDate: _msgDate,
-        forSendMultiple: forSendMultiple,
         incomingConnId: incomingConnId);
   }
 
   /// Making Message Data Ready For Local
   void _manageMessageForLocale(_msgData,
-      {bool forSendMultiple = false, String? incomingConnId}) {
-    if (!forSendMultiple) setSingleNewMessage(_msgData);
+      {bool forSendMultiple = false,
+      String? incomingConnId,
+      bool storeOnMsgBox = true}) {
+    if (!forSendMultiple && storeOnMsgBox) setSingleNewMessage(_msgData);
 
     _localStorage.insertUpdateMsgUnderConnectionChatTable(
         chatConTableName: DataManagement.generateTableNameForNewConnectionChat(
-            !forSendMultiple ? getPartnerUserId() : incomingConnId),
+            incomingConnId ?? getPartnerUserId()),
         id: _msgData.keys.toList()[0],
         holder: _msgData.values.toList()[0][MessageData.holder],
         message: _msgData.values.toList()[0][MessageData.message],
@@ -544,12 +557,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       required uniqueMsgId,
       required msgTime,
       required msgDate,
-      bool forSendMultiple = false,
       String? incomingConnId}) async {
     final bool _isNotificationPermitted =
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
-            .notificationPermitted(
-                !forSendMultiple ? getPartnerUserId() : incomingConnId);
+            .notificationPermitted(incomingConnId ?? getPartnerUserId());
 
     print("Is notification Permitted:  $_isNotificationPermitted");
 
@@ -593,7 +604,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     final _notificationData = _rendererForNotification(msgType, _remoteMsg);
 
     _dbOperations.sendMessage(
-        partnerId: !forSendMultiple ? getPartnerUserId() : incomingConnId,
+        partnerId: incomingConnId ?? getPartnerUserId(),
         msgData: _msgRemoteData,
         token: getToken(),
         title: _notificationData['title'],

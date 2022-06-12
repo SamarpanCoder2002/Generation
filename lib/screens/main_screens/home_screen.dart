@@ -207,25 +207,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
     final _connName = (_currentActivityData["name"] ?? '').toString();
 
-    _onConnActivityTap() async {
-      final LocalStorage _localStorage = LocalStorage();
-
-      final _activityData = await _localStorage.getAllActivity(
-          tableName: DataManagement.generateTableNameForNewConnectionActivity(
-              _connId));
-      Provider.of<ActivityProvider>(context, listen: false)
-          .setActivityCollection(_activityData);
-
-      Timer(const Duration(milliseconds: 500), () {
-        Navigation.intent(context, const ActivityController(),
-            afterWork: () => changeContextTheme(_isDarkMode));
-      });
-    }
-
     return Container(
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
-        onTap: _onConnActivityTap,
+        onTap: () => _switchToActivity(
+            tableName: DataManagement.generateTableNameForNewConnectionActivity(
+                _connId),
+            isDarkMode: _isDarkMode),
         child: Column(
           children: [
             Container(
@@ -263,55 +251,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-
-    // return OpenContainer(
-    //   closedElevation: 0.0,
-    //   transitionType: ContainerTransitionType.fadeThrough,
-    //   transitionDuration: const Duration(milliseconds: 500),
-    //   closedColor: AppColors.getBgColor(_isDarkMode),
-    //   middleColor: AppColors.getBgColor(_isDarkMode),
-    //   openColor: AppColors.getBgColor(_isDarkMode),
-    //   onClosed: (_) => changeContextTheme(_isDarkMode),
-    //   openBuilder: (_, __) => const ActivityController(),
-    //   closedBuilder: (_, __) => Container(
-    //     margin: const EdgeInsets.only(right: 15),
-    //     child: Column(
-    //       children: [
-    //         Container(
-    //           width: 80,
-    //           height: 80,
-    //           decoration: BoxDecoration(
-    //             color: _isDarkMode
-    //                 ? AppColors.searchBarBgDarkMode.withOpacity(0.5)
-    //                 : AppColors.searchBarBgLightMode.withOpacity(0.5),
-    //             borderRadius: BorderRadius.circular(100),
-    //             image: DecorationImage(
-    //                 image: NetworkImage(_currentActivityData["profilePic"]),
-    //                 fit: BoxFit.cover),
-    //             border: Border.all(
-    //                 color: _currentActivityData["isActive"]
-    //                     ? _isDarkMode
-    //                         ? AppColors.darkBorderGreenColor
-    //                         : AppColors.lightBorderGreenColor
-    //                     : AppColors.imageDarkBgColor,
-    //                 width: 3),
-    //           ),
-    //         ),
-    //         Container(
-    //           margin: const EdgeInsets.only(top: 10),
-    //           child: Text(
-    //             _currentActivityData["connectionName"],
-    //             overflow: TextOverflow.ellipsis,
-    //             style: TextStyleCollection.activityTitleTextStyle.copyWith(
-    //                 color: _isDarkMode
-    //                     ? AppColors.pureWhiteColor
-    //                     : AppColors.lightActivityTextColor),
-    //           ),
-    //         )
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 
   _messagesSection() {
@@ -346,8 +285,8 @@ class _HomeScreenState extends State<HomeScreen> {
           alignment: Alignment.center,
           child: Text(
             "No Connection Found",
-            style: TextStyleCollection.secondaryHeadingTextStyle
-                .copyWith(fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
+            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
           ));
     }
 
@@ -427,14 +366,8 @@ class _HomeScreenState extends State<HomeScreen> {
   _myActivity() {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
-
-    print("Current Activity Data: $_currentActivityData");
-
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-
     final _connName = (_currentActivityData["name"] ?? '').toString();
-
-    print('Connname: $_connName');
 
     _addActivityIcon() {
       return InkWell(
@@ -458,22 +391,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    _onMyActivityTap() async {
-      final LocalStorage _localStorage = LocalStorage();
-
-      final _activityData =
-          await _localStorage.getAllActivity(tableName: DbData.myActivityTable);
-      Provider.of<ActivityProvider>(context, listen: false)
-          .setActivityCollection(_activityData);
-
-      Navigation.intent(context, const ActivityController(),
-          afterWork: () => changeContextTheme(_isDarkMode));
-    }
-
     return Container(
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
-        onTap: _onMyActivityTap,
+        onTap: () => _switchToActivity(
+            tableName: DbData.myActivityTable, isDarkMode: _isDarkMode),
         child: Column(
           children: [
             Container(
@@ -680,5 +602,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return '$_msgHolder:  $_msgData';
+  }
+
+  _switchToActivity(
+      {required String tableName, required bool isDarkMode}) async {
+    final LocalStorage _localStorage = LocalStorage();
+
+    final _activityData =
+        await _localStorage.getAllActivity(tableName: tableName);
+    Provider.of<ActivityProvider>(context, listen: false)
+        .setActivityCollection(_activityData);
+
+    final _visitedData =
+        await _localStorage.getAllSeenUnseenActivity(tableName: tableName);
+
+    Provider.of<ActivityProvider>(context, listen: false).startFrom(
+        _visitedData.length == _activityData.length ? 0 : _visitedData.length);
+
+    Timer(const Duration(milliseconds: 500), () {
+      Navigation.intent(
+          context,
+          ActivityController(
+              tableName: tableName,
+              startingIndex: _visitedData.length == _activityData.length
+                  ? 0
+                  : _visitedData.length),
+          afterWork: () => changeContextTheme(isDarkMode));
+    });
   }
 }
