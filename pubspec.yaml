@@ -41,7 +41,7 @@ dependencies:
   path_provider: ^2.0.9
   record: ^3.0.3
   intl: ^0.17.0
-  image_picker: ^0.8.4+10
+  image_picker: ^0.8.5+3
   open_file: ^3.2.1
   file_picker: ^4.5.0
   pdf_viewer_plugin: ^2.0.1

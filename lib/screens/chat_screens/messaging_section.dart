@@ -785,8 +785,11 @@ class _MessagingSectionState extends State<MessagingSection> {
         _replyMsgData["activityId"] == null) return;
 
     final LocalStorage _localStorage = LocalStorage();
-    final tableName = DataManagement.generateTableNameForNewConnectionActivity(
-        _replyMsgData["activityHolderId"]);
+    final tableName = _replyMsgData["activityHolderId"] ==
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId()
+        ? DataManagement.generateTableNameForNewConnectionActivity(
+            _replyMsgData["activityHolderId"])
+        : DbData.myActivityTable;
 
     final _activityData = await _localStorage.getParticularActivity(
         tableName: tableName, activityId: _replyMsgData["activityId"]);
