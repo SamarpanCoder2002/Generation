@@ -46,8 +46,9 @@ class VideoShowProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Duration getVideoDuration(File file){
+  Future<Duration> getVideoDuration(File file)async{
     VideoPlayerController controller = VideoPlayerController.file(file);
+    await controller.initialize();
     return controller.value.duration;
   }
 }

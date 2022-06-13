@@ -204,19 +204,25 @@ class _ActivityControllerState extends State<ActivityController>
           .resumeAnimationForNewest(widget.startingIndex);
     }
 
+    print('Data collection: $_dataCollection');
+
     return Positioned(
       top: 30.0,
       left: 5.0,
       right: 5.0,
       child: Row(
         children: [
-          ..._dataCollection.asMap().entries.map((dataMap) => AnimatedBar(
-                animController: Provider.of<ActivityProvider>(context)
-                    .getAnimationController(),
-                position: dataMap.key,
-                currentIndex:
-                    Provider.of<ActivityProvider>(context).getPageIndex(),
-              ))
+          ..._dataCollection.asMap().entries.map((dataMap){
+            print('Position in activity: ${dataMap.key}');
+
+            return AnimatedBar(
+              animController: Provider.of<ActivityProvider>(context)
+                  .getAnimationController(),
+              position: dataMap.key,
+              currentIndex:
+              Provider.of<ActivityProvider>(context).getPageIndex(),
+            );
+          })
         ],
       ),
     );

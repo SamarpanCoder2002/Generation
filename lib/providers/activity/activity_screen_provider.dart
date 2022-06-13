@@ -64,6 +64,8 @@ class ActivityProvider extends ChangeNotifier {
         durationInSec =
             int.parse(_currentActivityData.additionalThings["duration"]);
 
+        print('Duration in sec top: $durationInSec');
+
         if (_currentActivityData.type == ActivityContentType.audio.toString()) {
           durationInSec += 1;
         }
@@ -197,6 +199,8 @@ class ActivityProvider extends ChangeNotifier {
           _newestActivityData.type == ActivityContentType.poll.toString()) {
         durationInSec =
             int.parse(_newestActivityData.additionalThings["duration"]);
+
+        print('Duration in sec: $durationInSec');
 
         if (_newestActivityData.type == ActivityContentType.audio.toString()) {
           durationInSec += 1;

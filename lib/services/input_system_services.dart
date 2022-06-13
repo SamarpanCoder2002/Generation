@@ -591,10 +591,12 @@ class InputOption {
   }
 
   _commonVideoNavigationForActivity(dynamic data, VideoType videoType) async {
-    final duration = Provider.of<VideoShowProvider>(context, listen: false)
+    final duration = await Provider.of<VideoShowProvider>(context, listen: false)
         .getVideoDuration(File(data["videoPath"]));
 
     if (duration.inSeconds <= Timings.videoDurationInSec) {
+      print('Video Duration: ${duration.inSeconds}');
+
       Navigation.intent(
           context,
           CreateActivity(activityContentType: ActivityContentType.video, data: {
