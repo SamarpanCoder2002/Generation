@@ -20,6 +20,14 @@ class ActivityProvider extends ChangeNotifier {
   late BuildContext context;
   bool _replyBtnClicked = false;
   List<dynamic> _activityCollection = [];
+  bool _showActivityDetails = false;
+
+  bool get showActivityDetails => _showActivityDetails;
+
+  setActivityDetails(bool incomingActivity){
+    _showActivityDetails = incomingActivity;
+    notifyListeners();
+  }
 
   startFrom(int incoming) {
     _startFrom = incoming;
@@ -179,11 +187,13 @@ class ActivityProvider extends ChangeNotifier {
 
   pauseActivityAnimation() {
     _animationController.stop();
+    setActivityDetails(true);
     notifyListeners();
   }
 
   resumeActivityAnimation() {
     _animationController.forward();
+    setActivityDetails(false);
     notifyListeners();
   }
 

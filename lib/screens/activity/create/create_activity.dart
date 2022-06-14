@@ -270,7 +270,7 @@ class _CreateActivityState extends State<CreateActivity> {
     switch (widget.activityContentType) {
       case ActivityContentType.text:
         map["message"] = _textActivityController.text;
-        map["additionalThings"] = {
+        map["additionalThings"] = <String, dynamic>{
           "backgroundColor": {
             'red': pickColor.red.toString(),
             'green': pickColor.green.toString(),
