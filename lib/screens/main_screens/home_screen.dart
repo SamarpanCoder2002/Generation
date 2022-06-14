@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () => _switchToActivity(
             tableName: DataManagement.generateTableNameForNewConnectionActivity(
                 _connId),
-            isDarkMode: _isDarkMode),
+            isDarkMode: _isDarkMode, connId: _connId),
         child: Column(
           children: [
             Container(
@@ -395,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
         onTap: () => _switchToActivity(
-            tableName: DbData.myActivityTable, isDarkMode: _isDarkMode),
+            tableName: DbData.myActivityTable, isDarkMode: _isDarkMode, connId: _currentActivityData['id']),
         child: Column(
           children: [
             Container(
@@ -605,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _switchToActivity(
-      {required String tableName, required bool isDarkMode}) async {
+      {required String tableName, required bool isDarkMode, required String connId}) async {
     final LocalStorage _localStorage = LocalStorage();
 
     final _activityData =
@@ -626,7 +626,7 @@ class _HomeScreenState extends State<HomeScreen> {
               tableName: tableName,
               startingIndex: _visitedData.length == _activityData.length
                   ? 0
-                  : _visitedData.length),
+                  : _visitedData.length, activityHolderId: connId,),
           afterWork: () => changeContextTheme(isDarkMode));
     });
   }

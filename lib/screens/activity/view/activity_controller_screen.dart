@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/model/activity_model.dart';
 import 'package:generation/providers/activity/activity_screen_provider.dart';
 import 'package:generation/providers/activity/poll_show_provider.dart';
@@ -16,6 +18,7 @@ import 'package:provider/provider.dart';
 
 import '../../../config/size_collection.dart';
 import '../../../providers/chat/messaging_provider.dart';
+import '../../../providers/connection_collection_provider.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/video_management/video_show_provider.dart';
@@ -26,9 +29,14 @@ class ActivityController extends StatefulWidget {
   final String tableName;
   final int startingIndex;
   final bool showReplySection;
+  final String activityHolderId;
 
   const ActivityController(
-      {Key? key, required this.tableName, required this.startingIndex, this.showReplySection = true})
+      {Key? key,
+      required this.tableName,
+      required this.startingIndex,
+      required this.activityHolderId,
+      this.showReplySection = true})
       : super(key: key);
 
   @override
@@ -39,6 +47,7 @@ class _ActivityControllerState extends State<ActivityController>
     with TickerProviderStateMixin {
   final TextEditingController textEditingController = TextEditingController();
   final LocalStorage _localStorage = LocalStorage();
+  final DBOperations _dbOperations = DBOperations();
 
   bool _isLoading = false;
 
@@ -144,6 +153,9 @@ class _ActivityControllerState extends State<ActivityController>
     final _currUserId = Provider.of<StatusCollectionProvider>(context)
         .getCurrentAccData()['id'];
 
+    final _showActivityDetails =
+        Provider.of<ActivityProvider>(context).showActivityDetails;
+
     return SizedBox(
       width: double.maxFinite,
       height: MediaQuery.of(context).size.height,
@@ -179,16 +191,75 @@ class _ActivityControllerState extends State<ActivityController>
             children: [
               ActivityViewer(activityData: _currentActivityData),
               _activityAnimation(),
+              if (_showActivityDetails)
+                _activityInformation(_currentActivityData),
               _forNavigation(_currentActivityData),
-              if (widget.showReplySection && _currentActivityData.holderId != _currUserId &&
+              if (widget.showReplySection &&
+                  _currentActivityData.holderId != _currUserId &&
                   !_activityProvider.isReplyBtnClicked())
                 _replyButton(_currentActivityData),
-              if (widget.showReplySection && _currentActivityData.holderId != _currUserId &&
+              if (widget.showReplySection &&
+                  _currentActivityData.holderId != _currUserId &&
                   _activityProvider.isReplyBtnClicked())
                 _replySection(_currentActivityData),
             ],
           );
         },
+      ),
+    );
+  }
+
+  _activityInformation(ActivityModel? _currentActivityData) {
+    print('Activity holder id :${widget.activityHolderId}');
+
+    final _connectionData = widget.activityHolderId == _dbOperations.currUid
+        ? Provider.of<StatusCollectionProvider>(context).getCurrentAccData()
+        : Provider.of<ConnectionCollectionProvider>(context)
+            .getUsersMap(widget.activityHolderId);
+
+    return Positioned(
+      top: 35,
+      left: 1,
+      right: 1,
+      child: Container(
+        width: double.maxFinite,
+        color: AppColors.pureBlackColor.withOpacity(0.1),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 25,
+              backgroundColor: AppColors.transparentColor,
+              backgroundImage:
+                  CachedNetworkImageProvider(_connectionData['profilePic']),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 100,
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _connectionData['name'],
+                      style: TextStyleCollection.activityTitleTextStyle,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "${_currentActivityData!.date} ${_currentActivityData.time}",
+                      style: TextStyleCollection.activityTitleTextStyle,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -204,19 +275,25 @@ class _ActivityControllerState extends State<ActivityController>
           .resumeAnimationForNewest(widget.startingIndex);
     }
 
+    print('Data collection: $_dataCollection');
+
     return Positioned(
       top: 30.0,
       left: 5.0,
       right: 5.0,
       child: Row(
         children: [
-          ..._dataCollection.asMap().entries.map((dataMap) => AnimatedBar(
-                animController: Provider.of<ActivityProvider>(context)
-                    .getAnimationController(),
-                position: dataMap.key,
-                currentIndex:
-                    Provider.of<ActivityProvider>(context).getPageIndex(),
-              ))
+          ..._dataCollection.asMap().entries.map((dataMap) {
+            print('Position in activity: ${dataMap.key}');
+
+            return AnimatedBar(
+              animController: Provider.of<ActivityProvider>(context)
+                  .getAnimationController(),
+              position: dataMap.key,
+              currentIndex:
+                  Provider.of<ActivityProvider>(context).getPageIndex(),
+            );
+          })
         ],
       ),
     );
@@ -325,7 +402,8 @@ class _ActivityControllerState extends State<ActivityController>
       }
 
       Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-          .setReplyActivity(_currentActivityData.id, _currentActivityData.holderId);
+          .setReplyActivity(
+              _currentActivityData.id, _currentActivityData.holderId);
     }
 
     return Align(
@@ -495,7 +573,8 @@ class _ActivityControllerState extends State<ActivityController>
                 ? null
                 : {'reply': DataManagement.toJsonString(_replyMsg)});
 
-    Provider.of<ChatBoxMessagingProvider>(context, listen: false).removeReplyMsg();
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .removeReplyMsg();
 
     if (mounted) {
       setState(() {

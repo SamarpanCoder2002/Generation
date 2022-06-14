@@ -20,6 +20,14 @@ class ActivityProvider extends ChangeNotifier {
   late BuildContext context;
   bool _replyBtnClicked = false;
   List<dynamic> _activityCollection = [];
+  bool _showActivityDetails = false;
+
+  bool get showActivityDetails => _showActivityDetails;
+
+  setActivityDetails(bool incomingActivity){
+    _showActivityDetails = incomingActivity;
+    notifyListeners();
+  }
 
   startFrom(int incoming) {
     _startFrom = incoming;
@@ -63,6 +71,8 @@ class ActivityProvider extends ChangeNotifier {
           _currentActivityData.type == ActivityContentType.poll.toString()) {
         durationInSec =
             int.parse(_currentActivityData.additionalThings["duration"]);
+
+        print('Duration in sec top: $durationInSec');
 
         if (_currentActivityData.type == ActivityContentType.audio.toString()) {
           durationInSec += 1;
@@ -177,11 +187,13 @@ class ActivityProvider extends ChangeNotifier {
 
   pauseActivityAnimation() {
     _animationController.stop();
+    setActivityDetails(true);
     notifyListeners();
   }
 
   resumeActivityAnimation() {
     _animationController.forward();
+    setActivityDetails(false);
     notifyListeners();
   }
 
@@ -197,6 +209,8 @@ class ActivityProvider extends ChangeNotifier {
           _newestActivityData.type == ActivityContentType.poll.toString()) {
         durationInSec =
             int.parse(_newestActivityData.additionalThings["duration"]);
+
+        print('Duration in sec: $durationInSec');
 
         if (_newestActivityData.type == ActivityContentType.audio.toString()) {
           durationInSec += 1;

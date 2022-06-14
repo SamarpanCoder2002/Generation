@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:generation/config/size_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/local_storage_provider.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/config/types.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -92,10 +94,29 @@ class LocalStorage {
 
       final String path = newDirectory.path +
           "/${DataManagement.getEnvData(EnvFileKey.dbName)}.db";
-
-      final Database getDatabase = await openDatabase(path, version: 1);
-      return getDatabase;
+      DataManagement.storeStringData(StoredString.dbPath, path);
+      return await _getDatabase(path: path);
     }
+  }
+
+  Future<Database> _getDatabase({String? path}) async {
+    path ??= await DataManagement.getStringData(StoredString.dbPath);
+
+    if(path == null){
+      final Directory? directory = await getExternalStorageDirectory();
+
+      final Directory newDirectory =
+      await Directory(directory!.path + "/${FolderData.dbFolder}/")
+          .create();
+
+      path = newDirectory.path +
+          "/${DataManagement.getEnvData(EnvFileKey.dbName)}.db";
+      DataManagement.storeStringData(StoredString.dbPath, path);
+    }
+
+    final Database getDatabase = await openDatabase(path, version: 1);
+    _database = getDatabase;
+    return _database;
   }
 
   storeDbInstance(context) async {
@@ -273,8 +294,9 @@ class LocalStorage {
 
   /// Get Connections Primary Data. If id null, it returns all the data. Get Particular Connection Data
   /// By Passing Connection Id
-  getConnectionPrimaryData({String? id}) async {
-    final Database db = await database;
+  getConnectionPrimaryData({String? id, bool withStoragePermission = true}) async {
+    final Database db =
+    withStoragePermission ? await database : await _getDatabase();
 
     if (id == null) {
       return await db.rawQuery("""SELECT * FROM ${DbData.connectionsTable}""");
@@ -434,14 +456,16 @@ class LocalStorage {
     }
   }
 
-  deleteActivity({required String tableName, String? activityId}) async {
-    final Database db = await database;
+  deleteActivity({required String tableName, String? activityId, bool withStoragePermission = true}) async {
+    final Database db = withStoragePermission ? await database : await _getDatabase();
 
     if (activityId == null) {
       await db.delete(tableName);
       print("Delete Activity");
     } else {
-      await db.delete(tableName, where: """$_activityId = "$activityId" """);
+      final _response = await db
+          .delete(tableName, where: """$_activityId = "$activityId" """);
+      print('Delete Activity Response: $_response   Activity Id: $activityId');
     }
   }
 
@@ -467,14 +491,16 @@ class LocalStorage {
     // });
   }
 
-  getAllActivity({required String tableName}) async {
-    try {
-      final Database db = await database;
-      return await db.rawQuery(""" SELECT * FROM $tableName """);
-    } catch (e) {
-      print('Get all activity error :${e}');
-      return [];
-    }
+  getAllActivity(
+      {required String tableName, bool withStoragePermission = true}) async {
+    //try {
+    final Database db =
+        withStoragePermission ? await database : await _getDatabase();
+    return await db.rawQuery(""" SELECT * FROM $tableName """);
+    // } catch (e) {
+    //   print('Get all activity error :${e}');
+    //   return [];
+    // }
   }
 
   getAllSeenUnseenActivity(
@@ -555,5 +581,98 @@ class LocalStorage {
   closeDatabase() async {
     final Database db = await database;
     await db.close();
+  }
+
+  get getDbInstance async => await database;
+
+  deleteOwnExpiredActivity({String tableName = DbData.myActivityTable}) async {
+    //try {
+    print('Entry 1');
+
+    final Database db = await database;
+
+    print('Entry 2');
+    final DBOperations _dbOperations = DBOperations();
+    print('Entry 3');
+    final _activities = await db.rawQuery(""" SELECT * FROM $tableName """);
+    print('Entry 4');
+    final _currDateTime = DateTime.now();
+
+    print('All Activities Collection: $_activities');
+
+    for (final activity in _activities) {
+      final _additionalThings = activity[_activityAdditionalThings] ?? "";
+      print('Additional Things: $_additionalThings');
+      final _remoteData = DataManagement.fromJsonString(
+          (DataManagement.fromJsonString(
+                  _additionalThings.toString())["remoteData"]) ??
+              "");
+
+      // if (activity[_activityType] != ActivityContentType.text.toString()) {
+      //   _dbOperations.deleteMediaFromFirebaseStorage(_remoteData['message']);
+      // }
+
+      _dbOperations.deleteParticularActivity(_remoteData);
+      await _deleteEligibleActivities(
+          activity: activity,
+          currDateTime: _currDateTime,
+          tableName: tableName);
+    }
+    // } catch (e) {
+    //   print('deleteMyExpiredActivity error :$e');
+    //   return [];
+    // }
+  }
+
+  manageDeleteConnectionsExpiredActivity() async {
+    final _connectionsData = await getConnectionPrimaryData();
+    if (_connectionsData.isEmpty) return;
+
+    Map<String, List<dynamic>> _connData = {};
+    final Database db = await database;
+
+    for (final conn in _connectionsData) {
+      try {
+        final _activities = await db.rawQuery(
+            """ SELECT * FROM ${DataManagement.generateTableNameForNewConnectionActivity(conn[_conId])} """);
+        _connData[conn[_conId]] = _activities;
+      } catch (e) {
+        debugPrint('Error in Get Ids: $e');
+      }
+    }
+
+    final _currDateTime = DateTime.now();
+
+    for (final connId in _connData.keys.toList()) {
+      for (final activity in (_connData[connId] ?? [])) {
+        await _deleteEligibleActivities(
+            activity: activity,
+            currDateTime: _currDateTime,
+            tableName: DataManagement.generateTableNameForNewConnectionActivity(
+                connId));
+      }
+    }
+  }
+
+  _deleteEligibleActivities(
+      {required activity,
+      required currDateTime,
+      required String tableName}) async {
+    //try {
+    final _date = activity[_activityDate];
+    final _time = activity[_activityTime];
+
+    DateFormat format = DateFormat("dd MMMM, yyyy hh:mm a");
+    var formattedDateTime = format.parse('$_date $_time');
+    final Duration _diffDateTime = currDateTime.difference(formattedDateTime);
+
+    if (_diffDateTime.inMinutes >= 2) {
+      print('Activity Deleting Msg: ${activity}');
+      await deleteActivity(
+          tableName: tableName, activityId: activity[_activityId]);
+    }
+    // } catch (e) {
+    //   print('Error in _deleteEligibleActivities: $e');
+    // }
   }
 }

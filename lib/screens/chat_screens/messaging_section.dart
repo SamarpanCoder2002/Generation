@@ -804,6 +804,7 @@ class _MessagingSectionState extends State<MessagingSection> {
             tableName: tableName,
             startingIndex: 0,
             showReplySection: false,
+            activityHolderId: _replyMsgData["activityHolderId"],
           ),
           afterWork: () => changeContextTheme(_isDarkMode));
     });

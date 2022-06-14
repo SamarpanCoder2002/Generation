@@ -9,6 +9,7 @@ import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/activity/poll_creator_provider.dart';
 import 'package:generation/screens/common/video_show_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
+import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
 import 'package:loading_overlay/loading_overlay.dart';
@@ -63,7 +64,9 @@ class _CreateActivityState extends State<CreateActivity> {
     return LoadingOverlay(
       isLoading: _isLoading,
       color: AppColors.pureBlackColor.withOpacity(0.6),
-      progressIndicator: const CircularProgressIndicator(color: AppColors.lightBorderGreenColor,),
+      progressIndicator: const CircularProgressIndicator(
+        color: AppColors.lightBorderGreenColor,
+      ),
       child: WillPopScope(
         onWillPop: () async {
           if (widget.activityContentType == ActivityContentType.audio) {
@@ -247,10 +250,10 @@ class _CreateActivityState extends State<CreateActivity> {
         child: _otherActivityMakeSection(),
       );
 
-  void _onSendButtonPressed() async{
-    if(!mounted) return;
+  void _onSendButtonPressed() async {
+    if (!mounted) return;
 
-    setState((){
+    setState(() {
       _isLoading = true;
     });
 
@@ -267,7 +270,7 @@ class _CreateActivityState extends State<CreateActivity> {
     switch (widget.activityContentType) {
       case ActivityContentType.text:
         map["message"] = _textActivityController.text;
-        map["additionalThings"] = {
+        map["additionalThings"] = <String, dynamic>{
           "backgroundColor": {
             'red': pickColor.red.toString(),
             'green': pickColor.green.toString(),
@@ -312,11 +315,17 @@ class _CreateActivityState extends State<CreateActivity> {
         break;
     }
 
-    Provider.of<ActivityProvider>(context, listen: false).addNewActivity({...map},map["holderId"]);
-    await _dbOperation.addActivity({...map});
+    final _serverStoredData = await _dbOperation.addActivity({...map});
+    map["additionalThings"]["remoteData"] =
+        DataManagement.toJsonString(_serverStoredData);
 
-    if(mounted){
-      setState((){
+    print('Modified activity data: $map');
+
+    Provider.of<ActivityProvider>(context, listen: false)
+        .addNewActivity({...map}, map["holderId"]);
+
+    if (mounted) {
+      setState(() {
         _isLoading = false;
       });
     }

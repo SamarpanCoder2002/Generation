@@ -38,6 +38,18 @@ class DBOperations {
 
   FirebaseStorage get _storageInstance => FirebaseStorage.instance;
 
+  initializeFirebase()async{
+    try {
+      //if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+     // }
+    } catch (e) {
+      print(
+          'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
+      print('Firebase Already Initialized');
+    }
+  }
+
   isConnectedToDB(context) async {
     final _isNetworkPresent =
         await Provider.of<NetworkManagementProvider>(context, listen: false)
@@ -422,6 +434,8 @@ class DBOperations {
 
   Future<void> deleteMediaFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
+    print('Delete Media File: $fileName');
+
     try {
       try {
         if (specialPurpose && Firebase.apps.isEmpty) {
@@ -483,7 +497,7 @@ class DBOperations {
         .set({DBPath.data: []});
   }
 
-  addActivity(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> addActivity(Map<String, dynamic> data) async {
     if (data['type'] != ActivityContentType.text.toString()) {
       data["message"] = await uploadMediaToStorage(
           DBHelper.activityPath(
@@ -491,11 +505,25 @@ class DBOperations {
           File(data["message"]),
           reference: StorageHelper.activityRef(currUid));
     }
+
     await _getInstance
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
         .set({
       DBPath.data: FieldValue.arrayUnion([data]),
+    }, SetOptions(merge: true));
+
+    return data;
+  }
+
+  deleteParticularActivity(data){
+
+    print('Delete Particular Activity From Remote');
+    _getInstance
+        .doc(
+        '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
+        .set({
+      DBPath.data: FieldValue.arrayRemove([data]),
     }, SetOptions(merge: true));
   }
 }

@@ -33,7 +33,7 @@ class PhoneNumberData {
   static const String numberLabel = "label";
 }
 
-class EnvFileKey{
+class EnvFileKey {
   static const supportMail = "SUPPORT_MAIL";
   static const rzpAPIKEY = "RZP_API_KEY";
   static const dbName = "DATABASE_NAME";
@@ -42,36 +42,44 @@ class EnvFileKey{
   static const serverKey = "serverKey";
 }
 
-class DbData{
+class DbData {
   static const currUserTable = "__currentUserEncryptedData__";
   static const connectionsTable = "__connectionsEncryptedData__";
   static const chatTable = "__chatEncryptedData__";
   static const myActivityTable = "__myActivityEncryptedData__";
 }
 
-class FolderData{
+class FolderData {
   static const dbFolder = ".Databases";
 }
 
-class TextCollection{
+class TextCollection {
   /// Terminal Link Should be Replaced by this app link after published to the playstore
-  static const String appShareData = "Enjoy Private Chat Message Experience with Modern UI with Free Video Call In Generation\nhttps://generation-launch-page.netlify.app/";
-  static const String videoDurationAlert = "Video duration should be within ${Timings.videoDurationInSec} seconds";
+  static const String appShareData =
+      "Enjoy Private Chat Message Experience with Modern UI with Free Video Call In Generation\nhttps://generation-launch-page.netlify.app/";
+  static const String videoDurationAlert =
+      "Video duration should be within ${Timings.videoDurationInSec} seconds";
   static const String myWebsite = 'https://samarpandasgupta.com/';
   static const String removeYou = "removed you from connection";
 }
 
-class NotifyManagement{
-  static const String sendNotificationUrl = 'https://fcm.googleapis.com/fcm/send';
+class NotifyManagement {
+  static const String sendNotificationUrl =
+      'https://fcm.googleapis.com/fcm/send';
 
-  static sendNotificationHeader(_serverKey){
+  static sendNotificationHeader(_serverKey) {
     return <String, String>{
       'Content-Type': 'application/json',
       'Authorization': 'key=$_serverKey',
     };
   }
 
-  static bodyData({required String title, required String body, required String deviceToken, String? image,required String connId}){
+  static bodyData(
+      {required String title,
+      required String body,
+      required String deviceToken,
+      String? image,
+      required String connId}) {
     final _notifyBody = <String, dynamic>{
       'notification': <String, dynamic>{
         'body': body,
@@ -93,11 +101,10 @@ class NotifyManagement{
       'to': deviceToken,
     };
 
-    if(image != null){
+    if (image != null) {
       _notifyBody['notification']['image'] = image;
       _notifyBody['data']['image'] = image;
     }
-
 
     return DataManagement.toJsonString(_notifyBody);
   }
