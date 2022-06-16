@@ -78,7 +78,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     try {
       Navigator.pop(context);
     } catch (e) {
-      debug("Error in Pop Up Screen:  $e");
+      debugShow("Error in Pop Up Screen:  $e");
     }
   }
 
@@ -241,10 +241,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
           name: _msgData.toString().split('/').last);
     }
 
-    debug("Media Message Data is:   $_mediaStorePath\n\n");
+    debugShow("Media Message Data is:   $_mediaStorePath\n\n");
 
     _dio.download(_msgData, _mediaStorePath).whenComplete(() async {
-      debug("Media Download Completed");
+      debugShow("Media Download Completed");
       message.values.toList()[0][MessageData.message] = _mediaStorePath;
       _dbOperations.deleteMediaFromFirebaseStorage(_msgData);
 
@@ -267,7 +267,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _dio
         .download(_msgAdditionalData["thumbnail"], _thumbnailPath)
         .whenComplete(() {
-      debug("Thumbnail Download Completed");
+      debugShow("Thumbnail Download Completed");
       _msgAdditionalData["thumbnail"] = _thumbnailPath;
       message.values.toList()[0][MessageData.additionalData] =
           DataManagement.toJsonString(_msgAdditionalData);
@@ -392,7 +392,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   void _onFocusChange() {
-    debug("Focus: ${_focus.hasFocus.toString()}");
+    debugShow("Focus: ${_focus.hasFocus.toString()}");
   }
 
   setSingleNewMessage(incomingMessageSet) {
@@ -563,7 +563,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .notificationPermitted(incomingConnId ?? getPartnerUserId());
 
-    debug("Is notification Permitted:  $_isNotificationPermitted");
+    debugShow("Is notification Permitted:  $_isNotificationPermitted");
 
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&

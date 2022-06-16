@@ -110,7 +110,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     if (_getItemCount() == 0) {
-      debug("Here");
+      debugShow("Here");
       return Container(
           width: double.maxFinite,
           height: MediaQuery.of(context).size.height / 1.8,
@@ -280,7 +280,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
 
   _sendConnectionRequest(otherUserData, int index) async {
     final _currAccData = await _localStorage.getDataForCurrAccount();
-    debug("Current Account Data: $_currAccData");
+    debugShow("Current Account Data: $_currAccData");
 
     if (_currAccData == null) return;
 
@@ -294,12 +294,12 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<SentConnectionsProvider>(context, listen: false)
           .initialize(update: true);
-      showToast(context,
+      showToast(
           title: "Connection Request Sent",
           toastIconType: ToastIconType.success,
           showFromTop: false);
     } else {
-      showToast(context,
+      showToast(
           title: "Failed to sent request",
           toastIconType: ToastIconType.error,
           showFromTop: false);
@@ -321,12 +321,12 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
-      showToast(context,
+      showToast(
           title: "Request withdrawn",
           toastIconType: ToastIconType.success,
           showFromTop: false);
     } else {
-      showToast(context,
+      showToast(
           title: "Failed to withdraw request",
           toastIconType: ToastIconType.error,
           showFromTop: false);
@@ -351,12 +351,12 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       Provider.of<ConnectionCollectionProvider>(context, listen: false)
           .initialize(update: true);
 
-      showToast(context,
+      showToast(
           title: "Request Accepted",
           toastIconType: ToastIconType.success,
           showFromTop: false);
     } else {
-      showToast(context,
+      showToast(
           title: "Failed to accept request",
           toastIconType: ToastIconType.error,
           showFromTop: false);
@@ -376,12 +376,12 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
-      showToast(context,
+      showToast(
           title: "Incoming Request Rejected",
           toastIconType: ToastIconType.success,
           showFromTop: false);
     } else {
-      showToast(context,
+      showToast(
           title: "Failed to reject request",
           toastIconType: ToastIconType.error,
           showFromTop: false);

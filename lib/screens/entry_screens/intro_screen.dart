@@ -45,7 +45,7 @@ class _IntroScreensState extends State<IntroScreens> {
   // void didChangeDependencies() {
   //   final _incomingData = Provider.of<IncomingDataProvider>(context).getIncomingData();
   //
-  //   debug("Incoming DAta: $_incomingData");
+  //   debugShow("Incoming DAta: $_incomingData");
   //
   //   if(_incomingData.isNotEmpty){
   //
@@ -65,7 +65,7 @@ class _IntroScreensState extends State<IntroScreens> {
         Provider.of<IncomingDataProvider>(context, listen: false)
             .getIncomingData();
 
-    debug("Incoming DAta: $_incomingData");
+    debugShow("Incoming DAta: $_incomingData");
 
     if (_incomingData.isNotEmpty) {
       return const CommonSelectionScreen(
@@ -255,19 +255,19 @@ class _IntroScreensState extends State<IntroScreens> {
     final _userData = await _googleAuth.logIn();
 
     if (_userData == null) {
-      showToast(context,
+      showToast(
           title: "Sign In Failed",
           toastIconType: ToastIconType.error,
           showFromTop: false);
       return;
     }
 
-    showToast(context,
+    showToast(
         title: "Sign In Successful",
         toastIconType: ToastIconType.success,
         showFromTop: false);
 
-    debug("User Data: $_userData");
+    debugShow("User Data: $_userData");
 
     final _createdBefore = await _dbOperations.isAccountCreatedBefore();
 

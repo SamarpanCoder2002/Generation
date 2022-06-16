@@ -209,7 +209,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     imgPath: _singleImagePath,
                     contentFor: widget.contentFor,
                   ))).then((value) {
-        debug("nOw");
+        debugShow("nOw");
         changeContextTheme(_isDarkMode);
       });
     } else {
@@ -220,7 +220,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     wallpaperType: wallpaperData["type"],
                     contentFor: widget.contentFor,
                   ))).then((value) {
-        debug("nOw");
+        debugShow("nOw");
         changeContextTheme(_isDarkMode);
       });
     }

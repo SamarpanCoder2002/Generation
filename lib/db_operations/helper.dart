@@ -24,7 +24,7 @@ class StorageHelper{
 class Validator{
   static bool profilePic(File file){
     final double _sizeInMb = SizeCollection.getFileSize(file);
-    debug("Profile Picture Size: $_sizeInMb");
+    debugShow("Profile Picture Size: $_sizeInMb");
 
     return _sizeInMb <= 4;
   }

@@ -211,7 +211,7 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _activityInformation(ActivityModel? _currentActivityData) {
-    debug('Activity holder id :${widget.activityHolderId}');
+    debugShow('Activity holder id :${widget.activityHolderId}');
 
     final _connectionData = widget.activityHolderId == _dbOperations.currUid
         ? Provider.of<StatusCollectionProvider>(context).getCurrentAccData()
@@ -276,7 +276,7 @@ class _ActivityControllerState extends State<ActivityController>
           .resumeAnimationForNewest(widget.startingIndex);
     }
 
-    debug('Data collection: $_dataCollection');
+    debugShow('Data collection: $_dataCollection');
 
     return Positioned(
       top: 30.0,
@@ -285,7 +285,7 @@ class _ActivityControllerState extends State<ActivityController>
       child: Row(
         children: [
           ..._dataCollection.asMap().entries.map((dataMap) {
-            debug('Position in activity: ${dataMap.key}');
+            debugShow('Position in activity: ${dataMap.key}');
 
             return AnimatedBar(
               animController: Provider.of<ActivityProvider>(context)
@@ -379,7 +379,7 @@ class _ActivityControllerState extends State<ActivityController>
 
   _replyButton(ActivityModel? _currentActivityData) {
     _getBgColor() {
-      debug('Additional Things: ${_currentActivityData!.additionalThings}');
+      debugShow('Additional Things: ${_currentActivityData!.additionalThings}');
 
       return _currentActivityData.additionalThings["text"] == null ||
               _currentActivityData.additionalThings["text"] == ""
@@ -549,7 +549,7 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _sendActivityReplyMsg(ActivityModel? _currentActivityData) async {
-    debug('At Reply Activity');
+    debugShow('At Reply Activity');
 
     final _replyMsg =
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -585,7 +585,7 @@ class _ActivityControllerState extends State<ActivityController>
       });
     }
 
-    showToast(context,
+    showToast(
         title: 'Reply Send Successfully',
         toastIconType: ToastIconType.success,
         showCenterToast: true);

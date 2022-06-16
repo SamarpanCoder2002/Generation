@@ -55,7 +55,7 @@ class _ShowMapInLargeFormState extends State<ShowMapInLargeForm> {
             latitude: _latitude ?? widget.locationData["latitude"],
             longitude: _longitude ?? widget.locationData["longitude"],
             onDragStopped: (changedLocationData) {
-              debug("Changed Location Data: $changedLocationData");
+              debugShow("Changed Location Data: $changedLocationData");
               if (mounted) {
                 setState(() {
                   _latitude = changedLocationData.latitude;

@@ -71,7 +71,7 @@ class _CreateActivityState extends State<CreateActivity> {
       child: WillPopScope(
         onWillPop: () async {
           if (widget.activityContentType == ActivityContentType.audio) {
-            debug("At Here on Will Pop");
+            debugShow("At Here on Will Pop");
             Provider.of<SongManagementProvider>(context, listen: false)
                 .stopSong();
           }
@@ -320,7 +320,7 @@ class _CreateActivityState extends State<CreateActivity> {
     map["additionalThings"]["remoteData"] =
         DataManagement.toJsonString(_serverStoredData);
 
-    debug('Modified activity data: $map');
+    debugShow('Modified activity data: $map');
 
     Provider.of<ActivityProvider>(context, listen: false)
         .addNewActivity({...map}, map["holderId"]);
@@ -331,7 +331,7 @@ class _CreateActivityState extends State<CreateActivity> {
       });
     }
 
-    showToast(context,
+    showToast(
         title: "Activity Added",
         toastIconType: ToastIconType.success,
         toastDuration: 10);

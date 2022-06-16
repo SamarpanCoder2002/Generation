@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../services/debugging.dart';
+
 class GoogleAuth {
   final GoogleSignIn googleSignIn = GoogleSignIn(scopes: [
     "https://www.googleapis.com/auth/userinfo.email",
@@ -12,7 +14,7 @@ class GoogleAuth {
       if (!await googleSignIn.isSignedIn()) {
         final user = await googleSignIn.signIn();
         if (user == null) {
-          debug("Google Sign In Not Completed");
+          debugShow("Google Sign In Not Completed");
         } else {
           final GoogleSignInAuthentication googleAuth =
               await user.authentication;
@@ -34,17 +36,17 @@ class GoogleAuth {
           _userCollectedData["profilePic"] = _userData?.photoURL ?? "";
           _userCollectedData["id"] = _userData?.uid ?? "";
 
-          debug("User Data: $_userData");
+          debugShow("User Data: $_userData");
 
           return _userCollectedData;
         }
       } else {
-        debug("Already Logged In");
+        debugShow("Already Logged In");
         await logOut();
         return await logIn();
       }
     } catch (e) {
-      debug("Google LogIn Error: ${e.toString()}");
+      debugShow("Google LogIn Error: ${e.toString()}");
       return null;
     }
   }

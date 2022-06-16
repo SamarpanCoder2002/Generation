@@ -133,7 +133,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getChatHistory(connectionData["id"], connectionData["name"]);
 
-    debug("Connection Data:   $_chatHistoryData");
+    debugShow("Connection Data:   $_chatHistoryData");
 
     Provider.of<StorageProvider>(context, listen: false)
         .setImagesCollection(_chatHistoryData[ChatMessageType.image]);
@@ -157,7 +157,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
               .onConnectionClick(_connectionData["id"]);
 
       if (!_response) {
-        showToast(context,
+        showToast(
             title:
                 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections',
             toastIconType: ToastIconType.info,
@@ -210,7 +210,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   }
 
   _extractChatHistory(connectionData) async {
-    debug("At Extract Chat History");
+    debugShow("At Extract Chat History");
 
     final _chatHistoryData =
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -230,7 +230,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
     await _chatHistoryStoreFile.writeAsString(_historyTextData);
 
-    debug(await _chatHistoryStoreFile.readAsString());
+    debugShow(await _chatHistoryStoreFile.readAsString());
 
     _showShareOptions(_chatHistoryStoreFile);
   }
@@ -239,7 +239,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     final _selectedConnections =
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .getSelectedConnections();
-    debug("Selected Connections:  $_selectedConnections");
+    debugShow("Selected Connections:  $_selectedConnections");
 
     for (final message in _messagesCollection) {
       var _modifiedMessage = message.message;

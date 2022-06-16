@@ -268,7 +268,7 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
       Provider.of<ChatBoxMessagingProvider>(context, listen: false).getChatWallpaperData(_partnerUserId, newWallpaper: _imageToStore);
     }
 
-    showToast(context,
+    showToast(
         title: "Chat Wallpaper Set Successfully",
         toastIconType: ToastIconType.success,
         showFromTop: false);

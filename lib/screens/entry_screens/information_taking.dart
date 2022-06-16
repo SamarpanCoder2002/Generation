@@ -312,7 +312,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (userData["profilePic"] == null) {
-      showToast(context,
+      showToast(
           title: "Profile Picture Required",
           toastIconType: ToastIconType.info,
           showFromTop: false);
@@ -336,10 +336,10 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
       });
     }
 
-    debug("Response: $_response");
+    debugShow("Response: $_response");
 
     if (!_response["success"]) {
-      showToast(context,
+      showToast(
           title: _response["message"],
           toastIconType: ToastIconType.success,
           showFromTop: false);
@@ -382,7 +382,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     try {
       final _data = _response["data"];
 
-      debug("Data to Store: $_data");
+      debugShow("Data to Store: $_data");
 
       await _localStorage.createTableForStorePrimaryData();
       _localStorage.createTableForConnectionsPrimaryData();
@@ -399,7 +399,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
 
       await _dbOperations.updateToken();
 
-      showToast(context,
+      showToast(
           title: _response["message"],
           toastIconType: ToastIconType.success,
           showFromTop: false);

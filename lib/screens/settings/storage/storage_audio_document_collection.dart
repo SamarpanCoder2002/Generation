@@ -6,6 +6,7 @@ import 'package:generation/services/system_file_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/theme_provider.dart';
+import '../../../services/debugging.dart';
 
 class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
   final bool isAudio;
@@ -26,7 +27,7 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
   _getBody(BuildContext context) {
     if (isAudio &&
         Provider.of<StorageProvider>(context).getAudioCollection().isEmpty) {
-      debug("here");
+      debugShow("here");
       return _emptyMedia('No Audios Found', context);
     }
 

@@ -37,7 +37,7 @@ class RequestConnectionsProvider extends ChangeNotifier {
       _searchedConnections.removeAt(index);
       notifyListeners();
     }catch(e){
-      debug("Error in Remove From SEarch Incoming Reuqets: $e");
+      debugShow("Error in Remove From SEarch Incoming Reuqets: $e");
     }
   }
 

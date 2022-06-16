@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../model/chat_message_model.dart';
+import '../../providers/chat/chat_creation_section_provider.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
@@ -50,7 +52,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return InkWell(
-      onTap: () =>  _onImageClicked(connectionData["profilePic"]),
+      onTap: () => _onImageClicked(connectionData["profilePic"]),
       child: Container(
         width: 45,
         height: 45,
@@ -154,7 +156,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
           children: [
             if (_selectedMessages.length == 1)
               IconButton(
-                onPressed: () {},
+                onPressed: _onReply,
                 icon: const Icon(Icons.reply_outlined),
                 color: AppColors.getIconColor(_isDarkMode),
               ),
@@ -183,7 +185,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
             if (Provider.of<ChatBoxMessagingProvider>(context)
                 .eligibleForCopyTextSelMsg())
               IconButton(
-                onPressed: () {},
+                onPressed: _copySelectedMsgData,
                 icon: const Icon(Icons.copy_outlined),
                 color: AppColors.getIconColor(_isDarkMode),
               ),
@@ -202,12 +204,12 @@ class ChatBoxHeaderSection extends StatelessWidget {
 
   _onImageClicked(String? photo) {
     if (photo == null) {
-      showToast(context,
-          title: "Image Not Found", toastIconType: ToastIconType.info);
+      showToast(title: "Image Not Found", toastIconType: ToastIconType.info);
       return;
     }
 
-    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     Navigation.intent(
         context,
@@ -225,5 +227,31 @@ class ChatBoxHeaderSection extends StatelessWidget {
       return ImageType.network;
     }
     return ImageType.file;
+  }
+
+  void _copySelectedMsgData() {
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final _selectedMsgData = _selectedMessages.values.toList()[0].message;
+
+    copyText(_selectedMsgData).then((value) =>
+        showToast(title: 'Text Copied', toastIconType: ToastIconType.success));
+  }
+
+  void _onReply() async {
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final ChatMessageModel messageData = _selectedMessages.values.toList()[0];
+    final String msgKey = _selectedMessages.keys.toList()[0];
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setReplyHolderMsg(msgKey, messageData);
+    Provider.of<ChatCreationSectionProvider>(context, listen: false)
+        .setSectionHeightForReply();
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .clearSelectedMsgCollection();
   }
 }

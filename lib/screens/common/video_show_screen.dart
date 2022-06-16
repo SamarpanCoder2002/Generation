@@ -29,7 +29,7 @@ class _VideoShowScreenState extends State<VideoShowScreen> {
 
   @override
   void dispose() {
-    debug("AT DISPOSE VIDEO SHOW SCREEN");
+    debugShow("AT DISPOSE VIDEO SHOW SCREEN");
     _videoController.pause();
     _videoController.dispose();
     super.dispose();

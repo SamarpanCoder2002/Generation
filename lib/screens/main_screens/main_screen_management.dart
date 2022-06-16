@@ -22,7 +22,7 @@ import '../../providers/connection_collection_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/status_collection_provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../services/debugging.dart';
+
 import '../../services/device_specific_operations.dart';
 import '../../services/local_data_management.dart';
 import 'connection_management/connection_management.dart';
@@ -267,7 +267,7 @@ bgTaskTopLevel() {
   Workmanager().executeTask((taskName, inputData) async {
     switch (taskName) {
       case BgTask.deleteOwnActivity:
-        debug('Delete Own Activity');
+        debugPrint('Delete Own Activity');
         await deleteOwnExpiredActivity(tableName: DbData.myActivityTable);
         break;
       case BgTask.deleteConnectionsActivity:
@@ -282,16 +282,16 @@ bgTaskTopLevel() {
 deleteOwnExpiredActivity(
     {String tableName = DbData.myActivityTable, bool stop = false}) async {
   //try {
-  debug('Entry 1');
+  debugPrint('Entry 1');
   final LocalStorage _localStorage = LocalStorage();
 
-  debug('Entry 2');
+  debugPrint('Entry 2');
   final _activities = await _localStorage.getAllActivity(
       tableName: tableName, withStoragePermission: false);
-  debug('Entry 3');
+  debugPrint('Entry 3');
   final _currDateTime = DateTime.now();
 
-  debug('All Activities Collection: $_activities');
+  debugPrint('All Activities Collection: $_activities');
 
   if (stop) return;
 
@@ -303,7 +303,7 @@ deleteOwnExpiredActivity(
         ownActivity: true);
   }
   // } catch (e) {
-  //   debug('deleteMyExpiredActivity error :$e');
+  //   debugPrint('deleteMyExpiredActivity error :$e');
   //   return [];
   // }
 }
@@ -313,7 +313,7 @@ manageDeleteConnectionsExpiredActivity() async {
   final _connectionsData = await _localStorage.getConnectionPrimaryData(
       withStoragePermission: false);
 
-  debug('Connections Data: $_connectionsData');
+  debugPrint('Connections Data: $_connectionsData');
 
   if (_connectionsData.isEmpty) return;
 
@@ -327,9 +327,9 @@ manageDeleteConnectionsExpiredActivity() async {
           withStoragePermission: false);
       _connData[conn["id"]] = _activities;
 
-      debug('Connection Data Map: $_connData');
+      debugPrint('Connection Data Map: $_connData');
     } catch (e) {
-      debug('Error in Get Ids: $e');
+      debugPrint('Error in Get Ids: $e');
     }
   }
 
@@ -357,29 +357,29 @@ _deleteEligibleActivities(
   final _time = activity["time"];
   final LocalStorage _localStorage = LocalStorage();
 
-  debug('Activity date and time: $_date  $_time');
+  debugPrint('Activity date and time: $_date  $_time');
 
   DateFormat format = DateFormat("dd MMMM, yyyy hh:mm a");
   var formattedDateTime = format.parse('$_date $_time');
   final Duration _diffDateTime = currDateTime.difference(formattedDateTime);
 
-  debug('Diff Time Date Time: $_diffDateTime');
+  debugPrint('Diff Time Date Time: $_diffDateTime');
 
   if (_diffDateTime.inHours >= SizeCollection.activitySustainTimeInHour) {
-    debug('Activity Deleting Msg: $activity');
+    debugPrint('Activity Deleting Msg: $activity');
 
     if (ownActivity) {
       await _ownActivityRemoteDataDeletion(activity: activity);
     }
 
-    debug('Under time Activity: $activity');
+    debugPrint('Under time Activity: $activity');
 
     if (activity["type"] != ActivityContentType.text.toString()) {
-      debug('Non Text File');
+      debugPrint('Non Text File');
       await SystemFileManagement.deleteFile(activity['message'] ?? '');
       if (activity['type'] == ActivityContentType.video.toString()) {
         final _additionalDataString = activity["additionalThings"] ?? "";
-        debug('Additional Things in eligible: $_additionalDataString');
+        debugPrint('Additional Things in eligible: $_additionalDataString');
         final _additionalData =
             DataManagement.fromJsonString(_additionalDataString.toString());
         await SystemFileManagement.deleteFile(
@@ -391,12 +391,12 @@ _deleteEligibleActivities(
         tableName: tableName,
         activityId: activity["id"],
         withStoragePermission: false);
-    debug('Activity Deleted');
+    debugPrint('Activity Deleted');
   }
 
-  debug('Activity Deletion Completed Background $activity');
+  debugPrint('Activity Deletion Completed Background $activity');
   // } catch (e) {
-  //   debug('Error in _deleteEligibleActivities: $e');
+  //   debugPrint('Error in _deleteEligibleActivities: $e');
   // }
 }
 
@@ -404,7 +404,7 @@ _ownActivityRemoteDataDeletion({required activity}) async {
   final DBOperations _dbOperations = DBOperations();
 
   final _additionalThings = activity["additionalThings"] ?? "";
-  debug('Additional Things: $_additionalThings');
+  debugPrint('Additional Things: $_additionalThings');
   final _remoteData = DataManagement.fromJsonString(
       (DataManagement.fromJsonString(
               _additionalThings.toString())["remoteData"]) ??

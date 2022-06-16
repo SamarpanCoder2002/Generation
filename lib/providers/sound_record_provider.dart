@@ -22,11 +22,11 @@ class SoundRecorderProvider extends ChangeNotifier {
       notifyListeners();
     }
 
-    debug("Voice Store Dir Path: $_voiceStoreDirPath");
+    debugShow("Voice Store Dir Path: $_voiceStoreDirPath");
 
     final _voiceStoreFilePath = createAudioFile(dirPath: _voiceStoreDirPath!, name: 'Voice Message');
 
-    debug("Voice Store File PAth: $_voiceStoreFilePath");
+    debugShow("Voice Store File PAth: $_voiceStoreFilePath");
 
     bool result = await _record.hasPermission();
 

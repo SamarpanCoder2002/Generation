@@ -88,7 +88,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       _managingRemoveConnRequest(context);
       _dbOperations.getAvailableUsersData(context);
     } catch (e) {
-      debug("Error in Fetch Local Connected Users: $e");
+      debugShow("Error in Fetch Local Connected Users: $e");
     }
   }
 
@@ -211,7 +211,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   }
 
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
-    debug('Activity Collection length: ${activityCollection.length}');
+    debugShow('Activity Collection length: ${activityCollection.length}');
 
     for (final activity in activityCollection) {
       final _oldParticularData = await _localStorage.getParticularActivity(
@@ -219,9 +219,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
               DataManagement.generateTableNameForNewConnectionActivity(connId),
           activityId: activity["id"]);
 
-      debug('Suspected Activity id Top: ${activity["id"]}');
+      debugShow('Suspected Activity id Top: ${activity["id"]}');
 
-      debug('Old Particular Activity Data:  $_oldParticularData');
+      debugShow('Old Particular Activity Data:  $_oldParticularData');
 
       if (_oldParticularData.isEmpty) {
         if (_activityConnDataCollection.isEmpty) {
@@ -263,7 +263,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     }
 
     _dio.download(activity['message'], _mediaStorePath).whenComplete(() async {
-      debug("${activity['type']} Activity Media Download Completed");
+      debugShow("${activity['type']} Activity Media Download Completed");
       activity['message'] = _mediaStorePath;
 
       _storeActivityInLocalStorage(activity, connId, insert: false);
@@ -412,11 +412,11 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   getUsersMap(String id) => _localConnectedUsersMap[id];
 
   bool notificationPermitted(String connId) {
-    debug("notification checkid id: $connId");
+    debugShow("notification checkid id: $connId");
 
-    debug(
+    debugShow(
         "notification: ${_localConnectedUsersMap[connId][DBPath.notification]}");
-    debug(
+    debugShow(
         "notification list: ${_localConnectedUsersMap[connId][DBPath.notificationDeactivated]}");
 
     bool _checkInNotificationDeactivatedList() {
@@ -506,7 +506,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
         _localStorage.deleteConnectionPrimaryData(id: _connId);
 
-        showToast(context,
+        showToast(
             title:
                 '${_localConnectedUsersMap[_connId]["name"]} ${TextCollection.removeYou}',
             toastIconType: ToastIconType.info,

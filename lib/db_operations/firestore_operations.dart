@@ -45,9 +45,9 @@ class DBOperations {
         await Firebase.initializeApp();
      // }
     } catch (e) {
-      debug(
+      debugShow(
           'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
-      debug('Firebase Already Initialized');
+      debugShow('Firebase Already Initialized');
     }
   }
 
@@ -56,7 +56,7 @@ class DBOperations {
         await Provider.of<NetworkManagementProvider>(context, listen: false)
             .isNetworkActive;
     if (!_isNetworkPresent) {
-      debug("Network not found");
+      debugShow("Network not found");
       Provider.of<NetworkManagementProvider>(context, listen: false)
           .noNetworkMsg(context, showCenterToast: true);
       return;
@@ -65,7 +65,7 @@ class DBOperations {
     final _isCreatedBefore = await isAccountCreatedBefore();
     if (_isCreatedBefore['success']) return;
 
-    showToast(context,
+    showToast(
         title: "Account Not Found", toastIconType: ToastIconType.info);
 
     DataManagement.clearSharedStorage();
@@ -132,7 +132,7 @@ class DBOperations {
         "profilePic": profilePicRemote,
       };
     } catch (e) {
-      debug("ERROR in create Account: ${e.toString()}");
+      debugShow("ERROR in create Account: ${e.toString()}");
       _response["success"] = false;
       _response["message"] = "$e";
     }
@@ -150,7 +150,7 @@ class DBOperations {
 
       return true;
     } catch (e) {
-      debug("ERROR in update Current Account: $e");
+      debugShow("ERROR in update Current Account: $e");
       return false;
     }
   }
@@ -167,12 +167,12 @@ class DBOperations {
 
       await uploadTask.whenComplete(() async {
         downLoadUrl = await firebaseStorageRef.getDownloadURL();
-        debug("Download Url: $downLoadUrl}");
+        debugShow("Download Url: $downLoadUrl}");
       });
 
       return downLoadUrl ?? "";
     } catch (e) {
-      debug("Upload Error: $e");
+      debugShow("Upload Error: $e");
       return "";
     }
   }
@@ -283,7 +283,7 @@ class DBOperations {
           .set(currUserData, SetOptions(merge: true));
       return true;
     } catch (e) {
-      debug("Error in Sent Connection Request: $e");
+      debugShow("Error in Sent Connection Request: $e");
       return false;
     }
   }
@@ -303,7 +303,7 @@ class DBOperations {
           .delete();
       return true;
     } catch (e) {
-      debug("Error in Sent Connection Request: $e");
+      debugShow("Error in Sent Connection Request: $e");
       return false;
     }
   }
@@ -331,7 +331,7 @@ class DBOperations {
           .delete();
       return true;
     } catch (e) {
-      debug("ERROR in Accept Connection Request: $e");
+      debugShow("ERROR in Accept Connection Request: $e");
       return false;
     }
   }
@@ -372,7 +372,7 @@ class DBOperations {
       }, SetOptions(merge: true));
       return true;
     } catch (e) {
-      debug("ERROR in Remove Connected User: $e");
+      debugShow("ERROR in Remove Connected User: $e");
       return false;
     }
   }
@@ -389,7 +389,7 @@ class DBOperations {
           .delete();
       return true;
     } catch (e) {
-      debug("Error in Sent Connection Request: $e");
+      debugShow("Error in Sent Connection Request: $e");
       return false;
     }
   }
@@ -421,7 +421,7 @@ class DBOperations {
 
       return true;
     } catch (e) {
-      debug("ERROR in send MSg: $e");
+      debugShow("ERROR in send MSg: $e");
       return false;
     }
   }
@@ -435,7 +435,7 @@ class DBOperations {
 
   Future<void> deleteMediaFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
-    debug('Delete Media File: $fileName');
+    debugShow('Delete Media File: $fileName');
 
     try {
       try {
@@ -443,20 +443,20 @@ class DBOperations {
           await Firebase.initializeApp();
         }
       } catch (e) {
-        debug(
+        debugShow(
             'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
-        debug('Firebase Already Initialized');
+        debugShow('Firebase Already Initialized');
       }
 
       final Reference reference =
           FirebaseStorage.instance.ref().storage.refFromURL(fileName);
-      debug('Reference is: $reference');
+      debugShow('Reference is: $reference');
 
       await reference.delete();
 
-      debug("File Deleted");
+      debugShow("File Deleted");
     } catch (e) {
-      debug("Delete From Firebase Storage Exception: ${e.toString()}");
+      debugShow("Delete From Firebase Storage Exception: ${e.toString()}");
     }
   }
 
@@ -519,7 +519,7 @@ class DBOperations {
 
   deleteParticularActivity(data){
 
-    debug('Delete Particular Activity From Remote');
+    debugShow('Delete Particular Activity From Remote');
     _getInstance
         .doc(
         '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
@@ -596,7 +596,7 @@ class MessagingOperation {
           connId: connId),
     );
 
-    debug('Response is: ${response.statusCode}    ${response.body}');
+    debugShow('Response is: ${response.statusCode}    ${response.body}');
 
     return response.statusCode;
   }

@@ -25,7 +25,7 @@ dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
 
-  showToast(context,
+  showToast(
       title: "Account Created Before",
       toastIconType: ToastIconType.success,
       showFromTop: false,
@@ -37,7 +37,7 @@ dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
     await _dbOperations.updateCurrentAccount(_createdBefore["data"]);
     await _dbOperations.updateToken();
 
-    showToast(context,
+    showToast(
         title: "Data Fetched Successfully",
         toastIconType: ToastIconType.success,
         showFromTop: false,

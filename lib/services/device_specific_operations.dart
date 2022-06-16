@@ -126,10 +126,10 @@ class NotificationManagement {
   _initAll(InitializationSettings initializationSettings) async {
     final response = await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings, onSelectNotification: (payload) async {
-      debug("Payload is: $payload");
+      debugShow("Payload is: $payload");
     });
 
-    debug('Local Notification Initialization Status: $response');
+    debugShow('Local Notification Initialization Status: $response');
   }
 
   showNotification(
@@ -158,7 +158,7 @@ class NotificationManagement {
       await _flutterLocalNotificationsPlugin
           .show(0, title, body, generalNotificationDetails, payload: title);
     } catch (e) {
-      debug("Notification Showing Error: $e");
+      debugShow("Notification Showing Error: $e");
     }
   }
 
@@ -167,3 +167,6 @@ class NotificationManagement {
     return response.bodyBytes;
   }
 }
+
+Future<void> copyText(text) async =>
+    await Clipboard.setData(ClipboardData(text: text.toString()));

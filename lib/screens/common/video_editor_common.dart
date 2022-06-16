@@ -137,11 +137,11 @@
 //
 //     await _controller.exportVideo(
 //       onProgress: (statics) {
-//         debug("First: ${statics.getTime()}");
+//         debugShow("First: ${statics.getTime()}");
 //         if (_firstStat) {
 //           _firstStat = false;
 //         } else {
-//           debug("Get Time: ${statics.getTime()}");
+//           debugShow("Get Time: ${statics.getTime()}");
 //           Provider.of<VideoEditingProvider>(context, listen: false)
 //               .updateExportingProgress(statics.getTime() /
 //                   _controller.video.value.duration.inMilliseconds);
@@ -248,7 +248,7 @@
 //
 //     final _isPlaying = Provider.of<VideoEditingProvider>(context).isPlaying();
 //
-//     debug("is playing: $_isPlaying");
+//     debugShow("is playing: $_isPlaying");
 //
 //     return _controller == null
 //         ? const Center()

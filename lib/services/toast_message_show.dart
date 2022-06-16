@@ -18,7 +18,7 @@ Color _getColor(ToastIconType toastIconType) {
   }
 }
 
-void showToast(BuildContext context,
+void showToast(
     {required String title,
     int? toastDuration,
     double? height,

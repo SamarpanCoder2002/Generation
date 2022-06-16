@@ -424,7 +424,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getChatHistory(widget.connData["id"], widget.connData["name"]);
 
-    debug("Connection Data:   $_chatHistoryData");
+    debugShow("Connection Data:   $_chatHistoryData");
 
     Provider.of<StorageProvider>(context, listen: false)
         .setImagesCollection(_chatHistoryData[ChatMessageType.image]);

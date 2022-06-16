@@ -35,7 +35,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
 
   @override
   void initState() {
-    debug('Activity: ${widget.activityData}');
+    debugShow('Activity: ${widget.activityData}');
     _scrollController.addListener(_scrollListener);
 
     if (widget.activityData.type == ActivityContentType.audio.toString()) {
@@ -126,7 +126,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
   }
 
   _imageActivityShow() {
-    debug("Image data is: ${widget.activityData.message}");
+    debugShow("Image data is: ${widget.activityData.message}");
 
     return Stack(
       children: [
@@ -204,7 +204,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
     final _pollShowProvider = Provider.of<PollShowProvider>(context);
     final _pollAnsCollection = _pollShowProvider.getPollAnswers();
 
-    debug("Updated Data: ${_pollShowProvider.getIndexedAnswerValue(0)}");
+    debugShow("Updated Data: ${_pollShowProvider.getIndexedAnswerValue(0)}");
 
     return Container(
       width: MediaQuery.of(context).size.width,

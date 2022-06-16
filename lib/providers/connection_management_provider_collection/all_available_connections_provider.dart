@@ -18,7 +18,7 @@ class AllAvailableConnectionsProvider extends ChangeNotifier {
   }
 
   removeIndexFromSearch(int indexInSearch) {
-    debug("Here After Sent Connection Request");
+    debugShow("Here After Sent Connection Request");
   if(indexInSearch > _searchedConnections.length - 1) return;
     _searchedConnections.removeAt(indexInSearch);
     notifyListeners();

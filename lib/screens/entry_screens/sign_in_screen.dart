@@ -181,9 +181,9 @@ class _SignInScreenState extends State<SignInScreen> {
       });
     }
 
-    debug("Data is: $_data");
+    debugShow("Data is: $_data");
 
-    showToast(context,
+    showToast(
         title: _data["message"],
         toastIconType:
         _data["success"] ? ToastIconType.success : ToastIconType.error,

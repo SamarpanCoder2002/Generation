@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:open_file/open_file.dart';
 
+import 'debugging.dart';
+
 class SystemFileManagement {
   static Future<void> openFile(String filePath) async {
     await OpenFile.open(filePath);
@@ -9,11 +11,11 @@ class SystemFileManagement {
 
   static deleteFile(String filePath) async {
     try {
-      debug('Attempting Deleting media file from local storage $filePath');
+      debugShow('Attempting Deleting media file from local storage $filePath');
       await File(filePath).delete(recursive: true);
-      debug('Local File $filePath deleted');
+      debugShow('Local File $filePath deleted');
     } catch (e) {
-      debug('Error in Delete File: $e');
+      debugShow('Error in Delete File: $e');
     }
   }
 }

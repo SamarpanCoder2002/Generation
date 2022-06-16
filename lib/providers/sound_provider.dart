@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../services/debugging.dart';
+
 class SongManagementProvider extends ChangeNotifier {
   String? _currentSongPath;
   String? _showingTime;
@@ -70,7 +72,7 @@ class SongManagementProvider extends ChangeNotifier {
 
         await _justAudioPlayer.play();
       } else {
-        debug(_justAudioPlayer.processingState);
+        debugShow(_justAudioPlayer.processingState);
         if (_justAudioPlayer.processingState == ProcessingState.idle) {
           await _justAudioPlayer.setFilePath(_currentSongPath!);
           setSongPlaying(update: update);
@@ -88,7 +90,7 @@ class SongManagementProvider extends ChangeNotifier {
             ProcessingState.completed) {}
       }
     } catch (e) {
-      debug('Audio Playing Error: $e');
+      debugShow('Audio Playing Error: $e');
     }
   }
 

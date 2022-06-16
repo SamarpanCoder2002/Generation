@@ -72,7 +72,7 @@ Future<void> notificationInitialize() async {
 }
 
 Future<void> backgroundMsgAction(RemoteMessage message) async {
-  debug("Background MEssage is: ${message.data}");
+  debugShow("Background MEssage is: ${message.data}");
 }
 
 void foregroundMessageAction(RemoteMessage msgEvent) async {

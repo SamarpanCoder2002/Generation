@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final Map<String, dynamic> _currAccData =
         await _localStorage.getDataForCurrAccount();
 
-    debug("Current Account data: $_currAccData");
+    debugShow("Current Account data: $_currAccData");
 
     if (mounted) {
       setState(() {
@@ -338,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _onGalleryPressed() async {
       final String? imgPath = await _inputOption.pickSingleImageFromGallery();
 
-      debug("Image Path is: $imgPath");
+      debugShow("Image Path is: $imgPath");
 
       if (imgPath == null) return;
 
@@ -478,13 +478,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
 
-      showToast(context,
+      showToast(
           title: _response["message"],
           toastIconType: ToastIconType.success,
           toastDuration: 6,
           showFromTop: false);
     } else {
-      showToast(context,
+      showToast(
           title: "Profile Update Failed",
           toastIconType: ToastIconType.success,
           toastDuration: 6,

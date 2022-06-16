@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:generation/config/stored_string_collection.dart';
 
+import '../services/debugging.dart';
 import '../services/local_data_management.dart';
 import '../config/types.dart';
 
@@ -15,7 +16,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   setThemeData(ThemeModeTypes themeModeType) async {
-    debug("Theme Mode Type: $themeModeType");
+    debugShow("Theme Mode Type: $themeModeType");
     if (_themeModeType == themeModeType) return;
 
     _themeModeType = themeModeType;
@@ -26,7 +27,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   _filtration(String? examineThemeData) {
-    debug("Examine Theme Data: $examineThemeData");
+    debugShow("Examine Theme Data: $examineThemeData");
     if (examineThemeData == null) return ThemeModeTypes.darkMode;
 
     if (examineThemeData == ThemeModeTypes.systemMode.toString()) {
