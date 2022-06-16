@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../config/stored_string_collection.dart';
+import '../../services/debugging.dart';
 import '../../services/local_data_management.dart';
 import '../../config/types.dart';
 
@@ -33,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
     /// For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile>? value) {
-      print("Shared MediaStream: $value");
+      debugShow("Shared MediaStream: $value");
       if (value != null && mounted) {
         final _data = [];
 
@@ -46,12 +47,12 @@ class _SplashScreenState extends State<SplashScreen> {
             .setIncomingData(_data);
       }
     }, onError: (err) {
-      print("getIntentDataStream error: $err");
+      debugShow("getIntentDataStream error: $err");
     });
 
     /// For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile>? value) {
-      print("Shared Images: $value");
+      debugShow("Shared Images: $value");
       if (value != null && mounted) {
         final _data = [];
 
@@ -68,19 +69,19 @@ class _SplashScreenState extends State<SplashScreen> {
     /// For sharing or opening urls/text coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen((String? value) {
-      print("Shared urls/text coming from outside the app: $value");
+      debugShow("Shared urls/text coming from outside the app: $value");
 
       if (value != null && mounted) {
         Provider.of<IncomingDataProvider>(context, listen: false)
             .setIncomingData(value);
       }
     }, onError: (err) {
-      print("getLinkStream error: $err");
+      debugShow("getLinkStream error: $err");
     });
 
     /// For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String? value) {
-      print(
+      debugShow(
           "urls/text coming from outside the app while the app is closed: $value");
 
       if (value != null && mounted) {

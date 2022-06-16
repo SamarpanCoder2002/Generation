@@ -18,4 +18,9 @@ class DBPath{
   static const specialRequest = "special_request";
   static const removeConn = "remove_connection";
   static const notificationDeactivated = "notification_deactivated";
+  static const specialOperation = "special_operation";
+}
+
+class SpecialOperationTypes{
+  static const deleteMsg = "Delete_Message";
 }

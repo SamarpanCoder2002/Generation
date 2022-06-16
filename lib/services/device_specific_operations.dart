@@ -6,6 +6,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:http/http.dart';
 
+import 'debugging.dart';
+
 void showStatusAndNavigationBar() =>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top]);
@@ -124,10 +126,10 @@ class NotificationManagement {
   _initAll(InitializationSettings initializationSettings) async {
     final response = await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings, onSelectNotification: (payload) async {
-      print("Payload is: $payload");
+      debugShow("Payload is: $payload");
     });
 
-    print('Local Notification Initialization Status: $response');
+    debugShow('Local Notification Initialization Status: $response');
   }
 
   showNotification(
@@ -156,7 +158,7 @@ class NotificationManagement {
       await _flutterLocalNotificationsPlugin
           .show(0, title, body, generalNotificationDetails, payload: title);
     } catch (e) {
-      print("Notification Showing Error: $e");
+      debugShow("Notification Showing Error: $e");
     }
   }
 
@@ -165,3 +167,6 @@ class NotificationManagement {
     return response.bodyBytes;
   }
 }
+
+Future<void> copyText(text) async =>
+    await Clipboard.setData(ClipboardData(text: text.toString()));

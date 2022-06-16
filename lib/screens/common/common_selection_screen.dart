@@ -21,6 +21,7 @@ import '../../providers/chat/messaging_provider.dart';
 import '../../providers/connection_collection_provider.dart';
 import '../../providers/storage/storage_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 import 'chat_connections_common_design.dart';
 
@@ -132,7 +133,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getChatHistory(connectionData["id"], connectionData["name"]);
 
-    print("Connection Data:   $_chatHistoryData");
+    debugShow("Connection Data:   $_chatHistoryData");
 
     Provider.of<StorageProvider>(context, listen: false)
         .setImagesCollection(_chatHistoryData[ChatMessageType.image]);
@@ -156,7 +157,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
               .onConnectionClick(_connectionData["id"]);
 
       if (!_response) {
-        showToast(context,
+        showToast(
             title:
                 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections',
             toastIconType: ToastIconType.info,
@@ -209,7 +210,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   }
 
   _extractChatHistory(connectionData) async {
-    print("At Extract Chat History");
+    debugShow("At Extract Chat History");
 
     final _chatHistoryData =
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -229,7 +230,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
     await _chatHistoryStoreFile.writeAsString(_historyTextData);
 
-    print(await _chatHistoryStoreFile.readAsString());
+    debugShow(await _chatHistoryStoreFile.readAsString());
 
     _showShareOptions(_chatHistoryStoreFile);
   }
@@ -238,7 +239,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     final _selectedConnections =
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .getSelectedConnections();
-    print("Selected Connections:  $_selectedConnections");
+    debugShow("Selected Connections:  $_selectedConnections");
 
     for (final message in _messagesCollection) {
       var _modifiedMessage = message.message;

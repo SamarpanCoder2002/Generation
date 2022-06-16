@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/images_path_collection.dart';
+import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/chat_screens/connection_profile_screen.dart';
 import 'package:generation/screens/common/common_selection_screen.dart';
+import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
+import '../../model/chat_message_model.dart';
+import '../../providers/chat/chat_creation_section_provider.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
+import '../../services/local_data_management.dart';
 import '../../services/toast_message_show.dart';
 import '../../config/types.dart';
+import '../common/button.dart';
 import '../common/image_showing_screen.dart';
 
 class ChatBoxHeaderSection extends StatelessWidget {
@@ -50,7 +56,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return InkWell(
-      onTap: () =>  _onImageClicked(connectionData["profilePic"]),
+      onTap: () => _onImageClicked(connectionData["profilePic"]),
       child: Container(
         width: 45,
         height: 45,
@@ -154,7 +160,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
           children: [
             if (_selectedMessages.length == 1)
               IconButton(
-                onPressed: () {},
+                onPressed: _onReply,
                 icon: const Icon(Icons.reply_outlined),
                 color: AppColors.getIconColor(_isDarkMode),
               ),
@@ -176,14 +182,14 @@ class ChatBoxHeaderSection extends StatelessWidget {
               width: 10,
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: _deleteMsg,
               icon: const Icon(Icons.delete_outline_outlined),
               color: AppColors.getIconColor(_isDarkMode),
             ),
             if (Provider.of<ChatBoxMessagingProvider>(context)
                 .eligibleForCopyTextSelMsg())
               IconButton(
-                onPressed: () {},
+                onPressed: _copySelectedMsgData,
                 icon: const Icon(Icons.copy_outlined),
                 color: AppColors.getIconColor(_isDarkMode),
               ),
@@ -202,12 +208,12 @@ class ChatBoxHeaderSection extends StatelessWidget {
 
   _onImageClicked(String? photo) {
     if (photo == null) {
-      showToast(context,
-          title: "Image Not Found", toastIconType: ToastIconType.info);
+      showToast(title: "Image Not Found", toastIconType: ToastIconType.info);
       return;
     }
 
-    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     Navigation.intent(
         context,
@@ -225,5 +231,131 @@ class ChatBoxHeaderSection extends StatelessWidget {
       return ImageType.network;
     }
     return ImageType.file;
+  }
+
+  void _copySelectedMsgData() {
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final _selectedMsgData = _selectedMessages.values.toList()[0].message;
+
+    copyText(_selectedMsgData).then((value) =>
+        showToast(title: 'Text Copied', toastIconType: ToastIconType.success));
+  }
+
+  void _onReply() async {
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final ChatMessageModel messageData = _selectedMessages.values.toList()[0];
+    final String msgKey = _selectedMessages.keys.toList()[0];
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .setReplyHolderMsg(msgKey, messageData);
+    Provider.of<ChatCreationSectionProvider>(context, listen: false)
+        .setSectionHeightForReply();
+
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .clearSelectedMsgCollection();
+  }
+
+  void _deleteMsg() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 10),
+              backgroundColor: AppColors.getModalColor(_isDarkMode),
+              elevation: 10,
+              title: Center(
+                child: Text(
+                  'Delete this message',
+                  textAlign: TextAlign.center,
+                  style: TextStyleCollection.headingTextStyle
+                      .copyWith(fontSize: 20),
+                ),
+              ),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                commonTextButton(
+                    btnText: "Delete For Me",
+                    onPressed: _deleteMyMsgOnly,
+                    borderColor: _isDarkMode
+                        ? AppColors.darkBorderGreenColor
+                        : AppColors.lightBorderGreenColor),
+                commonTextButton(
+                    btnText: "Delete For Everyone",
+                    onPressed: _deleteForEveryOne,
+                    borderColor: _isDarkMode
+                        ? AppColors.darkBorderGreenColor
+                        : AppColors.lightBorderGreenColor),
+              ],
+            ));
+  }
+
+  void _deleteForEveryOne() async {
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final msgIdCollection = _selectedMessages.keys.toList();
+
+    final DBOperations _dbOperations = DBOperations();
+
+    bool _sendToRemotely = false;
+
+    for (final msgId in msgIdCollection) {
+      _sendToRemotely = await _dbOperations.deleteForEveryoneMsg(
+          msgId,
+          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+              .getPartnerUserId());
+    }
+
+    if (_sendToRemotely) {
+      _deleteMyMsgOnly();
+      return;
+    }
+
+    showToast(
+        title: 'Messages Deletion Failed', toastIconType: ToastIconType.error);
+  }
+
+  void _deleteMyMsgOnly() async {
+    final LocalStorage _localStorage = LocalStorage();
+    final tableName = DataManagement.generateTableNameForNewConnectionChat(
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getPartnerUserId());
+
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final msgIdCollection = _selectedMessages.keys.toList();
+
+    bool _operationDone = false;
+
+    for (final msgId in msgIdCollection) {
+      _operationDone =
+          await _localStorage.deleteDataFromParticularChatConnTable(
+              tableName: tableName, msgId: msgId);
+      if (_operationDone) {
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .deleteParticularMessage(msgId);
+      }
+    }
+
+    if (_operationDone) {
+      Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .clearSelectedMsgCollection();
+      showToast(
+          title: 'Messages Deleted Successfully',
+          toastIconType: ToastIconType.success);
+    } else {
+      showToast(
+          title: 'Failed to Delete Messages',
+          toastIconType: ToastIconType.error);
+    }
+
+    Navigator.pop(context);
   }
 }

@@ -3,7 +3,6 @@ import 'package:generation/config/regex_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/entry_screens/information_taking.dart';
 import 'package:generation/screens/entry_screens/sign_up_screen.dart';
-import 'package:generation/screens/main_screens/main_screen_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
@@ -12,6 +11,7 @@ import 'package:generation/config/types.dart';
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../auth/email_auth.dart';
+import '../../services/debugging.dart';
 import '../common/button.dart';
 import '../common/common_operations.dart';
 
@@ -181,9 +181,9 @@ class _SignInScreenState extends State<SignInScreen> {
       });
     }
 
-    print("Data is: $_data");
+    debugShow("Data is: $_data");
 
-    showToast(context,
+    showToast(
         title: _data["message"],
         toastIconType:
         _data["success"] ? ToastIconType.success : ToastIconType.error,

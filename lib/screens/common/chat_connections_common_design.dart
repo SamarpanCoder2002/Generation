@@ -181,7 +181,7 @@ class CommonChatListLayout {
               .onConnectionClick(connectionData["id"]);
 
           if(!_response){
-            showToast(context, title: 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections', toastIconType: ToastIconType.info, fontSize: 14, showFromTop: false);
+            showToast( title: 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections', toastIconType: ToastIconType.info, fontSize: 14, showFromTop: false);
           }
         },
         icon: _isSelected
@@ -197,7 +197,7 @@ class CommonChatListLayout {
 
   _onImageClicked(String? photo) {
     if (photo == null) {
-      showToast(context,
+      showToast(
           title: "Image Not Found", toastIconType: ToastIconType.info);
       return;
     }

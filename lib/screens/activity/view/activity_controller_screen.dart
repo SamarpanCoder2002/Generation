@@ -22,6 +22,7 @@ import '../../../providers/connection_collection_provider.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/video_management/video_show_provider.dart';
+import '../../../services/debugging.dart';
 import '../../../services/local_data_management.dart';
 import '../animation_controller.dart';
 
@@ -210,7 +211,7 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _activityInformation(ActivityModel? _currentActivityData) {
-    print('Activity holder id :${widget.activityHolderId}');
+    debugShow('Activity holder id :${widget.activityHolderId}');
 
     final _connectionData = widget.activityHolderId == _dbOperations.currUid
         ? Provider.of<StatusCollectionProvider>(context).getCurrentAccData()
@@ -275,7 +276,7 @@ class _ActivityControllerState extends State<ActivityController>
           .resumeAnimationForNewest(widget.startingIndex);
     }
 
-    print('Data collection: $_dataCollection');
+    debugShow('Data collection: $_dataCollection');
 
     return Positioned(
       top: 30.0,
@@ -284,7 +285,7 @@ class _ActivityControllerState extends State<ActivityController>
       child: Row(
         children: [
           ..._dataCollection.asMap().entries.map((dataMap) {
-            print('Position in activity: ${dataMap.key}');
+            debugShow('Position in activity: ${dataMap.key}');
 
             return AnimatedBar(
               animController: Provider.of<ActivityProvider>(context)
@@ -378,7 +379,7 @@ class _ActivityControllerState extends State<ActivityController>
 
   _replyButton(ActivityModel? _currentActivityData) {
     _getBgColor() {
-      print('Additional Things: ${_currentActivityData!.additionalThings}');
+      debugShow('Additional Things: ${_currentActivityData!.additionalThings}');
 
       return _currentActivityData.additionalThings["text"] == null ||
               _currentActivityData.additionalThings["text"] == ""
@@ -548,7 +549,7 @@ class _ActivityControllerState extends State<ActivityController>
   }
 
   _sendActivityReplyMsg(ActivityModel? _currentActivityData) async {
-    print('At Reply Activity');
+    debugShow('At Reply Activity');
 
     final _replyMsg =
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
@@ -584,7 +585,7 @@ class _ActivityControllerState extends State<ActivityController>
       });
     }
 
-    showToast(context,
+    showToast(
         title: 'Reply Send Successfully',
         toastIconType: ToastIconType.success,
         showCenterToast: true);

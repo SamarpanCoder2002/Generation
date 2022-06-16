@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -34,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final Map<String, dynamic> _currAccData =
         await _localStorage.getDataForCurrAccount();
 
-    print("Current Account data: $_currAccData");
+    debugShow("Current Account data: $_currAccData");
 
     if (mounted) {
       setState(() {
@@ -337,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _onGalleryPressed() async {
       final String? imgPath = await _inputOption.pickSingleImageFromGallery();
 
-      print("Image Path is: $imgPath");
+      debugShow("Image Path is: $imgPath");
 
       if (imgPath == null) return;
 
@@ -477,13 +478,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
 
-      showToast(context,
+      showToast(
           title: _response["message"],
           toastIconType: ToastIconType.success,
           toastDuration: 6,
           showFromTop: false);
     } else {
-      showToast(context,
+      showToast(
           title: "Profile Update Failed",
           toastIconType: ToastIconType.success,
           toastDuration: 6,

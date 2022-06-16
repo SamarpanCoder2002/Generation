@@ -9,6 +9,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../../config/text_style_collection.dart';
 import '../../../providers/theme_provider.dart';
+import '../../../services/debugging.dart';
 import '../../common/button.dart';
 
 class DonateScreen extends StatefulWidget {
@@ -25,17 +26,17 @@ class _DonateScreenState extends State<DonateScreen> {
   final Razorpay _razorpay = Razorpay();
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    debugPrint('Success:                        PaymentId: ${response.paymentId}    OrderId: ${response.orderId}         Signature: ${response.signature}');
-    showToast(context, title: "Payment Successful... Thank You 💖", toastIconType: ToastIconType.success, toastDuration: 10, showFromTop: widget.showMsgFromTop);
+    debugShow('Success:                        PaymentId: ${response.paymentId}    OrderId: ${response.orderId}         Signature: ${response.signature}');
+    showToast( title: "Payment Successful... Thank You 💖", toastIconType: ToastIconType.success, toastDuration: 10, showFromTop: widget.showMsgFromTop);
     Navigator.pop(context);
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
-    debugPrint('Error: ${response.message}');
+    debugShow('Error: ${response.message}');
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {
-    debugPrint('For External Wallet: ${response.walletName}');
+    debugShow('For External Wallet: ${response.walletName}');
   }
 
   @override
@@ -146,7 +147,7 @@ class _DonateScreenState extends State<DonateScreen> {
     try {
       _razorpay.open(options);
     } catch (e) {
-      debugPrint('Razorpay Error is: ${e.toString()}');
+      debugShow('Razorpay Error is: ${e.toString()}');
     }
   }
 

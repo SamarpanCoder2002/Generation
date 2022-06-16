@@ -34,6 +34,7 @@ import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
 import '../screens/common/music_visualizer.dart';
+import 'debugging.dart';
 import 'local_data_management.dart';
 import 'navigation_management.dart';
 import '../config/types.dart';
@@ -269,7 +270,7 @@ class InputOption {
 
       Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
     } catch (e) {
-      print("Error in Document File Picking: $e");
+      debugShow("Error in Document File Picking: $e");
     }
   }
 
@@ -289,7 +290,7 @@ class InputOption {
   Future<Map<String, dynamic>> _getCurrentLocation(
       BuildContext oldStackContext) async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-      showToast(oldStackContext,
+       showToast(
           title: "Location Service is not Enabled",
           toastIconType: ToastIconType.error);
       return {};
@@ -299,14 +300,14 @@ class InputOption {
         await _permissionManagement.locationPermission();
 
     if (!_locationActivationStatus) {
-      showToast(oldStackContext,
+       showToast(
           title: "Location Permission not granted",
           toastIconType: ToastIconType.error);
 
       return {};
     }
 
-    showToast(oldStackContext,
+     showToast(
         title: "Map will show within few seconds",
         toastIconType: ToastIconType.info,
         toastDuration: 12);
@@ -408,7 +409,7 @@ class InputOption {
 
     _onSaveButtonPressed() async {
       if (contactNameController.text.isEmpty) {
-        showToast(context,
+        showToast(
             height: 50,
             title: "Please Give a Contact Name",
             toastIconType: ToastIconType.info);
@@ -420,7 +421,7 @@ class InputOption {
       Navigator.pop(context);
 
       /// Show Success toast Message
-      showToast(context,
+      showToast(
           title: "Contact Saved Successfully",
           height: 50,
           toastIconType: ToastIconType.success);
@@ -518,7 +519,7 @@ class InputOption {
     contact.familyName = "";
     contact.phones = [Item(label: numberLabel, value: phoneNumber)];
     await ContactsService.addContact(contact);
-    print("Here");
+    debugShow("Here");
   }
 
   Future sendSupportMail(String subject, String body) async {
@@ -534,7 +535,7 @@ class InputOption {
     try {
       await launchUrl(Uri.parse(url));
     } catch (e) {
-      debugPrint('Support Mail Sending Error: ${e.toString()}');
+      debugShow('Support Mail Sending Error: ${e.toString()}');
     }
   }
 
@@ -548,7 +549,7 @@ class InputOption {
     try {
       launchUrl(Uri.parse(url));
     } catch (e) {
-      print("Error in Open Url:  $e");
+      debugShow("Error in Open Url:  $e");
     }
   }
 
@@ -595,7 +596,7 @@ class InputOption {
         .getVideoDuration(File(data["videoPath"]));
 
     if (duration.inSeconds <= Timings.videoDurationInSec) {
-      print('Video Duration: ${duration.inSeconds}');
+      debugShow('Video Duration: ${duration.inSeconds}');
 
       Navigation.intent(
           context,
@@ -611,7 +612,7 @@ class InputOption {
       //         path: data["videoPath"],
       //         videoType: videoType,
       //         thumbnailPath: data["thumbnail"]));
-      showToast(context,
+      showToast(
           title: TextCollection.videoDurationAlert,
           toastIconType: ToastIconType.info);
     }
@@ -637,7 +638,7 @@ class InputOption {
 
   commonCreateActivityNavigation(ActivityContentType activityContentType,
       {required Map<String, dynamic> data}) {
-    print("Navigation at");
+    debugShow("Navigation at");
 
     Navigation.intent(
         context,
@@ -718,11 +719,11 @@ class InputOption {
             Navigator.pop(context);
             Navigator.pop(context);
 
-            print("Duration in sec: $durationInSec");
+            debugShow("Duration in sec: $durationInSec");
 
             if (durationInSec == null ||
                 durationInSec > Timings.audioDurationInSec) {
-              showToast(context,
+              showToast(
                   title:
                       "Toast Duration greater than ${Timings.audioDurationInSec} sec",
                   toastIconType: ToastIconType.warning);
@@ -792,16 +793,16 @@ class InputOption {
 
     if (file == null) return;
 
-    print("File: ${file.path}");
+    debugShow("File: ${file.path}");
 
     final int? durationInSec =
         await Provider.of<SongManagementProvider>(context, listen: false)
             .getDurationInSec(File(file.path).path);
 
-    print("Duration in Sec: $durationInSec");
+    debugShow("Duration in Sec: $durationInSec");
 
     if (durationInSec == null || durationInSec > Timings.audioDurationInSec) {
-      showToast(context,
+      showToast(
           title:
               "Toast Duration greater than ${Timings.audioDurationInSec} sec",
           toastIconType: ToastIconType.warning);
@@ -825,7 +826,7 @@ class InputOption {
 
       if (_response) {
         _localStorage.deleteConnectionPrimaryData(id: otherUserId);
-        showToast(context,
+        showToast(
             title: "Connection Removed Successfully",
             toastIconType: ToastIconType.success,
             showFromTop: false);
@@ -837,7 +838,7 @@ class InputOption {
         Navigator.pop(context);
         Navigator.pop(context);
       } else {
-        showToast(context,
+        showToast(
             title: "Failed to Remove Connection",
             toastIconType: ToastIconType.error,
             showFromTop: false);
@@ -864,7 +865,7 @@ class InputOption {
 
       Navigator.pop(context);
       Navigator.pop(context);
-      showToast(context,
+      showToast(
           title: "Chat Messages Deletion Done",
           toastIconType: ToastIconType.success);
     }

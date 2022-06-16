@@ -136,7 +136,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void _onSubmitInformation() async{
     if (!_formKey.currentState!.validate()) return;
     if(_pwdController.text != _confirmPwdController.text) {
-      showToast(context, title: "Password and Confirm Password are not same", toastIconType: ToastIconType.error, showFromTop: false);
+      showToast( title: "Password and Confirm Password are not same", toastIconType: ToastIconType.error, showFromTop: false);
       return;
     }
 
@@ -163,7 +163,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Navigator.pop(context);
       });
     }else{
-      showToast(context, title: "Email Already Exist Before", toastIconType: ToastIconType.error, showFromTop: false);
+      showToast( title: "Email Already Exist Before", toastIconType: ToastIconType.error, showFromTop: false);
     }
 
 

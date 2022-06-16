@@ -24,6 +24,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/connection_management_provider_collection/sent_request_provider.dart';
 import '../providers/network_management_provider.dart';
+import '../services/debugging.dart';
 import '../services/local_data_management.dart';
 
 class DBOperations {
@@ -38,15 +39,15 @@ class DBOperations {
 
   FirebaseStorage get _storageInstance => FirebaseStorage.instance;
 
-  initializeFirebase()async{
+  initializeFirebase() async {
     try {
       //if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp();
-     // }
+      await Firebase.initializeApp();
+      // }
     } catch (e) {
-      print(
+      debugShow(
           'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
-      print('Firebase Already Initialized');
+      debugShow('Firebase Already Initialized');
     }
   }
 
@@ -55,7 +56,7 @@ class DBOperations {
         await Provider.of<NetworkManagementProvider>(context, listen: false)
             .isNetworkActive;
     if (!_isNetworkPresent) {
-      print("Network not found");
+      debugShow("Network not found");
       Provider.of<NetworkManagementProvider>(context, listen: false)
           .noNetworkMsg(context, showCenterToast: true);
       return;
@@ -64,8 +65,7 @@ class DBOperations {
     final _isCreatedBefore = await isAccountCreatedBefore();
     if (_isCreatedBefore['success']) return;
 
-    showToast(context,
-        title: "Account Not Found", toastIconType: ToastIconType.info);
+    showToast(title: "Account Not Found", toastIconType: ToastIconType.info);
 
     DataManagement.clearSharedStorage();
     _localStorage.closeDatabase();
@@ -131,7 +131,7 @@ class DBOperations {
         "profilePic": profilePicRemote,
       };
     } catch (e) {
-      print("ERROR in create Account: ${e.toString()}");
+      debugShow("ERROR in create Account: ${e.toString()}");
       _response["success"] = false;
       _response["message"] = "$e";
     }
@@ -149,7 +149,7 @@ class DBOperations {
 
       return true;
     } catch (e) {
-      print("ERROR in update Current Account: $e");
+      debugShow("ERROR in update Current Account: $e");
       return false;
     }
   }
@@ -166,12 +166,12 @@ class DBOperations {
 
       await uploadTask.whenComplete(() async {
         downLoadUrl = await firebaseStorageRef.getDownloadURL();
-        print("Download Url: $downLoadUrl}");
+        debugShow("Download Url: $downLoadUrl}");
       });
 
       return downLoadUrl ?? "";
     } catch (e) {
-      print("Upload Error: $e");
+      debugShow("Upload Error: $e");
       return "";
     }
   }
@@ -282,7 +282,7 @@ class DBOperations {
           .set(currUserData, SetOptions(merge: true));
       return true;
     } catch (e) {
-      print("Error in Sent Connection Request: $e");
+      debugShow("Error in Sent Connection Request: $e");
       return false;
     }
   }
@@ -302,7 +302,7 @@ class DBOperations {
           .delete();
       return true;
     } catch (e) {
-      print("Error in Sent Connection Request: $e");
+      debugShow("Error in Sent Connection Request: $e");
       return false;
     }
   }
@@ -330,7 +330,7 @@ class DBOperations {
           .delete();
       return true;
     } catch (e) {
-      print("ERROR in Accept Connection Request: $e");
+      debugShow("ERROR in Accept Connection Request: $e");
       return false;
     }
   }
@@ -371,7 +371,7 @@ class DBOperations {
       }, SetOptions(merge: true));
       return true;
     } catch (e) {
-      print("ERROR in Remove Connected User: $e");
+      debugShow("ERROR in Remove Connected User: $e");
       return false;
     }
   }
@@ -388,7 +388,7 @@ class DBOperations {
           .delete();
       return true;
     } catch (e) {
-      print("Error in Sent Connection Request: $e");
+      debugShow("Error in Sent Connection Request: $e");
       return false;
     }
   }
@@ -420,7 +420,7 @@ class DBOperations {
 
       return true;
     } catch (e) {
-      print("ERROR in send MSg: $e");
+      debugShow("ERROR in send MSg: $e");
       return false;
     }
   }
@@ -434,7 +434,7 @@ class DBOperations {
 
   Future<void> deleteMediaFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
-    print('Delete Media File: $fileName');
+    debugShow('Delete Media File: $fileName');
 
     try {
       try {
@@ -442,20 +442,20 @@ class DBOperations {
           await Firebase.initializeApp();
         }
       } catch (e) {
-        print(
+        debugShow(
             'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
-        print('Firebase Already Initialized');
+        debugShow('Firebase Already Initialized');
       }
 
       final Reference reference =
           FirebaseStorage.instance.ref().storage.refFromURL(fileName);
-      print('Reference is: $reference');
+      debugShow('Reference is: $reference');
 
       await reference.delete();
 
-      print("File Deleted");
+      debugShow("File Deleted");
     } catch (e) {
-      print("Delete From Firebase Storage Exception: ${e.toString()}");
+      debugShow("Delete From Firebase Storage Exception: ${e.toString()}");
     }
   }
 
@@ -516,15 +516,30 @@ class DBOperations {
     return data;
   }
 
-  deleteParticularActivity(data){
-
-    print('Delete Particular Activity From Remote');
+  deleteParticularActivity(data) {
+    debugShow('Delete Particular Activity From Remote');
     _getInstance
         .doc(
-        '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
+            '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
         .set({
       DBPath.data: FieldValue.arrayRemove([data]),
     }, SetOptions(merge: true));
+  }
+
+  deleteForEveryoneMsg(String msgId, String partnerId) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
+          .set({
+        SpecialOperationTypes.deleteMsg: FieldValue.arrayUnion([msgId])
+      }, SetOptions(merge: true));
+
+      return true;
+    } catch (e) {
+      debugShow("ERROR in deleteForEveryoneMsg: $e");
+      return false;
+    }
   }
 }
 
@@ -595,7 +610,7 @@ class MessagingOperation {
           connId: connId),
     );
 
-    print('Response is: ${response.statusCode}    ${response.body}');
+    debugShow('Response is: ${response.statusCode}    ${response.body}');
 
     return response.statusCode;
   }

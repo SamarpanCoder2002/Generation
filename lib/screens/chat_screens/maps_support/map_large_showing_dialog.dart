@@ -6,6 +6,7 @@ import 'package:generation/services/input_system_services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../config/images_path_collection.dart';
+import '../../../services/debugging.dart';
 import '../../../services/show_google_map.dart';
 
 class ShowMapInLargeForm extends StatefulWidget {
@@ -54,7 +55,7 @@ class _ShowMapInLargeFormState extends State<ShowMapInLargeForm> {
             latitude: _latitude ?? widget.locationData["latitude"],
             longitude: _longitude ?? widget.locationData["longitude"],
             onDragStopped: (changedLocationData) {
-              print("Changed Location Data: $changedLocationData");
+              debugShow("Changed Location Data: $changedLocationData");
               if (mounted) {
                 setState(() {
                   _latitude = changedLocationData.latitude;
