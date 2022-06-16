@@ -13,6 +13,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../config/colors_collection.dart';
 import '../../config/images_path_collection.dart';
 import '../../providers/incoming_data_provider.dart';
+import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
 import '../common/common_operations.dart';
@@ -44,7 +45,7 @@ class _IntroScreensState extends State<IntroScreens> {
   // void didChangeDependencies() {
   //   final _incomingData = Provider.of<IncomingDataProvider>(context).getIncomingData();
   //
-  //   print("Incoming DAta: $_incomingData");
+  //   debug("Incoming DAta: $_incomingData");
   //
   //   if(_incomingData.isNotEmpty){
   //
@@ -64,7 +65,7 @@ class _IntroScreensState extends State<IntroScreens> {
         Provider.of<IncomingDataProvider>(context, listen: false)
             .getIncomingData();
 
-    print("Incoming DAta: $_incomingData");
+    debug("Incoming DAta: $_incomingData");
 
     if (_incomingData.isNotEmpty) {
       return const CommonSelectionScreen(
@@ -266,7 +267,7 @@ class _IntroScreensState extends State<IntroScreens> {
         toastIconType: ToastIconType.success,
         showFromTop: false);
 
-    print("User Data: $_userData");
+    debug("User Data: $_userData");
 
     final _createdBefore = await _dbOperations.isAccountCreatedBefore();
 

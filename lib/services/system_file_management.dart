@@ -9,11 +9,11 @@ class SystemFileManagement {
 
   static deleteFile(String filePath) async {
     try {
-      print('Attempting Deleting media file from local storage $filePath');
+      debug('Attempting Deleting media file from local storage $filePath');
       await File(filePath).delete(recursive: true);
-      print('Local File $filePath deleted');
+      debug('Local File $filePath deleted');
     } catch (e) {
-      print('Error in Delete File: $e');
+      debug('Error in Delete File: $e');
     }
   }
 }

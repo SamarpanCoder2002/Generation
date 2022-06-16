@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 
+import '../../services/debugging.dart';
+
 class RequestConnectionsProvider extends ChangeNotifier {
   List<dynamic> _searchedConnections = [];
   List<dynamic> _requestConnections = [];
@@ -35,7 +37,7 @@ class RequestConnectionsProvider extends ChangeNotifier {
       _searchedConnections.removeAt(index);
       notifyListeners();
     }catch(e){
-      print("Error in Remove From SEarch Incoming Reuqets: $e");
+      debug("Error in Remove From SEarch Incoming Reuqets: $e");
     }
   }
 

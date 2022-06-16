@@ -11,6 +11,7 @@ import '../../../providers/connection_management_provider_collection/incoming_re
 import '../../../providers/connection_management_provider_collection/sent_request_provider.dart';
 import '../../../providers/main_scrolling_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../../services/debugging.dart';
 import '../../../services/toast_message_show.dart';
 import '../../../config/types.dart';
 import '../../common/chat_connections_common_design.dart';
@@ -109,7 +110,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     if (_getItemCount() == 0) {
-      print("Here");
+      debug("Here");
       return Container(
           width: double.maxFinite,
           height: MediaQuery.of(context).size.height / 1.8,
@@ -279,7 +280,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
 
   _sendConnectionRequest(otherUserData, int index) async {
     final _currAccData = await _localStorage.getDataForCurrAccount();
-    print("Current Account Data: $_currAccData");
+    debug("Current Account Data: $_currAccData");
 
     if (_currAccData == null) return;
 

@@ -34,6 +34,7 @@ import '../providers/sound_provider.dart';
 import '../providers/theme_provider.dart';
 import '../screens/activity/create/create_activity.dart';
 import '../screens/common/music_visualizer.dart';
+import 'debugging.dart';
 import 'local_data_management.dart';
 import 'navigation_management.dart';
 import '../config/types.dart';
@@ -269,7 +270,7 @@ class InputOption {
 
       Provider.of<ChatScrollProvider>(context, listen: false).animateToBottom();
     } catch (e) {
-      print("Error in Document File Picking: $e");
+      debug("Error in Document File Picking: $e");
     }
   }
 
@@ -518,7 +519,7 @@ class InputOption {
     contact.familyName = "";
     contact.phones = [Item(label: numberLabel, value: phoneNumber)];
     await ContactsService.addContact(contact);
-    print("Here");
+    debug("Here");
   }
 
   Future sendSupportMail(String subject, String body) async {
@@ -534,7 +535,7 @@ class InputOption {
     try {
       await launchUrl(Uri.parse(url));
     } catch (e) {
-      debugPrint('Support Mail Sending Error: ${e.toString()}');
+      debug('Support Mail Sending Error: ${e.toString()}');
     }
   }
 
@@ -548,7 +549,7 @@ class InputOption {
     try {
       launchUrl(Uri.parse(url));
     } catch (e) {
-      print("Error in Open Url:  $e");
+      debug("Error in Open Url:  $e");
     }
   }
 
@@ -595,7 +596,7 @@ class InputOption {
         .getVideoDuration(File(data["videoPath"]));
 
     if (duration.inSeconds <= Timings.videoDurationInSec) {
-      print('Video Duration: ${duration.inSeconds}');
+      debug('Video Duration: ${duration.inSeconds}');
 
       Navigation.intent(
           context,
@@ -637,7 +638,7 @@ class InputOption {
 
   commonCreateActivityNavigation(ActivityContentType activityContentType,
       {required Map<String, dynamic> data}) {
-    print("Navigation at");
+    debug("Navigation at");
 
     Navigation.intent(
         context,
@@ -718,7 +719,7 @@ class InputOption {
             Navigator.pop(context);
             Navigator.pop(context);
 
-            print("Duration in sec: $durationInSec");
+            debug("Duration in sec: $durationInSec");
 
             if (durationInSec == null ||
                 durationInSec > Timings.audioDurationInSec) {
@@ -792,13 +793,13 @@ class InputOption {
 
     if (file == null) return;
 
-    print("File: ${file.path}");
+    debug("File: ${file.path}");
 
     final int? durationInSec =
         await Provider.of<SongManagementProvider>(context, listen: false)
             .getDurationInSec(File(file.path).path);
 
-    print("Duration in Sec: $durationInSec");
+    debug("Duration in Sec: $durationInSec");
 
     if (durationInSec == null || durationInSec > Timings.audioDurationInSec) {
       showToast(context,

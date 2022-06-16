@@ -11,6 +11,7 @@ import '../../config/text_style_collection.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/storage/storage_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/navigation_management.dart';
 import '../../config/types.dart';
@@ -423,7 +424,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getChatHistory(widget.connData["id"], widget.connData["name"]);
 
-    print("Connection Data:   $_chatHistoryData");
+    debug("Connection Data:   $_chatHistoryData");
 
     Provider.of<StorageProvider>(context, listen: false)
         .setImagesCollection(_chatHistoryData[ChatMessageType.image]);

@@ -16,6 +16,7 @@ import 'package:generation/config/types.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/icon_collection.dart';
+import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/input_system_services.dart';
 
@@ -335,7 +336,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
       });
     }
 
-    print("Response: $_response");
+    debug("Response: $_response");
 
     if (!_response["success"]) {
       showToast(context,
@@ -381,7 +382,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     try {
       final _data = _response["data"];
 
-      print("Data to Store: $_data");
+      debug("Data to Store: $_data");
 
       await _localStorage.createTableForStorePrimaryData();
       _localStorage.createTableForConnectionsPrimaryData();

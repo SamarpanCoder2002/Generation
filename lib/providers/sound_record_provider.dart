@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:record/record.dart';
 
+import '../services/debugging.dart';
 import '../services/permission_management.dart';
 
 class SoundRecorderProvider extends ChangeNotifier {
@@ -21,11 +22,11 @@ class SoundRecorderProvider extends ChangeNotifier {
       notifyListeners();
     }
 
-    print("Voice Store Dir Path: $_voiceStoreDirPath");
+    debug("Voice Store Dir Path: $_voiceStoreDirPath");
 
     final _voiceStoreFilePath = createAudioFile(dirPath: _voiceStoreDirPath!, name: 'Voice Message');
 
-    print("Voice Store File PAth: $_voiceStoreFilePath");
+    debug("Voice Store File PAth: $_voiceStoreFilePath");
 
     bool result = await _record.hasPermission();
 

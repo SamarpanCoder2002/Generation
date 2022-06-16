@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../config/time_collection.dart';
 import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/sound_provider.dart';
+import '../../../services/debugging.dart';
 import '../../common/music_visualizer.dart';
 
 class ActivityViewer extends StatefulWidget {
@@ -34,7 +35,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
 
   @override
   void initState() {
-    print('Activity: ${widget.activityData}');
+    debug('Activity: ${widget.activityData}');
     _scrollController.addListener(_scrollListener);
 
     if (widget.activityData.type == ActivityContentType.audio.toString()) {
@@ -125,7 +126,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
   }
 
   _imageActivityShow() {
-    print("Image data is: ${widget.activityData.message}");
+    debug("Image data is: ${widget.activityData.message}");
 
     return Stack(
       children: [
@@ -203,7 +204,7 @@ class _ActivityViewerState extends State<ActivityViewer> {
     final _pollShowProvider = Provider.of<PollShowProvider>(context);
     final _pollAnsCollection = _pollShowProvider.getPollAnswers();
 
-    print("Updated Data: ${_pollShowProvider.getIndexedAnswerValue(0)}");
+    debug("Updated Data: ${_pollShowProvider.getIndexedAnswerValue(0)}");
 
     return Container(
       width: MediaQuery.of(context).size.width,

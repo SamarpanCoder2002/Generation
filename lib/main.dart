@@ -8,6 +8,7 @@ import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/providers/providers_collection.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
+import 'package:generation/services/debugging.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
@@ -71,7 +72,7 @@ Future<void> notificationInitialize() async {
 }
 
 Future<void> backgroundMsgAction(RemoteMessage message) async {
-  print("Background MEssage is: ${message.data}");
+  debug("Background MEssage is: ${message.data}");
 }
 
 void foregroundMessageAction(RemoteMessage msgEvent) async {

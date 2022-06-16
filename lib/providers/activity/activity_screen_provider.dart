@@ -7,6 +7,7 @@ import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/types.dart';
+import '../../services/debugging.dart';
 import '../sound_provider.dart';
 
 class ActivityProvider extends ChangeNotifier {
@@ -72,7 +73,7 @@ class ActivityProvider extends ChangeNotifier {
         durationInSec =
             int.parse(_currentActivityData.additionalThings["duration"]);
 
-        print('Duration in sec top: $durationInSec');
+        debug('Duration in sec top: $durationInSec');
 
         if (_currentActivityData.type == ActivityContentType.audio.toString()) {
           durationInSec += 1;
@@ -210,7 +211,7 @@ class ActivityProvider extends ChangeNotifier {
         durationInSec =
             int.parse(_newestActivityData.additionalThings["duration"]);
 
-        print('Duration in sec: $durationInSec');
+        debug('Duration in sec: $durationInSec');
 
         if (_newestActivityData.type == ActivityContentType.audio.toString()) {
           durationInSec += 1;

@@ -12,7 +12,7 @@ class GoogleAuth {
       if (!await googleSignIn.isSignedIn()) {
         final user = await googleSignIn.signIn();
         if (user == null) {
-          print("Google Sign In Not Completed");
+          debug("Google Sign In Not Completed");
         } else {
           final GoogleSignInAuthentication googleAuth =
               await user.authentication;
@@ -34,17 +34,17 @@ class GoogleAuth {
           _userCollectedData["profilePic"] = _userData?.photoURL ?? "";
           _userCollectedData["id"] = _userData?.uid ?? "";
 
-          print("User Data: $_userData");
+          debug("User Data: $_userData");
 
           return _userCollectedData;
         }
       } else {
-        print("Already Logged In");
+        debug("Already Logged In");
         await logOut();
         return await logIn();
       }
     } catch (e) {
-      print("Google LogIn Error: ${e.toString()}");
+      debug("Google LogIn Error: ${e.toString()}");
       return null;
     }
   }

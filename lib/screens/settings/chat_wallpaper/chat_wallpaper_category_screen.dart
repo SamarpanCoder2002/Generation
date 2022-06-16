@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../../../providers/network_management_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/wallpaper/wallpaper_provider.dart';
+import '../../../services/debugging.dart';
 import '../../../services/device_specific_operations.dart';
 
 class ChatWallpaperScreen extends StatefulWidget {
@@ -208,7 +209,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     imgPath: _singleImagePath,
                     contentFor: widget.contentFor,
                   ))).then((value) {
-        print("nOw");
+        debug("nOw");
         changeContextTheme(_isDarkMode);
       });
     } else {
@@ -219,7 +220,7 @@ class _ChatWallpaperScreenState extends State<ChatWallpaperScreen> {
                     wallpaperType: wallpaperData["type"],
                     contentFor: widget.contentFor,
                   ))).then((value) {
-        print("nOw");
+        debug("nOw");
         changeContextTheme(_isDarkMode);
       });
     }

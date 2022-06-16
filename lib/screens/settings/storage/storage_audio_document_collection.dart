@@ -26,7 +26,7 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
   _getBody(BuildContext context) {
     if (isAudio &&
         Provider.of<StorageProvider>(context).getAudioCollection().isEmpty) {
-      print("here");
+      debug("here");
       return _emptyMedia('No Audios Found', context);
     }
 

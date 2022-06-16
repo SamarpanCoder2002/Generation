@@ -16,6 +16,7 @@ import 'package:dio/dio.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_collection.dart';
+import '../../services/debugging.dart';
 import '../../services/local_data_management.dart';
 import '../../config/types.dart';
 import 'chat_scroll_provider.dart';
@@ -77,7 +78,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     try {
       Navigator.pop(context);
     } catch (e) {
-      print("Error in Pop Up Screen:  $e");
+      debug("Error in Pop Up Screen:  $e");
     }
   }
 
@@ -240,10 +241,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
           name: _msgData.toString().split('/').last);
     }
 
-    print("Media Message Data is:   $_mediaStorePath\n\n");
+    debug("Media Message Data is:   $_mediaStorePath\n\n");
 
     _dio.download(_msgData, _mediaStorePath).whenComplete(() async {
-      print("Media Download Completed");
+      debug("Media Download Completed");
       message.values.toList()[0][MessageData.message] = _mediaStorePath;
       _dbOperations.deleteMediaFromFirebaseStorage(_msgData);
 
@@ -266,7 +267,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     _dio
         .download(_msgAdditionalData["thumbnail"], _thumbnailPath)
         .whenComplete(() {
-      print("Thumbnail Download Completed");
+      debug("Thumbnail Download Completed");
       _msgAdditionalData["thumbnail"] = _thumbnailPath;
       message.values.toList()[0][MessageData.additionalData] =
           DataManagement.toJsonString(_msgAdditionalData);
@@ -391,7 +392,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   void _onFocusChange() {
-    debugPrint("Focus: ${_focus.hasFocus.toString()}");
+    debug("Focus: ${_focus.hasFocus.toString()}");
   }
 
   setSingleNewMessage(incomingMessageSet) {
@@ -562,7 +563,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .notificationPermitted(incomingConnId ?? getPartnerUserId());
 
-    print("Is notification Permitted:  $_isNotificationPermitted");
+    debug("Is notification Permitted:  $_isNotificationPermitted");
 
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&

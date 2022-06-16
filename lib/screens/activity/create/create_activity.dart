@@ -21,6 +21,7 @@ import '../../../providers/activity/activity_screen_provider.dart';
 import '../../../providers/chat/messaging_provider.dart';
 import '../../../providers/sound_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../../services/debugging.dart';
 import '../../common/music_visualizer.dart';
 
 class CreateActivity extends StatefulWidget {
@@ -70,7 +71,7 @@ class _CreateActivityState extends State<CreateActivity> {
       child: WillPopScope(
         onWillPop: () async {
           if (widget.activityContentType == ActivityContentType.audio) {
-            print("At Here on Will Pop");
+            debug("At Here on Will Pop");
             Provider.of<SongManagementProvider>(context, listen: false)
                 .stopSong();
           }
@@ -319,7 +320,7 @@ class _CreateActivityState extends State<CreateActivity> {
     map["additionalThings"]["remoteData"] =
         DataManagement.toJsonString(_serverStoredData);
 
-    print('Modified activity data: $map');
+    debug('Modified activity data: $map');
 
     Provider.of<ActivityProvider>(context, listen: false)
         .addNewActivity({...map}, map["holderId"]);

@@ -1,33 +1,35 @@
 import 'package:flutter/services.dart';
 
+import 'debugging.dart';
+
 class NativeCallback {
   static const MethodChannel _platform =
       MethodChannel("com.samarpandasgupta.generation/nativeCallBack");
 
   Future<void> callForCancelNotifications() async {
-    print('Here in Notification Clear Native Calling');
+    debug('Here in Notification Clear Native Calling');
 
     final result = await _platform.invokeMethod('cancelAllNotification', '');
-    print('Call For Notification Result: $result');
+    debug('Call For Notification Result: $result');
   }
 
   Future<bool> checkInternet() async {
-    print('Here in Internet Connectivity Native Calling');
+    debug('Here in Internet Connectivity Native Calling');
 
     final bool result =
         await _platform.invokeMethod('checkNetworkConnectivity', '');
-    print('Network Connectivity: $result');
+    debug('Network Connectivity: $result');
 
     return result;
   }
 
   Future<String> getTheVideoThumbnail({required String videoPath}) async {
-    print('Thumbnail Take');
+    debug('Thumbnail Take');
 
     final String thumbnailPath = await _platform
         .invokeMethod('makeVideoThumbnail', {'videoPath': videoPath});
 
-    print("Thumbnail Path is: $thumbnailPath");
+    debug("Thumbnail Path is: $thumbnailPath");
 
     return thumbnailPath;
   }

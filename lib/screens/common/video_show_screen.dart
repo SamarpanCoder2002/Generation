@@ -6,6 +6,8 @@ import 'package:generation/providers/video_management/video_show_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../services/debugging.dart';
+
 class VideoShowScreen extends StatefulWidget {
   final File file;
 
@@ -27,7 +29,7 @@ class _VideoShowScreenState extends State<VideoShowScreen> {
 
   @override
   void dispose() {
-    debugPrint("AT DISPOSE VIDEO SHOW SCREEN");
+    debug("AT DISPOSE VIDEO SHOW SCREEN");
     _videoController.pause();
     _videoController.dispose();
     super.dispose();

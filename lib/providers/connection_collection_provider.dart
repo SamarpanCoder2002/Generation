@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../config/text_collection.dart';
 import '../db_operations/types.dart';
+import '../services/debugging.dart';
 import '../services/directory_management.dart';
 import '../services/toast_message_show.dart';
 import 'chat/messaging_provider.dart';
@@ -87,7 +88,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       _managingRemoveConnRequest(context);
       _dbOperations.getAvailableUsersData(context);
     } catch (e) {
-      print("Error in Fetch Local Connected Users: $e");
+      debug("Error in Fetch Local Connected Users: $e");
     }
   }
 
@@ -210,7 +211,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   }
 
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
-    print('Activity Collection length: ${activityCollection.length}');
+    debug('Activity Collection length: ${activityCollection.length}');
 
     for (final activity in activityCollection) {
       final _oldParticularData = await _localStorage.getParticularActivity(
@@ -218,9 +219,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
               DataManagement.generateTableNameForNewConnectionActivity(connId),
           activityId: activity["id"]);
 
-      print('Suspected Activity id Top: ${activity["id"]}');
+      debug('Suspected Activity id Top: ${activity["id"]}');
 
-      print('Old Particular Activity Data:  $_oldParticularData');
+      debug('Old Particular Activity Data:  $_oldParticularData');
 
       if (_oldParticularData.isEmpty) {
         if (_activityConnDataCollection.isEmpty) {
@@ -262,7 +263,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     }
 
     _dio.download(activity['message'], _mediaStorePath).whenComplete(() async {
-      print("${activity['type']} Activity Media Download Completed");
+      debug("${activity['type']} Activity Media Download Completed");
       activity['message'] = _mediaStorePath;
 
       _storeActivityInLocalStorage(activity, connId, insert: false);
@@ -411,11 +412,11 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   getUsersMap(String id) => _localConnectedUsersMap[id];
 
   bool notificationPermitted(String connId) {
-    print("notification checkid id: $connId");
+    debug("notification checkid id: $connId");
 
-    print(
+    debug(
         "notification: ${_localConnectedUsersMap[connId][DBPath.notification]}");
-    print(
+    debug(
         "notification list: ${_localConnectedUsersMap[connId][DBPath.notificationDeactivated]}");
 
     bool _checkInNotificationDeactivatedList() {

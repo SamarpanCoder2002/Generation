@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../services/debugging.dart';
+
 class AllAvailableConnectionsProvider extends ChangeNotifier {
   List<dynamic> _searchedConnections = [];
   List<dynamic> _allAvailableConnections = [];
@@ -16,7 +18,7 @@ class AllAvailableConnectionsProvider extends ChangeNotifier {
   }
 
   removeIndexFromSearch(int indexInSearch) {
-    print("Here After Sent Connection Request");
+    debug("Here After Sent Connection Request");
   if(indexInSearch > _searchedConnections.length - 1) return;
     _searchedConnections.removeAt(indexInSearch);
     notifyListeners();

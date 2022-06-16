@@ -13,7 +13,7 @@ class EmailAuth {
       userCredential.user?.sendEmailVerification();
       return true;
     } catch (e) {
-      print("Sign-up Error is: $e");
+      debug("Sign-up Error is: $e");
     }
 
     return false;
@@ -38,7 +38,7 @@ class EmailAuth {
 
       return _data;
     } catch (e) {
-      print("Sign Up Error is: $e");
+      debug("Sign Up Error is: $e");
     }
 
     _data["success"] = false;

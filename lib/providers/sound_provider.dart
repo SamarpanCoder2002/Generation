@@ -70,7 +70,7 @@ class SongManagementProvider extends ChangeNotifier {
 
         await _justAudioPlayer.play();
       } else {
-        print(_justAudioPlayer.processingState);
+        debug(_justAudioPlayer.processingState);
         if (_justAudioPlayer.processingState == ProcessingState.idle) {
           await _justAudioPlayer.setFilePath(_currentSongPath!);
           setSongPlaying(update: update);
@@ -88,7 +88,7 @@ class SongManagementProvider extends ChangeNotifier {
             ProcessingState.completed) {}
       }
     } catch (e) {
-      print('Audio Playing Error: $e');
+      debug('Audio Playing Error: $e');
     }
   }
 

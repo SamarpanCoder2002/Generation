@@ -13,6 +13,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../config/stored_string_collection.dart';
 import '../config/text_collection.dart';
+import 'debugging.dart';
 import 'local_data_management.dart';
 
 /// For Current User Data
@@ -83,7 +84,7 @@ class LocalStorage {
     final storagePermissionResponse =
         await _permissionManagement.storagePermission();
     if (!storagePermissionResponse) {
-      print("Storage Permission Required under local database services");
+      debug("Storage Permission Required under local database services");
       return _database;
     } else {
       final Directory? directory = await getExternalStorageDirectory();
@@ -135,7 +136,7 @@ class LocalStorage {
 
       _createTableForActivity(tableName: DbData.myActivityTable);
     } catch (e) {
-      print(
+      debug(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
     }
   }
@@ -190,7 +191,7 @@ class LocalStorage {
         await db.rawQuery("""SELECT * FROM ${DbData.currUserTable}""");
 
     if (result.isEmpty) {
-      print("No Current User Data Found From Local Database");
+      debug("No Current User Data Found From Local Database");
       return;
     }
 
@@ -206,7 +207,7 @@ class LocalStorage {
       await db.execute(
           """CREATE TABLE ${DbData.connectionsTable}($_conId TEXT PRIMARY KEY, $_conUserName TEXT, $_conProfilePic TEXT, $_conUserAbout TEXT, $_conChatWallpaperPath TEXT, $_conLastMsgData TEXT, $_conNotSeenMsgCount TEXT, $_conChatWallpaperManually TEXT, $_conNotificationManually TEXT)""");
     } catch (e) {
-      print(
+      debug(
           "Error in Local Storage Create Table For Store Primary Data: ${e.toString()}");
     }
   }
@@ -267,7 +268,7 @@ class LocalStorage {
             where: """$_conId = "$id" """);
       }
     } catch (e) {
-      print("ERROR in insertUpdateConnectionPrimaryData: $e");
+      debug("ERROR in insertUpdateConnectionPrimaryData: $e");
     }
   }
 
@@ -279,7 +280,7 @@ class LocalStorage {
     final _rowAffected =
         await db.delete(DbData.connectionsTable, where: """$_conId = "$id" """);
 
-    print("row Affected:  $_rowAffected");
+    debug("row Affected:  $_rowAffected");
 
     if (_rowAffected == 1 && allowDeleteOtherRelatedTable) {
       deleteDataFromParticularChatConnTable(
@@ -318,7 +319,7 @@ class LocalStorage {
       await db.execute(
           """CREATE TABLE $tableName($_msgId TEXT PRIMARY KEY, $_msgType TEXT, $_msgHolder TEXT, $_msgData TEXT, $_msgDate TEXT, $_msgTime TEXT, $_msgAdditionalData TEXT)""");
     } catch (e) {
-      print(
+      debug(
           "Error in Local Storage Create Table For Connection Chat: ${e.toString()}");
     }
   }
@@ -358,7 +359,7 @@ class LocalStorage {
 
     if (msgId == null) {
       await db.delete(tableName);
-      print("Deletion done chat");
+      debug("Deletion done chat");
     } else {
       await db.delete(tableName, where: """$_msgId = "$msgId" """);
     }
@@ -409,7 +410,7 @@ class LocalStorage {
       await db.execute(
           """CREATE TABLE $tableName($_activityHolderId TEXT, $_activityId TEXT PRIMARY KEY, $_activityMessage TEXT, $_activityType TEXT, $_activityDate TEXT, $_activityTime TEXT, $_activityAdditionalThings TEXT, $_activityVisited TEXT)""");
     } catch (e) {
-      print("Error in _createTableForActivity Chat: ${e.toString()}");
+      debug("Error in _createTableForActivity Chat: ${e.toString()}");
     }
   }
 
@@ -430,7 +431,7 @@ class LocalStorage {
 
       final Map<String, dynamic> _activityData = <String, dynamic>{};
 
-      print('Suspected Activity id Low: ${activityId}');
+      debug('Suspected Activity id Low: ${activityId}');
 
       _activityData[_activityId] = activityId;
       _activityData[_activityHolderId] = activityHolderId;
@@ -442,7 +443,7 @@ class LocalStorage {
           DataManagement.toJsonString(additionalData);
       _activityData[_activityVisited] = "${activityVisited ?? 'false'}";
 
-      print('Activity Data:  $_activityData     dbOperation: ${dbOperation}');
+      debug('Activity Data:  $_activityData     dbOperation: ${dbOperation}');
 
       dbOperation == DBOperation.insert
           ? db.insert(tableName, _activityData)
@@ -451,7 +452,7 @@ class LocalStorage {
 
       return true;
     } catch (e) {
-      print('Error in Insert or update Activity Data: $e');
+      debug('Error in Insert or update Activity Data: $e');
       return false;
     }
   }
@@ -461,11 +462,11 @@ class LocalStorage {
 
     if (activityId == null) {
       await db.delete(tableName);
-      print("Delete Activity");
+      debug("Delete Activity");
     } else {
       final _response = await db
           .delete(tableName, where: """$_activityId = "$activityId" """);
-      print('Delete Activity Response: $_response   Activity Id: $activityId');
+      debug('Delete Activity Response: $_response   Activity Id: $activityId');
     }
   }
 
@@ -498,7 +499,7 @@ class LocalStorage {
         withStoragePermission ? await database : await _getDatabase();
     return await db.rawQuery(""" SELECT * FROM $tableName """);
     // } catch (e) {
-    //   print('Get all activity error :${e}');
+    //   debug('Get all activity error :${e}');
     //   return [];
     // }
   }
@@ -510,7 +511,7 @@ class LocalStorage {
       return await db.rawQuery(
           """ SELECT * FROM $tableName WHERE $_activityVisited = "$seen" """);
     } catch (e) {
-      print('Get all activity error :${e}');
+      debug('Get all activity error :${e}');
       return [];
     }
   }
@@ -548,9 +549,9 @@ class LocalStorage {
 
     await DataManagement.storeStringData(
             StoredString.accCreatedBefore, DataManagement.toJsonString(_data))
-        .then((value) => print("Stored Data"));
+        .then((value) => debug("Stored Data"));
 
-    print(
+    debug(
         "stored Data gEr: ${await DataManagement.getStringData(StoredString.accCreatedBefore)}");
   }
 
@@ -587,22 +588,22 @@ class LocalStorage {
 
   deleteOwnExpiredActivity({String tableName = DbData.myActivityTable}) async {
     //try {
-    print('Entry 1');
+    debug('Entry 1');
 
     final Database db = await database;
 
-    print('Entry 2');
+    debug('Entry 2');
     final DBOperations _dbOperations = DBOperations();
-    print('Entry 3');
+    debug('Entry 3');
     final _activities = await db.rawQuery(""" SELECT * FROM $tableName """);
-    print('Entry 4');
+    debug('Entry 4');
     final _currDateTime = DateTime.now();
 
-    print('All Activities Collection: $_activities');
+    debug('All Activities Collection: $_activities');
 
     for (final activity in _activities) {
       final _additionalThings = activity[_activityAdditionalThings] ?? "";
-      print('Additional Things: $_additionalThings');
+      debug('Additional Things: $_additionalThings');
       final _remoteData = DataManagement.fromJsonString(
           (DataManagement.fromJsonString(
                   _additionalThings.toString())["remoteData"]) ??
@@ -619,7 +620,7 @@ class LocalStorage {
           tableName: tableName);
     }
     // } catch (e) {
-    //   print('deleteMyExpiredActivity error :$e');
+    //   debug('deleteMyExpiredActivity error :$e');
     //   return [];
     // }
   }
@@ -637,7 +638,7 @@ class LocalStorage {
             """ SELECT * FROM ${DataManagement.generateTableNameForNewConnectionActivity(conn[_conId])} """);
         _connData[conn[_conId]] = _activities;
       } catch (e) {
-        debugPrint('Error in Get Ids: $e');
+        debug('Error in Get Ids: $e');
       }
     }
 
@@ -667,12 +668,12 @@ class LocalStorage {
     final Duration _diffDateTime = currDateTime.difference(formattedDateTime);
 
     if (_diffDateTime.inMinutes >= 2) {
-      print('Activity Deleting Msg: ${activity}');
+      debug('Activity Deleting Msg: ${activity}');
       await deleteActivity(
           tableName: tableName, activityId: activity[_activityId]);
     }
     // } catch (e) {
-    //   print('Error in _deleteEligibleActivities: $e');
+    //   debug('Error in _deleteEligibleActivities: $e');
     // }
   }
 }

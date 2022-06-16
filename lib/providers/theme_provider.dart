@@ -15,7 +15,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   setThemeData(ThemeModeTypes themeModeType) async {
-    print("Theme Mode Type: $themeModeType");
+    debug("Theme Mode Type: $themeModeType");
     if (_themeModeType == themeModeType) return;
 
     _themeModeType = themeModeType;
@@ -26,7 +26,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   _filtration(String? examineThemeData) {
-    print("Examine Theme Data: $examineThemeData");
+    debug("Examine Theme Data: $examineThemeData");
     if (examineThemeData == null) return ThemeModeTypes.darkMode;
 
     if (examineThemeData == ThemeModeTypes.systemMode.toString()) {

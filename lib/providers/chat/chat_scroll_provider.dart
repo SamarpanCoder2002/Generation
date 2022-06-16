@@ -50,7 +50,7 @@ class ChatScrollProvider extends ChangeNotifier {
         _scrollController.position.maxScrollExtent,
       );
     } catch (e) {
-      print("Direct Bottom Error:  $e");
+      debug("Direct Bottom Error:  $e");
     }
   }
 
@@ -74,7 +74,7 @@ class ChatScrollProvider extends ChangeNotifier {
     final scrollDirection = _scrollController.position.userScrollDirection;
 
     if (!_comeAtTop && _scrollController.position.pixels == 0) {
-      print("At Top of Chat Messaging Section");
+      debug("At Top of Chat Messaging Section");
 
       /// Call Next Amount of local messages from here
       _comeAtTop = true;
