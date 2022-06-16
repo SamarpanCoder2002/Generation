@@ -353,16 +353,24 @@ class LocalStorage {
   }
 
   /// Delete Particular Connection Chat Message Table
-  deleteDataFromParticularChatConnTable(
+  Future<bool> deleteDataFromParticularChatConnTable(
       {required String tableName, String? msgId}) async {
-    final Database db = await database;
+    try{
+      final Database db = await database;
 
-    if (msgId == null) {
-      await db.delete(tableName);
-      debugShow("Deletion done chat");
-    } else {
-      await db.delete(tableName, where: """$_msgId = "$msgId" """);
+      if (msgId == null) {
+        await db.delete(tableName);
+        debugShow("Deletion done chat");
+      } else {
+        await db.delete(tableName, where: """$_msgId = "$msgId" """);
+      }
+
+      return true;
+    }catch(e){
+      print('Error in deleteDataFromParticularChatConnTable: $e');
+      return false;
     }
+
   }
 
   /// Get Paginated Data from Connection Chat Message Table

@@ -401,6 +401,11 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  deleteParticularMessage(msgId) {
+    _messageData.removeWhere((element) => element.keys.toList()[0] == msgId);
+    notifyListeners();
+  }
+
   clearMessageData() {
     _messageData.clear();
     notifyListeners();
@@ -755,4 +760,16 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
     return _notificationData;
   }
+
+  Map<String, dynamic> getJson(msgId, ChatMessageModel msgData) => {
+        msgId: {
+          "id": msgId,
+          "type": msgData.type,
+          "holder": msgData.holder,
+          "message": msgData.message,
+          "date": msgData.date,
+          "time": msgData.time,
+          "additionalData": msgData.additionalData
+        }
+      };
 }

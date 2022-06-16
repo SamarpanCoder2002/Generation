@@ -39,11 +39,11 @@ class DBOperations {
 
   FirebaseStorage get _storageInstance => FirebaseStorage.instance;
 
-  initializeFirebase()async{
+  initializeFirebase() async {
     try {
       //if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp();
-     // }
+      await Firebase.initializeApp();
+      // }
     } catch (e) {
       debugShow(
           'Error in Storage Element Delete Firebase Initialization: ${e.toString()}');
@@ -65,8 +65,7 @@ class DBOperations {
     final _isCreatedBefore = await isAccountCreatedBefore();
     if (_isCreatedBefore['success']) return;
 
-    showToast(
-        title: "Account Not Found", toastIconType: ToastIconType.info);
+    showToast(title: "Account Not Found", toastIconType: ToastIconType.info);
 
     DataManagement.clearSharedStorage();
     _localStorage.closeDatabase();
@@ -517,15 +516,30 @@ class DBOperations {
     return data;
   }
 
-  deleteParticularActivity(data){
-
+  deleteParticularActivity(data) {
     debugShow('Delete Particular Activity From Remote');
     _getInstance
         .doc(
-        '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
+            '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
         .set({
       DBPath.data: FieldValue.arrayRemove([data]),
     }, SetOptions(merge: true));
+  }
+
+  deleteForEveryoneMsg(String msgId, String partnerId) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
+          .set({
+        SpecialOperationTypes.deleteMsg: FieldValue.arrayUnion([msgId])
+      }, SetOptions(merge: true));
+
+      return true;
+    } catch (e) {
+      debugShow("ERROR in deleteForEveryoneMsg: $e");
+      return false;
+    }
   }
 }
 
