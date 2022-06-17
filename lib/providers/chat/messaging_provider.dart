@@ -32,6 +32,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   String _localWallpaperPath = '';
   StreamSubscription? _realTimeMessagingSubscription;
   StreamSubscription? _realTimeConnSubscription;
+  StreamSubscription? _realTimeSpecialOperationSubscription;
   late BuildContext context;
   Map<String, dynamic> _currStatus = {};
   Map<String, dynamic> _replyHolderMsg = {};
@@ -156,6 +157,32 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         }
       }
     });
+  }
+
+  getSpecialOperationDataRealTime(String partnerId){
+      _realTimeSpecialOperationSubscription = _realTimeOperations.getRealTimeSpecialOperationsData(partnerId).listen((docSnapShot) {
+        final Map<String, dynamic>? _docData = docSnapShot.data();
+
+        print('Doc Data is: $_docData');
+
+        if(_docData == null) return;
+
+        final _deletedMessages = _docData[SpecialOperationTypes.deleteMsg];
+        _deleteSpecialOperationMessages(_deletedMessages, partnerId);
+
+      });
+  }
+
+  _deleteSpecialOperationMessages(_deletedMessages, partnerId)async{
+    if(_deletedMessages == null) return;
+
+    for(final msgId in _deletedMessages){
+      await _localStorage.deleteDataFromParticularChatConnTable(tableName: DataManagement.generateTableNameForNewConnectionChat(partnerId), msgId: msgId);
+      deleteParticularMessage(msgId);
+    }
+
+    _dbOperations.deleteSpecialOperationMsgIdSet(partnerId);
+
   }
 
   setToken(String token) {
@@ -308,6 +335,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   destroyRealTimeMessaging() {
     _realTimeMessagingSubscription?.cancel();
     _realTimeConnSubscription?.cancel();
+    _realTimeSpecialOperationSubscription?.cancel();
     resetLocalWallpaper();
     clearToken();
     notifyListeners();
@@ -472,6 +500,15 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     if (_selectedMessage.length > 1) return false;
     return _selectedMessage.values.toList()[0].type ==
         ChatMessageType.text.toString();
+  }
+
+  bool eligibleForDeleteForEveryOne(){
+    for(ChatMessageModel msg in _selectedMessage.values.toList()){
+      print('Message Type: ${msg.holder}');
+      if(msg.holder == MessageHolderType.other.toString()) return false;
+    }
+
+    return true;
   }
 
   clearSelectedMsgCollection() {
