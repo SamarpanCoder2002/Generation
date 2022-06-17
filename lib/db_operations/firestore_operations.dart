@@ -541,6 +541,22 @@ class DBOperations {
       return false;
     }
   }
+
+  deleteSpecialOperationMsgIdSet(partnerId)async{
+    try {
+      await _getInstance
+          .doc(
+          '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
+          .set({
+        SpecialOperationTypes.deleteMsg: []
+      }, SetOptions(merge: true));
+
+      return true;
+    } catch (e) {
+      debugShow("ERROR in deleteSpecialOperationMsgIdSet: $e");
+      return false;
+    }
+  }
 }
 
 class RealTimeOperations {
@@ -587,6 +603,12 @@ class RealTimeOperations {
       .doc(
           '${DBPath.userCollection}/$currUid/${DBPath.specialRequest}/${DBPath.removeConn}')
       .snapshots();
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>>
+      getRealTimeSpecialOperationsData(String partnerId) => _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.userConnections}/$partnerId/${DBPath.contents}/${DBPath.specialOperation}')
+          .snapshots();
 }
 
 class MessagingOperation {

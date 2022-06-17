@@ -42,6 +42,8 @@ class _ChatScreenState extends State<ChatScreen> {
         .getOldStoredChatMessages();
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .getConnectionDataRealTime(widget.connectionData["id"], context);
+    Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        .getSpecialOperationDataRealTime(widget.connectionData["id"]);
 
     changeOnlyContextChatColor(_isDarkMode);
     super.initState();
@@ -162,7 +164,10 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(
             height: 10,
           ),
-          MessagingSection(context: context, connData: widget.connectionData,),
+          MessagingSection(
+            context: context,
+            connData: widget.connectionData,
+          ),
           const SizedBox(
             height: 10,
           ),

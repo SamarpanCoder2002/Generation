@@ -153,7 +153,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          width: 18,
+          width: 10,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,9 +164,9 @@ class ChatBoxHeaderSection extends StatelessWidget {
                 icon: const Icon(Icons.reply_outlined),
                 color: AppColors.getIconColor(_isDarkMode),
               ),
-            const SizedBox(
-              width: 10,
-            ),
+            // const SizedBox(
+            //   width: 10,
+            // ),
             IconButton(
               icon: Image.asset(
                 IconImages.forwardImagePath,
@@ -178,9 +178,9 @@ class ChatBoxHeaderSection extends StatelessWidget {
                   const CommonSelectionScreen(
                       commonRequirement: CommonRequirement.forwardMsg)),
             ),
-            const SizedBox(
-              width: 10,
-            ),
+            // const SizedBox(
+            //   width: 10,
+            // ),
             IconButton(
               onPressed: _deleteMsg,
               icon: const Icon(Icons.delete_outline_outlined),
@@ -263,6 +263,10 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final _isDarkMode =
         Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
+    final _eligibleForDeleteForEveryOne =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .eligibleForDeleteForEveryOne();
+
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -277,7 +281,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
                       .copyWith(fontSize: 20),
                 ),
               ),
-              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actionsAlignment: _eligibleForDeleteForEveryOne?MainAxisAlignment.spaceBetween:MainAxisAlignment.center,
               actions: [
                 commonTextButton(
                     btnText: "Delete For Me",
@@ -285,12 +289,13 @@ class ChatBoxHeaderSection extends StatelessWidget {
                     borderColor: _isDarkMode
                         ? AppColors.darkBorderGreenColor
                         : AppColors.lightBorderGreenColor),
-                commonTextButton(
-                    btnText: "Delete For Everyone",
-                    onPressed: _deleteForEveryOne,
-                    borderColor: _isDarkMode
-                        ? AppColors.darkBorderGreenColor
-                        : AppColors.lightBorderGreenColor),
+                if (_eligibleForDeleteForEveryOne)
+                  commonTextButton(
+                      btnText: "Delete For Everyone",
+                      onPressed: _deleteForEveryOne,
+                      borderColor: _isDarkMode
+                          ? AppColors.darkBorderGreenColor
+                          : AppColors.lightBorderGreenColor),
               ],
             ));
   }
