@@ -207,13 +207,12 @@ class DBOperations {
             '${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}')
         .get();
 
-    try{
+    try {
       Provider.of<SentConnectionsProvider>(context, listen: false)
           .setConnections(_sentData.docs);
-    }catch(e){
+    } catch (e) {
       debugShow('Error in getSentRequestUsersData: $e');
     }
-
 
     return _sentData.docs;
   }
@@ -412,7 +411,8 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.messages}')
           .set({
-        DBPath.data: FieldValue.arrayUnion([Secure.encode(DataManagement.toJsonString(msgData))])
+        DBPath.data: FieldValue.arrayUnion(
+            [Secure.encode(DataManagement.toJsonString(msgData))])
       }, SetOptions(merge: true));
 
       if (isNotificationPermitted) {
@@ -440,8 +440,6 @@ class DBOperations {
 
   Future<void> deleteMediaFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
-    debugShow('Delete Media File: $fileName');
-
     try {
       try {
         if (specialPurpose && Firebase.apps.isEmpty) {
@@ -455,7 +453,6 @@ class DBOperations {
 
       final Reference reference =
           FirebaseStorage.instance.ref().storage.refFromURL(fileName);
-      debugShow('Reference is: $reference');
 
       await reference.delete();
 
@@ -466,9 +463,8 @@ class DBOperations {
   }
 
   updateActiveStatus(Map<String, dynamic> status) async {
-    await _getInstance
-        .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.status: Secure.encode(DataManagement.toJsonString(status))});
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update(
+        {DBPath.status: Secure.encode(DataManagement.toJsonString(status))});
   }
 
   updateNotificationStatus(bool updatedNotification) async {
@@ -516,7 +512,8 @@ class DBOperations {
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
         .set({
-      DBPath.data: FieldValue.arrayUnion([Secure.encode(DataManagement.toJsonString(data))]),
+      DBPath.data: FieldValue.arrayUnion(
+          [Secure.encode(DataManagement.toJsonString(data))]),
     }, SetOptions(merge: true));
 
     return Secure.encode(DataManagement.toJsonString(data));
@@ -547,14 +544,12 @@ class DBOperations {
     }
   }
 
-  deleteSpecialOperationMsgIdSet(partnerId)async{
+  deleteSpecialOperationMsgIdSet(partnerId) async {
     try {
       await _getInstance
           .doc(
-          '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
-          .set({
-        SpecialOperationTypes.deleteMsg: []
-      }, SetOptions(merge: true));
+              '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
+          .set({SpecialOperationTypes.deleteMsg: []}, SetOptions(merge: true));
 
       return true;
     } catch (e) {
