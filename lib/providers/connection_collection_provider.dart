@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/config/types.dart';
@@ -213,7 +214,8 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
     debugShow('Activity Collection length: ${activityCollection.length}');
 
-    for (final activity in activityCollection) {
+    for (var activity in activityCollection) {
+      activity = DataManagement.fromJsonString(Secure.decode(activity));
       final _oldParticularData = await _localStorage.getParticularActivity(
           tableName:
               DataManagement.generateTableNameForNewConnectionActivity(connId),

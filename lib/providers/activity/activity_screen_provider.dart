@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/model/activity_model.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ class ActivityProvider extends ChangeNotifier {
 
   bool get showActivityDetails => _showActivityDetails;
 
-  setActivityDetails(bool incomingActivity){
+  setActivityDetails(bool incomingActivity) {
     _showActivityDetails = incomingActivity;
     notifyListeners();
   }
@@ -174,15 +175,13 @@ class ActivityProvider extends ChangeNotifier {
     if (index > _activityCollection.length - 1) return null;
 
     final _activityData = _activityCollection[index];
-    return ActivityModel.getJson(
-        type: _activityData["type"],
-        holderId: _activityData["holderId"],
-        date: _activityData["date"],
-        time: _activityData["time"],
-        message: _activityData["message"],
-        additionalThings: _activityData["additionalThings"] == null
-            ? {}
-            : DataManagement.fromJsonString(_activityData["additionalThings"]),
+    return ActivityModel.getDecodedJson(
+        type: Secure.decode(_activityData["type"]),
+        holderId: Secure.decode(_activityData["holderId"]),
+        date: Secure.decode(_activityData["date"]),
+        time: Secure.decode(_activityData["time"]),
+        message: Secure.decode(_activityData["message"]),
+        additionalThings: Secure.decode(_activityData["additionalThings"]),
         id: _activityData["id"]);
   }
 

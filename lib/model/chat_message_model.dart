@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:generation/services/encryption_manager.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 
 class ChatMessageModel {

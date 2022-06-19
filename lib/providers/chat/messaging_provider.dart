@@ -10,7 +10,7 @@ import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/network_management_provider.dart';
 import 'package:generation/services/directory_management.dart';
-import 'package:generation/services/encryption_manager.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:generation/config/types.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
@@ -510,7 +511,7 @@ class DBOperations {
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
         .set({
-      DBPath.data: FieldValue.arrayUnion([data]),
+      DBPath.data: FieldValue.arrayUnion([Secure.encode(DataManagement.toJsonString(data))]),
     }, SetOptions(merge: true));
 
     return data;

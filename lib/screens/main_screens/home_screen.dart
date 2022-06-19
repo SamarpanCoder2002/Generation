@@ -8,7 +8,7 @@ import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
-import 'package:generation/services/encryption_manager.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
