@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Provider.of<ConnectionCollectionProvider>(context).getUsersMap(_connId);
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-    final _connName = (_currentActivityData["name"] ?? '').toString();
+    final _connName = Secure.decode(_currentActivityData["name"]);
 
     return Container(
       margin: const EdgeInsets.only(right: 15),
@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     : AppColors.searchBarBgLightMode.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(100),
                 image: DecorationImage(
-                    image: NetworkImage(_currentActivityData["profilePic"]),
+                    image: NetworkImage(Secure.decode(_currentActivityData["profilePic"])),
                     fit: BoxFit.cover),
                 border: Border.all(
                     color: _isDarkMode
@@ -325,17 +325,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 onLongPress: () =>
                     _onChatLongPressed(_connectionData, connectionIndex),
                 child: _commonChatLayout.particularChatConnection(
-                    photo: _connectionData["profilePic"] ?? "",
-                    heading: _connectionData["name"] ?? "",
+                    photo: Secure.decode(_connectionData["profilePic"]),
+                    heading: Secure.decode(_connectionData["name"]),
                     subheading: _getSubHeading(
                         _lastMsgData,
-                        (_connectionData['name'] ?? '')
+                        Secure.decode(_connectionData["name"])
                             .toString()
                             .split(' ')
                             .first),
                     lastMsgTime: Secure.decode(_lastMsgData?["time"]),
                     currentIndex: connectionIndex,
-                    totalPendingMessages: _connectionData["notSeenMsgCount"],
+                    totalPendingMessages:
+                        Secure.decode(_connectionData["notSeenMsgCount"]),
                     bottomMargin:
                         connectionIndex == _totalMessages - 1 ? 40 : null));
           }),
@@ -369,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-    final _connName = (_currentActivityData["name"] ?? '').toString();
+    final _connName = Secure.decode(_currentActivityData["name"]);
 
     _addActivityIcon() {
       return InkWell(
@@ -417,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             : AppColors.lightBorderGreenColor,
                         width: 3),
                     image: DecorationImage(
-                        image: NetworkImage(_currentActivityData["profilePic"]),
+                        image: NetworkImage(Secure.decode(_currentActivityData["profilePic"])),
                         fit: BoxFit.cover)),
                 child: _addActivityIcon()),
             Container(

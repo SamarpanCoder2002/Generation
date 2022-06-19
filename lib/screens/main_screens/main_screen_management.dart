@@ -9,6 +9,7 @@ import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/system_file_management.dart';
 import 'package:intl/intl.dart';
@@ -93,7 +94,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
               BgTask.deleteConnectionActivities['frequencyInMin'] ?? '15')),
     );
 
-    deleteOwnExpiredActivity(stop: false);
+    // deleteOwnExpiredActivity(stop: false);
+    // manageDeleteConnectionsExpiredActivity();
 
     super.initState();
   }
@@ -293,7 +295,7 @@ deleteOwnExpiredActivity(
 
   debugPrint('All Activities Collection: $_activities');
 
-  if (stop) return;
+  //if (stop) return;
 
   for (final activity in _activities) {
     await _deleteEligibleActivities(
@@ -353,8 +355,8 @@ _deleteEligibleActivities(
     required String tableName,
     required bool ownActivity}) async {
   //try {
-  final _date = activity["date"];
-  final _time = activity["time"];
+  final _date = Secure.decode(activity["date"]);
+  final _time = Secure.decode(activity["time"]);
   final LocalStorage _localStorage = LocalStorage();
 
   debugPrint('Activity date and time: $_date  $_time');
@@ -365,7 +367,7 @@ _deleteEligibleActivities(
 
   debugPrint('Diff Time Date Time: $_diffDateTime');
 
-  if (_diffDateTime.inHours >= SizeCollection.activitySustainTimeInHour) {
+  if (_diffDateTime.inMinutes >= 1) {
     debugPrint('Activity Deleting Msg: $activity');
 
     if (ownActivity) {
@@ -374,11 +376,14 @@ _deleteEligibleActivities(
 
     debugPrint('Under time Activity: $activity');
 
-    if (activity["type"] != ActivityContentType.text.toString()) {
+    if (Secure.decode(activity["type"]) !=
+        ActivityContentType.text.toString()) {
       debugPrint('Non Text File');
-      await SystemFileManagement.deleteFile(activity['message'] ?? '');
-      if (activity['type'] == ActivityContentType.video.toString()) {
-        final _additionalDataString = activity["additionalThings"] ?? "";
+      await SystemFileManagement.deleteFile(Secure.decode(activity['message']));
+      if (Secure.decode(activity['type']) ==
+          ActivityContentType.video.toString()) {
+        final _additionalDataString =
+            Secure.decode(activity["additionalThings"]);
         debugPrint('Additional Things in eligible: $_additionalDataString');
         final _additionalData =
             DataManagement.fromJsonString(_additionalDataString.toString());
@@ -403,18 +408,18 @@ _deleteEligibleActivities(
 _ownActivityRemoteDataDeletion({required activity}) async {
   final DBOperations _dbOperations = DBOperations();
 
-  final _additionalThings = activity["additionalThings"] ?? "";
+  final _additionalThings = Secure.decode(activity["additionalThings"]);
   debugPrint('Additional Things: $_additionalThings');
-  final _remoteData = DataManagement.fromJsonString(
-      (DataManagement.fromJsonString(
-              _additionalThings.toString())["remoteData"]) ??
-          "");
+  final _remoteDataEncrypted =
+      DataManagement.fromJsonString(_additionalThings.toString())["remoteData"];
+  final _remoteDataDecrypted = Secure.decode(_remoteDataEncrypted);
 
   await _dbOperations.initializeFirebase();
 
-  if (activity["type"] != ActivityContentType.text.toString()) {
-    await _dbOperations.deleteMediaFromFirebaseStorage(_remoteData['message']);
+  if (Secure.decode(activity["type"]) != ActivityContentType.text.toString()) {
+    await _dbOperations.deleteMediaFromFirebaseStorage(
+        DataManagement.fromJsonString(_remoteDataDecrypted)['message']);
   }
 
-  await _dbOperations.deleteParticularActivity(_remoteData);
+  await _dbOperations.deleteParticularActivity(_remoteDataEncrypted);
 }

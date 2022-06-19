@@ -149,7 +149,7 @@ class CommonChatListLayout {
           const SizedBox(
             height: 10,
           ),
-          if (totalPendingMessages != null)
+          if (totalPendingMessages != '')
             Container(
               width: 25,
               height: 25,
@@ -160,7 +160,7 @@ class CommonChatListLayout {
                   borderRadius: BorderRadius.circular(100)),
               child: Center(
                   child: Text(
-                totalPendingMessages,
+                totalPendingMessages ?? '',
                 style: TextStyleCollection.terminalTextStyle,
               )),
             ),

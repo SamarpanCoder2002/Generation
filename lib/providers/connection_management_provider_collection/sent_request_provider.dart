@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/services/encryption_operations.dart';
 
 class SentConnectionsProvider extends ChangeNotifier {
   List<dynamic> _searchedConnections = [];
@@ -26,7 +27,7 @@ class SentConnectionsProvider extends ChangeNotifier {
     }
 
     for (final connection in _sentConnections) {
-      if (connection["name"]
+      if (Secure.decode(connection["name"])
           .toString()
           .toLowerCase()
           .contains(searchKeyword.toString().toLowerCase())) {

@@ -259,6 +259,12 @@ class _IntroScreensState extends State<IntroScreens> {
           title: "Sign In Failed",
           toastIconType: ToastIconType.error,
           showFromTop: false);
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
       return;
     }
 

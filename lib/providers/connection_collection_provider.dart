@@ -181,10 +181,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
           _docData.isNotEmpty &&
           _localConnectedUsersMap[connId] != null) {
         final _incomingMessagesCollection = _docData["data"];
+        final _remoteLatestMsg = _incomingMessagesCollection.isEmpty
+            ? <String, dynamic>{}
+            : DataManagement.fromJsonString(
+                    Secure.decode(_incomingMessagesCollection.last))
+                .values
+                .toList()
+                .first;
         _manageMsgStreamData(
-            remoteLatestMsg: _incomingMessagesCollection.isEmpty
-                ? {}
-                : _incomingMessagesCollection.last.values.toList().first,
+            remoteLatestMsg: _remoteLatestMsg,
             connData: _localConnectedUsersMap[connId],
             notSeenMessages: _incomingMessagesCollection.length.toString());
       }
@@ -278,12 +283,12 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
         activityId: activity["id"],
-        activityHolderId: activity["holderId"],
-        activityType: activity['type'],
-        date: activity['date'],
-        time: activity['time'],
-        msg: activity['message'],
-        additionalData: activity["additionalThings"],
+        activityHolderId: Secure.encode(activity["holderId"]) ?? '',
+        activityType: Secure.encode(activity['type']) ?? '',
+        date: Secure.encode(activity['date']) ?? '',
+        time: Secure.encode(activity['time']) ?? '',
+        msg: Secure.encode(activity['message']) ?? '',
+        additionalData: Secure.encode(DataManagement.toJsonString(activity["additionalThings"])),
         dbOperation: insert ? DBOperation.insert : DBOperation.update);
   }
 

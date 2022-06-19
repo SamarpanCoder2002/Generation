@@ -441,17 +441,15 @@ class LocalStorage {
       final Map<String, dynamic> _activityData = <String, dynamic>{};
 
       _activityData[_activityId] = activityId;
-      _activityData[_activityHolderId] = Secure.encode(activityHolderId);
-      _activityData[_activityType] = Secure.encode(activityType);
-      _activityData[_activityDate] = Secure.encode(date);
-      _activityData[_activityTime] = Secure.encode(time);
-      _activityData[_activityMessage] = Secure.encode(msg);
-      _activityData[_activityAdditionalThings] =
-          Secure.encode(DataManagement.toJsonString(additionalData));
+      _activityData[_activityHolderId] = activityHolderId;
+      _activityData[_activityType] = activityType;
+      _activityData[_activityDate] = date;
+      _activityData[_activityTime] = time;
+      _activityData[_activityMessage] = msg;
+      _activityData[_activityAdditionalThings] = additionalData;
       _activityData[_activityVisited] = "${activityVisited ?? 'false'}";
 
-      debugShow(
-          'Activity Data:  $_activityData     dbOperation: $dbOperation');
+      debugShow('Activity Data:  $_activityData     dbOperation: $dbOperation');
 
       dbOperation == DBOperation.insert
           ? db.insert(tableName, _activityData)

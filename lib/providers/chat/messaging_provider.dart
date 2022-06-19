@@ -144,7 +144,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         setToken(_docData['token']);
 
         if (_docData.isNotEmpty) {
-          setCurrStatus(_docData[DBPath.status] ?? {});
+          print('Sattus: ${Secure.decode(_docData[DBPath.status])}');
+          setCurrStatus(DataManagement.fromJsonString(Secure.decode(_docData[DBPath.status])) ?? {});
 
           _localStorage.insertUpdateConnectionPrimaryData(
               id: _docData["id"],
@@ -190,7 +191,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   setToken(String token) {
-    _connToken = token;
+    _connToken = Secure.decode(token);
     notifyListeners();
   }
 
@@ -207,6 +208,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   String getCurrStatus() {
+    print('curent Status: $_currStatus');
+
     if (_currStatus.isEmpty) return '';
     if (_currStatus["status"] == UserStatus.online.toString()) return 'Online';
 
@@ -231,7 +234,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   _manageIncomingMessages(messages) {
-    for (final message in messages) {
+    for (var message in messages) {
+      message = DataManagement.fromJsonString(Secure.decode(message));
       _manageMessageForLocale(message);
       final _msgType =
           Secure.decode(message.values.toList()[0][MessageData.type]);
@@ -678,7 +682,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         token: getToken(),
         title: _notificationData['title'] ?? '',
         body: _notificationData['body'] ?? '',
-        image: _notificationData['image'] ,
+        image: _notificationData['image'],
         isNotificationPermitted: _isNotificationPermitted);
   }
 
@@ -798,7 +802,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .getCurrAccData()['name'];
     Map<String, dynamic> _notificationData = {
-      'title': """$_currUserName send you a """,
+      'title': """${Secure.decode(_currUserName)} send you a """,
       'body': '',
     };
 

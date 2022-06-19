@@ -109,7 +109,7 @@ class DBOperations {
       }
 
       final _token = await _fToken();
-      final _profile = ProfileModel.getJson(
+      final _profile = ProfileModel.getEncodedJson(
           iName: name,
           iAbout: about,
           iEmail: currEmail,
@@ -207,8 +207,13 @@ class DBOperations {
             '${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}')
         .get();
 
-    Provider.of<SentConnectionsProvider>(context, listen: false)
-        .setConnections(_sentData.docs);
+    try{
+      Provider.of<SentConnectionsProvider>(context, listen: false)
+          .setConnections(_sentData.docs);
+    }catch(e){
+      debugShow('Error in getSentRequestUsersData: $e');
+    }
+
 
     return _sentData.docs;
   }
@@ -407,7 +412,7 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.messages}')
           .set({
-        DBPath.data: FieldValue.arrayUnion([msgData])
+        DBPath.data: FieldValue.arrayUnion([Secure.encode(DataManagement.toJsonString(msgData))])
       }, SetOptions(merge: true));
 
       if (isNotificationPermitted) {
@@ -463,7 +468,7 @@ class DBOperations {
   updateActiveStatus(Map<String, dynamic> status) async {
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.status: status});
+        .update({DBPath.status: Secure.encode(DataManagement.toJsonString(status))});
   }
 
   updateNotificationStatus(bool updatedNotification) async {
@@ -498,7 +503,7 @@ class DBOperations {
         .set({DBPath.data: []});
   }
 
-  Future<Map<String, dynamic>> addActivity(Map<String, dynamic> data) async {
+  Future<String?> addActivity(Map<String, dynamic> data) async {
     if (data['type'] != ActivityContentType.text.toString()) {
       data["message"] = await uploadMediaToStorage(
           DBHelper.activityPath(
@@ -514,11 +519,10 @@ class DBOperations {
       DBPath.data: FieldValue.arrayUnion([Secure.encode(DataManagement.toJsonString(data))]),
     }, SetOptions(merge: true));
 
-    return data;
+    return Secure.encode(DataManagement.toJsonString(data));
   }
 
   deleteParticularActivity(data) {
-    debugShow('Delete Particular Activity From Remote');
     _getInstance
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')

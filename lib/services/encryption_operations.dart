@@ -16,10 +16,14 @@ class Secure {
   }
 
   static String decode(String? encodedStringForm) {
-    if(encodedStringForm == null) return '';
+    try {
+      if (encodedStringForm == null) return '';
 
-    final String decrypted =
-        _makeEncryption.decrypt64(encodedStringForm, iv: _iv);
-    return decrypted;
+      final String decrypted =
+          _makeEncryption.decrypt64(encodedStringForm, iv: _iv);
+      return decrypted;
+    } catch (e) {
+      return encodedStringForm ?? '';
+    }
   }
 }

@@ -30,6 +30,8 @@ class ActivityModel {
       required String time,
       required String message,
       required dynamic additionalThings}) {
+
+   print('Additional Things here: $additionalThings');
     if (additionalThings != '') {
       additionalThings = DataManagement.fromJsonString(additionalThings);
     }

@@ -1,3 +1,4 @@
+import 'package:generation/services/encryption_operations.dart';
 import 'package:intl/intl.dart';
 
 class ProfileModel {
@@ -38,9 +39,28 @@ class ProfileModel {
       "id": _profile.id
     };
   }
+
+  static Map<String,dynamic> getEncodedJson(
+      {required String iName,
+        required String iAbout,
+        required String iEmail,
+        required String iProfilePic,
+        required String iToken, required String iId}) {
+    final _profile = ProfileModel(
+        name: iName,
+        about: iAbout,
+        email: iEmail,
+        profilePic: iProfilePic,
+        token: iToken, id: iId);
+
+    return {
+      "name": Secure.encode(_profile.name),
+      "about": Secure.encode(_profile.about),
+      "email": Secure.encode(_profile.email),
+      "profilePic": Secure.encode(_profile.profilePic),
+      "token": Secure.encode(_profile.token),
+      "createdAt": Secure.encode(DateTime.now().toString()),
+      "id": _profile.id
+    };
+  }
 }
-//
-// _getFormattedDate(DateTime dateTime){
-//   final DateFormat formatter = DateFormat('E');
-//   final String formatted = formatter.format(dateTime);
-// }

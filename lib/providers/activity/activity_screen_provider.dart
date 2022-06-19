@@ -115,18 +115,20 @@ class ActivityProvider extends ChangeNotifier {
   AnimationController getAnimationController() => _animationController;
 
   addNewActivity(Map<String, dynamic> map, String holderId) {
+    print('Adding Activity: $map');
+
     _localStorage.insertUpdateTableForActivity(
         tableName: holderId == _dbOperation.currUid
             ? DbData.myActivityTable
             : DataManagement.generateTableNameForNewConnectionActivity(
                 holderId),
         activityId: map["id"],
-        activityHolderId: map["holderId"],
-        activityType: map["type"],
-        date: map["date"],
-        time: map["time"],
-        msg: map["message"],
-        additionalData: map["additionalThings"],
+        activityHolderId: Secure.encode(map["holderId"]) ?? '',
+        activityType: Secure.encode(map["type"]) ?? '',
+        date: Secure.encode(map["date"]) ?? '',
+        time: Secure.encode(map["time"]) ?? '',
+        msg: Secure.encode(map["message"]) ?? '',
+        additionalData: Secure.encode(DataManagement.toJsonString(map["additionalThings"])) ?? '',
         dbOperation: DBOperation.insert);
   }
 
@@ -137,9 +139,14 @@ class ActivityProvider extends ChangeNotifier {
   setUpdatedIndex(int changedPageIndex) {
     _currentPageIndex = changedPageIndex;
     _animationBarCurrentIndex = changedPageIndex;
-    _pageController.animateToPage(changedPageIndex,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.fastOutSlowIn);
+    try{
+      _pageController.animateToPage(changedPageIndex,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.fastOutSlowIn);
+    }catch(e){
+      print('Activity Animate Error: $e');
+    }
+
     _loadActivity();
     notifyListeners();
   }

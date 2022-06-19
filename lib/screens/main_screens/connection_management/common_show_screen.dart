@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 
@@ -49,7 +50,8 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
         child: Column(
           children: [
             const SizedBox(height: 15),
-            if (_getItemCount() != 0) _searchBar(),
+            //if (_getItemCount() != 0)
+              _searchBar(),
             const SizedBox(height: 15),
             _collectionsSection(),
           ],
@@ -154,9 +156,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
 
       return _commonChatLayout.particularChatConnection(
         currentIndex: availableIndex,
-        photo: _particularData["profilePic"],
-        heading: _particularData["name"],
-        subheading: _particularData["about"],
+        photo: Secure.decode(_particularData["profilePic"]),
+        heading: Secure.decode(_particularData["name"]),
+        subheading: Secure.decode(_particularData["about"]),
         lastMsgTime: null,
         totalPendingMessages: null,
         trailingWidget: connectButton(_particularData, availableIndex),
@@ -168,9 +170,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
-          photo: _particularData["profilePic"],
-          heading: _particularData["name"],
-          subheading: _particularData["about"],
+          photo: Secure.decode(_particularData["profilePic"]),
+          heading: Secure.decode(_particularData["name"]),
+          subheading: Secure.decode(_particularData["about"]),
           lastMsgTime: null,
           totalPendingMessages: null,
           middleWidth: MediaQuery.of(context).size.width - 240,
@@ -183,9 +185,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
 
       return _commonChatLayout.particularChatConnection(
           currentIndex: availableIndex,
-          photo: _particularData["profilePic"],
-          heading: _particularData["name"],
-          subheading: _particularData["about"],
+          photo: Secure.decode(_particularData["profilePic"]),
+          heading: Secure.decode(_particularData["name"]),
+          subheading: Secure.decode(_particularData["about"]),
           lastMsgTime: null,
           totalPendingMessages: null,
           trailingWidget: withdrawButton(_particularData, availableIndex));

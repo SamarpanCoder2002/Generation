@@ -11,6 +11,7 @@ import 'package:generation/providers/status_collection_provider.dart';
 import 'package:generation/screens/activity/view/activity_value_screen.dart';
 import 'package:generation/services/device_specific_operations.dart';
 import 'package:generation/config/types.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:loading_overlay/loading_overlay.dart';
@@ -231,8 +232,8 @@ class _ActivityControllerState extends State<ActivityController>
             CircleAvatar(
               radius: 25,
               backgroundColor: AppColors.transparentColor,
-              backgroundImage:
-                  CachedNetworkImageProvider(_connectionData['profilePic']),
+              backgroundImage: CachedNetworkImageProvider(
+                  Secure.decode(_connectionData['profilePic'])),
             ),
             const SizedBox(
               width: 10,
@@ -244,7 +245,7 @@ class _ActivityControllerState extends State<ActivityController>
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      _connectionData['name'],
+                      Secure.decode(_connectionData['name']),
                       style: TextStyleCollection.activityTitleTextStyle,
                     ),
                   ),
@@ -538,12 +539,13 @@ class _ActivityControllerState extends State<ActivityController>
     _localStorage.insertUpdateTableForActivity(
         tableName: widget.tableName,
         activityId: _currentActivityData.id,
-        activityHolderId: _currentActivityData.holderId,
-        activityType: _currentActivityData.type,
-        date: _currentActivityData.date,
-        time: _currentActivityData.time,
-        msg: _currentActivityData.message,
-        additionalData: _currentActivityData.additionalThings,
+        activityHolderId: Secure.encode(_currentActivityData.holderId) ?? '',
+        activityType: Secure.encode(_currentActivityData.type) ?? '',
+        date: Secure.encode(_currentActivityData.date) ?? '',
+        time: Secure.encode(_currentActivityData.time) ?? '',
+        msg: Secure.encode(_currentActivityData.message) ?? '',
+        additionalData: Secure.encode(
+            DataManagement.toJsonString(_currentActivityData.additionalThings)),
         activityVisited: true,
         dbOperation: DBOperation.update);
   }
