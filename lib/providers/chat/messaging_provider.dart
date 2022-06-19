@@ -10,6 +10,7 @@ import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/network_management_provider.dart';
 import 'package:generation/services/directory_management.dart';
+import 'package:generation/services/encryption_manager.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
@@ -159,30 +160,33 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     });
   }
 
-  getSpecialOperationDataRealTime(String partnerId){
-      _realTimeSpecialOperationSubscription = _realTimeOperations.getRealTimeSpecialOperationsData(partnerId).listen((docSnapShot) {
-        final Map<String, dynamic>? _docData = docSnapShot.data();
+  getSpecialOperationDataRealTime(String partnerId) {
+    _realTimeSpecialOperationSubscription = _realTimeOperations
+        .getRealTimeSpecialOperationsData(partnerId)
+        .listen((docSnapShot) {
+      final Map<String, dynamic>? _docData = docSnapShot.data();
 
-        print('Doc Data is: $_docData');
+      print('Doc Data is: $_docData');
 
-        if(_docData == null) return;
+      if (_docData == null) return;
 
-        final _deletedMessages = _docData[SpecialOperationTypes.deleteMsg];
-        _deleteSpecialOperationMessages(_deletedMessages, partnerId);
-
-      });
+      final _deletedMessages = _docData[SpecialOperationTypes.deleteMsg];
+      _deleteSpecialOperationMessages(_deletedMessages, partnerId);
+    });
   }
 
-  _deleteSpecialOperationMessages(_deletedMessages, partnerId)async{
-    if(_deletedMessages == null) return;
+  _deleteSpecialOperationMessages(_deletedMessages, partnerId) async {
+    if (_deletedMessages == null) return;
 
-    for(final msgId in _deletedMessages){
-      await _localStorage.deleteDataFromParticularChatConnTable(tableName: DataManagement.generateTableNameForNewConnectionChat(partnerId), msgId: msgId);
+    for (final msgId in _deletedMessages) {
+      await _localStorage.deleteDataFromParticularChatConnTable(
+          tableName:
+              DataManagement.generateTableNameForNewConnectionChat(partnerId),
+          msgId: msgId);
       deleteParticularMessage(msgId);
     }
 
     _dbOperations.deleteSpecialOperationMsgIdSet(partnerId);
-
   }
 
   setToken(String token) {
@@ -229,7 +233,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   _manageIncomingMessages(messages) {
     for (final message in messages) {
       _manageMessageForLocale(message);
-      final _msgType = message.values.toList()[0][MessageData.type];
+      final _msgType =
+          Secure.decode(message.values.toList()[0][MessageData.type]);
       if (_msgType != ChatMessageType.text.toString() &&
           _msgType != ChatMessageType.location.toString() &&
           _msgType != ChatMessageType.contact.toString()) {
@@ -240,11 +245,12 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   _downloadMediaContent(message) async {
     final _message = message.values.toList()[0];
-    final _msgData = _message[MessageData.message];
-    final _msgType = _message[MessageData.type];
+    final _msgData = Secure.decode(_message[MessageData.message]);
+    final _msgType = Secure.decode(_message[MessageData.type]);
     final _msgAdditionalData = _message[MessageData.additionalData] == null
         ? {}
-        : DataManagement.fromJsonString(_message[MessageData.additionalData]);
+        : DataManagement.fromJsonString(
+            Secure.decode(_message[MessageData.additionalData]));
 
     String _mediaStorePath = "";
 
@@ -272,7 +278,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
     _dio.download(_msgData, _mediaStorePath).whenComplete(() async {
       debugShow("Media Download Completed");
-      message.values.toList()[0][MessageData.message] = _mediaStorePath;
+      message.values.toList()[0][MessageData.message] =
+          Secure.encode(_mediaStorePath);
       _dbOperations.deleteMediaFromFirebaseStorage(_msgData);
 
       /// For Thumbnail Management
@@ -297,7 +304,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       debugShow("Thumbnail Download Completed");
       _msgAdditionalData["thumbnail"] = _thumbnailPath;
       message.values.toList()[0][MessageData.additionalData] =
-          DataManagement.toJsonString(_msgAdditionalData);
+          Secure.encode(DataManagement.toJsonString(_msgAdditionalData));
 
       _dbOperations
           .deleteMediaFromFirebaseStorage(_msgAdditionalData["thumbnail"]);
@@ -502,10 +509,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         ChatMessageType.text.toString();
   }
 
-  bool eligibleForDeleteForEveryOne(){
-    for(ChatMessageModel msg in _selectedMessage.values.toList()){
+  bool eligibleForDeleteForEveryOne() {
+    for (ChatMessageModel msg in _selectedMessage.values.toList()) {
       print('Message Type: ${msg.holder}');
-      if(msg.holder == MessageHolderType.other.toString()) return false;
+      if (msg.holder == MessageHolderType.other.toString()) return false;
     }
 
     return true;
@@ -523,11 +530,15 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       bool forSendMultiple = false,
       bool storeOnMsgBox = true,
       String? incomingConnId}) async {
-    if (!(await Provider.of<NetworkManagementProvider>(context, listen: false)
-        .isNetworkActive)) {
-      Provider.of<NetworkManagementProvider>(context, listen: false)
-          .noNetworkMsg(context);
-      return;
+    try {
+      if (!(await Provider.of<NetworkManagementProvider>(context, listen: false)
+          .isNetworkActive)) {
+        Provider.of<NetworkManagementProvider>(context, listen: false)
+            .noNetworkMsg(context);
+        return;
+      }
+    } catch (e) {
+      debugShow('Error in network check: $e');
     }
 
     /// Collecting Message Corresponding Data
@@ -544,14 +555,15 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     /// Local Data Management
     final _msgLocalData = {
       _uniqueMsgId: {
-        MessageData.type: msgType,
-        MessageData.message: _localMsgModify,
-        MessageData.time: _msgTime,
-        MessageData.date: _msgDate,
-        MessageData.holder: getMessageHolderForSendMsg(SendMsgStorage.local),
+        MessageData.type: Secure.encode(msgType),
+        MessageData.message: Secure.encode(_localMsgModify),
+        MessageData.time: Secure.encode(_msgTime),
+        MessageData.date: Secure.encode(_msgDate),
+        MessageData.holder:
+            Secure.encode(getMessageHolderForSendMsg(SendMsgStorage.local)),
         MessageData.additionalData: additionalData != null
-            ? DataManagement.toJsonString(additionalData)
-            : additionalData
+            ? Secure.encode(DataManagement.toJsonString(additionalData))
+            : Secure.encode(additionalData)
       }
     };
     _manageMessageForLocale(_msgLocalData,
@@ -601,11 +613,17 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       required msgTime,
       required msgDate,
       String? incomingConnId}) async {
-    final bool _isNotificationPermitted =
-        Provider.of<ConnectionCollectionProvider>(context, listen: false)
-            .notificationPermitted(incomingConnId ?? getPartnerUserId());
+    bool _isNotificationPermitted = false;
 
-    debugShow("Is notification Permitted:  $_isNotificationPermitted");
+    try {
+      _isNotificationPermitted =
+          Provider.of<ConnectionCollectionProvider>(context, listen: false)
+              .notificationPermitted(incomingConnId ?? getPartnerUserId());
+
+      debugShow("Is notification Permitted:  $_isNotificationPermitted");
+    } catch (e) {
+      debugShow('Error in manage message for remote: $e');
+    }
 
     var _remoteMsg = message;
     if (msgType != ChatMessageType.text.toString() &&
@@ -633,26 +651,34 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
     final _msgRemoteData = {
       uniqueMsgId: {
-        MessageData.type: msgType,
-        MessageData.message: _remoteMsg,
-        MessageData.time: msgTime,
-        MessageData.date: msgDate,
-        MessageData.holder: getMessageHolderForSendMsg(SendMsgStorage.remote),
+        MessageData.type: Secure.encode(msgType),
+        MessageData.message: Secure.encode(_remoteMsg),
+        MessageData.time: Secure.encode(msgTime),
+        MessageData.date: Secure.encode(msgDate),
+        MessageData.holder:
+            Secure.encode(getMessageHolderForSendMsg(SendMsgStorage.remote)),
         MessageData.additionalData: _additionalDataModified != null
-            ? DataManagement.toJsonString(_additionalDataModified)
-            : _additionalDataModified
+            ? Secure.encode(
+                DataManagement.toJsonString(_additionalDataModified))
+            : Secure.encode(_additionalDataModified)
       }
     };
 
-    final _notificationData = _rendererForNotification(msgType, _remoteMsg);
+    Map<String, dynamic> _notificationData = {};
+
+    try {
+      _notificationData = _rendererForNotification(msgType, _remoteMsg);
+    } catch (e) {
+      debugShow('Error in Renderer For Notification: $e');
+    }
 
     _dbOperations.sendMessage(
         partnerId: incomingConnId ?? getPartnerUserId(),
         msgData: _msgRemoteData,
         token: getToken(),
-        title: _notificationData['title'],
-        body: _notificationData['body'],
-        image: _notificationData['image'],
+        title: _notificationData['title'] ?? '',
+        body: _notificationData['body'] ?? '',
+        image: _notificationData['image'] ,
         isNotificationPermitted: _isNotificationPermitted);
   }
 
@@ -736,25 +762,31 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     };
 
     for (final message in _chatMessages) {
-      if (message['type'] == ChatMessageType.image.toString()) {
+      if (Secure.decode(message['type'].toString()) ==
+          ChatMessageType.image.toString()) {
         (_chatHistoryData[ChatMessageType.image] as List<dynamic>).add(message);
-      } else if (message['type'] == ChatMessageType.video.toString()) {
+      } else if (Secure.decode(message['type'].toString()) ==
+          ChatMessageType.video.toString()) {
         (_chatHistoryData[ChatMessageType.video] as List<dynamic>).add(message);
-      } else if (message['type'] == ChatMessageType.audio.toString()) {
+      } else if (Secure.decode(message['type'].toString()) ==
+          ChatMessageType.audio.toString()) {
         (_chatHistoryData[ChatMessageType.audio] as List<dynamic>).add(message);
-      } else if (message['type'] == ChatMessageType.document.toString()) {
+      } else if (Secure.decode(message['type'].toString()) ==
+          ChatMessageType.document.toString()) {
         (_chatHistoryData[ChatMessageType.document] as List<dynamic>)
             .add(message);
-      } else if (message['type'] == ChatMessageType.location.toString()) {
+      } else if (Secure.decode(message['type'].toString()) ==
+          ChatMessageType.location.toString()) {
         (_chatHistoryData[ChatMessageType.location] as List<dynamic>)
             .add(message);
-      } else if (message['type'] == ChatMessageType.contact.toString()) {
+      } else if (Secure.decode(message['type'].toString()) ==
+          ChatMessageType.contact.toString()) {
         (_chatHistoryData[ChatMessageType.contact] as List<dynamic>)
             .add(message);
       }
 
       (_chatHistoryData[ChatMessageType.text] as List<dynamic>).add(
-          """${message['holder'] == MessageHolderType.me.toString() ? 'You' : connName ?? ''}:  ${message['type'] == ChatMessageType.text.toString() ? message['message'] : '<Non-Text-File>'}\n\n""");
+          """${Secure.decode(message['holder'].toString()) == MessageHolderType.me.toString() ? 'You' : connName ?? ''}:  ${Secure.decode(message['type'].toString()) == ChatMessageType.text.toString() ? Secure.decode(message['message'].toString()) : '<Non-Text-File>'}\n\n""");
     }
 
     return _chatHistoryData;

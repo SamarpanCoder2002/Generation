@@ -8,6 +8,7 @@ import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
+import 'package:generation/services/encryption_manager.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -213,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () => _switchToActivity(
             tableName: DataManagement.generateTableNameForNewConnectionActivity(
                 _connId),
-            isDarkMode: _isDarkMode, connId: _connId),
+            isDarkMode: _isDarkMode,
+            connId: _connId),
         child: Column(
           children: [
             Container(
@@ -331,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             .toString()
                             .split(' ')
                             .first),
-                    lastMsgTime: _lastMsgData?["time"] ?? "",
+                    lastMsgTime: Secure.decode(_lastMsgData?["time"]),
                     currentIndex: connectionIndex,
                     totalPendingMessages: _connectionData["notSeenMsgCount"],
                     bottomMargin:
@@ -395,7 +397,9 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
         onTap: () => _switchToActivity(
-            tableName: DbData.myActivityTable, isDarkMode: _isDarkMode, connId: _currentActivityData['id']),
+            tableName: DbData.myActivityTable,
+            isDarkMode: _isDarkMode,
+            connId: _currentActivityData['id']),
         child: Column(
           children: [
             Container(
@@ -574,30 +578,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getSubHeading(_lastMsgData, String connFirstName) {
-    final _msgData = _lastMsgData?["message"] ?? '';
-    var _msgHolder =
-        _lastMsgData?['holder'] ?? MessageHolderType.other.toString();
+    final _msgData = Secure.decode(_lastMsgData?["message"]);
+    var _msgHolder = Secure.decode(_lastMsgData?['holder']);
     _msgHolder =
         _msgHolder == MessageHolderType.other.toString() ? connFirstName : 'Me';
 
     if (_msgData == '') return '';
 
-    if (_lastMsgData["type"] == ChatMessageType.image.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.image.toString()) {
       return '$_msgHolder:  📷 Image';
     }
-    if (_lastMsgData["type"] == ChatMessageType.video.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.video.toString()) {
       return '$_msgHolder:  📽️ Video';
     }
-    if (_lastMsgData["type"] == ChatMessageType.location.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.location.toString()) {
       return '$_msgHolder:  🗺️ Location';
     }
-    if (_lastMsgData["type"] == ChatMessageType.audio.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.audio.toString()) {
       return '$_msgHolder:  🎵 Audio';
     }
-    if (_lastMsgData["type"] == ChatMessageType.document.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.document.toString()) {
       return '$_msgHolder:  📃 Document';
     }
-    if (_lastMsgData["type"] == ChatMessageType.contact.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.contact.toString()) {
       return '$_msgHolder:  💁 Contact';
     }
 
@@ -605,7 +614,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _switchToActivity(
-      {required String tableName, required bool isDarkMode, required String connId}) async {
+      {required String tableName,
+      required bool isDarkMode,
+      required String connId}) async {
     final LocalStorage _localStorage = LocalStorage();
 
     final _activityData =
@@ -623,10 +634,12 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigation.intent(
           context,
           ActivityController(
-              tableName: tableName,
-              startingIndex: _visitedData.length == _activityData.length
-                  ? 0
-                  : _visitedData.length, activityHolderId: connId,),
+            tableName: tableName,
+            startingIndex: _visitedData.length == _activityData.length
+                ? 0
+                : _visitedData.length,
+            activityHolderId: connId,
+          ),
           afterWork: () => changeContextTheme(isDarkMode));
     });
   }

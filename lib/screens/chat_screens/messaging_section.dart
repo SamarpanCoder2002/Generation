@@ -371,14 +371,12 @@ class _MessagingSectionState extends State<MessagingSection> {
 
             final realMsg = messageData.values.toList()[0];
 
-            final chatMsgObj = ChatMessageModel.toJson(
+            final chatMsgObj = ChatMessageModel.toDecodedJson(
                 type: realMsg["type"],
                 message: realMsg["message"],
                 time: realMsg["time"],
                 holder: realMsg["holder"],
-                additionalData: realMsg["additionalData"] != null
-                    ? DataManagement.fromJsonString(realMsg["additionalData"])
-                    : null,
+                additionalData: realMsg["additionalData"],
                 date: realMsg["date"]);
 
             return _commonMessageLayout(
@@ -786,7 +784,8 @@ class _MessagingSectionState extends State<MessagingSection> {
 
     final LocalStorage _localStorage = LocalStorage();
     final tableName = _replyMsgData["activityHolderId"] ==
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId()
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getPartnerUserId()
         ? DataManagement.generateTableNameForNewConnectionActivity(
             _replyMsgData["activityHolderId"])
         : DbData.myActivityTable;

@@ -9,6 +9,7 @@ import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/settings/storage/storage_screen.dart';
 import 'package:generation/services/directory_management.dart';
+import 'package:generation/services/encryption_manager.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/navigation_management.dart';
