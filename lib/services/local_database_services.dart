@@ -483,12 +483,17 @@ class LocalStorage {
 
   getParticularActivity(
       {required String tableName, required String activityId}) async {
-    final Database db = await database;
+    try {
+      final Database db = await database;
 
-    final _activitySet = await db.rawQuery(
-        """ SELECT * FROM $tableName WHERE $_activityId = "$activityId" """);
+      final _activitySet = await db.rawQuery(
+          """ SELECT * FROM $tableName WHERE $_activityId = "$activityId" """);
 
-    return _activitySet;
+      return _activitySet;
+    } catch (e) {
+      print('Error in particular activity: $e');
+      return [];
+    }
   }
 
   Stream<List<Map<String, Object?>>> getAllActivityStream(

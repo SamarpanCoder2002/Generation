@@ -489,7 +489,7 @@ class DBOperations {
     final _getToken = await _fToken();
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.token: _getToken});
+        .update({DBPath.token: Secure.encode(_getToken)});
   }
 
   resetRemoveSpecialRequest() {

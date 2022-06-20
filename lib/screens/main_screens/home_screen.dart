@@ -335,8 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             .first),
                     lastMsgTime: Secure.decode(_lastMsgData?["time"]),
                     currentIndex: connectionIndex,
-                    totalPendingMessages:
-                        Secure.decode(_connectionData["notSeenMsgCount"]),
+                    totalPendingMessages: _connectionData["notSeenMsgCount"],
                     bottomMargin:
                         connectionIndex == _totalMessages - 1 ? 40 : null));
           }),

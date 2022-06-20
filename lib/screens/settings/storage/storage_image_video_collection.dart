@@ -6,6 +6,7 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/storage/storage_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/config/types.dart';
 import 'package:open_file/open_file.dart';
@@ -75,16 +76,15 @@ class StorageImageAndVideoCollection extends StatelessWidget {
 
     _onTapped() async {
       if (showVideoPlayIcon) {
-        await OpenFile.open(_extractedData['message']);
+        await OpenFile.open(Secure.decode(_extractedData['message']));
       } else {
         makeStatusBarTransparent();
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (_) => ImageShowingScreen(
-                      imgPath: _extractedData['message'],
+                      imgPath: Secure.decode(_extractedData['message']),
                       imageType: ImageType.file,
-                      isCovered: true,
                     ))).then((value) => showStatusAndNavigationBar());
       }
     }
@@ -95,8 +95,8 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         children: [
           _onlyImageSection(showVideoPlayIcon
               ? DataManagement.fromJsonString(
-                  _extractedData['additionalData'])['thumbnail']
-              : _extractedData['message']),
+                  Secure.decode(_extractedData['additionalData']))['thumbnail']
+              : Secure.decode(_extractedData['message'])),
           if (showVideoPlayIcon)
             _forShowingVideoFile(_extractedData['message']),
         ],
