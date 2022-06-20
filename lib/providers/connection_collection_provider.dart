@@ -23,7 +23,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
-  List<String> _activityConnDataCollection = [];
+  final List<String> _activityConnDataCollection = [];
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
@@ -288,7 +288,8 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         date: Secure.encode(activity['date']) ?? '',
         time: Secure.encode(activity['time']) ?? '',
         msg: Secure.encode(activity['message']) ?? '',
-        additionalData: Secure.encode(DataManagement.toJsonString(activity["additionalThings"])),
+        additionalData: Secure.encode(
+            DataManagement.toJsonString(activity["additionalThings"])),
         dbOperation: insert ? DBOperation.insert : DBOperation.update);
   }
 
@@ -309,7 +310,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         name: connData["name"],
         profilePic: connData["profilePic"],
         about: connData["about"],
-        notificationTypeManually: connData["notificationManually"],
         dbOperation: DBOperation.update,
         lastMsgData: _lastMsgDataToInsert,
         notSeenMsgCount: notSeenMessages);
@@ -400,7 +400,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     }
 
     for (final connection in _chatConnectionsDataCollection) {
-      if (connection["name"]
+      if (Secure.decode(connection["name"])
           .toString()
           .toLowerCase()
           .contains(searchKeyword.toString().toLowerCase())) {
@@ -430,13 +430,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       final _notificationDeactivatedList =
           _localConnectedUsersMap[connId][DBPath.notificationDeactivated];
       if (_notificationDeactivatedList == null) return true;
-      return !(_notificationDeactivatedList.contains(_dbOperations.currUid));
+      return !(_notificationDeactivatedList
+          .contains(Secure.encode(_dbOperations.currUid)));
     }
 
     if (_localConnectedUsersMap[connId][DBPath.notification] == null) {
       return _checkInNotificationDeactivatedList();
     } else {
-      if (_localConnectedUsersMap[connId][DBPath.notification] == 'false') {
+      if (Secure.decode(_localConnectedUsersMap[connId][DBPath.notification]) ==
+          'false') {
         return false;
       } else {
         return _checkInNotificationDeactivatedList();

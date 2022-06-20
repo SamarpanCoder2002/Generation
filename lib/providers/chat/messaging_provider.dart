@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:generation/config/stored_string_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
-import 'package:generation/db_operations/helper.dart';
+import 'package:generation/db_operations/config.dart';
 import 'package:generation/db_operations/types.dart';
 import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
@@ -152,7 +152,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
               name: _docData["name"],
               profilePic: _docData["profilePic"],
               about: _docData["about"],
-              notificationTypeManually: _docData["notificationManually"],
               dbOperation: DBOperation.update);
           Provider.of<ConnectionCollectionProvider>(context, listen: false)
               .updateParticularConnectionData(_docData["id"], _docData);

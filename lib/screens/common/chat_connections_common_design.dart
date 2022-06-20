@@ -6,7 +6,7 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
-import '../../config/size_collection.dart';
+import '../../config/countable_data_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';

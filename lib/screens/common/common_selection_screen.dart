@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/config/size_collection.dart';
+import 'package:generation/config/countable_data_collection.dart';
 import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/button.dart';
@@ -118,8 +118,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
           child: _commonChatLayout.particularChatConnection(
               commonRequirement: widget.commonRequirement,
               connectionData: _connectionData,
-              photo: _connectionData["profilePic"],
-              heading: _connectionData["name"],
+              photo: Secure.decode(_connectionData["profilePic"]),
+              heading: Secure.decode(_connectionData["name"]),
               subheading: '',
               lastMsgTime: '',
               currentIndex: connectionIndex,
@@ -215,12 +215,12 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
     final _chatHistoryData =
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .getChatHistory(connectionData["id"], connectionData["name"]);
+            .getChatHistory(connectionData["id"], Secure.decode(connectionData["name"]));
 
     final _chatHistoryStoreDir = await createChatHistoryStoreDir();
     final _chatHistoryStoreFile = File(createChatHistoryFile(
         dirPath: _chatHistoryStoreDir,
-        connName: connectionData["name"],
+        connName: Secure.decode(connectionData["name"]),
         connId: connectionData["id"]));
 
     String _historyTextData = """""";

@@ -1,5 +1,4 @@
 import 'package:generation/services/encryption_operations.dart';
-import 'package:intl/intl.dart';
 
 class ProfileModel {
   final String name;

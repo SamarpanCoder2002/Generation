@@ -1,10 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:generation/config/size_collection.dart';
+import 'package:generation/config/countable_data_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/local_storage_provider.dart';
-import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/config/types.dart';
 import 'package:intl/intl.dart';
@@ -242,6 +241,8 @@ class LocalStorage {
       _conData[_conNotificationManually] =
           notificationTypeManually ?? NotificationType.unMuted.toString();
 
+
+
       if (dbOperation == DBOperation.insert) {
         await db.insert(DbData.connectionsTable, _conData);
 
@@ -261,9 +262,13 @@ class LocalStorage {
         }
 
         if (notificationTypeManually == null) {
+          print('Old Notification Data: ${_oldConnPrimaryData[_conNotificationManually]}');
+
           _conData[_conNotificationManually] =
               _oldConnPrimaryData[_conNotificationManually];
         }
+
+        print('Notification Manually: $notificationTypeManually      Value Stored: ${_conData[_conNotificationManually]}');
 
         await db.update(DbData.connectionsTable, _conData,
             where: """$_conId = "$id" """);

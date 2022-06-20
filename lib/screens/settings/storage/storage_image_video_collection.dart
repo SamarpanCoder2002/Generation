@@ -125,7 +125,7 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         ),
         onPressed: () async {
           /// When Integrate Functions later, Open Video from phone app write here
-          await OpenFile.open(extractedData);
+          await OpenFile.open(Secure.decode(extractedData));
         },
       ),
     );

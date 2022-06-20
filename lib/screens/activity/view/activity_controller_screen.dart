@@ -17,7 +17,7 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:provider/provider.dart';
 
-import '../../../config/size_collection.dart';
+import '../../../config/countable_data_collection.dart';
 import '../../../providers/chat/messaging_provider.dart';
 import '../../../providers/connection_collection_provider.dart';
 import '../../../providers/sound_provider.dart';

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/images_path_collection.dart';
-import 'package:generation/config/size_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/providers/main_screen_provider.dart';
@@ -16,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../../config/countable_data_collection.dart';
 import '../../config/data_collection.dart';
 import '../../config/text_collection.dart';
 import '../../config/types.dart';
@@ -367,11 +367,12 @@ _deleteEligibleActivities(
 
   debugPrint('Diff Time Date Time: $_diffDateTime');
 
-  if (_diffDateTime.inMinutes >= 1) {
+  if (_diffDateTime.inHours >= TimeCollection.activitySustainTimeInHour) {
     debugPrint('Activity Deleting Msg: $activity');
 
     if (ownActivity) {
-      await _ownActivityRemoteDataDeletion(activity: activity);
+      final _done = await _ownActivityRemoteDataDeletion(activity: activity);
+      if (!_done) return;
     }
 
     debugPrint('Under time Activity: $activity');
@@ -405,7 +406,7 @@ _deleteEligibleActivities(
   // }
 }
 
-_ownActivityRemoteDataDeletion({required activity}) async {
+Future<bool> _ownActivityRemoteDataDeletion({required activity}) async {
   final DBOperations _dbOperations = DBOperations();
 
   final _additionalThings = Secure.decode(activity["additionalThings"]);
@@ -417,9 +418,11 @@ _ownActivityRemoteDataDeletion({required activity}) async {
   await _dbOperations.initializeFirebase();
 
   if (Secure.decode(activity["type"]) != ActivityContentType.text.toString()) {
-    await _dbOperations.deleteMediaFromFirebaseStorage(
+    final _data = await _dbOperations.deleteMediaFromFirebaseStorage(
         DataManagement.fromJsonString(_remoteDataDecrypted)['message']);
+
+    if (!_data) return _data;
   }
 
-  await _dbOperations.deleteParticularActivity(_remoteDataEncrypted);
+  return await _dbOperations.deleteParticularActivity(_remoteDataEncrypted);
 }

@@ -16,7 +16,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/db_operations/db_models.dart';
-import 'package:generation/db_operations/helper.dart';
+import 'package:generation/db_operations/config.dart';
 import 'package:generation/db_operations/types.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
@@ -438,7 +438,7 @@ class DBOperations {
         .set({DBPath.data: []}, SetOptions(merge: true));
   }
 
-  Future<void> deleteMediaFromFirebaseStorage(String fileName,
+  Future<bool> deleteMediaFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
     try {
       try {
@@ -457,8 +457,11 @@ class DBOperations {
       await reference.delete();
 
       debugShow("File Deleted");
+
+      return true;
     } catch (e) {
       debugShow("Delete From Firebase Storage Exception: ${e.toString()}");
+      return false;
     }
   }
 
@@ -470,15 +473,15 @@ class DBOperations {
   updateNotificationStatus(bool updatedNotification) async {
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.notification: updatedNotification.toString()});
+        .update({DBPath.notification: Secure.encode(updatedNotification.toString())});
   }
 
   updateParticularConnectionNotificationStatus(
       String connId, bool updatedNotification) async {
     await _getInstance.doc('${DBPath.userCollection}/$currUid').update({
       DBPath.notificationDeactivated: updatedNotification
-          ? FieldValue.arrayUnion([connId])
-          : FieldValue.arrayRemove([connId])
+          ? FieldValue.arrayUnion([Secure.encode(connId)])
+          : FieldValue.arrayRemove([Secure.encode(connId)])
     });
   }
 
@@ -519,13 +522,19 @@ class DBOperations {
     return Secure.encode(DataManagement.toJsonString(data));
   }
 
-  deleteParticularActivity(data) {
-    _getInstance
-        .doc(
-            '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
-        .set({
-      DBPath.data: FieldValue.arrayRemove([data]),
-    }, SetOptions(merge: true));
+  Future<bool> deleteParticularActivity(data) async{
+    try{
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
+          .set({
+        DBPath.data: FieldValue.arrayRemove([data]),
+      }, SetOptions(merge: true));
+      return true;
+    }catch(e){
+      debugPrint('Error in delete particular activity: $e');
+      return false;
+    }
   }
 
   deleteForEveryoneMsg(String msgId, String partnerId) async {

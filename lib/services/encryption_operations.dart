@@ -20,31 +20,18 @@ class Secure {
     try {
       if (encodedStringForm == null) return '';
 
-      print('\n\n\n\nEncoded String form: $encodedStringForm\n\n\n\n');
-
-      print('Initialization Value: $initialize\n\n\n\n');
-
       if (initialize) {
         _key = Key.fromBase64(SecretData.encryptKey);
         _iv = IV.fromLength(16);
         _makeEncryption =
             Encrypter(AES(_key, mode: AESMode.ctr, padding: null));
-
-        print(
-            '\n\n\n\nAfter initialize make Encryption value: $_makeEncryption\n\n\n\n');
       }
 
       final String decrypted =
           _makeEncryption.decrypt64(encodedStringForm, iv: _iv);
 
-      if (initialize) {
-        print('Initiailize: $initialize    DECCRYPTED VALUE: $decrypted');
-      }
-
       return decrypted;
     } catch (e) {
-      print('Decoding Error: $e');
-
       if (e.toString().contains('NotInitializedError')) {
         return decode(encodedStringForm, initialize: true);
       }

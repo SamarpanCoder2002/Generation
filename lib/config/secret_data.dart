@@ -1,3 +1,3 @@
 class SecretData{
-  static const String encryptKey = "9gYAVs+3QAdpwpn12AHvjzURf1qFshk2XH2R3TZ1Rxs=";
+  static const String encryptKey = "LpDz33I4orac8VV9BSznk6ogYlBBAxndcD07MTWFyFs=";
 }

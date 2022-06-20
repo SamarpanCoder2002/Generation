@@ -14,6 +14,7 @@ import '../../common/button.dart';
 
 class DonateScreen extends StatefulWidget {
   final bool showMsgFromTop;
+
   const DonateScreen({Key? key, this.showMsgFromTop = false}) : super(key: key);
 
   @override
@@ -26,8 +27,13 @@ class _DonateScreenState extends State<DonateScreen> {
   final Razorpay _razorpay = Razorpay();
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    debugShow('Success:                        PaymentId: ${response.paymentId}    OrderId: ${response.orderId}         Signature: ${response.signature}');
-    showToast( title: "Payment Successful... Thank You 💖", toastIconType: ToastIconType.success, toastDuration: 10, showFromTop: widget.showMsgFromTop);
+    debugShow(
+        'Success:                        PaymentId: ${response.paymentId}    OrderId: ${response.orderId}         Signature: ${response.signature}');
+    showToast(
+        title: "Payment Successful... Thank You 💖",
+        toastIconType: ToastIconType.success,
+        toastDuration: 10,
+        showFromTop: widget.showMsgFromTop);
     Navigator.pop(context);
   }
 
@@ -84,9 +90,14 @@ class _DonateScreenState extends State<DonateScreen> {
       child: TextFormField(
         autofocus: true,
         controller: _donateController,
-        style: TextStyleCollection.terminalTextStyle
-            .copyWith(fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
-        cursorColor: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightLatestMsgTextColor,
+        style: TextStyleCollection.terminalTextStyle.copyWith(
+            fontSize: 14,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor),
+        cursorColor: _isDarkMode
+            ? AppColors.pureWhiteColor
+            : AppColors.lightLatestMsgTextColor,
         maxLines: null,
         keyboardType: TextInputType.number,
         validator: (inputVal) {
@@ -102,11 +113,20 @@ class _DonateScreenState extends State<DonateScreen> {
           alignLabelWithHint: true,
           labelText: "Donation Amount",
           labelStyle: TextStyleCollection.terminalTextStyle.copyWith(
-              fontSize: 14, color: _isDarkMode?AppColors.pureWhiteColor.withOpacity(0.6):AppColors.lightLatestMsgTextColor),
+              fontSize: 14,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor.withOpacity(0.6)
+                  : AppColors.lightLatestMsgTextColor),
           enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
+              borderSide: BorderSide(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor)),
           focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
+              borderSide: BorderSide(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor)),
         ),
       ),
     );
@@ -118,7 +138,7 @@ class _DonateScreenState extends State<DonateScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 20),
       child: commonElevatedButton(
-        bgColor: AppColors.getElevatedBtnColor(_isDarkMode),
+          bgColor: AppColors.getElevatedBtnColor(_isDarkMode),
           btnText: "Donate",
           onPressed: () async {
             if (!_formKey.currentState!.validate()) return;
@@ -129,19 +149,13 @@ class _DonateScreenState extends State<DonateScreen> {
   }
 
   _nowDonate() {
-
-
     /// for Production We should use Actual Data for all of the following Fields...
     /// NOTE: Now That API KEY for Test mode. In production we should use live mode api key...
 
     var options = {
       'key': DataManagement.getEnvData(EnvFileKey.rzpAPIKEY),
-      'amount': '${int.parse(_donateController.text) * 100}',
-      //"currency": "INR",
-      'email': "samarpan2dasgupta@gmail.com",
-      'name': "Samarpan Dasgupta",
-      'description': 'Donation For Improvement',
-      'prefill': {'email': "samarpan2dasgupta@gmail.com"}
+      'amount': '${double.parse(_donateController.text) * 100}',
+      'description': 'Donation For Generation Improvement',
     };
 
     try {
@@ -151,7 +165,7 @@ class _DonateScreenState extends State<DonateScreen> {
     }
   }
 
-  _headerSection(){
+  _headerSection() {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return AppBar(
@@ -162,11 +176,17 @@ class _DonateScreenState extends State<DonateScreen> {
         children: [
           IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: Icon(Icons.arrow_back_outlined, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor)),
+              icon: Icon(Icons.arrow_back_outlined,
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor)),
           Text(
             "Donate For Generation",
-            style:
-            TextStyleCollection.terminalTextStyle.copyWith(fontSize: 16, color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+            style: TextStyleCollection.terminalTextStyle.copyWith(
+                fontSize: 16,
+                color: _isDarkMode
+                    ? AppColors.pureWhiteColor
+                    : AppColors.lightChatConnectionTextColor),
           ),
         ],
       ),
