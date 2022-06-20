@@ -301,6 +301,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     final _dirPath = await createThumbnailStoreDir();
     final _thumbnailPath =
         createImageFile(dirPath: _dirPath, name: 'thumbnail');
+    final _remoteThumbnailPath = _msgAdditionalData["thumbnail"];
 
     _dio
         .download(_msgAdditionalData["thumbnail"], _thumbnailPath)
@@ -311,7 +312,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
           Secure.encode(DataManagement.toJsonString(_msgAdditionalData));
 
       _dbOperations
-          .deleteMediaFromFirebaseStorage(_msgAdditionalData["thumbnail"]);
+          .deleteMediaFromFirebaseStorage(_remoteThumbnailPath);
 
       _updateInLocalStorage(message);
       _updateInTopLevel(message);
