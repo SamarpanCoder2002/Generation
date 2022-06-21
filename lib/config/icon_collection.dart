@@ -132,15 +132,15 @@ class ActivityIconCollection{
 
 class ConnectionActionOptions{
   static List<dynamic> iconsCollection = [
-    [
-      const Icon(
-        Icons.person_add_disabled,
-        color: AppColors.pureWhiteColor,
-        size: 25,
-      ),
-      "Remove Connection",
-      AppColors.normalBlueColor,
-    ],
+    // [
+    //   const Icon(
+    //     Icons.person_add_disabled,
+    //     color: AppColors.pureWhiteColor,
+    //     size: 25,
+    //   ),
+    //   "Remove Connection",
+    //   AppColors.normalBlueColor,
+    // ],
     [
       const Icon(
         Icons.delete_outline_outlined,
@@ -152,12 +152,12 @@ class ConnectionActionOptions{
     ],
     [
       const Icon(
-        Icons.notifications_none,
+        Icons.person,
         color: AppColors.pureWhiteColor,
         size: 25,
       ),
-      "Notification",
-      AppColors.galleryIconBgColor,
+      "Profile",
+      AppColors.orangeTextColor,
     ],
   ];
 }

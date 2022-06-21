@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../config/colors_collection.dart';
 import '../../../config/text_style_collection.dart';
 import '../../../db_operations/firestore_operations.dart';
+import '../../../db_operations/types.dart';
 import '../../../providers/connection_collection_provider.dart';
 import '../../../providers/connection_management_provider_collection/all_available_connections_provider.dart';
 import '../../../providers/connection_management_provider_collection/incoming_request_provider.dart';
@@ -30,6 +31,7 @@ class CommonUsersShowScreen extends StatefulWidget {
 class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
+  final MessagingOperation _messagingOperation = MessagingOperation();
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           children: [
             const SizedBox(height: 15),
             //if (_getItemCount() != 0)
-              _searchBar(),
+            _searchBar(),
             const SizedBox(height: 15),
             _collectionsSection(),
           ],
@@ -296,10 +298,21 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<SentConnectionsProvider>(context, listen: false)
           .initialize(update: true);
+
       showToast(
           title: "Connection Request Sent",
           toastIconType: ToastIconType.success,
           showFromTop: false);
+
+      if(otherUserData['token'] == null){
+        otherUserData = await _dbOperations.getRemoteAnyAccData(otherUserData['id']);
+      }
+
+      _sendModifiedNotification(
+          Secure.decode(otherUserData['token']),
+          '${Secure.decode(_currAccData['name'])} sent you a connection request',
+          'I would like to connect with you',
+          otherUserData);
     } else {
       showToast(
           title: "Failed to sent request",
@@ -357,6 +370,16 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           title: "Request Accepted",
           toastIconType: ToastIconType.success,
           showFromTop: false);
+
+      if(otherUserData['token'] == null){
+        otherUserData = await _dbOperations.getRemoteAnyAccData(otherUserData['id']);
+      }
+
+      _sendModifiedNotification(
+          Secure.decode(otherUserData['token']),
+          '${Secure.decode(_currAccData['name'])} accepted your connection request',
+          "Let's talk with each other",
+          otherUserData);
     } else {
       showToast(
           title: "Failed to accept request",
@@ -388,5 +411,21 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           toastIconType: ToastIconType.error,
           showFromTop: false);
     }
+  }
+
+  void _sendModifiedNotification(token, title, body, otherUserData) {
+    bool _notificationPermitted = true;
+    if (otherUserData[DBPath.notification] != null &&
+        Secure.decode(otherUserData[DBPath.notification]) == 'false') {
+      _notificationPermitted = false;
+    }
+
+    if (!_notificationPermitted) return;
+
+    _messagingOperation.sendNotification(
+        deviceToken: token,
+        title: title,
+        body: body,
+        connId: _dbOperations.currUid);
   }
 }

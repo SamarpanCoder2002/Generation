@@ -7,6 +7,7 @@ import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
+import 'package:generation/screens/chat_screens/connection_profile_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
@@ -227,7 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     : AppColors.searchBarBgLightMode.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(100),
                 image: DecorationImage(
-                    image: NetworkImage(Secure.decode(_currentActivityData["profilePic"])),
+                    image: NetworkImage(
+                        Secure.decode(_currentActivityData["profilePic"])),
                     fit: BoxFit.cover),
                 border: Border.all(
                     color: _isDarkMode
@@ -417,7 +419,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             : AppColors.lightBorderGreenColor,
                         width: 3),
                     image: DecorationImage(
-                        image: NetworkImage(Secure.decode(_currentActivityData["profilePic"])),
+                        image: NetworkImage(
+                            Secure.decode(_currentActivityData["profilePic"])),
                         fit: BoxFit.cover)),
                 child: _addActivityIcon()),
             Container(
@@ -518,7 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: AppColors.getModalColor(_isDarkMode),
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
             child: GridView.count(
-              crossAxisCount: 3,
+              crossAxisCount: 2,
               crossAxisSpacing: 4,
               mainAxisSpacing: 6,
               children: List.generate(
@@ -533,21 +536,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return InkWell(
       onTap: () async {
+        // if (index == 0) {
+        //   _inputOption.removeConnectedUser(
+        //       _connectionData["id"], _isDarkMode, connectionIndex);
+        // } else
+        //
         if (index == 0) {
-          _inputOption.removeConnectedUser(
-              _connectionData["id"], _isDarkMode, connectionIndex);
-        } else if (index == 1) {
           _inputOption.clearChatData(_connectionData, _isDarkMode);
-        } else if (index == 2) {
-          _inputOption.activityImageFromGallery();
-        } else if (index == 3) {
-          _inputOption.makeVideoActivity(_isDarkMode);
-        } else if (index == 4) {
-          _inputOption.makeAudioActivity();
-        } else if (index == 5) {
-          Navigation.intent(context, const PollCreatorScreen());
-        } else if (index == 6) {
-          //await _inputOption.getContacts();
+        } else if (index == 1) {
+          Navigation.intent(context, ConnectionProfileScreen(connData: _connectionData));
         }
       },
       child: Column(

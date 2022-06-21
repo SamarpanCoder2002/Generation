@@ -155,6 +155,12 @@ class DBOperations {
     }
   }
 
+  Future<Map<String, dynamic>?> getRemoteAnyAccData(String userId) async {
+    final _docData =
+        await _getInstance.doc('${DBPath.userCollection}/$userId').get();
+    return _docData.data();
+  }
+
   Future<String> uploadMediaToStorage(String fileName, File file,
       {required String reference}) async {
     try {
@@ -471,9 +477,8 @@ class DBOperations {
   }
 
   updateNotificationStatus(bool updatedNotification) async {
-    await _getInstance
-        .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.notification: Secure.encode(updatedNotification.toString())});
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update(
+        {DBPath.notification: Secure.encode(updatedNotification.toString())});
   }
 
   updateParticularConnectionNotificationStatus(
@@ -522,8 +527,8 @@ class DBOperations {
     return Secure.encode(DataManagement.toJsonString(data));
   }
 
-  Future<bool> deleteParticularActivity(data) async{
-    try{
+  Future<bool> deleteParticularActivity(data) async {
+    try {
       await _getInstance
           .doc(
               '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
@@ -531,7 +536,7 @@ class DBOperations {
         DBPath.data: FieldValue.arrayRemove([data]),
       }, SetOptions(merge: true));
       return true;
-    }catch(e){
+    } catch (e) {
       debugPrint('Error in delete particular activity: $e');
       return false;
     }
