@@ -23,8 +23,6 @@ class _SoundManagementScreenState extends State<SoundManagementScreen> {
   _initialize()async{
     final _currAccData = await _localStorage.getDataForCurrAccount();
 
-    print('Global Notification: ${_currAccData["notification"]}');
-
     if(mounted){
       setState(() {
         _isNotificationActive = _currAccData["notification"] == NotificationType.unMuted.toString();

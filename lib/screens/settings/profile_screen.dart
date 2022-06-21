@@ -454,7 +454,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_response["success"]) {
       final _updatedData = _response["data"];
 
-      print('Updated Data');
+  
 
       await _localStorage.insertUpdateDataCurrAccData(
           currUserId: _updatedData["id"],

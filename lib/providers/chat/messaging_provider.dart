@@ -144,7 +144,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         setToken(_docData['token']);
 
         if (_docData.isNotEmpty) {
-          print('Sattus: ${Secure.decode(_docData[DBPath.status])}');
+          debugShow('Sattus: ${Secure.decode(_docData[DBPath.status])}');
           setCurrStatus(DataManagement.fromJsonString(Secure.decode(_docData[DBPath.status])) ?? {});
 
           _localStorage.insertUpdateConnectionPrimaryData(
@@ -166,7 +166,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         .listen((docSnapShot) {
       final Map<String, dynamic>? _docData = docSnapShot.data();
 
-      print('Doc Data is: $_docData');
+      debugShow('Doc Data is: $_docData');
 
       if (_docData == null) return;
 
@@ -207,7 +207,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   String getCurrStatus() {
-    print('curent Status: $_currStatus');
+    debugShow('curent Status: $_currStatus');
 
     if (_currStatus.isEmpty) return '';
     if (_currStatus["status"] == UserStatus.online.toString()) return 'Online';
@@ -515,7 +515,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   bool eligibleForDeleteForEveryOne() {
     for (ChatMessageModel msg in _selectedMessage.values.toList()) {
-      print('Message Type: ${msg.holder}');
+      debugShow('Message Type: ${msg.holder}');
       if (msg.holder == MessageHolderType.other.toString()) return false;
     }
 

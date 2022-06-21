@@ -69,7 +69,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
     Workmanager().initialize(
         bgTaskTopLevel, // The top level function, aka callbackDispatcher
-        isInDebugMode: true);
+        isInDebugMode: false);
 
     Workmanager().registerPeriodicTask(
       BgTask.deleteOwnActivityData['taskId'] ?? "1",
@@ -269,7 +269,6 @@ bgTaskTopLevel() {
   Workmanager().executeTask((taskName, inputData) async {
     switch (taskName) {
       case BgTask.deleteOwnActivity:
-        debugPrint('Delete Own Activity');
         await deleteOwnExpiredActivity(tableName: DbData.myActivityTable);
         break;
       case BgTask.deleteConnectionsActivity:
@@ -284,16 +283,13 @@ bgTaskTopLevel() {
 deleteOwnExpiredActivity(
     {String tableName = DbData.myActivityTable, bool stop = false}) async {
   //try {
-  debugPrint('Entry 1');
+
   final LocalStorage _localStorage = LocalStorage();
 
-  debugPrint('Entry 2');
   final _activities = await _localStorage.getAllActivity(
       tableName: tableName, withStoragePermission: false);
-  debugPrint('Entry 3');
-  final _currDateTime = DateTime.now();
 
-  debugPrint('All Activities Collection: $_activities');
+  final _currDateTime = DateTime.now();
 
   //if (stop) return;
 
@@ -305,7 +301,7 @@ deleteOwnExpiredActivity(
         ownActivity: true);
   }
   // } catch (e) {
-  //   debugPrint('deleteMyExpiredActivity error :$e');
+  //
   //   return [];
   // }
 }
@@ -314,8 +310,6 @@ manageDeleteConnectionsExpiredActivity() async {
   final LocalStorage _localStorage = LocalStorage();
   final _connectionsData = await _localStorage.getConnectionPrimaryData(
       withStoragePermission: false);
-
-  debugPrint('Connections Data: $_connectionsData');
 
   if (_connectionsData.isEmpty) return;
 
@@ -328,10 +322,8 @@ manageDeleteConnectionsExpiredActivity() async {
               conn["id"]),
           withStoragePermission: false);
       _connData[conn["id"]] = _activities;
-
-      debugPrint('Connection Data Map: $_connData');
     } catch (e) {
-      debugPrint('Error in Get Ids: $e');
+      //
     }
   }
 
@@ -354,38 +346,29 @@ _deleteEligibleActivities(
     required currDateTime,
     required String tableName,
     required bool ownActivity}) async {
-  //try {
+  try {
   final _date = Secure.decode(activity["date"]);
   final _time = Secure.decode(activity["time"]);
   final LocalStorage _localStorage = LocalStorage();
-
-  debugPrint('Activity date and time: $_date  $_time');
 
   DateFormat format = DateFormat("dd MMMM, yyyy hh:mm a");
   var formattedDateTime = format.parse('$_date $_time');
   final Duration _diffDateTime = currDateTime.difference(formattedDateTime);
 
-  debugPrint('Diff Time Date Time: $_diffDateTime');
-
   if (_diffDateTime.inHours >= TimeCollection.activitySustainTimeInHour) {
-    debugPrint('Activity Deleting Msg: $activity');
-
     if (ownActivity) {
       final _done = await _ownActivityRemoteDataDeletion(activity: activity);
       if (!_done) return;
     }
 
-    debugPrint('Under time Activity: $activity');
-
     if (Secure.decode(activity["type"]) !=
         ActivityContentType.text.toString()) {
-      debugPrint('Non Text File');
       await SystemFileManagement.deleteFile(Secure.decode(activity['message']));
       if (Secure.decode(activity['type']) ==
           ActivityContentType.video.toString()) {
         final _additionalDataString =
             Secure.decode(activity["additionalThings"]);
-        debugPrint('Additional Things in eligible: $_additionalDataString');
+
         final _additionalData =
             DataManagement.fromJsonString(_additionalDataString.toString());
         await SystemFileManagement.deleteFile(
@@ -397,20 +380,18 @@ _deleteEligibleActivities(
         tableName: tableName,
         activityId: activity["id"],
         withStoragePermission: false);
-    debugPrint('Activity Deleted');
   }
 
-  debugPrint('Activity Deletion Completed Background $activity');
-  // } catch (e) {
-  //   debugPrint('Error in _deleteEligibleActivities: $e');
-  // }
+   } catch (e) {
+  //
+   }
 }
 
 Future<bool> _ownActivityRemoteDataDeletion({required activity}) async {
   final DBOperations _dbOperations = DBOperations();
 
   final _additionalThings = Secure.decode(activity["additionalThings"]);
-  debugPrint('Additional Things: $_additionalThings');
+
   final _remoteDataEncrypted =
       DataManagement.fromJsonString(_additionalThings.toString())["remoteData"];
   final _remoteDataDecrypted = Secure.decode(_remoteDataEncrypted);

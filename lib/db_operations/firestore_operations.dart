@@ -537,7 +537,7 @@ class DBOperations {
       }, SetOptions(merge: true));
       return true;
     } catch (e) {
-      debugPrint('Error in delete particular activity: $e');
+      
       return false;
     }
   }

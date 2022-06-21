@@ -38,12 +38,9 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   bool _isNotificationActive = false;
 
   _initialize() async {
-    print('Here');
     String _oldNotificationStatus =
         (await _localStorage.getConnectionPrimaryData(
-                id: widget.connData["id"]))["notificationManually"];
-
-    print('Local Notification Status: $_oldNotificationStatus');
+            id: widget.connData["id"]))["notificationManually"];
 
     if (mounted) {
       setState(() {

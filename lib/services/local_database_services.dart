@@ -241,8 +241,6 @@ class LocalStorage {
       _conData[_conNotificationManually] =
           notificationTypeManually ?? NotificationType.unMuted.toString();
 
-
-
       if (dbOperation == DBOperation.insert) {
         await db.insert(DbData.connectionsTable, _conData);
 
@@ -262,13 +260,9 @@ class LocalStorage {
         }
 
         if (notificationTypeManually == null) {
-          print('Old Notification Data: ${_oldConnPrimaryData[_conNotificationManually]}');
-
           _conData[_conNotificationManually] =
               _oldConnPrimaryData[_conNotificationManually];
         }
-
-        print('Notification Manually: $notificationTypeManually      Value Stored: ${_conData[_conNotificationManually]}');
 
         await db.update(DbData.connectionsTable, _conData,
             where: """$_conId = "$id" """);
@@ -374,7 +368,6 @@ class LocalStorage {
 
       return true;
     } catch (e) {
-      print('Error in deleteDataFromParticularChatConnTable: $e');
       return false;
     }
   }
@@ -496,7 +489,6 @@ class LocalStorage {
 
       return _activitySet;
     } catch (e) {
-      print('Error in particular activity: $e');
       return [];
     }
   }

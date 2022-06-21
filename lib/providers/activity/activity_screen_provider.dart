@@ -115,8 +115,6 @@ class ActivityProvider extends ChangeNotifier {
   AnimationController getAnimationController() => _animationController;
 
   addNewActivity(Map<String, dynamic> map, String holderId) {
-    print('Adding Activity: $map');
-
     _localStorage.insertUpdateTableForActivity(
         tableName: holderId == _dbOperation.currUid
             ? DbData.myActivityTable
@@ -128,7 +126,9 @@ class ActivityProvider extends ChangeNotifier {
         date: Secure.encode(map["date"]) ?? '',
         time: Secure.encode(map["time"]) ?? '',
         msg: Secure.encode(map["message"]) ?? '',
-        additionalData: Secure.encode(DataManagement.toJsonString(map["additionalThings"])) ?? '',
+        additionalData: Secure.encode(
+                DataManagement.toJsonString(map["additionalThings"])) ??
+            '',
         dbOperation: DBOperation.insert);
   }
 
@@ -139,12 +139,12 @@ class ActivityProvider extends ChangeNotifier {
   setUpdatedIndex(int changedPageIndex) {
     _currentPageIndex = changedPageIndex;
     _animationBarCurrentIndex = changedPageIndex;
-    try{
+    try {
       _pageController.animateToPage(changedPageIndex,
           duration: const Duration(milliseconds: 100),
           curve: Curves.fastOutSlowIn);
-    }catch(e){
-      print('Activity Animate Error: $e');
+    } catch (e) {
+      debugShow('Error in set updated index $e');
     }
 
     _loadActivity();
