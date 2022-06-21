@@ -28,7 +28,7 @@ class ThemeProvider extends ChangeNotifier {
 
   _filtration(String? examineThemeData) {
     debugShow("Examine Theme Data: $examineThemeData");
-    if (examineThemeData == null) return ThemeModeTypes.darkMode;
+    if (examineThemeData == null) return ThemeModeTypes.systemMode;
 
     if (examineThemeData == ThemeModeTypes.systemMode.toString()) {
       return ThemeModeTypes.systemMode;
