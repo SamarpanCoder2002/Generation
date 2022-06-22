@@ -6,7 +6,7 @@ import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
 import 'package:provider/provider.dart';
 import '../../config/colors_collection.dart';
-import '../../config/size_collection.dart';
+import '../../config/countable_data_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
@@ -149,7 +149,7 @@ class CommonChatListLayout {
           const SizedBox(
             height: 10,
           ),
-          if (totalPendingMessages != null)
+          if (totalPendingMessages != '')
             Container(
               width: 25,
               height: 25,
@@ -160,7 +160,7 @@ class CommonChatListLayout {
                   borderRadius: BorderRadius.circular(100)),
               child: Center(
                   child: Text(
-                totalPendingMessages,
+                totalPendingMessages ?? '',
                 style: TextStyleCollection.terminalTextStyle,
               )),
             ),

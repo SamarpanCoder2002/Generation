@@ -5,6 +5,7 @@ import 'package:generation/config/colors_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
@@ -40,8 +41,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       setState(() {
         _currAccData.forEach((key, value) {
-          _actualProfileData[key] = value;
-          _editableProfileData[key] = value;
+          _actualProfileData[key] = Secure.decode(value);
+          _editableProfileData[key] = Secure.decode(value);
         });
         _isLoading = false;
       });
@@ -452,12 +453,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (_response["success"]) {
       final _updatedData = _response["data"];
+
+  
+
       await _localStorage.insertUpdateDataCurrAccData(
           currUserId: _updatedData["id"],
-          currUserName: _updatedData["name"],
-          currUserProfilePic: _updatedData["profilePic"],
-          currUserAbout: _updatedData["about"],
-          currUserEmail: _editableProfileData["email"],
+          currUserName: Secure.encode(_updatedData["name"]) ?? '',
+          currUserProfilePic: Secure.encode(_updatedData["profilePic"]) ?? '',
+          currUserAbout: Secure.encode(_updatedData["about"]) ?? '',
+          currUserEmail: Secure.encode(_editableProfileData["email"]) ?? '',
           dbOperation: DBOperation.update);
     }
 

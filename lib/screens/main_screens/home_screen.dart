@@ -7,7 +7,9 @@ import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
+import 'package:generation/screens/chat_screens/connection_profile_screen.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -205,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Provider.of<ConnectionCollectionProvider>(context).getUsersMap(_connId);
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-    final _connName = (_currentActivityData["name"] ?? '').toString();
+    final _connName = Secure.decode(_currentActivityData["name"]);
 
     return Container(
       margin: const EdgeInsets.only(right: 15),
@@ -213,7 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () => _switchToActivity(
             tableName: DataManagement.generateTableNameForNewConnectionActivity(
                 _connId),
-            isDarkMode: _isDarkMode, connId: _connId),
+            isDarkMode: _isDarkMode,
+            connId: _connId),
         child: Column(
           children: [
             Container(
@@ -225,7 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     : AppColors.searchBarBgLightMode.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(100),
                 image: DecorationImage(
-                    image: NetworkImage(_currentActivityData["profilePic"]),
+                    image: NetworkImage(
+                        Secure.decode(_currentActivityData["profilePic"])),
                     fit: BoxFit.cover),
                 border: Border.all(
                     color: _isDarkMode
@@ -323,15 +327,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 onLongPress: () =>
                     _onChatLongPressed(_connectionData, connectionIndex),
                 child: _commonChatLayout.particularChatConnection(
-                    photo: _connectionData["profilePic"] ?? "",
-                    heading: _connectionData["name"] ?? "",
+                    photo: Secure.decode(_connectionData["profilePic"]),
+                    heading: Secure.decode(_connectionData["name"]),
                     subheading: _getSubHeading(
                         _lastMsgData,
-                        (_connectionData['name'] ?? '')
+                        Secure.decode(_connectionData["name"])
                             .toString()
                             .split(' ')
                             .first),
-                    lastMsgTime: _lastMsgData?["time"] ?? "",
+                    lastMsgTime: Secure.decode(_lastMsgData?["time"]),
                     currentIndex: connectionIndex,
                     totalPendingMessages: _connectionData["notSeenMsgCount"],
                     bottomMargin:
@@ -367,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final _currentActivityData =
         Provider.of<StatusCollectionProvider>(context).getCurrentAccData();
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-    final _connName = (_currentActivityData["name"] ?? '').toString();
+    final _connName = Secure.decode(_currentActivityData["name"]);
 
     _addActivityIcon() {
       return InkWell(
@@ -395,7 +399,9 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(right: 15),
       child: InkWell(
         onTap: () => _switchToActivity(
-            tableName: DbData.myActivityTable, isDarkMode: _isDarkMode, connId: _currentActivityData['id']),
+            tableName: DbData.myActivityTable,
+            isDarkMode: _isDarkMode,
+            connId: _currentActivityData['id']),
         child: Column(
           children: [
             Container(
@@ -413,7 +419,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             : AppColors.lightBorderGreenColor,
                         width: 3),
                     image: DecorationImage(
-                        image: NetworkImage(_currentActivityData["profilePic"]),
+                        image: NetworkImage(
+                            Secure.decode(_currentActivityData["profilePic"])),
                         fit: BoxFit.cover)),
                 child: _addActivityIcon()),
             Container(
@@ -514,7 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: AppColors.getModalColor(_isDarkMode),
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
             child: GridView.count(
-              crossAxisCount: 3,
+              crossAxisCount: 2,
               crossAxisSpacing: 4,
               mainAxisSpacing: 6,
               children: List.generate(
@@ -529,21 +536,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return InkWell(
       onTap: () async {
+        // if (index == 0) {
+        //   _inputOption.removeConnectedUser(
+        //       _connectionData["id"], _isDarkMode, connectionIndex);
+        // } else
+        //
         if (index == 0) {
-          _inputOption.removeConnectedUser(
-              _connectionData["id"], _isDarkMode, connectionIndex);
-        } else if (index == 1) {
           _inputOption.clearChatData(_connectionData, _isDarkMode);
-        } else if (index == 2) {
-          _inputOption.activityImageFromGallery();
-        } else if (index == 3) {
-          _inputOption.makeVideoActivity(_isDarkMode);
-        } else if (index == 4) {
-          _inputOption.makeAudioActivity();
-        } else if (index == 5) {
-          Navigation.intent(context, const PollCreatorScreen());
-        } else if (index == 6) {
-          //await _inputOption.getContacts();
+        } else if (index == 1) {
+          Navigation.intent(context, ConnectionProfileScreen(connData: _connectionData));
         }
       },
       child: Column(
@@ -574,30 +575,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getSubHeading(_lastMsgData, String connFirstName) {
-    final _msgData = _lastMsgData?["message"] ?? '';
-    var _msgHolder =
-        _lastMsgData?['holder'] ?? MessageHolderType.other.toString();
+    final _msgData = Secure.decode(_lastMsgData?["message"]);
+    var _msgHolder = Secure.decode(_lastMsgData?['holder']);
     _msgHolder =
         _msgHolder == MessageHolderType.other.toString() ? connFirstName : 'Me';
 
     if (_msgData == '') return '';
 
-    if (_lastMsgData["type"] == ChatMessageType.image.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.image.toString()) {
       return '$_msgHolder:  📷 Image';
     }
-    if (_lastMsgData["type"] == ChatMessageType.video.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.video.toString()) {
       return '$_msgHolder:  📽️ Video';
     }
-    if (_lastMsgData["type"] == ChatMessageType.location.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.location.toString()) {
       return '$_msgHolder:  🗺️ Location';
     }
-    if (_lastMsgData["type"] == ChatMessageType.audio.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.audio.toString()) {
       return '$_msgHolder:  🎵 Audio';
     }
-    if (_lastMsgData["type"] == ChatMessageType.document.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.document.toString()) {
       return '$_msgHolder:  📃 Document';
     }
-    if (_lastMsgData["type"] == ChatMessageType.contact.toString()) {
+    if (Secure.decode(_lastMsgData["type"]) ==
+        ChatMessageType.contact.toString()) {
       return '$_msgHolder:  💁 Contact';
     }
 
@@ -605,7 +611,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _switchToActivity(
-      {required String tableName, required bool isDarkMode, required String connId}) async {
+      {required String tableName,
+      required bool isDarkMode,
+      required String connId}) async {
     final LocalStorage _localStorage = LocalStorage();
 
     final _activityData =
@@ -623,10 +631,12 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigation.intent(
           context,
           ActivityController(
-              tableName: tableName,
-              startingIndex: _visitedData.length == _activityData.length
-                  ? 0
-                  : _visitedData.length, activityHolderId: connId,),
+            tableName: tableName,
+            startingIndex: _visitedData.length == _activityData.length
+                ? 0
+                : _visitedData.length,
+            activityHolderId: connId,
+          ),
           afterWork: () => changeContextTheme(isDarkMode));
     });
   }

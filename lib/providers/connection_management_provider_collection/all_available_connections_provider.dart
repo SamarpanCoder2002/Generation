@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:generation/services/encryption_operations.dart';
 
 import '../../services/debugging.dart';
 
@@ -34,7 +35,7 @@ class AllAvailableConnectionsProvider extends ChangeNotifier {
     }
 
     for (final connection in _allAvailableConnections) {
-      if (connection["name"]
+      if (Secure.decode(connection["name"])
           .toString()
           .toLowerCase()
           .contains(searchKeyword.toString().toLowerCase())) {

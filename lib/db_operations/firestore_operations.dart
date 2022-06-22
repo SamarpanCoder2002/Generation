@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:generation/config/types.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
@@ -15,7 +16,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/db_operations/db_models.dart';
-import 'package:generation/db_operations/helper.dart';
+import 'package:generation/db_operations/config.dart';
 import 'package:generation/db_operations/types.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/providers/connection_management_provider_collection/all_available_connections_provider.dart';
@@ -108,7 +109,7 @@ class DBOperations {
       }
 
       final _token = await _fToken();
-      final _profile = ProfileModel.getJson(
+      final _profile = ProfileModel.getEncodedJson(
           iName: name,
           iAbout: about,
           iEmail: currEmail,
@@ -152,6 +153,12 @@ class DBOperations {
       debugShow("ERROR in update Current Account: $e");
       return false;
     }
+  }
+
+  Future<Map<String, dynamic>?> getRemoteAnyAccData(String userId) async {
+    final _docData =
+        await _getInstance.doc('${DBPath.userCollection}/$userId').get();
+    return _docData.data();
   }
 
   Future<String> uploadMediaToStorage(String fileName, File file,
@@ -206,8 +213,12 @@ class DBOperations {
             '${DBPath.userCollection}/$currUid/${DBPath.userSentRequest}')
         .get();
 
-    Provider.of<SentConnectionsProvider>(context, listen: false)
-        .setConnections(_sentData.docs);
+    try {
+      Provider.of<SentConnectionsProvider>(context, listen: false)
+          .setConnections(_sentData.docs);
+    } catch (e) {
+      debugShow('Error in getSentRequestUsersData: $e');
+    }
 
     return _sentData.docs;
   }
@@ -406,7 +417,8 @@ class DBOperations {
           .doc(
               '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.messages}')
           .set({
-        DBPath.data: FieldValue.arrayUnion([msgData])
+        DBPath.data: FieldValue.arrayUnion(
+            [Secure.encode(DataManagement.toJsonString(msgData))])
       }, SetOptions(merge: true));
 
       if (isNotificationPermitted) {
@@ -432,10 +444,8 @@ class DBOperations {
         .set({DBPath.data: []}, SetOptions(merge: true));
   }
 
-  Future<void> deleteMediaFromFirebaseStorage(String fileName,
+  Future<bool> deleteMediaFromFirebaseStorage(String fileName,
       {bool specialPurpose = false}) async {
-    debugShow('Delete Media File: $fileName');
-
     try {
       try {
         if (specialPurpose && Firebase.apps.isEmpty) {
@@ -449,34 +459,34 @@ class DBOperations {
 
       final Reference reference =
           FirebaseStorage.instance.ref().storage.refFromURL(fileName);
-      debugShow('Reference is: $reference');
 
       await reference.delete();
 
       debugShow("File Deleted");
+
+      return true;
     } catch (e) {
       debugShow("Delete From Firebase Storage Exception: ${e.toString()}");
+      return false;
     }
   }
 
   updateActiveStatus(Map<String, dynamic> status) async {
-    await _getInstance
-        .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.status: status});
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update(
+        {DBPath.status: Secure.encode(DataManagement.toJsonString(status))});
   }
 
   updateNotificationStatus(bool updatedNotification) async {
-    await _getInstance
-        .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.notification: updatedNotification.toString()});
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update(
+        {DBPath.notification: Secure.encode(updatedNotification.toString())});
   }
 
   updateParticularConnectionNotificationStatus(
       String connId, bool updatedNotification) async {
     await _getInstance.doc('${DBPath.userCollection}/$currUid').update({
       DBPath.notificationDeactivated: updatedNotification
-          ? FieldValue.arrayUnion([connId])
-          : FieldValue.arrayRemove([connId])
+          ? FieldValue.arrayUnion([Secure.encode(connId)])
+          : FieldValue.arrayRemove([Secure.encode(connId)])
     });
   }
 
@@ -487,7 +497,7 @@ class DBOperations {
     final _getToken = await _fToken();
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
-        .update({DBPath.token: _getToken});
+        .update({DBPath.token: Secure.encode(_getToken)});
   }
 
   resetRemoveSpecialRequest() {
@@ -497,7 +507,7 @@ class DBOperations {
         .set({DBPath.data: []});
   }
 
-  Future<Map<String, dynamic>> addActivity(Map<String, dynamic> data) async {
+  Future<String?> addActivity(Map<String, dynamic> data) async {
     if (data['type'] != ActivityContentType.text.toString()) {
       data["message"] = await uploadMediaToStorage(
           DBHelper.activityPath(
@@ -510,20 +520,26 @@ class DBOperations {
         .doc(
             '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
         .set({
-      DBPath.data: FieldValue.arrayUnion([data]),
+      DBPath.data: FieldValue.arrayUnion(
+          [Secure.encode(DataManagement.toJsonString(data))]),
     }, SetOptions(merge: true));
 
-    return data;
+    return Secure.encode(DataManagement.toJsonString(data));
   }
 
-  deleteParticularActivity(data) {
-    debugShow('Delete Particular Activity From Remote');
-    _getInstance
-        .doc(
-            '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
-        .set({
-      DBPath.data: FieldValue.arrayRemove([data]),
-    }, SetOptions(merge: true));
+  Future<bool> deleteParticularActivity(data) async {
+    try {
+      await _getInstance
+          .doc(
+              '${DBPath.userCollection}/$currUid/${DBPath.activities}/${DBPath.data}')
+          .set({
+        DBPath.data: FieldValue.arrayRemove([data]),
+      }, SetOptions(merge: true));
+      return true;
+    } catch (e) {
+      
+      return false;
+    }
   }
 
   deleteForEveryoneMsg(String msgId, String partnerId) async {
@@ -542,14 +558,12 @@ class DBOperations {
     }
   }
 
-  deleteSpecialOperationMsgIdSet(partnerId)async{
+  deleteSpecialOperationMsgIdSet(partnerId) async {
     try {
       await _getInstance
           .doc(
-          '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
-          .set({
-        SpecialOperationTypes.deleteMsg: []
-      }, SetOptions(merge: true));
+              '${DBPath.userCollection}/$partnerId/${DBPath.userConnections}/$currUid/${DBPath.contents}/${DBPath.specialOperation}')
+          .set({SpecialOperationTypes.deleteMsg: []}, SetOptions(merge: true));
 
       return true;
     } catch (e) {

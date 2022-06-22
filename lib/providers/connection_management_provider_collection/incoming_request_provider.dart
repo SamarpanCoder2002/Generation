@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
+import 'package:generation/services/encryption_operations.dart';
 
 import '../../services/debugging.dart';
 
@@ -51,7 +52,7 @@ class RequestConnectionsProvider extends ChangeNotifier {
     }
 
     for (final connection in _requestConnections) {
-      if (connection["name"]
+      if (Secure.decode(connection["name"])
           .toString()
           .toLowerCase()
           .contains(searchKeyword.toString().toLowerCase())) {

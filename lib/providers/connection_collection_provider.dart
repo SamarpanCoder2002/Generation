@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/config/types.dart';
@@ -22,7 +23,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   //final List<dynamic> _selectedSearchedChatConnectionsDataCollection = [];
   final Map<String, bool> _selectedConnections = {};
   List<dynamic> _chatConnectionsDataCollection = [];
-  List<String> _activityConnDataCollection = [];
+  final List<String> _activityConnDataCollection = [];
   final Map<String, dynamic> _localConnectedUsersMap = {};
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
@@ -180,10 +181,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
           _docData.isNotEmpty &&
           _localConnectedUsersMap[connId] != null) {
         final _incomingMessagesCollection = _docData["data"];
+        final _remoteLatestMsg = _incomingMessagesCollection.isEmpty
+            ? <String, dynamic>{}
+            : DataManagement.fromJsonString(
+                    Secure.decode(_incomingMessagesCollection.last))
+                .values
+                .toList()
+                .first;
         _manageMsgStreamData(
-            remoteLatestMsg: _incomingMessagesCollection.isEmpty
-                ? {}
-                : _incomingMessagesCollection.last.values.toList().first,
+            remoteLatestMsg: _remoteLatestMsg,
             connData: _localConnectedUsersMap[connId],
             notSeenMessages: _incomingMessagesCollection.length.toString());
       }
@@ -213,7 +219,8 @@ class ConnectionCollectionProvider extends ChangeNotifier {
   _storeActivityData(List<dynamic> activityCollection, String connId) async {
     debugShow('Activity Collection length: ${activityCollection.length}');
 
-    for (final activity in activityCollection) {
+    for (var activity in activityCollection) {
+      activity = DataManagement.fromJsonString(Secure.decode(activity));
       final _oldParticularData = await _localStorage.getParticularActivity(
           tableName:
               DataManagement.generateTableNameForNewConnectionActivity(connId),
@@ -276,12 +283,13 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         tableName:
             DataManagement.generateTableNameForNewConnectionActivity(connId),
         activityId: activity["id"],
-        activityHolderId: activity["holderId"],
-        activityType: activity['type'],
-        date: activity['date'],
-        time: activity['time'],
-        msg: activity['message'],
-        additionalData: activity["additionalThings"],
+        activityHolderId: Secure.encode(activity["holderId"]) ?? '',
+        activityType: Secure.encode(activity['type']) ?? '',
+        date: Secure.encode(activity['date']) ?? '',
+        time: Secure.encode(activity['time']) ?? '',
+        msg: Secure.encode(activity['message']) ?? '',
+        additionalData: Secure.encode(
+            DataManagement.toJsonString(activity["additionalThings"])),
         dbOperation: insert ? DBOperation.insert : DBOperation.update);
   }
 
@@ -302,7 +310,6 @@ class ConnectionCollectionProvider extends ChangeNotifier {
         name: connData["name"],
         profilePic: connData["profilePic"],
         about: connData["about"],
-        notificationTypeManually: connData["notificationManually"],
         dbOperation: DBOperation.update,
         lastMsgData: _lastMsgDataToInsert,
         notSeenMsgCount: notSeenMessages);
@@ -393,7 +400,7 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     }
 
     for (final connection in _chatConnectionsDataCollection) {
-      if (connection["name"]
+      if (Secure.decode(connection["name"])
           .toString()
           .toLowerCase()
           .contains(searchKeyword.toString().toLowerCase())) {
@@ -423,13 +430,15 @@ class ConnectionCollectionProvider extends ChangeNotifier {
       final _notificationDeactivatedList =
           _localConnectedUsersMap[connId][DBPath.notificationDeactivated];
       if (_notificationDeactivatedList == null) return true;
-      return !(_notificationDeactivatedList.contains(_dbOperations.currUid));
+      return !(_notificationDeactivatedList
+          .contains(Secure.encode(_dbOperations.currUid)));
     }
 
     if (_localConnectedUsersMap[connId][DBPath.notification] == null) {
       return _checkInNotificationDeactivatedList();
     } else {
-      if (_localConnectedUsersMap[connId][DBPath.notification] == 'false') {
+      if (Secure.decode(_localConnectedUsersMap[connId][DBPath.notification]) ==
+          'false') {
         return false;
       } else {
         return _checkInNotificationDeactivatedList();

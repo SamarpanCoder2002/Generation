@@ -317,8 +317,7 @@ class _CreateActivityState extends State<CreateActivity> {
     }
 
     final _serverStoredData = await _dbOperation.addActivity({...map});
-    map["additionalThings"]["remoteData"] =
-        DataManagement.toJsonString(_serverStoredData);
+    map["additionalThings"]["remoteData"] = _serverStoredData;
 
     debugShow('Modified activity data: $map');
 

@@ -1,3 +1,5 @@
+import 'package:generation/services/local_data_management.dart';
+
 class ActivityModel {
   final String id;
   final String type;
@@ -12,11 +14,28 @@ class ActivityModel {
 
   factory ActivityModel.getJson(
           {required String id,
-            required String type,
+          required String type,
           required String holderId,
           required String date,
           required String time,
           required String message,
           required dynamic additionalThings}) =>
       ActivityModel(type, message, additionalThings, holderId, date, time, id);
+
+  factory ActivityModel.getDecodedJson(
+      {required String id,
+      required String type,
+      required String holderId,
+      required String date,
+      required String time,
+      required String message,
+      required dynamic additionalThings}) {
+
+   
+    if (additionalThings != '') {
+      additionalThings = DataManagement.fromJsonString(additionalThings);
+    }
+    return ActivityModel(
+        type, message, additionalThings, holderId, date, time, id);
+  }
 }

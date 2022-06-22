@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:generation/config/size_collection.dart';
+import 'package:generation/config/countable_data_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/providers/local_storage_provider.dart';
 import 'package:generation/services/permission_management.dart';
@@ -103,12 +103,12 @@ class LocalStorage {
   Future<Database> _getDatabase({String? path}) async {
     path ??= await DataManagement.getStringData(StoredString.dbPath);
 
-    if(path == null){
+    if (path == null) {
       final Directory? directory = await getExternalStorageDirectory();
 
       final Directory newDirectory =
-      await Directory(directory!.path + "/${FolderData.dbFolder}/")
-          .create();
+          await Directory(directory!.path + "/${FolderData.dbFolder}/")
+              .create();
 
       path = newDirectory.path +
           "/${DataManagement.getEnvData(EnvFileKey.dbName)}.db";
@@ -295,9 +295,10 @@ class LocalStorage {
 
   /// Get Connections Primary Data. If id null, it returns all the data. Get Particular Connection Data
   /// By Passing Connection Id
-  getConnectionPrimaryData({String? id, bool withStoragePermission = true}) async {
+  getConnectionPrimaryData(
+      {String? id, bool withStoragePermission = true}) async {
     final Database db =
-    withStoragePermission ? await database : await _getDatabase();
+        withStoragePermission ? await database : await _getDatabase();
 
     if (id == null) {
       return await db.rawQuery("""SELECT * FROM ${DbData.connectionsTable}""");
@@ -355,7 +356,7 @@ class LocalStorage {
   /// Delete Particular Connection Chat Message Table
   Future<bool> deleteDataFromParticularChatConnTable(
       {required String tableName, String? msgId}) async {
-    try{
+    try {
       final Database db = await database;
 
       if (msgId == null) {
@@ -366,11 +367,9 @@ class LocalStorage {
       }
 
       return true;
-    }catch(e){
-      print('Error in deleteDataFromParticularChatConnTable: $e');
+    } catch (e) {
       return false;
     }
-
   }
 
   /// Get Paginated Data from Connection Chat Message Table
@@ -439,19 +438,16 @@ class LocalStorage {
 
       final Map<String, dynamic> _activityData = <String, dynamic>{};
 
-      debugShow('Suspected Activity id Low: ${activityId}');
-
       _activityData[_activityId] = activityId;
       _activityData[_activityHolderId] = activityHolderId;
       _activityData[_activityType] = activityType;
       _activityData[_activityDate] = date;
       _activityData[_activityTime] = time;
       _activityData[_activityMessage] = msg;
-      _activityData[_activityAdditionalThings] =
-          DataManagement.toJsonString(additionalData);
+      _activityData[_activityAdditionalThings] = additionalData;
       _activityData[_activityVisited] = "${activityVisited ?? 'false'}";
 
-      debugShow('Activity Data:  $_activityData     dbOperation: ${dbOperation}');
+      debugShow('Activity Data:  $_activityData     dbOperation: $dbOperation');
 
       dbOperation == DBOperation.insert
           ? db.insert(tableName, _activityData)
@@ -465,8 +461,12 @@ class LocalStorage {
     }
   }
 
-  deleteActivity({required String tableName, String? activityId, bool withStoragePermission = true}) async {
-    final Database db = withStoragePermission ? await database : await _getDatabase();
+  deleteActivity(
+      {required String tableName,
+      String? activityId,
+      bool withStoragePermission = true}) async {
+    final Database db =
+        withStoragePermission ? await database : await _getDatabase();
 
     if (activityId == null) {
       await db.delete(tableName);
@@ -474,18 +474,23 @@ class LocalStorage {
     } else {
       final _response = await db
           .delete(tableName, where: """$_activityId = "$activityId" """);
-      debugShow('Delete Activity Response: $_response   Activity Id: $activityId');
+      debugShow(
+          'Delete Activity Response: $_response   Activity Id: $activityId');
     }
   }
 
   getParticularActivity(
       {required String tableName, required String activityId}) async {
-    final Database db = await database;
+    try {
+      final Database db = await database;
 
-    final _activitySet = await db.rawQuery(
-        """ SELECT * FROM $tableName WHERE $_activityId = "$activityId" """);
+      final _activitySet = await db.rawQuery(
+          """ SELECT * FROM $tableName WHERE $_activityId = "$activityId" """);
 
-    return _activitySet;
+      return _activitySet;
+    } catch (e) {
+      return [];
+    }
   }
 
   Stream<List<Map<String, Object?>>> getAllActivityStream(
@@ -519,7 +524,7 @@ class LocalStorage {
       return await db.rawQuery(
           """ SELECT * FROM $tableName WHERE $_activityVisited = "$seen" """);
     } catch (e) {
-      debugShow('Get all activity error :${e}');
+      debugShow('Get all activity error :$e');
       return [];
     }
   }
@@ -676,7 +681,7 @@ class LocalStorage {
     final Duration _diffDateTime = currDateTime.difference(formattedDateTime);
 
     if (_diffDateTime.inMinutes >= 2) {
-      debugShow('Activity Deleting Msg: ${activity}');
+      debugShow('Activity Deleting Msg: $activity');
       await deleteActivity(
           tableName: tableName, activityId: activity[_activityId]);
     }

@@ -10,6 +10,7 @@ import 'package:generation/providers/chat/chat_creation_section_provider.dart';
 import 'package:generation/providers/chat/chat_scroll_provider.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
 import 'package:generation/screens/common/button.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
@@ -371,14 +372,12 @@ class _MessagingSectionState extends State<MessagingSection> {
 
             final realMsg = messageData.values.toList()[0];
 
-            final chatMsgObj = ChatMessageModel.toJson(
+            final chatMsgObj = ChatMessageModel.toDecodedJson(
                 type: realMsg["type"],
                 message: realMsg["message"],
                 time: realMsg["time"],
                 holder: realMsg["holder"],
-                additionalData: realMsg["additionalData"] != null
-                    ? DataManagement.fromJsonString(realMsg["additionalData"])
-                    : null,
+                additionalData: realMsg["additionalData"],
                 date: realMsg["date"]);
 
             return _commonMessageLayout(
@@ -746,12 +745,12 @@ class _MessagingSectionState extends State<MessagingSection> {
         final _activityHolder = _replyMsgData["activityHolderId"] ==
                 Provider.of<ChatBoxMessagingProvider>(context)
                     .getPartnerUserId()
-            ? """${widget.connData['name']}'s"""
+            ? """${Secure.decode(widget.connData['name'])}'s"""
             : 'Your';
         return """${_replyMsgData["activityHolderId"] != null ? _activityHolder : ''} activity : click here to view""";
       }
 
-      return """${realMsgData.holder == MessageHolderType.other.toString() ? '${widget.connData['name']}' : 'You'} : ${_optimizedShowReplyMessage(_replyMsgData.values.toList()[0])}""";
+      return """${realMsgData.holder == MessageHolderType.other.toString() ? Secure.decode(widget.connData['name']) : 'You'} : ${_optimizedShowReplyMessage(_replyMsgData.values.toList()[0])}""";
     }
 
     return InkWell(
@@ -786,7 +785,8 @@ class _MessagingSectionState extends State<MessagingSection> {
 
     final LocalStorage _localStorage = LocalStorage();
     final tableName = _replyMsgData["activityHolderId"] ==
-            Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId()
+            Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getPartnerUserId()
         ? DataManagement.generateTableNameForNewConnectionActivity(
             _replyMsgData["activityHolderId"])
         : DbData.myActivityTable;

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
 
@@ -39,8 +40,7 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   _initialize() async {
     String _oldNotificationStatus =
         (await _localStorage.getConnectionPrimaryData(
-                id: widget.connData["id"]))["notificationManually"] ??
-            'false';
+            id: widget.connData["id"]))["notificationManually"];
 
     if (mounted) {
       setState(() {
@@ -81,17 +81,17 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
             _commonSection(
                 iconData: Icons.account_circle_outlined,
                 heading: "Name",
-                nameValue: widget.connData["name"] ?? ""),
+                nameValue: Secure.decode(widget.connData["name"])),
             const SizedBox(height: 30),
             _commonSection(
                 iconData: Icons.info_outlined,
                 heading: "About",
-                nameValue: widget.connData["about"] ?? ""),
+                nameValue: Secure.decode(widget.connData["about"])),
             const SizedBox(height: 30),
             _commonSection(
                 iconData: Icons.email_outlined,
                 heading: "Email",
-                nameValue: widget.connData["email"] ?? ""),
+                nameValue: Secure.decode(widget.connData["email"])),
             const SizedBox(height: 30),
             // _commonSection(
             //     iconData: _notificationStatus == "Muted"
@@ -116,14 +116,14 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
                 text: 'Media',
                 onPressed: _navigateToLocalStorageScreen),
             const SizedBox(height: 30),
-            _commonInputSection(
-                iconData: Icons.person_add_disabled,
-                text: 'Remove Connection',
-                startIconColor: AppColors.lightRedColor,
-                terminalIconData: Icons.delete_outline_outlined,
-                textColor: AppColors.lightRedColor,
-                onPressed: () {},
-                terminalIconColor: AppColors.lightRedColor),
+            // _commonInputSection(
+            //     iconData: Icons.person_add_disabled,
+            //     text: 'Remove Connection',
+            //     startIconColor: AppColors.lightRedColor,
+            //     terminalIconData: Icons.delete_outline_outlined,
+            //     textColor: AppColors.lightRedColor,
+            //     onPressed: () {},
+            //     terminalIconColor: AppColors.lightRedColor),
           ],
         ),
       ),
@@ -184,13 +184,15 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
   _imageSection() {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
+    final _decodedProfilePic = Secure.decode(widget.connData["profilePic"]);
+
     return InkWell(
       onTap: () async {
         Navigation.intent(
             context,
             ImageShowingScreen(
-                imgPath: widget.connData["profilePic"],
-                imageType: widget.connData["profilePic"].startsWith("https")
+                imgPath: _decodedProfilePic,
+                imageType: _decodedProfilePic.startsWith("https")
                     ? ImageType.network
                     : ImageType.file), afterWork: () {
           showStatusAndNavigationBar();
@@ -207,14 +209,14 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
             borderRadius: BorderRadius.circular(100),
             color: AppColors.getImageBgColor(_isDarkMode),
             border: Border.all(color: AppColors.darkBorderGreenColor, width: 3),
-            image: widget.connData["profilePic"]?.startsWith("https")
+            image: _decodedProfilePic.startsWith("https")
                 ? DecorationImage(
                     fit: BoxFit.cover,
-                    image: NetworkImage(widget.connData["profilePic"]),
+                    image: NetworkImage(_decodedProfilePic),
                   )
                 : DecorationImage(
                     fit: BoxFit.cover,
-                    image: FileImage(File(widget.connData["profilePic"])),
+                    image: FileImage(File(_decodedProfilePic)),
                   )),
       ),
     );

@@ -8,6 +8,7 @@ import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/common/common_operations.dart';
 import 'package:generation/screens/main_screens/main_screen_management.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
@@ -388,10 +389,10 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
       _localStorage.createTableForConnectionsPrimaryData();
       await _localStorage.insertUpdateDataCurrAccData(
           currUserId: _data["id"],
-          currUserName: _data["name"],
-          currUserProfilePic: _data["profilePic"],
-          currUserAbout: _data["about"],
-          currUserEmail: _data["email"],
+          currUserName: Secure.encode(_data["name"]) ??'',
+          currUserProfilePic: Secure.encode(_data["profilePic"]) ?? '',
+          currUserAbout: Secure.encode(_data["about"]) ?? '',
+          currUserEmail: Secure.encode(_data["email"]) ?? '',
           dbOperation: DBOperation.insert);
 
       await DataManagement.storeStringData(

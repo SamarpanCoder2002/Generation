@@ -3,6 +3,7 @@ import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/chat_screens/connection_profile_screen.dart';
 import 'package:generation/screens/common/common_selection_screen.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
@@ -67,10 +68,11 @@ class ChatBoxHeaderSection extends StatelessWidget {
                 : AppColors.searchBarBgLightMode.withOpacity(0.5),
             borderRadius: BorderRadius.circular(100),
             border: Border.all(color: AppColors.darkBorderGreenColor, width: 2),
-            image: connectionData["profilePic"] == null
+            image: Secure.decode(connectionData["profilePic"]) == ''
                 ? null
                 : DecorationImage(
-                    image: NetworkImage(connectionData["profilePic"]),
+                    image: NetworkImage(
+                        Secure.decode(connectionData["profilePic"])),
                     fit: BoxFit.cover)),
       ),
     );
@@ -92,7 +94,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                connectionData["name"],
+                Secure.decode(connectionData["name"]),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyleCollection.headingTextStyle.copyWith(
                     fontSize: 16,
@@ -281,7 +283,9 @@ class ChatBoxHeaderSection extends StatelessWidget {
                       .copyWith(fontSize: 20),
                 ),
               ),
-              actionsAlignment: _eligibleForDeleteForEveryOne?MainAxisAlignment.spaceBetween:MainAxisAlignment.center,
+              actionsAlignment: _eligibleForDeleteForEveryOne
+                  ? MainAxisAlignment.spaceBetween
+                  : MainAxisAlignment.center,
               actions: [
                 commonTextButton(
                     btnText: "Delete For Me",

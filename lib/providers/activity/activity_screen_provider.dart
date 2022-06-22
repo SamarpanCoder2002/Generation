@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/model/activity_model.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ class ActivityProvider extends ChangeNotifier {
 
   bool get showActivityDetails => _showActivityDetails;
 
-  setActivityDetails(bool incomingActivity){
+  setActivityDetails(bool incomingActivity) {
     _showActivityDetails = incomingActivity;
     notifyListeners();
   }
@@ -120,12 +121,14 @@ class ActivityProvider extends ChangeNotifier {
             : DataManagement.generateTableNameForNewConnectionActivity(
                 holderId),
         activityId: map["id"],
-        activityHolderId: map["holderId"],
-        activityType: map["type"],
-        date: map["date"],
-        time: map["time"],
-        msg: map["message"],
-        additionalData: map["additionalThings"],
+        activityHolderId: Secure.encode(map["holderId"]) ?? '',
+        activityType: Secure.encode(map["type"]) ?? '',
+        date: Secure.encode(map["date"]) ?? '',
+        time: Secure.encode(map["time"]) ?? '',
+        msg: Secure.encode(map["message"]) ?? '',
+        additionalData: Secure.encode(
+                DataManagement.toJsonString(map["additionalThings"])) ??
+            '',
         dbOperation: DBOperation.insert);
   }
 
@@ -136,9 +139,14 @@ class ActivityProvider extends ChangeNotifier {
   setUpdatedIndex(int changedPageIndex) {
     _currentPageIndex = changedPageIndex;
     _animationBarCurrentIndex = changedPageIndex;
-    _pageController.animateToPage(changedPageIndex,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.fastOutSlowIn);
+    try {
+      _pageController.animateToPage(changedPageIndex,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.fastOutSlowIn);
+    } catch (e) {
+      debugShow('Error in set updated index $e');
+    }
+
     _loadActivity();
     notifyListeners();
   }
@@ -174,15 +182,13 @@ class ActivityProvider extends ChangeNotifier {
     if (index > _activityCollection.length - 1) return null;
 
     final _activityData = _activityCollection[index];
-    return ActivityModel.getJson(
-        type: _activityData["type"],
-        holderId: _activityData["holderId"],
-        date: _activityData["date"],
-        time: _activityData["time"],
-        message: _activityData["message"],
-        additionalThings: _activityData["additionalThings"] == null
-            ? {}
-            : DataManagement.fromJsonString(_activityData["additionalThings"]),
+    return ActivityModel.getDecodedJson(
+        type: Secure.decode(_activityData["type"]),
+        holderId: Secure.decode(_activityData["holderId"]),
+        date: Secure.decode(_activityData["date"]),
+        time: Secure.decode(_activityData["time"]),
+        message: Secure.decode(_activityData["message"]),
+        additionalThings: Secure.decode(_activityData["additionalThings"]),
         id: _activityData["id"]);
   }
 

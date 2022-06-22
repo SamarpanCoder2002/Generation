@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/text_style_collection.dart';
 import 'package:generation/providers/storage/storage_provider.dart';
+import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/system_file_management.dart';
 import 'package:provider/provider.dart';
 
@@ -54,11 +55,13 @@ class StorageAudioAndDocumentCollectionScreen extends StatelessWidget {
   }
 
   _particularData(int index, BuildContext context) {
-    final String _audioDocFile = isAudio
+    String _audioDocFile = isAudio
         ? Provider.of<StorageProvider>(context).getAudioCollection()[index]
             ['message']
         : Provider.of<StorageProvider>(context).getDocumentCollection()[index]
             ['message'];
+
+    _audioDocFile = Secure.decode(_audioDocFile);
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 

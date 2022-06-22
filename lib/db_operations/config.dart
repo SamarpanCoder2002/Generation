@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../config/size_collection.dart';
+import '../config/countable_data_collection.dart';
 import '../services/debugging.dart';
 
 class DBHelper{

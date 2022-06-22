@@ -40,6 +40,7 @@ class EnvFileKey {
   static const baseUrl = "BASE_URL";
   static const firebaseMessagingTopic = "topicToSubscribe";
   static const serverKey = "serverKey";
+  static const encryptKey = "ENCRYPT_KEY";
 }
 
 class DbData {
