@@ -1,5 +1,5 @@
 name: generation
-description: What You Seek is Seeking You
+description: A new Flutter project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -15,10 +15,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.17.3 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,68 +29,73 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  http: ^0.13.3
+  provider: ^6.0.3
+  shared_preferences: ^2.0.13
+  flutter_font_icons: ^2.2.5
+  percent_indicator: ^4.2.2
+  photo_view: ^0.14.0
+  just_audio: ^0.9.20
+  flutter_linkify: ^5.0.2
+  url_launcher: ^6.0.20
+  permission_handler: ^9.2.0
+  path_provider: ^2.0.9
+  record: ^3.0.3
   intl: ^0.17.0
-
-  flutter_icons:
-    git:
-      url: git://github.com/jibiel/flutter-icons.git
-      ref: master
-  loading_overlay: ^0.3.0
-  emoji_picker_flutter: ^1.0.7
-  animations: ^2.0.1
-  flutter_colorpicker: ^0.6.0
-  fluttertoast: ^8.0.8
-  percent_indicator: ^3.0.1
-  just_audio: ^0.9.12
-  photo_view: ^0.12.0
-  flutter_local_notifications: ^8.2.0
-  workmanager: ^0.4.1
-  share: ^2.0.4
-  image_gallery_saver: ^1.7.0
-  mobile_number: ^1.0.4
-
-  circle_list: ^1.0.5
-  image_picker: ^0.8.4+2
-  flutter_sound: ^8.3.12
-  path_provider: ^2.0.5
-  permission_handler: ^8.1.6
-  file_picker: ^4.1.3
+  image_picker: ^0.8.5+3
   open_file: ^3.2.1
-  pdf_viewer_plugin:
+  file_picker: ^4.5.0
+  pdf_viewer_plugin: ^2.0.1
+  geolocator: ^8.2.0
+  google_maps_flutter: ^2.1.2
+  contacts_service: ^0.6.3
+  fluttertoast: ^8.0.9
+  cached_network_image:
     git:
-      url: https://github.com/boskokg/Pdf_Viewer_Plugin/
-      ref: master
-  swipe_to: 0.1.0-nullsafety.1
-
-  firebase_core: ^1.7.0
-  firebase_auth: ^3.1.2
-  google_sign_in: ^5.1.1
-  cloud_firestore: ^2.5.3
-  firebase_storage: ^10.0.4
-  firebase_messaging: ^10.0.8
-
-  dio: ^4.0.0
-
-  sqflite: ^2.0.0+4
-
-  google_maps_flutter: ^2.0.11
-  geolocator: ^7.6.2
-  url_launcher: ^6.0.12
-
+      url: https://github.com/XuannThucc/flutter_cached_network_image.git
+      path: cached_network_image
+      ref: ff72f00f142f13d889d7549e013af91cb0b523ab
+  flutter_dotenv: ^5.0.2
+  razorpay_flutter: ^1.2.9
+  share_plus: ^4.0.2
+  flutter_colorpicker: ^1.0.3
+  video_player: ^2.4.2
+  smooth_page_indicator: ^1.0.0+2
+  swipe_to: ^1.0.2
+  receive_sharing_intent: ^1.4.5
+  firebase_auth: ^3.3.15
+  cloud_firestore: ^3.1.13
+  google_sign_in: ^5.3.0
+  firebase_core: ^1.15.0
+  firebase_messaging: ^11.2.14
+  http: ^0.13.4
+  firebase_storage: ^10.2.13
+  dio: ^4.0.6
+  flutter_local_notifications: ^9.5.3+1
+  gugor_emoji: ^0.0.4
+  loading_overlay: ^0.3.0
+  workmanager: ^0.5.0
   encrypt: ^5.0.1
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.3
+  cupertino_icons: ^1.0.2
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  #  flutter_test:
+  #    sdk: flutter
 
-  flutter_native_splash: ^1.3.1
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^1.0.0
 
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -101,7 +106,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/logo/
+    - .env
+  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -115,15 +121,18 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: Lora
+    - family: Poppins
       fonts:
-        - asset: assets/fonts/Lora-Bold.ttf
-          weight: 500
-        - asset: assets/fonts/Lora-BoldItalic.ttf
-          weight: 500
-          style: italic
-        - asset: assets/fonts/Lora-Italic.ttf
-          style: italic
-        - asset: assets/fonts/Lora-Regular.ttf
+        - asset: assets/fonts/Poppins-Regular.ttf
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
