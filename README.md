@@ -2,13 +2,12 @@
 ![](https://img.shields.io/badge/Software_Development_Kit(SDK)-Flutter-gold.svg)
 ![](https://img.shields.io/badge/Platform-Android_Studio-green.svg)
 ![](https://img.shields.io/badge/App-Android-yellow.svg)
-![](https://img.shields.io/badge/Flutter_Version-2.5.0-brown.svg)
-![](https://img.shields.io/badge/Dart_Version-2.14.0-orange.svg)
+![](https://img.shields.io/badge/Flutter_Version-3.0.2-green.svg)
+![](https://img.shields.io/badge/Dart_Version-2.17.3-orange.svg)
 ![](https://img.shields.io/badge/Status-Stable-blue.svg)
-![](https://img.shields.io/badge/Null_Safety-Migrated-green.svg)
 
 
-# <p align="center">💙 Generation 💙</p>
+# <p align="center"> Generation </p>
 
 #### <p align="center"> ✨ A Private, Secure, End-to-End Encrypted Messaging app made in Flutter that helps you to connect with your connections without any Ads, promotion. No other third-party person, organization, or even Generation Team can't read your messages. ✨ </p>
 
@@ -42,61 +41,58 @@
 <br/>
 
 ### 🎯 Special Features:-
-#### 1. Chat Message Conversation
+#### 1. Send Chat Messages With Following Types
 
-|               	| Chat Types|            	|            	|
-|---------------	|--------------------------	|------------	|------------	|
-|   Text Chat   	| Voice Chat               	| Image Chat 	| Video Chat 	|
-| Document Chat 	| Location Chat            	| Audio Chat 	|            	|
+| Text  | Image    | Video    |
+|-------|----------|----------|
+| Voice | Audio    | Document |
+|       | Location |          |
 
-
-#### 2. Activity Section
-|               	| Activity Types 	|                  	|
-|---------------	|----------------	|------------------	|
-| Text Activity 	| Image Activity 	| Polling Activity 	|
+#### 2. Make Activity of Following Types
+| Text | Image | Video | Audio |
+|------|-------|-------|-------|
 
 
-#### 3. Connection Request Accept And New Connection Request Feature
-#### 4. Multiple Connection Message Send Simultaneously
+#### 3. Media Visibility Section
+| Image | Video | Audio | Document |
+|-------|-------|-------|----------|
 
-|  	|      Types   	|  	|
-|-	|-	|-	|
-| Text Chat 	| Image Chat 	| Voice Chat 	|
-| Audio Chat 	| Location Chat 	| Document Chat 	|
-| Video Chat 	|  	|  	|
+#### 4. Notification Settings Available for All or Particular Chat Connection
 
-#### 5. Media Visibility Section
-|  	|  Media Visibility  	|  	|  	|
-|-	|-	|-	|-	|
-| Image 	|        Video 	|    Document 	|        Audio        	|
-#### 6. Notification Settings Available for Global and Manual Chat
+| Online Notification | Receive Notification when app is killed or in background |
+|---------------------|----------------------------------------------------------|
 
-|  	| Notification Types 	|  	|  	|
-|-	|-	|-	|-	|
-| Background Notification Annotation 	| Online Notification 	| Remove Birth Notification 	| Remove Anonymous Notification 	|
+#### 5. Chat Wallpaper
 
-#### 7. Chat Wallpaper
+| Chat Wallpaper for All Connections | Personalized Chat Wallpaper for a Particular Connection |
+|------------------------------------|---------------------------------------------------------|
 
-| Global Chat Wallpaper 	| Manual Chat Wallpaper 	|
-|:-:	|-	|
+#### 6. Support Section
 
-#### 8. Support Section
+| Report a Problem | Donation For Generation Improvement |
+|------------------|-------------------------------------|
 
-| Report a Problem 	| Request a Feature 	| Send Feedback 	| Donate(Payment Gateway Integrated) 	|
-|:-:	|-	|-	|-	|
+#### 7. Receive Notification When you send a connection request or Receive a connection request
 
-#### 9.  Internal Search Section
-#### 10. Audio Calling and Calling History Section(Beta)
-#### 11. Profile Image Feature
-#### 12. Chat Message Forward Feature
+#### 8. By Default Online and Background Notification When Message Receive is activated overall the app.
+
+#### 9.  Search through your connections, available users, incoming and sent connection requests.
+#### 10. Reply to any Activity
+#### 11. Profile Customization Feature including Profile Picture, Name and About
+#### 12. Messages Forward to Other Connections
 #### 13. Share Chat Contents via multiple apps
-#### 14. Delete for Me for any chat messages
+#### 14. Delete for Me and Delete For Everyone for Any Chat Messages
+#### 15. Instant Activate System, Dark and Light Mode Across the app.
+#### 16. Extract Chat History for Any Connection.
+#### 17. Reply to any Chat Message.
+#### 18. Can Visit Latest Chat Message for any connection.
+#### 19. Can see if any connection is Online or not. If not online, last seen will show there.
 
 </br>
 
 ### 👀 Main APIs Used
-| Firebase API 	| Google Map API 	|
-|:-:	|-	|  
+| Firebase | Google Map | Cloud Messaging |
+|----------|------------|-----------------|
 
 </br>
 
@@ -108,8 +104,7 @@
 ### 🎯 Important Points Needs to Know
 
 #### 💥 Some Feature of this app written in Native part(Kotlin)
-#### 💥 Screenshot and Screen Recording is restricted for this app due to Security
-#### 💥 Except Audio Calling, all Messages and Activity are End-to-End-Encrypted
+#### 💥 All Messages and Activity are End-to-End-Encrypted
 #### 💥 Activity(Status) will deleted automatically after 24 hrs after it's launch
 #### 💥 API keys along with google-services.json file and Secure Keys removed for unwanted or unauthorized uses
 
@@ -124,7 +119,5 @@
 - #### [Click Here to See the Project Video](https://youtu.be/QEDhmxzEqUA)
 
 - #### [LinkedIN Video](https://www.linkedin.com/posts/samarpan-dasgupta-4aa1061b0_connections-introducing-project-activity-6811146891833704448-FyrC)
-
-- #### [APK File Download Link](https://drive.google.com/file/d/1KbyV40g-oUjdEwLzmEfmm9sjnwBu5D2b/view?usp=sharing)
 
 <h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>
