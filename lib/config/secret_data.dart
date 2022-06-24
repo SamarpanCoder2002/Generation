@@ -1,3 +1,3 @@
 class SecretData{
-  static const String encryptKey = "LpDz33I4orac8VV9BSznk6ogYlBBAxndcD07MTWFyFs=";
+  static const String encryptKey = "Write Encryption key here. It will be used when the app in background or app is killed";
 }

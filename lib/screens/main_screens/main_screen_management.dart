@@ -8,6 +8,7 @@ import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/screens/common/scroll_to_hide_widget.dart';
 import 'package:generation/screens/main_screens/home_screen.dart';
 import 'package:generation/screens/main_screens/settings_screen.dart';
+import 'package:generation/services/download_operations.dart';
 import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/system_file_management.dart';
@@ -42,6 +43,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    updateGeneration(context);
+
     final _onlineStatus =
         Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .getOnlineStatus();
@@ -60,12 +63,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     showStatusAndNavigationBar();
     makeStatusBarTransparent();
     changeContextTheme(_isDarkMode);
-
-    // BackgroundService().initialize();
-    // BackgroundService().deleteOwnActivityTask();
-    //BackgroundService.deleteConnectionsActivityTask();
-
-    //_localStorage.deleteOwnExpiredActivity();
 
     Workmanager().initialize(
         bgTaskTopLevel, // The top level function, aka callbackDispatcher
@@ -93,9 +90,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           minutes: int.parse(
               BgTask.deleteConnectionActivities['frequencyInMin'] ?? '15')),
     );
-
-    // deleteOwnExpiredActivity(stop: false);
-    // manageDeleteConnectionsExpiredActivity();
 
     super.initState();
   }
