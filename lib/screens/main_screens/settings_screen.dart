@@ -270,7 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               InkWell(
                 onTap: _onClickMyName,
                 child: Text(
-                  "Samarpan Dasgupta",
+                  TextCollection.appCreator,
                   style: TextStyleCollection.secondaryHeadingTextStyle
                       .copyWith(color: AppColors.normalBlueColor),
                 ),

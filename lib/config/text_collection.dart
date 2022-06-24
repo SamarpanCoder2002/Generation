@@ -55,9 +55,11 @@ class FolderData {
 }
 
 class TextCollection {
-  /// Terminal Link Should be Replaced by this app link after published to the playstore
+  static const String _appLink =
+      "https://play.google.com/store/apps/details?id=com.samarpandasgupta.generation";
+  static const String appCreator = "Samarpan Dasgupta";
   static const String appShareData =
-      "Enjoy Private Chat Message Experience with Modern UI with Free Video Call In Generation\nhttps://generation-launch-page.netlify.app/";
+      "Try Simple, Secure, Reliable And End-to-End-Encrypted Private Messaging App With Enrich UI\n$_appLink";
   static const String videoDurationAlert =
       "Video duration should be within ${Timings.videoDurationInSec} seconds";
   static const String myWebsite = 'https://samarpandasgupta.com/';

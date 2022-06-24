@@ -15,6 +15,7 @@ import 'package:generation/services/local_data_management.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/text_style_collection.dart';
@@ -37,6 +38,8 @@ class CommonSelectionScreen extends StatefulWidget {
 }
 
 class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
+  bool _isLoading = false;
+
   @override
   void initState() {
     final _isDarkMode =
@@ -50,21 +53,28 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   Widget build(BuildContext context) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
-    return WillPopScope(
-      onWillPop: () async {
-        Provider.of<ConnectionCollectionProvider>(context, listen: false)
-            .resetSelectionData();
-        return true;
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.getBgColor(_isDarkMode),
-        appBar: _headerSection(),
-        floatingActionButton: _sendBtn(),
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-          child: _chatConnectionCollection(),
+    return LoadingOverlay(
+      isLoading: _isLoading,
+      color: AppColors.pureBlackColor.withOpacity(0.6),
+      progressIndicator: const CircularProgressIndicator(
+        color: AppColors.lightBorderGreenColor,
+      ),
+      child: WillPopScope(
+        onWillPop: () async {
+          Provider.of<ConnectionCollectionProvider>(context, listen: false)
+              .resetSelectionData();
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.getBgColor(_isDarkMode),
+          appBar: _headerSection(),
+          floatingActionButton: _sendBtn(),
+          body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+            child: _chatConnectionCollection(),
+          ),
         ),
       ),
     );
@@ -215,7 +225,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
     final _chatHistoryData =
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-            .getChatHistory(connectionData["id"], Secure.decode(connectionData["name"]));
+            .getChatHistory(
+                connectionData["id"], Secure.decode(connectionData["name"]));
 
     final _chatHistoryStoreDir = await createChatHistoryStoreDir();
     final _chatHistoryStoreFile = File(createChatHistoryFile(
@@ -251,18 +262,34 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
         _modifiedMessage = DataManagement.fromJsonString(message.message);
       }
 
-      if (_additionalData != null) {
-        _additionalData = DataManagement.fromJsonString(_additionalData);
-      }
+      // if (_additionalData != null) {
+      //   _additionalData = DataManagement.fromJsonString(_additionalData);
+      // }
+
+      showToast(
+          title: 'Message Sending... Please Wait',
+          toastIconType: ToastIconType.success, toastDuration: 10);
 
       for (final selectedConnectionsId in _selectedConnections.keys.toList()) {
-        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+        if (mounted) {
+          setState(() {
+            _isLoading = true;
+          });
+        }
+
+        await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .sendMsgManagement(
                 msgType: message.type,
                 message: _modifiedMessage,
                 additionalData: _additionalData,
                 incomingConnId: selectedConnectionsId,
                 forSendMultiple: true);
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
 

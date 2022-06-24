@@ -68,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _activitiesSection(),
               const SizedBox(height: 10),
               _messagesSection(),
+              const SizedBox(height: 15),
             ],
           )),
     );
@@ -210,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final _connName = Secure.decode(_currentActivityData["name"]);
 
     return Container(
-      margin: const EdgeInsets.only(right: 15),
+      margin: const EdgeInsets.only(right: 10),
       child: InkWell(
         onTap: () => _switchToActivity(
             tableName: DataManagement.generateTableNameForNewConnectionActivity(
