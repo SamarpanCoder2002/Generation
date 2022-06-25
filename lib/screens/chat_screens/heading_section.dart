@@ -13,6 +13,7 @@ import '../../config/text_style_collection.dart';
 import '../../model/chat_message_model.dart';
 import '../../providers/chat/chat_creation_section_provider.dart';
 import '../../providers/chat/messaging_provider.dart';
+import '../../providers/status_collection_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/local_data_management.dart';
@@ -252,8 +253,15 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final ChatMessageModel messageData = _selectedMessages.values.toList()[0];
     final String msgKey = _selectedMessages.keys.toList()[0];
 
+    final _msgHolderId =
+    messageData.holder == MessageHolderType.other.toString()
+        ? Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId()
+        : Provider.of<StatusCollectionProvider>(context, listen: false)
+        .getCurrentAccData()['id'];
+
+
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .setReplyHolderMsg(msgKey, messageData);
+        .setReplyHolderMsg(msgKey, messageData, _msgHolderId);
     Provider.of<ChatCreationSectionProvider>(context, listen: false)
         .setSectionHeightForReply();
 

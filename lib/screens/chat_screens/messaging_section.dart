@@ -9,6 +9,7 @@ import 'package:generation/model/chat_message_model.dart';
 import 'package:generation/providers/chat/chat_creation_section_provider.dart';
 import 'package:generation/providers/chat/chat_scroll_provider.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
+import 'package:generation/providers/status_collection_provider.dart';
 import 'package:generation/screens/common/button.dart';
 import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
@@ -72,9 +73,15 @@ class _MessagingSectionState extends State<MessagingSection> {
                 .getTotalMessages() -
             1;
 
+    final _msgHolderId =
+        messageData.holder == MessageHolderType.other.toString()
+            ? Provider.of<ChatBoxMessagingProvider>(context).getPartnerUserId()
+            : Provider.of<StatusCollectionProvider>(context)
+                .getCurrentAccData()['id'];
+
     return SwipeTo(
       iconColor: AppColors.getIconColor(_isDarkMode),
-      onRightSwipe: () => _rightSwipe(messageId, messageData),
+      onRightSwipe: () => _rightSwipe(messageId, messageData, _msgHolderId),
       child: InkWell(
         onTap: () => onMessageTap(
             messageId, ChatMessageModel.copy(messageData), _selectedMessages),
@@ -704,9 +711,10 @@ class _MessagingSectionState extends State<MessagingSection> {
     );
   }
 
-  _rightSwipe(String messageId, ChatMessageModel messageData) {
+  _rightSwipe(
+      String messageId, ChatMessageModel messageData, String msgHolderId) {
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .setReplyHolderMsg(messageId, messageData);
+        .setReplyHolderMsg(messageId, messageData, msgHolderId);
     Provider.of<ChatCreationSectionProvider>(context, listen: false)
         .setSectionHeightForReply();
   }
@@ -750,7 +758,8 @@ class _MessagingSectionState extends State<MessagingSection> {
         return """${_replyMsgData["activityHolderId"] != null ? _activityHolder : ''} activity : click here to view""";
       }
 
-      return """${realMsgData.holder == MessageHolderType.other.toString() ? Secure.decode(widget.connData['name']) : 'You'} : ${_optimizedShowReplyMessage(_replyMsgData.values.toList()[0])}""";
+      final _replyMsgHolderData = _replyMsgData.values.toList()[0];
+      return """${_replyMsgData['msgHolderId'] == Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId() ? Secure.decode(widget.connData['name']) : 'You'} : ${_optimizedShowReplyMessage(_replyMsgHolderData)}""";
     }
 
     return InkWell(
