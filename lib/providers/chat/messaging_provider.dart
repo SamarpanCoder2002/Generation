@@ -62,8 +62,9 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     this.context = context;
   }
 
-  setReplyHolderMsg(String msgId, ChatMessageModel incoming) {
-    _replyHolderMsg = {msgId: incoming};
+  setReplyHolderMsg(
+      String msgId, ChatMessageModel incoming, String msgHolderId) {
+    _replyHolderMsg = {msgId: incoming, 'msgHolderId': msgHolderId};
     notifyListeners();
   }
 
@@ -102,7 +103,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         MessageData.date: _msgOldData?.date,
         MessageData.time: _msgOldData?.time,
         MessageData.additionalData: _msgOldData?.additionalData
-      }
+      },
+      'msgHolderId': _replyHolderMsg['msgHolderId']
     };
 
     return _msgData;
@@ -144,8 +146,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         setToken(_docData['token']);
 
         if (_docData.isNotEmpty) {
-          debugShow('Sattus: ${Secure.decode(_docData[DBPath.status])}');
-          setCurrStatus(DataManagement.fromJsonString(Secure.decode(_docData[DBPath.status])) ?? {});
+
+          setCurrStatus(DataManagement.fromJsonString(
+                  Secure.decode(_docData[DBPath.status])) ??
+              {});
 
           _localStorage.insertUpdateConnectionPrimaryData(
               id: _docData["id"],
@@ -310,8 +314,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       message.values.toList()[0][MessageData.additionalData] =
           Secure.encode(DataManagement.toJsonString(_msgAdditionalData));
 
-      _dbOperations
-          .deleteMediaFromFirebaseStorage(_remoteThumbnailPath);
+      _dbOperations.deleteMediaFromFirebaseStorage(_remoteThumbnailPath);
 
       _updateInLocalStorage(message);
       _updateInTopLevel(message);
