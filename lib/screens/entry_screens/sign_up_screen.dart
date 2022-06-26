@@ -63,13 +63,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 _commonTextField(
                     labelText: "Password",
-                    textEditingController: _pwdController),
+                    textEditingController: _pwdController,
+                    obscureText: true),
                 const SizedBox(
                   height: 30,
                 ),
                 _commonTextField(
                     labelText: "Confirm Password",
-                    textEditingController: _confirmPwdController),
+                    textEditingController: _confirmPwdController,
+                    obscureText: true),
                 if (!_isLoading)
                   const SizedBox(
                     height: 40,
@@ -98,7 +100,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   _commonTextField(
       {required String labelText,
       required TextEditingController textEditingController,
-      bool enabled = true}) {
+      bool enabled = true,
+      bool obscureText = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: TextFormField(
@@ -106,12 +109,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
         cursorColor: AppColors.pureWhiteColor,
         controller: textEditingController,
         enabled: enabled,
+        obscureText: obscureText,
         validator: (inputVal) {
           if (inputVal == null || inputVal.isEmpty) return "*Required";
           if (labelText == "Email" &&
               !RegexCollection.emailRegex.hasMatch(inputVal)) {
             return "*Please provider a valid email";
-          }else if(inputVal.length < 6){
+          } else if (inputVal.length < 6) {
             return "Password Must be at least 6 characters";
           }
           return null;
@@ -133,10 +137,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void _onSubmitInformation() async{
+  void _onSubmitInformation() async {
     if (!_formKey.currentState!.validate()) return;
-    if(_pwdController.text != _confirmPwdController.text) {
-      showToast( title: "Password and Confirm Password are not same", toastIconType: ToastIconType.error, showFromTop: false);
+    if (_pwdController.text != _confirmPwdController.text) {
+      showToast(
+          title: "Password and Confirm Password are not same",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
       return;
     }
 
@@ -145,8 +152,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _isLoading = true;
       });
     }
-    
-    final EmailAuth _emailAuth = EmailAuth(email: _emailController.text, pwd: _pwdController.text);
+
+    final EmailAuth _emailAuth =
+        EmailAuth(email: _emailController.text, pwd: _pwdController.text);
 
     final _response = await _emailAuth.signUp();
 
@@ -156,22 +164,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
     }
 
-
-    if(_response){
-      showPopUpDialog(context, "Sign Up Successful", "A verification email is sent to your email. Please verify your email at first", (){
+    if (_response) {
+      showPopUpDialog(context, "Sign Up Successful",
+          "A verification email is sent to your email. Please verify your email at first",
+          () {
         Navigator.pop(context);
         Navigator.pop(context);
       });
-    }else{
-      showToast( title: "Email Already Exist Before", toastIconType: ToastIconType.error, showFromTop: false);
+    } else {
+      showToast(
+          title: "Email Already Exist Before",
+          toastIconType: ToastIconType.error,
+          showFromTop: false);
     }
-
-
-
-
-
-
-
 
     // Timer(const Duration(seconds: 10), () {
     //   if (mounted) {
@@ -198,7 +203,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       child: Text(
         "Sign In",
         style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
-            decoration: TextDecoration.underline, fontWeight: FontWeight.w600, letterSpacing: 1),
+            decoration: TextDecoration.underline,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1),
       ),
       onPressed: () => Navigator.pop(context),
     );

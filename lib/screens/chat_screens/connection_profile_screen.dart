@@ -87,19 +87,12 @@ class _ConnectionProfileScreenState extends State<ConnectionProfileScreen> {
                 iconData: Icons.info_outlined,
                 heading: "About",
                 nameValue: Secure.decode(widget.connData["about"])),
-            const SizedBox(height: 30),
-            _commonSection(
-                iconData: Icons.email_outlined,
-                heading: "Email",
-                nameValue: Secure.decode(widget.connData["email"])),
-            const SizedBox(height: 30),
+            // const SizedBox(height: 30),
             // _commonSection(
-            //     iconData: _notificationStatus == "Muted"
-            //         ? Icons.notifications_off_outlined
-            //         : Icons.notifications_none,
-            //     heading: "Notification",
-            //     nameValue: _notificationStatus,
-            //     onPressed: _dialogNotification),
+            //     iconData: Icons.email_outlined,
+            //     heading: "Email",
+            //     nameValue: Secure.decode(widget.connData["email"])),
+            const SizedBox(height: 30),
             _commonToggleSection(),
             const SizedBox(height: 30),
             _commonInputSection(
