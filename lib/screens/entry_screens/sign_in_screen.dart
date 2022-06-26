@@ -71,7 +71,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 _commonTextField(
                     labelText: "Password",
-                    textEditingController: _pwdController),
+                    textEditingController: _pwdController,
+                    obscureText: true),
                 if (!_isLoading)
                   const SizedBox(
                     height: 40,
@@ -100,7 +101,8 @@ class _SignInScreenState extends State<SignInScreen> {
   _commonTextField(
       {required String labelText,
       required TextEditingController textEditingController,
-      bool enabled = true}) {
+      bool enabled = true,
+      bool obscureText = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: TextFormField(
@@ -108,6 +110,7 @@ class _SignInScreenState extends State<SignInScreen> {
         cursorColor: AppColors.pureWhiteColor,
         controller: textEditingController,
         enabled: enabled,
+        obscureText: obscureText,
         validator: (inputVal) {
           if (inputVal == null || inputVal.isEmpty) return "*Required";
           if (labelText == "Email" &&
@@ -134,8 +137,6 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
     );
   }
-
-
 
   _loadingIndicator() {
     return SizedBox(
@@ -171,7 +172,7 @@ class _SignInScreenState extends State<SignInScreen> {
     }
 
     final EmailAuth _emailAuth =
-    EmailAuth(email: _emailController.text, pwd: _pwdController.text);
+        EmailAuth(email: _emailController.text, pwd: _pwdController.text);
 
     final _data = await _emailAuth.signIn();
 
@@ -186,7 +187,7 @@ class _SignInScreenState extends State<SignInScreen> {
     showToast(
         title: _data["message"],
         toastIconType:
-        _data["success"] ? ToastIconType.success : ToastIconType.error,
+            _data["success"] ? ToastIconType.success : ToastIconType.error,
         showFromTop: false,
         toastDuration: 5);
 
