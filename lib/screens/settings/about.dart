@@ -51,20 +51,26 @@ class AboutScreen extends StatelessWidget {
         style: TextStyleCollection.headingTextStyle.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color:_isDarkMode? AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor),
+            color: _isDarkMode
+                ? AppColors.darkBorderGreenColor
+                : AppColors.lightBorderGreenColor),
       ),
     );
   }
 
-  _appDescription(context){
+  _appDescription(context) {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return Center(
       child: Text(
         "A Private, Secure, End-to-End Encrypted Messaging app that helps you to connect with your connections without any Ads, promotion. No other third party person, organization, or even Generation Team can't read your messages.",
         textAlign: TextAlign.justify,
-        style: TextStyleCollection.secondaryHeadingTextStyle
-            .copyWith(fontSize: 14, fontWeight: FontWeight.normal,color: _isDarkMode?AppColors.pureWhiteColor:AppColors.lightChatConnectionTextColor),
+        style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightChatConnectionTextColor),
       ),
     );
   }
@@ -74,10 +80,13 @@ class AboutScreen extends StatelessWidget {
 
     return Center(
       child: Text(
-        'Messages and Activity With Video Calling are\nEnd-to-End-Encrypted',
+        'Messages and Activities are End-to-End-Encrypted',
         textAlign: TextAlign.center,
-        style: TextStyleCollection.terminalTextStyle
-            .copyWith(color: _isDarkMode?AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor, fontSize: 14),
+        style: TextStyleCollection.terminalTextStyle.copyWith(
+            color: _isDarkMode
+                ? AppColors.darkBorderGreenColor
+                : AppColors.lightBorderGreenColor,
+            fontSize: 14),
       ),
     );
   }
@@ -91,21 +100,26 @@ class AboutScreen extends StatelessWidget {
                 headingTerminal: "Query",
               )),
           child: Container(
-            color: _isDarkMode?AppColors.oppositeMsgDarkModeColor:AppColors.lightModeBlueColor,
+            color: _isDarkMode
+                ? AppColors.oppositeMsgDarkModeColor
+                : AppColors.lightModeBlueColor,
             alignment: Alignment.center,
             width: MediaQuery.of(context).size.width / 2,
             child: Text(
               "Have Any Query ?",
-              style:
-                  TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14,color: AppColors.pureWhiteColor),
+              style: TextStyleCollection.terminalTextStyle
+                  .copyWith(fontSize: 14, color: AppColors.pureWhiteColor),
             ),
           ),
         );
 
     _donateSide() => InkWell(
-          onTap: () => Navigation.intent(context, const DonateScreen(showMsgFromTop: true)),
+          onTap: () => Navigation.intent(
+              context, const DonateScreen(showMsgFromTop: true)),
           child: Container(
-            color: _isDarkMode?AppColors.darkBorderGreenColor:AppColors.lightBorderGreenColor,
+            color: _isDarkMode
+                ? AppColors.darkBorderGreenColor
+                : AppColors.lightBorderGreenColor,
             alignment: Alignment.center,
             width: MediaQuery.of(context).size.width / 2,
             child: Text(

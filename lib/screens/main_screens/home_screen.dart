@@ -8,6 +8,7 @@ import 'package:generation/screens/activity/create/make_poll.dart';
 import 'package:generation/screens/activity/view/activity_controller_screen.dart';
 import 'package:generation/screens/chat_screens/chat_screen.dart';
 import 'package:generation/screens/chat_screens/connection_profile_screen.dart';
+import 'package:generation/screens/common/button.dart';
 import 'package:generation/screens/common/chat_connections_common_design.dart';
 import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/input_system_services.dart';
@@ -21,6 +22,7 @@ import '../../config/text_collection.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/activity/activity_screen_provider.dart';
 import '../../providers/connection_collection_provider.dart';
+import '../../providers/main_screen_provider.dart';
 import '../../providers/main_scrolling_provider.dart';
 import '../../providers/status_collection_provider.dart';
 import '../../services/device_specific_operations.dart';
@@ -280,19 +282,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _messagesCollectionSection() {
-    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    if (Provider.of<ConnectionCollectionProvider>(context)
+            .getConnectionsDataLength ==
+        0) {
+      return _noConnectionSection();
+    }
 
     if (Provider.of<ConnectionCollectionProvider>(context).getDataLength() ==
         0) {
-      return Container(
-          width: double.maxFinite,
-          height: MediaQuery.of(context).size.height / 1.8,
-          alignment: Alignment.center,
-          child: Text(
-            "No Connection Found",
-            style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
-                fontSize: 16, color: AppColors.getModalTextColor(_isDarkMode)),
-          ));
+      return _noConnectionSection(navigateButton: false);
     }
 
     final ScrollController _messageScreenScrollController =
@@ -343,6 +341,35 @@ class _HomeScreenState extends State<HomeScreen> {
                         connectionIndex == _totalMessages - 1 ? 40 : null));
           }),
     );
+  }
+
+  _noConnectionSection({bool navigateButton = true}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Container(
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height / 1.8,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "No Connection Found",
+              style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                  fontSize: 16,
+                  color: AppColors.getModalTextColor(_isDarkMode)),
+            ),
+            if (navigateButton) const SizedBox(height: 10),
+            if (navigateButton)
+              commonElevatedButton(
+                  btnText: "Let's Connect",
+                  bgColor: AppColors.getTextButtonColor(_isDarkMode, true),
+                  onPressed: () => Provider.of<MainScreenNavigationProvider>(
+                          context,
+                          listen: false)
+                      .setUpdatedIndex(1))
+          ],
+        ));
   }
 
   _onChatClicked(_connectionData) {
@@ -545,7 +572,8 @@ class _HomeScreenState extends State<HomeScreen> {
         if (index == 0) {
           _inputOption.clearChatData(_connectionData, _isDarkMode);
         } else if (index == 1) {
-          Navigation.intent(context, ConnectionProfileScreen(connData: _connectionData));
+          Navigation.intent(
+              context, ConnectionProfileScreen(connData: _connectionData));
         }
       },
       child: Column(
