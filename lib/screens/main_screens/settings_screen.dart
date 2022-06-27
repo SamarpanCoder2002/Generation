@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/screens/settings/chat_wallpaper/chat_wallpaper_category_screen.dart';
-import 'package:generation/screens/settings/sound_management.dart';
+import 'package:generation/screens/settings/inner_settings.dart';
 import 'package:generation/screens/settings/support/support_management.dart';
 import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/navigation_management.dart';
@@ -205,11 +205,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             terminalIconData: Icons.arrow_forward_ios_outlined,
             onPressed: () => Navigation.intent(context, const ProfileScreen())),
         _commonOption(
-            leadingIconData: Icons.music_note_rounded,
-            title: "Sound",
+            leadingIconData: Icons.settings,
+            title: "Settings",
             terminalIconData: Icons.arrow_forward_ios_outlined,
             onPressed: () =>
-                Navigation.intent(context, const SoundManagementScreen())),
+                Navigation.intent(context, const InnerSettingsScreen())),
         _commonOption(
             leadingIconData: Icons.wallpaper_outlined,
             title: "Chat WallPaper",
