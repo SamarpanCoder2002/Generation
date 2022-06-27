@@ -8,14 +8,14 @@ import 'package:provider/provider.dart';
 import '../../config/text_style_collection.dart';
 import '../../providers/theme_provider.dart';
 
-class SoundManagementScreen extends StatefulWidget {
-  const SoundManagementScreen({Key? key}) : super(key: key);
+class InnerSettingsScreen extends StatefulWidget {
+  const InnerSettingsScreen({Key? key}) : super(key: key);
 
   @override
-  State<SoundManagementScreen> createState() => _SoundManagementScreenState();
+  State<InnerSettingsScreen> createState() => _InnerSettingsScreenState();
 }
 
-class _SoundManagementScreenState extends State<SoundManagementScreen> {
+class _InnerSettingsScreenState extends State<InnerSettingsScreen> {
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
   bool _isNotificationActive = false;
@@ -84,7 +84,7 @@ class _SoundManagementScreenState extends State<SoundManagementScreen> {
               width: 10,
             ),
             Text(
-              "Sound Management",
+              "Settings",
               style: TextStyleCollection.headingTextStyle.copyWith(
                   fontSize: 20,
                   color: _isDarkMode

@@ -353,13 +353,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              "No Connection Found",
-              style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
-                  fontSize: 16,
-                  color: AppColors.getModalTextColor(_isDarkMode)),
-            ),
-            if (navigateButton) const SizedBox(height: 10),
+            if (!navigateButton)
+              Text(
+                "No Connection Found",
+                style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                    fontSize: 16,
+                    color: AppColors.getModalTextColor(_isDarkMode)),
+              ),
             if (navigateButton)
               commonElevatedButton(
                   btnText: "Let's Connect",
@@ -367,7 +367,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () => Provider.of<MainScreenNavigationProvider>(
                           context,
                           listen: false)
-                      .setUpdatedIndex(1))
+                      .setUpdatedIndex(1)),
+            const SizedBox(height: 40,),
           ],
         ));
   }
