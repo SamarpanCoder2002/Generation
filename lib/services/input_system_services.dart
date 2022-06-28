@@ -256,7 +256,8 @@ class InputOption {
                 "extension-for-document": pickedFile.extension.toString(),
                 'reply': _replyMsg.isEmpty
                     ? null
-                    : DataManagement.toJsonString(_replyMsg)
+                    : DataManagement.toJsonString(_replyMsg),
+                "fileName": File(pickedFile.path!).path
               });
         }
       }
@@ -290,7 +291,7 @@ class InputOption {
   Future<Map<String, dynamic>> _getCurrentLocation(
       BuildContext oldStackContext) async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-       showToast(
+      showToast(
           title: "Location Service is not Enabled",
           toastIconType: ToastIconType.error);
       return {};
@@ -300,14 +301,14 @@ class InputOption {
         await _permissionManagement.locationPermission();
 
     if (!_locationActivationStatus) {
-       showToast(
+      showToast(
           title: "Location Permission not granted",
           toastIconType: ToastIconType.error);
 
       return {};
     }
 
-     showToast(
+    showToast(
         title: "Map will show within few seconds",
         toastIconType: ToastIconType.info,
         toastDuration: 12);
@@ -592,8 +593,9 @@ class InputOption {
   }
 
   _commonVideoNavigationForActivity(dynamic data, VideoType videoType) async {
-    final duration = await Provider.of<VideoShowProvider>(context, listen: false)
-        .getVideoDuration(File(data["videoPath"]));
+    final duration =
+        await Provider.of<VideoShowProvider>(context, listen: false)
+            .getVideoDuration(File(data["videoPath"]));
 
     if (duration.inSeconds <= Timings.videoDurationInSec) {
       debugShow('Video Duration: ${duration.inSeconds}');
