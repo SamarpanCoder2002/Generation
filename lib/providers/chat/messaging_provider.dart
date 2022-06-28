@@ -278,7 +278,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       _mediaStorePath = createDocFile(
           dirPath: _dirPath,
           extension: _msgAdditionalData["extension-for-document"],
-          name: _msgData.toString().split('/').last);
+          name: _msgAdditionalData["fileName"] ?? _msgData.toString().split('/').last);
     }
 
     debugShow("Media Message Data is:   $_mediaStorePath\n\n");

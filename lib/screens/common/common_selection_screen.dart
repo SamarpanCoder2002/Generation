@@ -43,7 +43,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   @override
   void initState() {
     final _isDarkMode =
-    Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     changeContextTheme(_isDarkMode);
     super.initState();
@@ -70,14 +70,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
           appBar: _headerSection(),
           floatingActionButton: _sendBtn(),
           body: Container(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
-            height: MediaQuery
-                .of(context)
-                .size
-                .height,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
             margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
             child: _chatConnectionCollection(),
           ),
@@ -114,9 +108,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   }
 
   _chatConnectionCollection() {
-    if (Provider
-        .of<ConnectionCollectionProvider>(context)
-        .getConnectionsDataLength ==
+    if (Provider.of<ConnectionCollectionProvider>(context)
+            .getConnectionsDataLength ==
         0) {
       return _noConnectionSection();
     }
@@ -127,14 +120,14 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
       physics: const BouncingScrollPhysics(),
       shrinkWrap: true,
       itemCount:
-      Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
+          Provider.of<ConnectionCollectionProvider>(context).getDataLength(),
       itemBuilder: (_, connectionIndex) {
         final _rawData = Provider.of<ConnectionCollectionProvider>(context)
             .getData()[connectionIndex];
 
         final _connectionData =
-        Provider.of<ConnectionCollectionProvider>(context)
-            .getUsersMap(_rawData["id"]);
+            Provider.of<ConnectionCollectionProvider>(context)
+                .getUsersMap(_rawData["id"]);
 
         return InkWell(
           onTap: () => _getPerfectMethod(_connectionData),
@@ -157,10 +150,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
     return Container(
         width: double.maxFinite,
-        height: MediaQuery
-            .of(context)
-            .size
-            .height / 1.8,
+        height: MediaQuery.of(context).size.height / 1.8,
         alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -178,9 +168,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                   bgColor: AppColors.getTextButtonColor(_isDarkMode, true),
                   onPressed: () {
                     Navigator.pop(context);
-                    Provider.of<MainScreenNavigationProvider>(
-                        context,
-                        listen: false)
+                    Provider.of<MainScreenNavigationProvider>(context,
+                            listen: false)
                         .setUpdatedIndex(1);
                   })
           ],
@@ -189,8 +178,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
   _navigateToLocalStorageSection(connectionData) async {
     final _chatHistoryData =
-    await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .getChatHistory(connectionData["id"], connectionData["name"]);
+        await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getChatHistory(connectionData["id"], connectionData["name"]);
 
     debugShow("Connection Data:   $_chatHistoryData");
 
@@ -212,14 +201,13 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     }
     if (widget.commonRequirement == CommonRequirement.forwardMsg) {
       final _response =
-      Provider.of<ConnectionCollectionProvider>(context, listen: false)
-          .onConnectionClick(_connectionData["id"]);
+          Provider.of<ConnectionCollectionProvider>(context, listen: false)
+              .onConnectionClick(_connectionData["id"]);
 
       if (!_response) {
         showToast(
             title:
-            'You Can Select Maximum ${SizeCollection
-                .maxConnSelected} Connections',
+                'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections',
             toastIconType: ToastIconType.info,
             fontSize: 14,
             showFromTop: false);
@@ -237,8 +225,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
         widget.commonRequirement != CommonRequirement.incomingData) return;
 
     final _isAnyConnectionSelected =
-    Provider.of<ConnectionCollectionProvider>(context)
-        .isAnyConnectionSelected();
+        Provider.of<ConnectionCollectionProvider>(context)
+            .isAnyConnectionSelected();
     if (!_isAnyConnectionSelected) return const Center();
 
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
@@ -249,14 +237,14 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
       onPressed: () async {
         if (widget.commonRequirement == CommonRequirement.forwardMsg) {
           final _selectedMessages =
-          Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-              .getSelectedMessage();
+              Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                  .getSelectedMessage();
           final _messagesCollection = _selectedMessages.values.toList();
           await _sendMessagesToSelectedConnections(_messagesCollection);
         } else if (widget.commonRequirement == CommonRequirement.incomingData) {
           final _messagesCollection =
-          Provider.of<MainScreenNavigationProvider>(context, listen: false)
-              .getIncomingData();
+              Provider.of<MainScreenNavigationProvider>(context, listen: false)
+                  .getIncomingData();
           await _sendMessagesToSelectedConnections(_messagesCollection);
         }
       },
@@ -273,9 +261,9 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
     debugShow("At Extract Chat History");
 
     final _chatHistoryData =
-    await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-        .getChatHistory(
-        connectionData["id"], Secure.decode(connectionData["name"]));
+        await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getChatHistory(
+                connectionData["id"], Secure.decode(connectionData["name"]));
 
     final _chatHistoryStoreDir = await createChatHistoryStoreDir();
     final _chatHistoryStoreFile = File(createChatHistoryFile(
@@ -298,8 +286,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
   _sendMessagesToSelectedConnections(_messagesCollection) async {
     final _selectedConnections =
-    Provider.of<ConnectionCollectionProvider>(context, listen: false)
-        .getSelectedConnections();
+        Provider.of<ConnectionCollectionProvider>(context, listen: false)
+            .getSelectedConnections();
     debugShow("Selected Connections:  $_selectedConnections");
 
     for (final message in _messagesCollection) {
@@ -329,11 +317,11 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
 
         await Provider.of<ChatBoxMessagingProvider>(context, listen: false)
             .sendMsgManagement(
-            msgType: message.type,
-            message: _modifiedMessage,
-            additionalData: _additionalData,
-            incomingConnId: selectedConnectionsId,
-            forSendMultiple: true);
+                msgType: message.type,
+                message: _modifiedMessage,
+                additionalData: _additionalData,
+                incomingConnId: selectedConnectionsId,
+                forSendMultiple: true);
 
         if (mounted) {
           setState(() {
@@ -355,16 +343,12 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
   void _showShareOptions(File chatHistoryStoreFile) {
     final InputOption _inputOption = InputOption(context);
     final _isDarkMode =
-    Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     showModalBottomSheet(
         context: context,
-        builder: (_) =>
-            Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
+        builder: (_) => Container(
+              width: MediaQuery.of(context).size.width,
               height: 140,
               color: AppColors.getModalColorSecondary(_isDarkMode),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -376,9 +360,9 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                         "Share Chat History With",
                         style: TextStyleCollection.secondaryHeadingTextStyle
                             .copyWith(
-                            fontSize: 18,
-                            color:
-                            AppColors.getModalTextColor(_isDarkMode)),
+                                fontSize: 18,
+                                color:
+                                    AppColors.getModalTextColor(_isDarkMode)),
                       ),
                     ),
                     const SizedBox(
@@ -393,9 +377,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
                               btnText: 'Connections',
                               bgColor: AppColors.getTextButtonColor(
                                   _isDarkMode, true),
-                              onPressed: () =>
-                                  _sendChatHistoryToConnections(
-                                      chatHistoryStoreFile)),
+                              onPressed: () => _sendChatHistoryToConnections(
+                                  chatHistoryStoreFile)),
                           commonElevatedButton(
                               btnText: 'Other Apps',
                               bgColor: AppColors.getTextButtonColor(
@@ -425,8 +408,7 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
           date: _date,
           time: _time,
           holder: MessageHolderType.me.toString(),
-          additionalData:
-          DataManagement.toJsonString({"extension-for-document": 'txt'}))
+          additionalData: {"extension-for-document": 'txt', "fileName": chatHistoryStoreFile.path})
     ]);
 
     Navigator.pop(context);
