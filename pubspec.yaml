@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.7+7
+version: 1.0.9+9
 
 environment:
   sdk: ">=2.17.3 <3.0.0"
@@ -55,7 +55,7 @@ dependencies:
       path: cached_network_image
       ref: ff72f00f142f13d889d7549e013af91cb0b523ab
   flutter_dotenv: ^5.0.2
-  razorpay_flutter: ^1.2.9
+#  razorpay_flutter: ^1.2.9
   share_plus: ^4.0.2
   flutter_colorpicker: ^1.0.3
   video_player: ^2.4.2
