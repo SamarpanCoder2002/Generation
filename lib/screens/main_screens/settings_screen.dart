@@ -190,7 +190,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Provider.of<MainScrollingProvider>(context).getScrollController();
 
     final InputOption _inputOption = InputOption(context);
-    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return ListView(
       shrinkWrap: true,
@@ -258,27 +257,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(
           height: 40,
         ),
-        Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Created By ",
-                  style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
-                      color: _isDarkMode
-                          ? AppColors.pureWhiteColor
-                          : AppColors.lightChatConnectionTextColor)),
-              InkWell(
-                onTap: _onClickMyName,
-                child: Text(
-                  TextCollection.appCreator,
-                  style: TextStyleCollection.secondaryHeadingTextStyle
-                      .copyWith(color: AppColors.normalBlueColor),
-                ),
-              )
-            ],
-          ),
-        )
+        _creatorSection(),
       ],
+    );
+  }
+
+  _creatorSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Created By ",
+              style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightChatConnectionTextColor)),
+          InkWell(
+            onTap: _onClickMyName,
+            child: Text(
+              TextCollection.appCreator,
+              style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.darkBorderGreenColor
+                      : AppColors.lightBorderGreenColor),
+            ),
+          )
+        ],
+      ),
     );
   }
 

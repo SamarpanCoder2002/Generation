@@ -5,6 +5,7 @@ import 'package:generation/config/types.dart';
 import 'package:generation/screens/entry_screens/splash_screen.dart';
 import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_database_services.dart';
+import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:http/http.dart';
@@ -472,8 +473,16 @@ class DBOperations {
   }
 
   updateActiveStatus(Map<String, dynamic> status) async {
-    await _getInstance.doc('${DBPath.userCollection}/$currUid').update(
-        {DBPath.status: Secure.encode(DataManagement.toJsonString(status))});
+    final _data = {
+      DBPath.status: Secure.encode(DataManagement.toJsonString(status))
+    };
+
+    if (status["status"] == UserStatus.online.toString()) {
+      final _getToken = await _fToken();
+      _data[DBPath.token] = Secure.encode(_getToken);
+    }
+
+    await _getInstance.doc('${DBPath.userCollection}/$currUid').update(_data);
   }
 
   updateNotificationStatus(bool updatedNotification) async {
@@ -494,6 +503,8 @@ class DBOperations {
       await _getInstance.collection(DBPath.wallpaperCollection).get();
 
   updateToken() async {
+    if (!await NativeCallback().checkInternet()) return;
+
     final _getToken = await _fToken();
     await _getInstance
         .doc('${DBPath.userCollection}/$currUid')
@@ -537,7 +548,6 @@ class DBOperations {
       }, SetOptions(merge: true));
       return true;
     } catch (e) {
-      
       return false;
     }
   }
