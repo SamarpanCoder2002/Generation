@@ -258,6 +258,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           height: 40,
         ),
         _creatorSection(),
+        const SizedBox(
+          height: 10,
+        ),
       ],
     );
   }
