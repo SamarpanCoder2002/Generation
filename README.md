@@ -32,7 +32,7 @@
 
 <p align="center">
   
-#### ✨ Please Read [CONTRIBUTION.md](https://github.com/SamarpanCoder2002/Generation/blob/main/CONTRIBUTING.md) file before contributing in that repo.
+#### ✨ Please Read [CONTRIBUTION.md](https://github.com/SamarpanCoder2002/Generation/blob/main/CONTRIBUTING.md) file before setup project in your machine before contributing in that repo.
   
 </p>
 
