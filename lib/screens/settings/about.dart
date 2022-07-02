@@ -6,6 +6,7 @@ import 'package:generation/services/debugging.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../providers/main_screen_provider.dart';
 import '../../providers/theme_provider.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -40,9 +41,9 @@ class AboutScreen extends StatelessWidget {
                 height: 20,
               ),
               _moreInfoAboutApp(context),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
+              _versionSection(context),
+              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -136,52 +137,66 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  // _bottomSheet(BuildContext context) {
-  //   final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
-  //   _querySide() => InkWell(
-  //         onTap: () => Navigation.intent(
-  //             context,
-  //             SendEmailToSupport(
-  //               headingTerminal: "Query",
-  //             )),
-  //         child: Container(
-  //           alignment: Alignment.center,
-  //           width: MediaQuery.of(context).size.width / 2,
-  //           child: Text(
-  //             "Have Any Query ?",
-  //             style: TextStyleCollection.terminalTextStyle.copyWith(
-  //                 fontSize: 14,
-  //                 color: AppColors.pureWhiteColor,
-  //                 decoration: TextDecoration.underline),
-  //           ),
-  //         ),
-  //       );
-  //
-  //   // _donateSide() => InkWell(
-  //   //       onTap: () => Navigation.intent(
-  //   //           context, const DonateScreen(showMsgFromTop: true)),
-  //   //       child: Container(
-  //   //         color: _isDarkMode
-  //   //             ? AppColors.darkBorderGreenColor
-  //   //             : AppColors.lightBorderGreenColor,
-  //   //         alignment: Alignment.center,
-  //   //         width: MediaQuery.of(context).size.width / 2,
-  //   //         child: Text(
-  //   //           "Donate Now",
-  //   //           style:
-  //   //               TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
-  //   //         ),
-  //   //       ),
-  //   //     );
-  //
-  //   return BottomSheet(
-  //       elevation: 0,
-  //       enableDrag: false,
-  //       onClosing: () {},
-  //       builder: (_) => SizedBox(
-  //             width: MediaQuery.of(context).size.width,
-  //             height: 60,
-  //             child: _querySide(),
-  //           ));
-  // }
+  _versionSection(context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Center(
+      child: Text(
+          'v ${Provider.of<MainScreenNavigationProvider>(context).getLocalVersion}',
+          style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+              letterSpacing: 1.0,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightChatConnectionTextColor)),
+    );
+  }
+
+// _bottomSheet(BuildContext context) {
+//   final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+//   _querySide() => InkWell(
+//         onTap: () => Navigation.intent(
+//             context,
+//             SendEmailToSupport(
+//               headingTerminal: "Query",
+//             )),
+//         child: Container(
+//           alignment: Alignment.center,
+//           width: MediaQuery.of(context).size.width / 2,
+//           child: Text(
+//             "Have Any Query ?",
+//             style: TextStyleCollection.terminalTextStyle.copyWith(
+//                 fontSize: 14,
+//                 color: AppColors.pureWhiteColor,
+//                 decoration: TextDecoration.underline),
+//           ),
+//         ),
+//       );
+//
+//   // _donateSide() => InkWell(
+//   //       onTap: () => Navigation.intent(
+//   //           context, const DonateScreen(showMsgFromTop: true)),
+//   //       child: Container(
+//   //         color: _isDarkMode
+//   //             ? AppColors.darkBorderGreenColor
+//   //             : AppColors.lightBorderGreenColor,
+//   //         alignment: Alignment.center,
+//   //         width: MediaQuery.of(context).size.width / 2,
+//   //         child: Text(
+//   //           "Donate Now",
+//   //           style:
+//   //               TextStyleCollection.terminalTextStyle.copyWith(fontSize: 14),
+//   //         ),
+//   //       ),
+//   //     );
+//
+//   return BottomSheet(
+//       elevation: 0,
+//       enableDrag: false,
+//       onClosing: () {},
+//       builder: (_) => SizedBox(
+//             width: MediaQuery.of(context).size.width,
+//             height: 60,
+//             child: _querySide(),
+//           ));
+// }
 }

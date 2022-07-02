@@ -126,6 +126,14 @@ class AppColors {
 
     return _isDarkMode?darkSelectionBlueColor.withOpacity(0.3):lightModeBlueColor.withOpacity(0.3);
   }
+
+  static popUpBgColor(bool _isDarkMode) => _isDarkMode
+      ? AppColors.oppositeMsgDarkModeColor
+      : AppColors.pureWhiteColor;
+
+  static popUpTextColor(bool _isDarkMode) => _isDarkMode
+      ? AppColors.pureWhiteColor
+      : AppColors.lightChatConnectionTextColor;
 }
 
 class WaveForm {

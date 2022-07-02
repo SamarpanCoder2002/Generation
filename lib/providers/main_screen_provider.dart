@@ -5,6 +5,14 @@ import '../model/chat_message_model.dart';
 class MainScreenNavigationProvider extends ChangeNotifier{
   int _currentScreenIndex = 0;
   List<ChatMessageModel> _incomingData = [];
+  String _localVersion = '';
+
+  setLocalVersion(String localVersion){
+    _localVersion = localVersion;
+    notifyListeners();
+  }
+
+  get getLocalVersion => _localVersion;
 
   setUpdatedIndex(updatedIndex){
     _currentScreenIndex = updatedIndex;

@@ -376,18 +376,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       {required String editContent,
       required String previousValue,
       required String parameterKey}) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
-              backgroundColor: AppColors.oppositeMsgDarkModeColor,
+              backgroundColor: AppColors.popUpBgColor(_isDarkMode),
               title: Text(
                 editContent,
                 style: TextStyleCollection.secondaryHeadingTextStyle
-                    .copyWith(fontSize: 14),
+                    .copyWith(fontSize: 14, color: AppColors.popUpTextColor(_isDarkMode)),
               ),
               content: TextFormField(
                 cursorColor: AppColors.pureWhiteColor,
-                style: TextStyleCollection.searchTextStyle,
+                style: TextStyleCollection.searchTextStyle.copyWith(color: AppColors.popUpTextColor(_isDarkMode)),
                 initialValue: _editableProfileData[parameterKey],
                 onChanged: (inputVal) {
                   if (mounted) {
@@ -397,14 +399,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
                 },
                 decoration: InputDecoration(
-                  enabledBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.pureWhiteColor)),
-                  focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.pureWhiteColor)),
+                  enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color:AppColors.popUpTextColor(_isDarkMode))),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.popUpTextColor(_isDarkMode))),
                   hintText: "Enter $editContent Here",
                   hintStyle: TextStyleCollection.searchTextStyle.copyWith(
                       fontSize: 16,
-                      color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                      color: AppColors.popUpTextColor(_isDarkMode).withOpacity(0.8)),
                 ),
               ),
               actions: [
@@ -412,7 +414,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: commonElevatedButton(
                       btnText: "Ok",
                       onPressed: () => Navigator.pop(context),
-                      bgColor: AppColors.myMsgDarkModeColor),
+                      bgColor: AppColors.getMsgColor(_isDarkMode, false)),
                 ),
               ],
             ));

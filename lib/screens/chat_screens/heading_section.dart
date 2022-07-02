@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:generation/config/images_path_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
 import 'package:generation/screens/chat_screens/connection_profile_screen.dart';
 import 'package:generation/screens/common/common_selection_screen.dart';
 import 'package:generation/services/encryption_operations.dart';
+import 'package:generation/services/input_system_services.dart';
 import 'package:generation/services/local_database_services.dart';
 import 'package:generation/services/navigation_management.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../config/colors_collection.dart';
 import '../../config/text_style_collection.dart';
@@ -196,13 +200,8 @@ class ChatBoxHeaderSection extends StatelessWidget {
                 icon: const Icon(Icons.copy_outlined),
                 color: AppColors.getIconColor(_isDarkMode),
               ),
-            IconButton(
-              onPressed: () =>
-                  Provider.of<ChatBoxMessagingProvider>(context, listen: false)
-                      .clearSelectedMsgCollection(),
-              icon: const Icon(Icons.cancel_outlined),
-              color: AppColors.getIconColor(_isDarkMode),
-            ),
+            const SizedBox(width: 5),
+            _popUpBtnCollection(),
           ],
         ),
       ],
@@ -254,11 +253,11 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final String msgKey = _selectedMessages.keys.toList()[0];
 
     final _msgHolderId =
-    messageData.holder == MessageHolderType.other.toString()
-        ? Provider.of<ChatBoxMessagingProvider>(context, listen: false).getPartnerUserId()
-        : Provider.of<StatusCollectionProvider>(context, listen: false)
-        .getCurrentAccData()['id'];
-
+        messageData.holder == MessageHolderType.other.toString()
+            ? Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+                .getPartnerUserId()
+            : Provider.of<StatusCollectionProvider>(context, listen: false)
+                .getCurrentAccData()['id'];
 
     Provider.of<ChatBoxMessagingProvider>(context, listen: false)
         .setReplyHolderMsg(msgKey, messageData, _msgHolderId);
@@ -281,14 +280,14 @@ class ChatBoxHeaderSection extends StatelessWidget {
         context: context,
         builder: (_) => AlertDialog(
               insetPadding: const EdgeInsets.symmetric(horizontal: 10),
-              backgroundColor: AppColors.getModalColor(_isDarkMode),
+              backgroundColor: AppColors.popUpBgColor(_isDarkMode),
               elevation: 10,
               title: Center(
                 child: Text(
                   'Delete this message',
                   textAlign: TextAlign.center,
                   style: TextStyleCollection.headingTextStyle
-                      .copyWith(fontSize: 20),
+                      .copyWith(fontSize: 20, color: AppColors.popUpTextColor(_isDarkMode)),
                 ),
               ),
               actionsAlignment: _eligibleForDeleteForEveryOne
@@ -374,5 +373,91 @@ class ChatBoxHeaderSection extends StatelessWidget {
     }
 
     Navigator.pop(context);
+  }
+
+  _popUpBtnCollection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context).getSelectedMessage();
+    final _selectedMessage =
+        (_selectedMessages.values.toList()[0]) as ChatMessageModel;
+
+    return PopupMenuButton(
+      color: AppColors.getChatBgColor(_isDarkMode),
+      itemBuilder: (BuildContext context) => [
+        if (_selectedMessages.length == 1 &&
+            _selectedMessage.type != ChatMessageType.contact.toString() &&
+            _selectedMessage.type != ChatMessageType.location.toString())
+          _shareOption(),
+        _selectionClear(),
+      ],
+      child: Icon(
+        Icons.more_vert_outlined,
+        color: AppColors.getIconColor(_isDarkMode),
+        size: 25,
+      ),
+    );
+  }
+
+  PopupMenuEntry<dynamic> _shareOption() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _selectedMessages =
+        Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+            .getSelectedMessage();
+    final _selectedMessage =
+        (_selectedMessages.values.toList()[0]) as ChatMessageModel;
+    final InputOption _inputOption = InputOption(context);
+
+    _onShare() {
+      if (_selectedMessage.type == ChatMessageType.text.toString()) {
+        Share.share(_selectedMessage.message);
+        _inputOption.shareTextContent(_selectedMessage.message);
+      } else {
+        _inputOption.shareFile(File(_selectedMessage.message));
+      }
+    }
+
+    return PopupMenuItem(
+      onTap: _onShare,
+      child: Row(
+        children: [
+          Icon(Icons.share_outlined,
+              color: AppColors.getIconColor(_isDarkMode)),
+          const SizedBox(
+            width: 10,
+          ),
+          Text(
+            'Share',
+            style: TextStyleCollection.searchTextStyle
+                .copyWith(color: AppColors.getIconColor(_isDarkMode)),
+          )
+        ],
+      ),
+    );
+  }
+
+  PopupMenuEntry<dynamic> _selectionClear() {
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+
+    return PopupMenuItem(
+      onTap: () => Provider.of<ChatBoxMessagingProvider>(context, listen: false)
+          .clearSelectedMsgCollection(),
+      child: Row(
+        children: [
+          Icon(Icons.cancel_outlined,
+              color: AppColors.getIconColor(_isDarkMode)),
+          const SizedBox(
+            width: 10,
+          ),
+          Text(
+            'Clear',
+            style: TextStyleCollection.searchTextStyle
+                .copyWith(color: AppColors.getIconColor(_isDarkMode)),
+          )
+        ],
+      ),
+    );
   }
 }
