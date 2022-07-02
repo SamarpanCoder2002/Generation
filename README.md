@@ -7,24 +7,28 @@
 ![](https://img.shields.io/badge/Status-Stable-blue.svg)
 
 
-# <p align="center"> Generation </p>
+# <p align="center"> Generation 2.0 </p>
 
 #### <p align="center"> ✨ A Private, Secure, End-to-End Encrypted Messaging app made in Flutter that helps you to connect with your connections without any Ads, promotion. No other third-party person, organization, or even Generation Team can't read your messages. ✨ </p>
 
 #### <p align="center"> 💖 Your Privacy is the biggest priority. 💖</p>
 
+
+### <p align="center"> <a href="https://play.google.com/store/apps/details?id=com.samarpandasgupta.generation"><img src="./readme_documents/download.png" alt="Download Generation From Google Play" width="200" /></a> </p>
+
 ### <p align="center"> Generation App Sample Looks </p>
 
 <p align="center">
 
-<img src="./readme_documents/1.png" width=200 alt="1st sample"/>
-<img src="./readme_documents/2.png" width=200 alt="2nd sample"/>
-<img src="./readme_documents/3.png" width=200 alt="3rd sample"/>
-<img src="./readme_documents/4.png" width=200 alt="4th sample"/>
-<img src="./readme_documents/5.png" width=200 alt="5th sample"/>
-<img src="./readme_documents/6.png" width=200 alt="6th sample"/>
-<img src="./readme_documents/7.png" width=200 alt="7th sample"/>
-<img src="./readme_documents/8.png" width=200 alt="8th sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F1.png?alt=media&token=63f84f8b-791b-40a5-b3aa-dd2f55e1b4d1" width=300 alt="1st sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F2.png?alt=media&token=188c32f4-172f-4b32-b993-c6d29e35ecdb" width=300 alt="2nd sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F3.png?alt=media&token=8c40903e-b010-4b40-b305-349dc49789c5" width=300 alt="3rd sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F4.png?alt=media&token=d2facbe9-359b-44d8-9ea9-6f3800a2ae88" width=300 alt="4th sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F5.png?alt=media&token=a77f883d-88fd-48d4-8136-f34eb3a0c77c" width=300 alt="5th sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F6.png?alt=media&token=8a96f00a-1f4f-4cfa-b3ec-570a8139f35b" width=300 alt="6th sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F7.png?alt=media&token=73e00e2a-3895-4747-a008-c02f0e3de03d" width=300 alt="7th sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F8.png?alt=media&token=54c87d96-5ffb-46fe-b6ae-4991a431ff48" width=300 alt="8th sample"/>
+<img src="https://firebasestorage.googleapis.com/v0/b/todo-list-e0ca8.appspot.com/o/Generation_2.0_mockups%2F9.png?alt=media&token=5c951ca6-5151-45ab-8c1b-946be23b62f5" width=300 alt="9th sample"/>
 
 </p>
 
@@ -111,13 +115,11 @@
 </br>
 
 ### 🙋 For Any query related to this project(Generation), Please Raise an issue in that Repo.
-
-***
+<br/>
 
 <h3 align="center">Show 💘 by Starring This Repo</h3>
 
-- #### [Click Here to See the Project Video](https://youtu.be/QEDhmxzEqUA)
+- #### [Click Here to See the Project Video](https://youtu.be/4MvZaJJ-qeE)
 
-- #### [LinkedIN Video](https://www.linkedin.com/posts/samarpan-dasgupta-4aa1061b0_connections-introducing-project-activity-6811146891833704448-FyrC)
 
 <h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>
