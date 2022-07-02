@@ -16,6 +16,8 @@
 
 ### <p align="center"> <a href="https://play.google.com/store/apps/details?id=com.samarpandasgupta.generation"><img src="./readme_documents/download.png" alt="Download Generation From Google Play" width="200" /></a> </p>
 
+### <p align="center"> [Click here to know more about this app](https://generation.samarpandasgupta.com/)</p>
+
 ### <p align="center"> Generation App Sample Looks </p>
 
 <p align="center">
