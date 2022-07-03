@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:generation/config/text_collection.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,9 +28,9 @@ Future<String> createWallpaperStoreDir()  async => await makeDirectoryOnce(direc
 Future<String> createChatHistoryStoreDir() async => await makeDirectoryOnce(directoryName: DirectoryName.chatHistoryDir, makeDirPrivate: true);
 
 
-String createAudioFile({required String dirPath, required String name}) => """$dirPath${name}_${DateTime.now()}.aac""";
-String createImageFile({required String dirPath, required String name}) =>  "$dirPath${name}_${DateTime.now()}.png";
-String createVideoFile({required String dirPath, required String name}) =>  "$dirPath${name}_${DateTime.now()}.mp4";
-String createDocFile({required String dirPath, required String extension, required String name}) =>  "$dirPath${name}_${DateTime.now()}.$extension";
+String createAudioFile({required String dirPath, required String name}) => """$dirPath${name.substring(0,min(name.length,100))}_${DateTime.now()}.aac""";
+String createImageFile({required String dirPath, required String name}) =>  "$dirPath${name.substring(0,min(name.length,100))}_${DateTime.now()}.png";
+String createVideoFile({required String dirPath, required String name}) =>  "$dirPath${name.substring(0,min(name.length,100))}_${DateTime.now()}.mp4";
+String createDocFile({required String dirPath, required String extension, required String name}) =>  "$dirPath${name.substring(0,min(name.length,100))}_${DateTime.now()}.$extension";
 String createWallpaperFile({required String dirPath}) => "${dirPath}_chat_wallpaper_${DateTime.now()}.png";
 String createChatHistoryFile({required String dirPath, required String connName, required String connId}) => """$dirPath$connName Chat History.txt""";

@@ -645,6 +645,8 @@ class MessagingOperation {
     final String _serverKey =
         DataManagement.getEnvData(EnvFileKey.serverKey) ?? '';
 
+    if(title == '' && body == '') return 204;
+
     final Response response = await post(
       Uri.parse(NotifyManagement.sendNotificationUrl),
       headers: NotifyManagement.sendNotificationHeader(_serverKey),

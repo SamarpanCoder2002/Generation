@@ -122,17 +122,19 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
 
   getConnectionWallpaper() => _localWallpaperPath;
 
-  getMessagesRealtime(String partnerId) {
+  getMessagesRealtime(String incomingPartnerUserId) {
     _realTimeMessagingSubscription =
-        _realTimeOperations.getChatMessages(partnerId).listen((docSnapShot) {
+        _realTimeOperations.getChatMessages(incomingPartnerUserId).listen((docSnapShot) {
+      if (incomingPartnerUserId != getPartnerUserId()) return;
+
       final _docData = docSnapShot.data();
 
       if (_docData != null &&
           _docData.isNotEmpty &&
           _docData["data"].isNotEmpty) {
-        _manageIncomingMessages(_docData["data"]);
+        _manageIncomingMessages(_docData["data"], incomingPartnerUserId);
 
-        _dbOperations.resetRemoteOldChatMessages(partnerId);
+        _dbOperations.resetRemoteOldChatMessages(incomingPartnerUserId);
       }
     });
   }
@@ -156,8 +158,12 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
               profilePic: _docData["profilePic"],
               about: _docData["about"],
               dbOperation: DBOperation.update);
-          Provider.of<ConnectionCollectionProvider>(context, listen: false)
-              .updateParticularConnectionData(_docData["id"], _docData);
+          try {
+            Provider.of<ConnectionCollectionProvider>(context, listen: false)
+                .updateParticularConnectionData(_docData["id"], _docData);
+          } catch (e) {
+            debugShow('Error at getConnectionDataRealTime: $e');
+          }
         }
       }
     });
@@ -168,8 +174,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         .getRealTimeSpecialOperationsData(partnerId)
         .listen((docSnapShot) {
       final Map<String, dynamic>? _docData = docSnapShot.data();
-
-      debugShow('Doc Data is: $_docData');
 
       if (_docData == null) return;
 
@@ -210,8 +214,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
   }
 
   String getCurrStatus() {
-    debugShow('curent Status: $_currStatus');
-
     if (_currStatus.isEmpty) return '';
     if (_currStatus["status"] == UserStatus.online.toString()) return 'Online';
 
@@ -235,10 +237,10 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
     return 'Last Seen $_dayShow at ${_currStatus["time"]}';
   }
 
-  _manageIncomingMessages(messages) {
+  _manageIncomingMessages(messages, String incomingPartnerUserId) {
     for (var message in messages) {
       message = DataManagement.fromJsonString(Secure.decode(message));
-      _manageMessageForLocale(message);
+      _manageMessageForLocale(message, incomingConnId: incomingPartnerUserId);
       final _msgType =
           Secure.decode(message.values.toList()[0][MessageData.type]);
       if (_msgType != ChatMessageType.text.toString() &&
@@ -287,6 +289,7 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       debugShow("Media Download Completed");
       message.values.toList()[0][MessageData.message] =
           Secure.encode(_mediaStorePath);
+
       _dbOperations.deleteMediaFromFirebaseStorage(_msgData);
 
       /// For Thumbnail Management
@@ -596,6 +599,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       {bool forSendMultiple = false,
       String? incomingConnId,
       bool storeOnMsgBox = true}) {
+    debugShow('Incoming Connection id: $incomingConnId');
+
     _localStorage
         .insertUpdateMsgUnderConnectionChatTable(
             chatConTableName:

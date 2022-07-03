@@ -360,13 +360,13 @@ class ConnectionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setFreshData(incomingData) {
-    if (incomingData == null) return;
-
-    _chatConnectionsDataCollection = incomingData;
-    _searchedChatConnectionsDataCollection = incomingData;
-    notifyListeners();
-  }
+  // setFreshData(incomingData) {
+  //   if (incomingData == null) return;
+  //
+  //   _chatConnectionsDataCollection = incomingData;
+  //   _searchedChatConnectionsDataCollection = incomingData;
+  //   notifyListeners();
+  // }
 
   addNewData(incomingNewData) {
     if (incomingNewData == null) return;
