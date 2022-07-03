@@ -13,13 +13,11 @@ Code of Conduct
 - Add This Project in Firebase . After Adding the SHA1 and SHA256 keys, download the `google-services.json` file. </br>
 
 
-- I use a package `encrypt` in that project. Search that in [pub.dev](https://pub.dev/packages/encrypt), to know to generate a secret unique encryption key and under [encryption_maker.dart](https://github.com/SamarpanCoder2002/Generation/blob/main/lib/BackendAndDatabaseManager/global_controller/encrytion_maker.dart) file with replacing `'Write Encryption Key here which will use when the app is in background'` and also in `.env` file.</br>
+- A package `encrypt` used in that project. Search that in [pub.dev](https://pub.dev/packages/encrypt). From Documentation,you can easily know how to generate secret key. Put that secret key in  `lib/config/secret_data.dart` file with replacing `'Write Encryption Key here which will use when the app is in background'` and also in `.env` file.</br>
 
 
-- You can generate an API key from `google cloud console` with enable `Maps SDK for Android` API, and add that API key under `AndroidManifest.xml` file with replacing `Google-Map-API-Key`.</br>
+- You can generate an API key from `google cloud console` with enable `Maps SDK for Android` API, and add that API key under `AndroidManifest.xml` file with replacing `@string/google_maps_api_key`.</br>
 
-
-- `'SERVER-KEY(Generated from Firebase Project Settings Cloud Messaging)'` under [notification_configuration.dart](https://github.com/SamarpanCoder2002/Generation/blob/main/lib/BackendAndDatabaseManager/general_services/notification_configuration.dart) file will replace by `SERVER-KEY` Generated Manually From Firebase Project Settings -> Cloud Messaging -> Generate New Server Key and use it as `SERVER-KEY`.</br>
 
 ### 🎯 Set up this project in local:
 
