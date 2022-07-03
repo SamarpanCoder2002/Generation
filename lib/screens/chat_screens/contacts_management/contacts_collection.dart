@@ -2,6 +2,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/contacts_provider.dart';
+import 'package:generation/providers/theme_provider.dart';
 import 'package:generation/screens/common/contact_card_design.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:provider/provider.dart';
@@ -26,8 +27,10 @@ class _ContactsCollectionState extends State<ContactsCollection> {
 
   @override
   Widget build(BuildContext context) {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundDarkMode,
+      backgroundColor: AppColors.getChatBgColor(_isDarkMode),
       floatingActionButton: Provider.of<ContactsProvider>(context)
                   .getLengthOfTotalFilteredContacts() >
               0
@@ -59,6 +62,8 @@ class _ContactsCollectionState extends State<ContactsCollection> {
   }
 
   _headingSection() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
         alignment: Alignment.centerLeft,
         margin: const EdgeInsets.only(left: 23),
@@ -71,8 +76,11 @@ class _ContactsCollectionState extends State<ContactsCollection> {
                       0
                   ? AppText.appName
                   : "Filtered Contacts",
-              style:
-                  TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
+              style: TextStyleCollection.headingTextStyle.copyWith(
+                  fontSize: 20,
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightTextColor),
             ),
             if (Provider.of<ContactsProvider>(context)
                     .getLengthOfTotalFilteredContacts() >
@@ -80,8 +88,11 @@ class _ContactsCollectionState extends State<ContactsCollection> {
               TextButton(
                 child: Text(
                   "Clear Selection",
-                  style: TextStyleCollection.headingTextStyle
-                      .copyWith(fontSize: 14),
+                  style: TextStyleCollection.headingTextStyle.copyWith(
+                      fontSize: 14,
+                      color: _isDarkMode
+                          ? AppColors.pureWhiteColor
+                          : AppColors.lightTextColor),
                 ),
                 onPressed: () {
                   Provider.of<ContactsProvider>(context, listen: false)
@@ -93,34 +104,47 @@ class _ContactsCollectionState extends State<ContactsCollection> {
   }
 
   _searchBar() {
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppColors.searchBarBgDarkMode,
+        color: _isDarkMode
+            ? AppColors.searchBarBgDarkMode
+            : AppColors.pureWhiteColor,
         borderRadius: BorderRadius.circular(40),
       ),
       child: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: 10),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
             child: Icon(
               Icons.search_outlined,
-              color: AppColors.pureWhiteColor,
+              color: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightTextColor.withOpacity(0.8),
             ),
           ),
           Expanded(
             child: TextField(
-              cursorColor: AppColors.pureWhiteColor,
-              style: TextStyleCollection.searchTextStyle,
+              cursorColor: _isDarkMode
+                  ? AppColors.pureWhiteColor
+                  : AppColors.lightTextColor.withOpacity(0.8),
+              style: TextStyleCollection.searchTextStyle.copyWith(
+                  color: _isDarkMode
+                      ? AppColors.pureWhiteColor
+                      : AppColors.lightTextColor.withOpacity(0.8)),
               onChanged: (inputVal) =>
                   Provider.of<ContactsProvider>(context, listen: false)
                       .filteredData(inputVal),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Search",
-                hintStyle: TextStyleCollection.searchTextStyle
-                    .copyWith(color: AppColors.pureWhiteColor.withOpacity(0.8)),
+                hintStyle: TextStyleCollection.searchTextStyle.copyWith(
+                    color: _isDarkMode
+                        ? AppColors.pureWhiteColor.withOpacity(0.8)
+                        : AppColors.lightTextColor.withOpacity(0.8)),
               ),
             ),
           )
@@ -130,11 +154,16 @@ class _ContactsCollectionState extends State<ContactsCollection> {
   }
 
   _screenHeading() {
-    return const Align(
+    final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
+
+    return Align(
       alignment: Alignment.topLeft,
       child: Text(
         "Contacts",
-        style: TextStyleCollection.secondaryHeadingTextStyle,
+        style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+            color: _isDarkMode
+                ? AppColors.pureWhiteColor
+                : AppColors.lightTextColor),
       ),
     );
   }
@@ -220,8 +249,9 @@ class _ContactsCollectionState extends State<ContactsCollection> {
                     PhoneNumberData.numberLabel:
                         _phoneNumbersCollection[0].label
                   },
-                  additionalData:
-                      _replyMsg.isEmpty ? null : {'reply': DataManagement.toJsonString(_replyMsg)});
+                  additionalData: _replyMsg.isEmpty
+                      ? null
+                      : {'reply': DataManagement.toJsonString(_replyMsg)});
         }
 
         if (_replyMsg.isNotEmpty) {

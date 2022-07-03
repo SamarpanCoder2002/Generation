@@ -146,7 +146,6 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
         setToken(_docData['token']);
 
         if (_docData.isNotEmpty) {
-
           setCurrStatus(DataManagement.fromJsonString(
                   Secure.decode(_docData[DBPath.status])) ??
               {});
@@ -278,7 +277,8 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       _mediaStorePath = createDocFile(
           dirPath: _dirPath,
           extension: _msgAdditionalData["extension-for-document"],
-          name: _msgAdditionalData["fileName"] ?? _msgData.toString().split('/').last);
+          name: _msgAdditionalData["fileName"] ??
+              _msgData.toString().split('/').last);
     }
 
     debugShow("Media Message Data is:   $_mediaStorePath\n\n");
@@ -596,19 +596,25 @@ class ChatBoxMessagingProvider extends ChangeNotifier {
       {bool forSendMultiple = false,
       String? incomingConnId,
       bool storeOnMsgBox = true}) {
-    if (!forSendMultiple && storeOnMsgBox) setSingleNewMessage(_msgData);
+    _localStorage
+        .insertUpdateMsgUnderConnectionChatTable(
+            chatConTableName:
+                DataManagement.generateTableNameForNewConnectionChat(
+                    incomingConnId ?? getPartnerUserId()),
+            id: _msgData.keys.toList()[0],
+            holder: _msgData.values.toList()[0][MessageData.holder],
+            message: _msgData.values.toList()[0][MessageData.message],
+            date: _msgData.values.toList()[0][MessageData.date],
+            time: _msgData.values.toList()[0][MessageData.time],
+            type: _msgData.values.toList()[0][MessageData.type],
+            additionalData: _msgData.values.toList()[0]
+                [MessageData.additionalData],
+            dbOperation: DBOperation.insert)
+        .then((operationDone) {
+      if (!operationDone) return;
 
-    _localStorage.insertUpdateMsgUnderConnectionChatTable(
-        chatConTableName: DataManagement.generateTableNameForNewConnectionChat(
-            incomingConnId ?? getPartnerUserId()),
-        id: _msgData.keys.toList()[0],
-        holder: _msgData.values.toList()[0][MessageData.holder],
-        message: _msgData.values.toList()[0][MessageData.message],
-        date: _msgData.values.toList()[0][MessageData.date],
-        time: _msgData.values.toList()[0][MessageData.time],
-        type: _msgData.values.toList()[0][MessageData.type],
-        additionalData: _msgData.values.toList()[0][MessageData.additionalData],
-        dbOperation: DBOperation.insert);
+      if (!forSendMultiple && storeOnMsgBox) setSingleNewMessage(_msgData);
+    });
   }
 
   /// Making Message Data Ready For Remote

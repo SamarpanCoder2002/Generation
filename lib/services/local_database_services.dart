@@ -326,7 +326,7 @@ class LocalStorage {
   }
 
   /// For Insert Or Update Chat Messages
-  Future<void> insertUpdateMsgUnderConnectionChatTable(
+  Future<bool> insertUpdateMsgUnderConnectionChatTable(
       {required String chatConTableName,
       required String id,
       required String holder,
@@ -336,21 +336,28 @@ class LocalStorage {
       required String type,
       dynamic additionalData,
       required DBOperation dbOperation}) async {
-    final Database db = await database;
+    try{
+      final Database db = await database;
 
-    final Map<String, dynamic> _chatData = <String, dynamic>{};
+      final Map<String, dynamic> _chatData = <String, dynamic>{};
 
-    _chatData[_msgId] = id;
-    _chatData[_msgHolder] = holder;
-    _chatData[_msgData] = message;
-    _chatData[_msgDate] = date;
-    _chatData[_msgTime] = time;
-    _chatData[_msgType] = type;
-    _chatData[_msgAdditionalData] = additionalData;
+      _chatData[_msgId] = id;
+      _chatData[_msgHolder] = holder;
+      _chatData[_msgData] = message;
+      _chatData[_msgDate] = date;
+      _chatData[_msgTime] = time;
+      _chatData[_msgType] = type;
+      _chatData[_msgAdditionalData] = additionalData;
 
-    dbOperation == DBOperation.insert
-        ? db.insert(chatConTableName, _chatData)
-        : db.update(chatConTableName, _chatData, where: """$_msgId = "$id" """);
+      dbOperation == DBOperation.insert
+          ? db.insert(chatConTableName, _chatData)
+          : db.update(chatConTableName, _chatData,
+              where: """$_msgId = "$id" """);
+
+      return true;
+    }catch(e){
+      return false;
+    }
   }
 
   /// Delete Particular Connection Chat Message Table

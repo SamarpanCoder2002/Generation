@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/providers/chat/messaging_provider.dart';
+import 'package:generation/providers/sound_provider.dart';
 import 'package:generation/screens/chat_screens/heading_section.dart';
 import 'package:generation/screens/chat_screens/message_creation_section.dart';
 import 'package:generation/screens/chat_screens/messaging_section.dart';
@@ -95,6 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
             .clearMessageData();
         Provider.of<ChatScrollProvider>(context, listen: false)
             .changeScrollAtFirstValue(true);
+        Provider.of<SongManagementProvider>(context,listen: false).stopSong();
         return true;
       },
       child: Scaffold(

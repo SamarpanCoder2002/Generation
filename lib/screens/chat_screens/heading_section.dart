@@ -19,6 +19,7 @@ import '../../providers/chat/chat_creation_section_provider.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/status_collection_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/local_data_management.dart';
 import '../../services/toast_message_show.dart';
@@ -62,7 +63,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final _isDarkMode = Provider.of<ThemeProvider>(context).isDarkTheme();
 
     return InkWell(
-      onTap: () => _onImageClicked(connectionData["profilePic"]),
+      onTap: () => _onImageClicked(Secure.decode(connectionData["profilePic"])),
       child: Container(
         width: 45,
         height: 45,
@@ -286,8 +287,9 @@ class ChatBoxHeaderSection extends StatelessWidget {
                 child: Text(
                   'Delete this message',
                   textAlign: TextAlign.center,
-                  style: TextStyleCollection.headingTextStyle
-                      .copyWith(fontSize: 20, color: AppColors.popUpTextColor(_isDarkMode)),
+                  style: TextStyleCollection.headingTextStyle.copyWith(
+                      fontSize: 20,
+                      color: AppColors.popUpTextColor(_isDarkMode)),
                 ),
               ),
               actionsAlignment: _eligibleForDeleteForEveryOne
