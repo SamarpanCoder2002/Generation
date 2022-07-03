@@ -6,6 +6,12 @@
 ![](https://img.shields.io/badge/Dart_Version-2.17.3-orange.svg)
 ![](https://img.shields.io/badge/Status-Stable-blue.svg)
 
+<br/>
+
+<center>
+<img src="./readme_documents/gen_ban_optimized.jpg" alt="Generation 2.0 Banner">
+</center>
+
 
 # <p align="center"> Generation 2.0 </p>
 
