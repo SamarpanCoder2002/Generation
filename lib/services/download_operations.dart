@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:generation/config/text_collection.dart';
 import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/services/directory_management.dart';
 import 'package:new_version/new_version.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../config/colors_collection.dart';
 import '../config/text_style_collection.dart';
@@ -25,6 +27,16 @@ class DownloadOperations {
 }
 
 updateGeneration(context) async {
+  _onAppUpdate(){
+    try{
+      launch(TextCollection.appLink);
+    }catch(e){
+      debugShow('Error in Opening: $e');
+    }
+
+  }
+
+
   try {
     final newVersion = NewVersion();
 
@@ -70,7 +82,7 @@ updateGeneration(context) async {
                 const SizedBox(width: 5),
                 commonTextButton(
                     btnText: "Update Now",
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: _onAppUpdate,
                     borderColor: AppColors.popUpBgColor(_isDarkMode),
                     fontSize: 16),
               ],
@@ -78,4 +90,6 @@ updateGeneration(context) async {
   } catch (e) {
     debugShow('Error in updateGeneration: $e');
   }
+
+
 }

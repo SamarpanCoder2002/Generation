@@ -55,13 +55,13 @@ class FolderData {
 }
 
 class TextCollection {
-  static const String _appLink =
+  static const String appLink =
       "https://play.google.com/store/apps/details?id=com.samarpandasgupta.generation";
   static const String appWebsiteLink =
       "https://generation.samarpandasgupta.com/";
   static const String appCreator = "Samarpan Dasgupta";
   static const String appShareData =
-      """If you care about your privacy, try this once\n\nEnjoy Simple, Secure, User-friendly free messaging app\n\n$_appLink""";
+      """If you care about your privacy, try this once\n\nEnjoy Simple, Secure, User-friendly free messaging app\n\n$appLink""";
   static const String videoDurationAlert =
       "Video duration should be within ${Timings.videoDurationInSec} seconds";
   static const String myWebsite = 'https://samarpandasgupta.com/';
