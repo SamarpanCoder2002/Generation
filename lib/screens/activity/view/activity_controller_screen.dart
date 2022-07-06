@@ -219,6 +219,11 @@ class _ActivityControllerState extends State<ActivityController>
         : Provider.of<ConnectionCollectionProvider>(context)
             .getUsersMap(widget.activityHolderId);
 
+    final _showDateTime = Provider.of<StatusCollectionProvider>(context)
+        .eligibleForShowDateTime(_currentActivityData);
+
+    debugShow('Show Date Time in activity: $_showDateTime');
+
     return Positioned(
       top: 35,
       left: 1,
@@ -250,13 +255,14 @@ class _ActivityControllerState extends State<ActivityController>
                     ),
                   ),
                   const SizedBox(height: 3),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "${_currentActivityData!.date} ${_currentActivityData.time}",
-                      style: TextStyleCollection.activityTitleTextStyle,
-                    ),
-                  )
+                  if (_showDateTime)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "${_currentActivityData!.date} ${_currentActivityData.time}",
+                        style: TextStyleCollection.activityTitleTextStyle,
+                      ),
+                    )
                 ],
               ),
             ),

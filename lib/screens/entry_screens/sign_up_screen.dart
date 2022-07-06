@@ -166,7 +166,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (_response) {
       showPopUpDialog(context, "Sign Up Successful",
-          "A verification email is sent to your email. Please verify your email at first",
+          "A verification email is sent to your email(Check also in spam folder). Please verify your email at first",
           () {
         Navigator.pop(context);
         Navigator.pop(context);
