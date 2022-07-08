@@ -9,7 +9,7 @@ import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/services/encryption_operations.dart';
 import 'package:generation/services/local_data_management.dart';
 import 'package:generation/config/types.dart';
-import 'package:open_file/open_file.dart';
+import 'package:generation/services/system_file_management.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/theme_provider.dart';
@@ -76,7 +76,7 @@ class StorageImageAndVideoCollection extends StatelessWidget {
 
     _onTapped() async {
       if (showVideoPlayIcon) {
-        await OpenFile.open(Secure.decode(_extractedData['message']));
+        await SystemFileManagement.openFile(Secure.decode(_extractedData['message']));
       } else {
         makeStatusBarTransparent();
         Navigator.push(
@@ -125,7 +125,7 @@ class StorageImageAndVideoCollection extends StatelessWidget {
         ),
         onPressed: () async {
           /// When Integrate Functions later, Open Video from phone app write here
-          await OpenFile.open(Secure.decode(extractedData));
+          await SystemFileManagement.openFile(Secure.decode(extractedData));
         },
       ),
     );
