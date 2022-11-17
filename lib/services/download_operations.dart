@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:generation/config/text_collection.dart';
 import 'package:generation/providers/main_screen_provider.dart';
 import 'package:generation/services/directory_management.dart';
-import 'package:new_version/new_version.dart';
+import 'package:new_version_plus/new_version_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,7 +29,7 @@ class DownloadOperations {
 updateGeneration(context) async {
   _onAppUpdate(){
     try{
-      launch(TextCollection.appLink);
+      launchUrl(Uri.parse(TextCollection.appLink));
     }catch(e){
       debugShow('Error in Opening: $e');
     }
@@ -38,7 +38,7 @@ updateGeneration(context) async {
 
 
   try {
-    final newVersion = NewVersion();
+    final newVersion = NewVersionPlus();
 
     final status = await newVersion.getVersionStatus();
     if (status == null) return;

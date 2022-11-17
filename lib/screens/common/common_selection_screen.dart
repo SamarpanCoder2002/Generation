@@ -205,12 +205,9 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
               .onConnectionClick(_connectionData["id"]);
 
       if (!_response) {
-        showToast(
-            title:
-                'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections',
-            toastIconType: ToastIconType.info,
-            fontSize: 14,
-            showFromTop: false);
+        ToastMsg.showInfoToast(
+            'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections',
+            context: context);
       }
       return;
     }
@@ -303,10 +300,8 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
       //   _additionalData = DataManagement.fromJsonString(_additionalData);
       // }
 
-      showToast(
-          title: 'Message Sending... Please Wait',
-          toastIconType: ToastIconType.success,
-          toastDuration: 10);
+      ToastMsg.showSuccessToast('Message Sending... Please Wait',
+          context: context);
 
       for (final selectedConnectionsId in _selectedConnections.keys.toList()) {
         if (mounted) {
@@ -408,7 +403,10 @@ class _CommonSelectionScreenState extends State<CommonSelectionScreen> {
           date: _date,
           time: _time,
           holder: MessageHolderType.me.toString(),
-          additionalData: {"extension-for-document": 'txt', "fileName": chatHistoryStoreFile.path})
+          additionalData: {
+            "extension-for-document": 'txt',
+            "fileName": chatHistoryStoreFile.path
+          })
     ]);
 
     Navigator.pop(context);

@@ -1,7 +1,7 @@
 class SliderData {
   static List<dynamic> content = [
     {
-      "title": "Welcome To Generation",
+      "title": "Welcome To Generation 2.0",
       "subtitle":
           "A Private, Secure, End-to-End Encrypted Messaging app that helps you to connect with your connections without any Ads, promotion. No other third party person, organization, or even Generation Team can't read your messages.",
     },

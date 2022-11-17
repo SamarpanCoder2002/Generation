@@ -376,7 +376,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       {required String editContent,
       required String previousValue,
       required String parameterKey}) {
-    final _isDarkMode = Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
+    final _isDarkMode =
+        Provider.of<ThemeProvider>(context, listen: false).isDarkTheme();
 
     showDialog(
         context: context,
@@ -384,12 +385,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundColor: AppColors.popUpBgColor(_isDarkMode),
               title: Text(
                 editContent,
-                style: TextStyleCollection.secondaryHeadingTextStyle
-                    .copyWith(fontSize: 14, color: AppColors.popUpTextColor(_isDarkMode)),
+                style: TextStyleCollection.secondaryHeadingTextStyle.copyWith(
+                    fontSize: 14, color: AppColors.popUpTextColor(_isDarkMode)),
               ),
               content: TextFormField(
                 cursorColor: AppColors.pureWhiteColor,
-                style: TextStyleCollection.searchTextStyle.copyWith(color: AppColors.popUpTextColor(_isDarkMode)),
+                style: TextStyleCollection.searchTextStyle
+                    .copyWith(color: AppColors.popUpTextColor(_isDarkMode)),
                 initialValue: _editableProfileData[parameterKey],
                 onChanged: (inputVal) {
                   if (mounted) {
@@ -400,13 +402,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
                 decoration: InputDecoration(
                   enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color:AppColors.popUpTextColor(_isDarkMode))),
+                      borderSide: BorderSide(
+                          color: AppColors.popUpTextColor(_isDarkMode))),
                   focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.popUpTextColor(_isDarkMode))),
+                      borderSide: BorderSide(
+                          color: AppColors.popUpTextColor(_isDarkMode))),
                   hintText: "Enter $editContent Here",
                   hintStyle: TextStyleCollection.searchTextStyle.copyWith(
                       fontSize: 16,
-                      color: AppColors.popUpTextColor(_isDarkMode).withOpacity(0.8)),
+                      color: AppColors.popUpTextColor(_isDarkMode)
+                          .withOpacity(0.8)),
                 ),
               ),
               actions: [
@@ -456,8 +461,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_response["success"]) {
       final _updatedData = _response["data"];
 
-  
-
       await _localStorage.insertUpdateDataCurrAccData(
           currUserId: _updatedData["id"],
           currUserName: Secure.encode(_updatedData["name"]) ?? '',
@@ -484,17 +487,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
 
-      showToast(
-          title: _response["message"],
-          toastIconType: ToastIconType.success,
-          toastDuration: 6,
-          showFromTop: false);
+      ToastMsg.showSuccessToast(_response["message"], context: context);
     } else {
-      showToast(
-          title: "Profile Update Failed",
-          toastIconType: ToastIconType.success,
-          toastDuration: 6,
-          showFromTop: false);
+      ToastMsg.showSuccessToast(
+          "Profile Update Failed",
+          context: context);
     }
   }
 }

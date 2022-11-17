@@ -1,4 +1,4 @@
-package com.samarpandasgupta.generation
+package com.generation.messaging
 
 import android.app.NotificationManager
 import android.content.Context
@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 
 class MainActivity : FlutterActivity() {
 
-    private val CHANNEL = "com.samarpandasgupta.generation/nativeCallBack"
+    private val CHANNEL = "com.generation.messaging/nativeCallBack"
 
     companion object{
         val TAG: String = MainActivity::class.java.simpleName

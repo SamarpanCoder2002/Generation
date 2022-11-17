@@ -10,26 +10,19 @@ import '../main_screens/main_screen_management.dart';
 
 storagePermissionForStoreCurrAccData(
     BuildContext context, VoidCallback rightBtnOnTap) {
-  showPopUpDialog(
-      context,
-      "Require Storage Permission",
+  DialogMsg.showDialog(context, "Require Storage Permission",
       "Generation will store your some frequent used data with encrypted form in your local system",
-      rightBtnOnTap,
+      onSuccess: rightBtnOnTap,
       rightBtnText: "Give Permission",
-      barrierDismissible: false,
-      showCancelBtn: true,
-      leftOnPressed: () => closeYourApp());
+      onFailure: () => closeYourApp(),
+      awesomeDialogType: AwesomeDialogType.info);
 }
 
 dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
   final LocalStorage _localStorage = LocalStorage();
   final DBOperations _dbOperations = DBOperations();
 
-  showToast(
-      title: "Account Created Before",
-      toastIconType: ToastIconType.success,
-      showFromTop: false,
-      toastDuration: 1);
+  ToastMsg.showSuccessToast("Account Created Before", context: context);
   storagePermissionForStoreCurrAccData(context, () async {
     await _localStorage.storeDataForCurrAccount(
         _createdBefore["data"], currUserId);
@@ -37,11 +30,7 @@ dataFetchingOperations(BuildContext context, _createdBefore, currUserId) {
     await _dbOperations.updateCurrentAccount(_createdBefore["data"]);
     await _dbOperations.updateToken();
 
-    showToast(
-        title: "Data Fetched Successfully",
-        toastIconType: ToastIconType.success,
-        showFromTop: false,
-        toastDuration: 3);
+    ToastMsg.showSuccessToast("Data Fetched Successfully", context: context);
     Navigation.intentStraight(context, const MainScreen());
   });
 }

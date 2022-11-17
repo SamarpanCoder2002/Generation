@@ -9,8 +9,7 @@ class NetworkManagementProvider extends ChangeNotifier {
   Future<bool> get isNetworkActive async =>
       await _nativeCallback.checkInternet();
 
-  noNetworkMsg(BuildContext context, {bool showFromTop = true, bool? showCenterToast}) => showToast(
-      title: 'Network not available',
-      toastIconType: ToastIconType.info,
-      toastDuration: 10,showFromTop: showFromTop, showCenterToast: showCenterToast);
+  noNetworkMsg(BuildContext context,
+          {bool showFromTop = true, bool? showCenterToast}) =>
+      ToastMsg.showErrorToast('Network not available', context: context);
 }

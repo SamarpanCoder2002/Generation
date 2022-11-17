@@ -125,7 +125,7 @@ class NotificationManagement {
 
   _initAll(InitializationSettings initializationSettings) async {
     final response = await _flutterLocalNotificationsPlugin.initialize(
-        initializationSettings, onSelectNotification: (payload) async {
+        initializationSettings, onDidReceiveNotificationResponse: (payload) async {
       debugShow("Payload is: $payload");
     });
 

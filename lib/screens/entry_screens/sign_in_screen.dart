@@ -184,12 +184,17 @@ class _SignInScreenState extends State<SignInScreen> {
 
     debugShow("Data is: $_data");
 
-    showToast(
-        title: _data["message"],
-        toastIconType:
-            _data["success"] ? ToastIconType.success : ToastIconType.error,
-        showFromTop: false,
-        toastDuration: 5);
+    if(_data["success"]){
+      ToastMsg.showSuccessToast(
+           _data["message"],
+          context: context);
+    }else{
+      ToastMsg.showErrorToast(
+          _data["message"],
+          context: context);
+    }
+
+
 
     if (!_data["success"]) return;
 

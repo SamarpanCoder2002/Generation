@@ -61,6 +61,12 @@ class AppColors {
   static const Color lightModeBlueColor = Color(0xff0186fe);
   static const Color darkSelectionBlueColor = Color(0xff749cf2);
 
+  /// Toast Message Color
+  static const Color successMsgColor = Color(0xff4BB543);
+  static const Color errorMsgColor = Color(0xffFF3333);
+  static const Color infoMsgColor = Color(0xff766EEF);
+  static const Color warningMsgColor = Color(0xffEBD114);
+
   static getBgColor(bool _isDarkMode) =>
       _isDarkMode ? backgroundDarkMode : backgroundLightMode;
 

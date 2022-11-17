@@ -517,11 +517,9 @@ class ConnectionCollectionProvider extends ChangeNotifier {
 
         _localStorage.deleteConnectionPrimaryData(id: _connId);
 
-        showToast(
-            title:
-                '${_localConnectedUsersMap[_connId]["name"]} ${TextCollection.removeYou}',
-            toastIconType: ToastIconType.info,
-            showFromTop: false);
+        ToastMsg.showInfoToast(
+            '${_localConnectedUsersMap[_connId]["name"]} ${TextCollection.removeYou}',
+            context: context);
 
         _chatConnectionsDataCollection
             .removeWhere((connData) => connData["id"] == _connId);

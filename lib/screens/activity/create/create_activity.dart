@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/config/colors_collection.dart';
 import 'package:generation/config/time_collection.dart';
 import 'package:generation/db_operations/firestore_operations.dart';
@@ -330,10 +331,9 @@ class _CreateActivityState extends State<CreateActivity> {
       });
     }
 
-    showToast(
-        title: "Activity Added",
-        toastIconType: ToastIconType.success,
-        toastDuration: 10);
+    ToastMsg.showSuccessToast(
+        "Activity Added",
+        context: context);
 
     if (widget.activityContentType == ActivityContentType.audio) {
       Provider.of<SongManagementProvider>(context, listen: false)

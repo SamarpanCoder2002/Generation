@@ -60,6 +60,8 @@ _initializeFirebase() async {
 
 Future<void> notificationInitialize() async {
   /// Important to subscribe a topic to send and receive message using FCM via http
+  ///
+  debugShow('Topic to subscribe: ${ DataManagement.getEnvData(EnvFileKey.firebaseMessagingTopic)}');
   await FirebaseMessaging.instance.subscribeToTopic(
       DataManagement.getEnvData(EnvFileKey.firebaseMessagingTopic) ?? '');
 

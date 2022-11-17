@@ -55,9 +55,7 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
             ? _particularImage()
             : PageView(
                 physics: const PageScrollPhysics(),
-                scrollBehavior: const ScrollBehavior(
-                    androidOverscrollIndicator:
-                        AndroidOverscrollIndicator.glow),
+                scrollBehavior: const ScrollBehavior(),
                 children: [
                   ..._getImagesCollection()
                       .map((imageData) => _particularImage(image: imageData))
@@ -268,10 +266,9 @@ class _ChatWallpaperPreviewState extends State<ChatWallpaperPreview> {
       Provider.of<ChatBoxMessagingProvider>(context, listen: false).getChatWallpaperData(_partnerUserId, newWallpaper: _imageToStore);
     }
 
-    showToast(
-        title: "Chat Wallpaper Set Successfully",
-        toastIconType: ToastIconType.success,
-        showFromTop: false);
+    ToastMsg.showSuccessToast(
+        "Chat Wallpaper Set Successfully",
+        context: context);
 
     Navigator.pop(context);
   }

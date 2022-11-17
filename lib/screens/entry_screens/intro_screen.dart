@@ -255,10 +255,9 @@ class _IntroScreensState extends State<IntroScreens> {
     final _userData = await _googleAuth.logIn();
 
     if (_userData == null) {
-      showToast(
-          title: "Sign In Failed",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast(
+          "Sign In Failed",
+          context: context);
 
       if (mounted) {
         setState(() {
@@ -268,10 +267,9 @@ class _IntroScreensState extends State<IntroScreens> {
       return;
     }
 
-    showToast(
-        title: "Sign In Successful",
-        toastIconType: ToastIconType.success,
-        showFromTop: false);
+    ToastMsg.showSuccessToast(
+        "Sign In Successful",
+        context: context);
 
     debugShow("User Data: $_userData");
 

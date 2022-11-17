@@ -15,9 +15,8 @@ class PollCreatorProvider extends ChangeNotifier {
 
   deleteLastAnswerController(BuildContext context) {
     if (_answerControllerCollection.length <= 2) {
-      showToast(
-          title: "Answer Must Have Two Options",
-          toastIconType: ToastIconType.warning);
+      ToastMsg.showWarningToast("Answer Must Have Two Options",
+          context: context);
       return;
     }
 
@@ -29,7 +28,7 @@ class PollCreatorProvider extends ChangeNotifier {
 
   getAllAnswerController() => _answerControllerCollection;
 
-  reset(){
+  reset() {
     _questionController.clear();
     _answerControllerCollection.clear();
     _answerControllerCollection =

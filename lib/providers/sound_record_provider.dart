@@ -35,7 +35,7 @@ class SoundRecorderProvider extends ChangeNotifier {
     // Start recording
     await _record.start(
       path: _voiceStoreFilePath, // required
-      encoder: AudioEncoder.AAC, // by default
+      encoder: AudioEncoder.aacLc, // by default
       bitRate: 128000, // by default
       samplingRate: 44100, // by default
     );

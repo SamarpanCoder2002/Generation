@@ -15,7 +15,6 @@ import '../../../providers/main_scrolling_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../services/debugging.dart';
 import '../../../services/toast_message_show.dart';
-import '../../../config/types.dart';
 import '../../common/chat_connections_common_design.dart';
 
 class CommonUsersShowScreen extends StatefulWidget {
@@ -299,13 +298,11 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       Provider.of<SentConnectionsProvider>(context, listen: false)
           .initialize(update: true);
 
-      showToast(
-          title: "Connection Request Sent",
-          toastIconType: ToastIconType.success,
-          showFromTop: false);
+      ToastMsg.showSuccessToast("Connection Request Sent", context: context);
 
-      if(otherUserData['token'] == null){
-        otherUserData = await _dbOperations.getRemoteAnyAccData(otherUserData['id']);
+      if (otherUserData['token'] == null) {
+        otherUserData =
+            await _dbOperations.getRemoteAnyAccData(otherUserData['id']);
       }
 
       _sendModifiedNotification(
@@ -314,10 +311,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           'I would like to connect with you',
           otherUserData);
     } else {
-      showToast(
-          title: "Failed to sent request",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast("Failed to sent request", context: context);
     }
   }
 
@@ -336,15 +330,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
-      showToast(
-          title: "Request withdrawn",
-          toastIconType: ToastIconType.success,
-          showFromTop: false);
+      ToastMsg.showSuccessToast("Request withdrawn", context: context);
     } else {
-      showToast(
-          title: "Failed to withdraw request",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast("Failed to withdraw request", context: context);
     }
   }
 
@@ -366,13 +354,11 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       Provider.of<ConnectionCollectionProvider>(context, listen: false)
           .initialize(update: true);
 
-      showToast(
-          title: "Request Accepted",
-          toastIconType: ToastIconType.success,
-          showFromTop: false);
+      ToastMsg.showSuccessToast("Request Accepted", context: context);
 
-      if(otherUserData['token'] == null){
-        otherUserData = await _dbOperations.getRemoteAnyAccData(otherUserData['id']);
+      if (otherUserData['token'] == null) {
+        otherUserData =
+            await _dbOperations.getRemoteAnyAccData(otherUserData['id']);
       }
 
       _sendModifiedNotification(
@@ -381,10 +367,7 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
           "Let's talk with each other",
           otherUserData);
     } else {
-      showToast(
-          title: "Failed to accept request",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast("Failed to accept request", context: context);
     }
   }
 
@@ -401,15 +384,9 @@ class _CommonUsersShowScreenState extends State<CommonUsersShowScreen> {
       await _dbOperations.getAvailableUsersData(context);
       Provider.of<AllAvailableConnectionsProvider>(context, listen: false)
           .initialize(update: true);
-      showToast(
-          title: "Incoming Request Rejected",
-          toastIconType: ToastIconType.success,
-          showFromTop: false);
+      ToastMsg.showSuccessToast("Incoming Request Rejected", context: context);
     } else {
-      showToast(
-          title: "Failed to reject request",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast("Failed to reject request", context: context);
     }
   }
 

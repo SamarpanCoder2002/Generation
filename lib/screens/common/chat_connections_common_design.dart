@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generation/providers/connection_collection_provider.dart';
 import 'package:generation/screens/common/image_showing_screen.dart';
 import 'package:generation/services/navigation_management.dart';
@@ -181,7 +182,7 @@ class CommonChatListLayout {
               .onConnectionClick(connectionData["id"]);
 
           if(!_response){
-            showToast( title: 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections', toastIconType: ToastIconType.info, fontSize: 14, showFromTop: false);
+            ToastMsg.showInfoToast( 'You Can Select Maximum ${SizeCollection.maxConnSelected} Connections', context: context);
           }
         },
         icon: _isSelected
@@ -197,8 +198,8 @@ class CommonChatListLayout {
 
   _onImageClicked(String? photo) {
     if (photo == null) {
-      showToast(
-          title: "Image Not Found", toastIconType: ToastIconType.info);
+      ToastMsg.showInfoToast(
+          "Image Not Found", context: context);
       return;
     }
 

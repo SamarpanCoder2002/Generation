@@ -140,10 +140,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void _onSubmitInformation() async {
     if (!_formKey.currentState!.validate()) return;
     if (_pwdController.text != _confirmPwdController.text) {
-      showToast(
-          title: "Password and Confirm Password are not same",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast(
+          "Password and Confirm Password are not same",
+          context: context);
       return;
     }
 
@@ -165,17 +164,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     if (_response) {
-      showPopUpDialog(context, "Sign Up Successful",
+      DialogMsg.showDialog(context, "Sign Up Successful",
           "A verification email is sent to your email(Check also in spam folder). Please verify your email at first",
-          () {
+          onSuccess: () {
         Navigator.pop(context);
         Navigator.pop(context);
-      });
+      }, awesomeDialogType: AwesomeDialogType.success);
     } else {
-      showToast(
-          title: "Email Already Exist Before",
-          toastIconType: ToastIconType.error,
-          showFromTop: false);
+      ToastMsg.showErrorToast(
+          "Email Already Exist Before",
+          context: context);
     }
 
     // Timer(const Duration(seconds: 10), () {

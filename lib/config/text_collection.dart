@@ -1,4 +1,5 @@
 import 'package:generation/config/time_collection.dart';
+import 'package:generation/services/debugging.dart';
 import 'package:generation/services/local_data_management.dart';
 
 class AppText {
@@ -35,9 +36,7 @@ class PhoneNumberData {
 
 class EnvFileKey {
   static const supportMail = "SUPPORT_MAIL";
-  static const rzpAPIKEY = "RZP_API_KEY";
   static const dbName = "DATABASE_NAME";
-  static const baseUrl = "BASE_URL";
   static const firebaseMessagingTopic = "topicToSubscribe";
   static const serverKey = "serverKey";
   static const encryptKey = "ENCRYPT_KEY";
@@ -110,6 +109,8 @@ class NotifyManagement {
       _notifyBody['notification']['image'] = image;
       _notifyBody['data']['image'] = image;
     }
+
+    debugShow('Notify body data: $_notifyBody');
 
     return DataManagement.toJsonString(_notifyBody);
   }

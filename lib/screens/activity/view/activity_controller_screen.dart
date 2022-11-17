@@ -593,9 +593,8 @@ class _ActivityControllerState extends State<ActivityController>
       });
     }
 
-    showToast(
-        title: 'Reply Send Successfully',
-        toastIconType: ToastIconType.success,
-        showCenterToast: true);
+    ToastMsg.showSuccessToast(
+     'Reply Send Successfully',
+        context: context);
   }
 }

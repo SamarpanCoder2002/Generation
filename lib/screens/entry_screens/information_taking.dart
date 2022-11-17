@@ -313,10 +313,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (userData["profilePic"] == null) {
-      showToast(
-          title: "Profile Picture Required",
-          toastIconType: ToastIconType.info,
-          showFromTop: false);
+      ToastMsg.showInfoToast("Profile Picture Required", context: context);
       return;
     }
 
@@ -340,10 +337,7 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
     debugShow("Response: $_response");
 
     if (!_response["success"]) {
-      showToast(
-          title: _response["message"],
-          toastIconType: ToastIconType.success,
-          showFromTop: false);
+      ToastMsg.showSuccessToast(_response["message"], context: context);
       return;
     }
 
@@ -385,11 +379,17 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
 
       debugShow("Data to Store: $_data");
 
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
+
       await _localStorage.createTableForStorePrimaryData();
       _localStorage.createTableForConnectionsPrimaryData();
       await _localStorage.insertUpdateDataCurrAccData(
           currUserId: _data["id"],
-          currUserName: Secure.encode(_data["name"]) ??'',
+          currUserName: Secure.encode(_data["name"]) ?? '',
           currUserProfilePic: Secure.encode(_data["profilePic"]) ?? '',
           currUserAbout: Secure.encode(_data["about"]) ?? '',
           currUserEmail: Secure.encode(_data["email"]) ?? '',
@@ -400,18 +400,22 @@ class _InformationTakingScreenState extends State<InformationTakingScreen> {
 
       await _dbOperations.updateToken();
 
-      showToast(
-          title: _response["message"],
-          toastIconType: ToastIconType.success,
-          showFromTop: false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+
+      ToastMsg.showSuccessToast(_response["message"], context: context);
 
       Navigation.intentStraight(context, const MainScreen());
     } catch (e) {
-      showPopUpDialog(
-          context,
-          "There is some issue while processing data",
+      debugShow('Error while onboarding is: $e');
+
+      DialogMsg.showDialog(context, "There is some issue while processing data",
           "Please clear this app data from settings and reopen the app.",
-          () => SystemNavigator.pop(animated: true));
+          onSuccess: () => SystemNavigator.pop(animated: true),
+          awesomeDialogType: AwesomeDialogType.info);
     }
   }
 }

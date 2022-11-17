@@ -1,131 +1,107 @@
-import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:generation/config/colors_collection.dart';
-import 'package:generation/config/text_style_collection.dart';
-import 'package:generation/screens/common/button.dart';
-import 'package:generation/config/types.dart';
 
-Color _getColor(ToastIconType toastIconType) {
-  switch (toastIconType) {
-    case ToastIconType.info:
-      return AppColors.toastBlueColor;
-    case ToastIconType.success:
-      return AppColors.darkBorderGreenColor;
-    case ToastIconType.error:
-      return AppColors.lightRedColor;
-    case ToastIconType.warning:
-      return AppColors.audioIconBgColor;
+import 'package:flutter/material.dart';
+
+import '../config/colors_collection.dart';
+import '../config/types.dart';
+import 'debugging.dart';
+
+class ToastMsg {
+  static void showSuccessToast(text,
+          {required dynamic context,
+          bool shortToast = true,
+          bool fromBottom = true}) =>
+      _commonToastShow(
+          context, text, shortToast, fromBottom, AppColors.successMsgColor);
+
+  static void showErrorToast(text,
+          {required dynamic context,
+          bool shortToast = true,
+          bool fromBottom = true}) =>
+      _commonToastShow(
+          context, text, shortToast, fromBottom, AppColors.errorMsgColor);
+
+  static void showInfoToast(text,
+          {required dynamic context,
+          bool shortToast = true,
+          bool fromBottom = true}) =>
+      _commonToastShow(
+          context, text, shortToast, fromBottom, AppColors.infoMsgColor);
+
+  static void showWarningToast(text,
+          {required dynamic context,
+          bool shortToast = true,
+          bool fromBottom = true}) =>
+      _commonToastShow(
+          context, text, shortToast, fromBottom, AppColors.warningMsgColor);
+
+  static _commonToastShow(dynamic context, String text, bool shortToast,
+      bool fromBottom, Color color) {
+    try {
+      final snackBar = SnackBar(
+        content: Text(text),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: shortToast ? 3 : 6),
+        margin: const EdgeInsets.all(10),
+        action: SnackBarAction(
+          textColor: AppColors.pureWhiteColor,
+          label: 'Close',
+          onPressed: () {},
+        ),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } catch (e) {
+      debugShow('Error while showing context: $e');
+      _alternativeToastShow(text, shortToast, fromBottom, color);
+    }
+  }
+
+  static _alternativeToastShow(
+      String text, bool shortToast, bool fromBottom, Color color) {
+    Fluttertoast.showToast(
+        msg: text,
+        toastLength: shortToast ? Toast.LENGTH_SHORT : Toast.LENGTH_SHORT,
+        gravity: fromBottom ? ToastGravity.BOTTOM : ToastGravity.TOP,
+        backgroundColor: color,
+        textColor: AppColors.pureWhiteColor,
+        fontSize: 16.0);
   }
 }
 
-void showToast(
-    {required String title,
-    int? toastDuration,
-    double? height,
-    required ToastIconType toastIconType,
-    bool showFromTop = true,
-    bool? showCenterToast,
-    double? fontSize}) async {
-  Fluttertoast.showToast(
-    msg: title,
-    toastLength: toastDuration == null
-        ? Toast.LENGTH_SHORT
-        : toastDuration < 5
-            ? Toast.LENGTH_SHORT
-            : Toast.LENGTH_LONG,
-    gravity: showCenterToast != null
-        ? ToastGravity.CENTER
-        : showFromTop
-            ? ToastGravity.TOP
-            : ToastGravity.BOTTOM,
-    backgroundColor: _getColor(toastIconType),
-    textColor: AppColors.pureWhiteColor,
-    fontSize: fontSize ?? 16.0,
-  );
-}
-
-void showPopUpDialog(
-    BuildContext context, String title, String content, VoidCallback onPressed,
-    {String? rightBtnText,
-    String? leftBtnText,
-    bool barrierDismissible = true,
-    bool showCancelBtn = true,
-    VoidCallback? leftOnPressed,
-    Color? bgColor,
-    Color? leftBtnColor}) {
-  showDialog(
+class DialogMsg {
+  static void showDialog(context, String title, String description,
+      {required AwesomeDialogType awesomeDialogType, VoidCallback? onSuccess, String? rightBtnText, VoidCallback? onFailure}) {
+    AwesomeDialog(
       context: context,
-      barrierDismissible: barrierDismissible,
-      builder: (_) => AlertDialog(
-            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-            backgroundColor: bgColor ?? AppColors.splashScreenColor,
-            elevation: 10,
-            title: Center(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style:
-                    TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
-              ),
-            ),
-            content: Text(
-              content,
-              style: TextStyleCollection.secondaryHeadingTextStyle,
-              textAlign: TextAlign.center,
-            ),
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: [
-              if (showCancelBtn)
-                commonTextButton(
-                    btnText: leftBtnText ?? "Cancel",
-                    onPressed: leftOnPressed ?? () => Navigator.pop(context),
-                    borderColor: leftBtnColor ?? AppColors.lightRedColor,
-                    textColor: leftBtnColor ?? AppColors.lightRedColor),
-              commonElevatedButton(
-                  btnText: rightBtnText ?? "Ok",
-                  onPressed: onPressed,
-                  bgColor: AppColors.darkBorderGreenColor),
-            ],
-          ));
-}
+      dialogType: _getDialogType(awesomeDialogType),
+      animType: AnimType.bottomSlide,
+      title: title,
+      desc: description,
+      btnCancelOnPress: () {
+        if(onFailure == null) return;
+        onFailure();
+      },
+      btnOkText: rightBtnText,
+      btnOkOnPress: () {
+        if (onSuccess == null) return;
+        onSuccess();
+      },
+    ).show();
+  }
 
-void showPopUpDialogManually(
-    BuildContext context, String title, Widget? content, VoidCallback onPressed,
-    {String? rightBtnText,
-    String? leftBtnText,
-    bool barrierDismissible = true,
-    bool showCancelBtn = true,
-    VoidCallback? leftOnPressed,
-    Color? bgColor,
-    Color? leftBtnColor}) {
-  showDialog(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      builder: (_) => AlertDialog(
-            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-            backgroundColor: bgColor ?? AppColors.splashScreenColor,
-            elevation: 10,
-            title: Center(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style:
-                    TextStyleCollection.headingTextStyle.copyWith(fontSize: 20),
-              ),
-            ),
-            content: content,
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: [
-              if (showCancelBtn)
-                commonTextButton(
-                    btnText: leftBtnText ?? "Cancel",
-                    onPressed: leftOnPressed ?? () => Navigator.pop(context),
-                    borderColor: leftBtnColor ?? AppColors.lightRedColor,
-                    textColor: leftBtnColor ?? AppColors.lightRedColor),
-              commonElevatedButton(
-                  btnText: rightBtnText ?? "Ok",
-                  onPressed: onPressed,
-                  bgColor: AppColors.darkBorderGreenColor),
-            ],
-          ));
+  static _getDialogType(AwesomeDialogType awesomeDialogType) {
+    switch (awesomeDialogType) {
+      case AwesomeDialogType.success:
+        return DialogType.success;
+      case AwesomeDialogType.error:
+        return DialogType.error;
+      case AwesomeDialogType.warning:
+        return DialogType.warning;
+      case AwesomeDialogType.info:
+        return DialogType.info;
+    }
+  }
 }

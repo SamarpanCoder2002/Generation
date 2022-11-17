@@ -15,10 +15,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 2.0.7+17
+version: 1.0.2+2
 
 environment:
-  sdk: ">=2.17.5 <3.0.0"
+  sdk: '>=2.18.2 <3.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,58 +29,54 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^6.0.3
-  shared_preferences: ^2.0.13
-  flutter_font_icons: ^2.2.5
-  percent_indicator: ^4.2.2
-  photo_view: ^0.14.0
-  just_audio: ^0.9.20
-  flutter_linkify: ^5.0.2
-  url_launcher: ^6.0.20
-  permission_handler: ^9.2.0
-  path_provider: ^2.0.9
-  record: ^3.0.3
-  intl: ^0.17.0
-  image_picker: ^0.8.5+3
-  open_file_safe: ^3.2.3
-  file_picker: ^4.5.0
-  pdf_viewer_plugin: ^2.0.1
-  geolocator: ^8.2.0
-  google_maps_flutter: ^2.1.2
-  contacts_service: ^0.6.3
-  fluttertoast: ^8.0.9
-  cached_network_image:
-    git:
-      url: https://github.com/XuannThucc/flutter_cached_network_image.git
-      path: cached_network_image
-      ref: ff72f00f142f13d889d7549e013af91cb0b523ab
-  flutter_dotenv: ^5.0.2
-#  razorpay_flutter: ^1.2.9
-  share_plus: ^4.0.2
-  flutter_colorpicker: ^1.0.3
-  video_player: ^2.4.2
-  smooth_page_indicator: ^1.0.0+2
-  swipe_to: ^1.0.2
-  receive_sharing_intent: ^1.4.5
-  firebase_auth: ^3.4.1
-  cloud_firestore: ^3.1.13
-  google_sign_in: ^5.3.0
-  firebase_core: ^1.19.1
-  firebase_messaging: ^11.4.4
-  http: ^0.13.4
-  firebase_storage: ^10.3.1
-  dio: ^4.0.6
-  flutter_local_notifications: ^9.5.3+1
-  gugor_emoji: ^0.0.4
-  loading_overlay: ^0.3.0
-  workmanager: ^0.5.0
-  encrypt: ^5.0.1
-  new_version: ^0.3.1
-
+  provider: any
+  shared_preferences: any
+  flutter_font_icons: any
+  percent_indicator: any
+  photo_view: any
+  just_audio: any
+  flutter_linkify: any
+  url_launcher: any
+  permission_handler: any
+  path_provider: any
+  record: any
+  intl: any
+  image_picker: any
+  open_file_safe: any
+  file_picker: any
+  pdf_viewer_plugin: any
+  location: any
+  google_maps_flutter: any
+  contacts_service: any
+  fluttertoast: any
+  cached_network_image: any
+  flutter_dotenv: any
+  #  razorpay_flutter: ^1.2.9
+  share_plus: any
+  flutter_colorpicker: any
+  video_player: any
+  smooth_page_indicator: any
+  swipe_to: any
+  receive_sharing_intent: any
+  firebase_auth: any
+  cloud_firestore: any
+  google_sign_in: any
+  firebase_core: any
+  firebase_messaging: any
+  http: any
+  firebase_storage: any
+  dio: any
+  flutter_local_notifications: any
+  gugor_emoji: any
+  loading_overlay: any
+  workmanager: any
+  encrypt: any
+  new_version_plus: any
+  awesome_dialog: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.3
 
 dev_dependencies:
   #  flutter_test:

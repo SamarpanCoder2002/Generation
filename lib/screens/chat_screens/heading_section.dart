@@ -19,7 +19,6 @@ import '../../providers/chat/chat_creation_section_provider.dart';
 import '../../providers/chat/messaging_provider.dart';
 import '../../providers/status_collection_provider.dart';
 import '../../providers/theme_provider.dart';
-import '../../services/debugging.dart';
 import '../../services/device_specific_operations.dart';
 import '../../services/local_data_management.dart';
 import '../../services/toast_message_show.dart';
@@ -211,7 +210,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
 
   _onImageClicked(String? photo) {
     if (photo == null) {
-      showToast(title: "Image Not Found", toastIconType: ToastIconType.info);
+      ToastMsg.showInfoToast("Image Not Found", context: context);
       return;
     }
 
@@ -243,7 +242,7 @@ class ChatBoxHeaderSection extends StatelessWidget {
     final _selectedMsgData = _selectedMessages.values.toList()[0].message;
 
     copyText(_selectedMsgData).then((value) =>
-        showToast(title: 'Text Copied', toastIconType: ToastIconType.success));
+        ToastMsg.showSuccessToast('Text Copied',context: context));
   }
 
   void _onReply() async {
@@ -335,8 +334,8 @@ class ChatBoxHeaderSection extends StatelessWidget {
       return;
     }
 
-    showToast(
-        title: 'Messages Deletion Failed', toastIconType: ToastIconType.error);
+    ToastMsg.showErrorToast(
+        'Messages Deletion Failed', context: context);
   }
 
   void _deleteMyMsgOnly() async {
@@ -365,13 +364,13 @@ class ChatBoxHeaderSection extends StatelessWidget {
     if (_operationDone) {
       Provider.of<ChatBoxMessagingProvider>(context, listen: false)
           .clearSelectedMsgCollection();
-      showToast(
-          title: 'Messages Deleted Successfully',
-          toastIconType: ToastIconType.success);
+      ToastMsg.showSuccessToast(
+          'Messages Deleted Successfully',
+          context: context);
     } else {
-      showToast(
-          title: 'Failed to Delete Messages',
-          toastIconType: ToastIconType.error);
+      ToastMsg.showErrorToast(
+          'Failed to Delete Messages',
+          context: context);
     }
 
     Navigator.pop(context);

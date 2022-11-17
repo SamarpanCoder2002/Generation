@@ -4,7 +4,7 @@ import 'debugging.dart';
 
 class NativeCallback {
   static const MethodChannel _platform =
-      MethodChannel("com.samarpandasgupta.generation/nativeCallBack");
+      MethodChannel("com.generation.messaging/nativeCallBack");
 
   Future<void> callForCancelNotifications() async {
     debugShow('Here in Notification Clear Native Calling');

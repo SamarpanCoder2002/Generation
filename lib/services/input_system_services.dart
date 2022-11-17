@@ -18,8 +18,8 @@ import 'package:generation/services/native_operations.dart';
 import 'package:generation/services/permission_management.dart';
 import 'package:generation/services/toast_message_show.dart';
 import 'package:generation/config/types.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,7 +37,6 @@ import '../screens/common/music_visualizer.dart';
 import 'debugging.dart';
 import 'local_data_management.dart';
 import 'navigation_management.dart';
-import '../config/types.dart';
 
 class InputOption {
   final BuildContext context;
@@ -290,10 +289,11 @@ class InputOption {
 
   Future<Map<String, dynamic>> _getCurrentLocation(
       BuildContext oldStackContext) async {
-    if (!await Geolocator.isLocationServiceEnabled()) {
-      showToast(
-          title: "Location Service is not Enabled",
-          toastIconType: ToastIconType.error);
+    final _location = Location();
+
+    if (!await _location.serviceEnabled()) {
+      ToastMsg.showErrorToast("Location Service is not Enabled",
+          context: context);
       return {};
     }
 
@@ -301,21 +301,16 @@ class InputOption {
         await _permissionManagement.locationPermission();
 
     if (!_locationActivationStatus) {
-      showToast(
-          title: "Location Permission not granted",
-          toastIconType: ToastIconType.error);
+      ToastMsg.showErrorToast("Location Permission not granted",
+          context: context);
 
       return {};
     }
 
-    showToast(
-        title: "Map will show within few seconds",
-        toastIconType: ToastIconType.info,
-        toastDuration: 12);
+    ToastMsg.showInfoToast("Map will show within few seconds",
+        context: context);
 
-    final _locationData = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
-        forceAndroidLocationManager: true);
+    final _locationData = await _location.getLocation();
 
     final Map<String, dynamic> _coordinate = {};
     _coordinate["latitude"] = _locationData.latitude;
@@ -410,10 +405,7 @@ class InputOption {
 
     _onSaveButtonPressed() async {
       if (contactNameController.text.isEmpty) {
-        showToast(
-            height: 50,
-            title: "Please Give a Contact Name",
-            toastIconType: ToastIconType.info);
+        ToastMsg.showInfoToast("Please Give a Contact Name", context: context);
         return;
       }
 
@@ -422,10 +414,7 @@ class InputOption {
       Navigator.pop(context);
 
       /// Show Success toast Message
-      showToast(
-          title: "Contact Saved Successfully",
-          height: 50,
-          toastIconType: ToastIconType.success);
+      ToastMsg.showSuccessToast("Contact Saved Successfully", context: context);
     }
 
     showModalBottomSheet(
@@ -544,7 +533,7 @@ class InputOption {
       await Share.share(textToShare);
 
   Future<void> shareFile(File file) async =>
-      await Share.shareFiles([file.path]);
+      await Share.shareXFiles([XFile(file.path)]);
 
   openUrl(String url) {
     try {
@@ -614,9 +603,8 @@ class InputOption {
       //         path: data["videoPath"],
       //         videoType: videoType,
       //         thumbnailPath: data["thumbnail"]));
-      showToast(
-          title: TextCollection.videoDurationAlert,
-          toastIconType: ToastIconType.info);
+      ToastMsg.showInfoToast(TextCollection.videoDurationAlert,
+          context: context);
     }
   }
 
@@ -725,10 +713,9 @@ class InputOption {
 
             if (durationInSec == null ||
                 durationInSec > Timings.audioDurationInSec) {
-              showToast(
-                  title:
-                      "Toast Duration greater than ${Timings.audioDurationInSec} sec",
-                  toastIconType: ToastIconType.warning);
+              ToastMsg.showWarningToast(
+                  "Toast Duration greater than ${Timings.audioDurationInSec} sec",
+                  context: context);
               return;
             }
 
@@ -804,10 +791,9 @@ class InputOption {
     debugShow("Duration in Sec: $durationInSec");
 
     if (durationInSec == null || durationInSec > Timings.audioDurationInSec) {
-      showToast(
-          title:
-              "Toast Duration greater than ${Timings.audioDurationInSec} sec",
-          toastIconType: ToastIconType.warning);
+      ToastMsg.showWarningToast(
+          "Toast Duration greater than ${Timings.audioDurationInSec} sec",
+          context: context);
       return;
     }
 
@@ -828,10 +814,8 @@ class InputOption {
 
       if (_response) {
         _localStorage.deleteConnectionPrimaryData(id: otherUserId);
-        showToast(
-            title: "Connection Removed Successfully",
-            toastIconType: ToastIconType.success,
-            showFromTop: false);
+        ToastMsg.showSuccessToast("Connection Removed Successfully",
+            context: context);
 
         Provider.of<ConnectionCollectionProvider>(context, listen: false)
             .removeConnectionAtIndex(connectionLocalIndex);
@@ -840,20 +824,23 @@ class InputOption {
         Navigator.pop(context);
         Navigator.pop(context);
       } else {
-        showToast(
-            title: "Failed to Remove Connection",
-            toastIconType: ToastIconType.error,
-            showFromTop: false);
+        ToastMsg.showErrorToast("Failed to Remove Connection",
+            context: context);
       }
     }
 
-    showPopUpDialog(
-        context,
-        "Remove That Connection?",
+    DialogMsg.showDialog(context, "Remove That Connection?",
         "Both of you can't send messages to each other until and unless you are connected again",
-        _removeConnectedFunctionality,
-        showCancelBtn: true,
-        bgColor: AppColors.getChatBgColor(_isDarkMode));
+        awesomeDialogType: AwesomeDialogType.warning,
+        onSuccess: _removeConnectedFunctionality);
+
+    // showPopUpDialog(
+    //     context,
+    //     "Remove That Connection?",
+    //     "Both of you can't send messages to each other until and unless you are connected again",
+    //     _removeConnectedFunctionality,
+    //     showCancelBtn: true,
+    //     bgColor: AppColors.getChatBgColor(_isDarkMode));
   }
 
   clearChatData(connData, bool _isDarkMode) {
@@ -867,13 +854,17 @@ class InputOption {
 
       Navigator.pop(context);
       Navigator.pop(context);
-      showToast(
-          title: "Chat Messages Deletion Done",
-          toastIconType: ToastIconType.success);
+      ToastMsg.showSuccessToast("Chat Messages Deletion Done",
+          context: context);
     }
+    //
+    // showPopUpDialog(context, "Clear Chat Data?",
+    //     "You can't restore deleted chat messages", _clearChatAllRows,
+    //     showCancelBtn: true, bgColor: AppColors.getChatBgColor(_isDarkMode));
 
-    showPopUpDialog(context, "Clear Chat Data?",
-        "You can't restore deleted chat messages", _clearChatAllRows,
-        showCancelBtn: true, bgColor: AppColors.getChatBgColor(_isDarkMode));
+    DialogMsg.showDialog(
+        context, "Clear Chat Data?", "You can't restore deleted chat messages",
+        awesomeDialogType: AwesomeDialogType.warning,
+        onSuccess: _clearChatAllRows);
   }
 }

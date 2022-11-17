@@ -67,7 +67,7 @@ class DBOperations {
     final _isCreatedBefore = await isAccountCreatedBefore();
     if (_isCreatedBefore['success']) return;
 
-    showToast(title: "Account Not Found", toastIconType: ToastIconType.info);
+    ToastMsg.showErrorToast("Account Not Found", context: context);
 
     DataManagement.clearSharedStorage();
     _localStorage.closeDatabase();
