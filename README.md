@@ -14,6 +14,8 @@
 
 #### <p align="center"> 💖 Your Privacy is the biggest priority. 💖</p>
 
+### <p align="center"> [Click here to know more about this app](https://old.generation.samarpandasgupta.in/)</p>
+
 ### <p align="center"> Generation App Sample Looks </p>
 
 <p align="center">
